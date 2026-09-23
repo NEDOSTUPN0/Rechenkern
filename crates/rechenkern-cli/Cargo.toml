@@ -1,0 +1,18 @@
+[package]
+name = "rechenkern-cli"
+description = "Command line interface for Rechenkern"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "rechenkern"
+path = "src/main.rs"
+
+[dependencies]
+jiff = "0.2.37"
+clap = { version = "4.6.7", features = ["derive"] }
+dirs = "7.0.0"
+rechenkern = { path = "../rechenkern", features = ["online"] }
+rustyline = "18.0.1"
