@@ -76,6 +76,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Compound growth (`$1,000 after 3 years at 7% compounding monthly`) is a
   whole-line phrase in `parser/phrases.rs`; the rate is yearly unless written
   per period (`10% per month`).
+- Workdays (Mon–Fri, no public holidays yet) have their own dimension, so they
+  never mix with time; `in workdays` counts them over a range or duration.
 - Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`.
 - Month = 30.436875 days, year = 365.2425 days (as in Soulver). Date
   arithmetic uses calendar spans (`Jan 31 + 1 month` = `Feb 29` in 2020).

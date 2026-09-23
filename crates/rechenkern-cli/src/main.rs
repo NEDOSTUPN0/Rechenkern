@@ -21,6 +21,9 @@ struct Args {
     /// Print each line next to its answer.
     #[arg(short, long)]
     annotate: bool,
+    /// Print one JSON object per line: {"input", "answer", "error"}.
+    #[arg(long)]
+    json: bool,
     /// Significant digits in answers.
     #[arg(short, long, default_value_t = 10)]
     precision: u32,
@@ -80,6 +83,10 @@ fn main() -> ExitCode {
 
     if !args.expression.is_empty() {
         let line = args.expression.join(" ");
+        if args.json {
+            println!("{}", json_line(&line, calc.calculate(&line)));
+            return ExitCode::SUCCESS;
+        }
         return match calc.calculate(&line) {
             Ok(Some(answer)) => {
                 println!("{answer}");
@@ -98,9 +105,24 @@ fn main() -> ExitCode {
         None => return repl(&mut calc),
     };
     match text {
+        Ok(text) if args.json => {
+            for (line, result) in text.lines().zip(calc.calculate_sheet(&text)) {
+                println!("{}", json_line(line, result));
+            }
+            ExitCode::SUCCESS
+        }
         Ok(text) => sheet(&mut calc, &text, args.annotate),
         Err(e) => fail(&e),
     }
+}
+
+/// `{"input": ..., "answer": ..., "error": ...}` for scripts and launchers.
+fn json_line(input: &str, result: rechenkern::Result<Option<Answer>>) -> serde_json::Value {
+    let (answer, error) = match result {
+        Ok(answer) => (answer.map(|a| a.to_string()), None),
+        Err(e) => (None, Some(e.to_string())),
+    };
+    serde_json::json!({ "input": input, "answer": answer, "error": error })
 }
 
 fn config(args: &Args) -> Result<Config, String> {

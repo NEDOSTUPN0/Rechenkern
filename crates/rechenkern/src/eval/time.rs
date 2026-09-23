@@ -373,6 +373,23 @@ impl Env<'_> {
         self.convert_quantity(&seconds, unit)
     }
 
+    /// Monday to Friday days in a duration, starting today unless anchored.
+    pub(super) fn workdays(&self, d: &Duration) -> Result<Number> {
+        let span = d.span.abs();
+        let start = d.anchor.map_or(self.today(), |a| a.date());
+        let end = start.checked_add(span)?;
+        let days = start.until((Cal::Day, end))?.get_days() as i64;
+        let mut count = days / 7 * 5;
+        let mut day = start.checked_add(Span::new().weeks(days / 7))?;
+        while day < end {
+            if !matches!(day.weekday(), Weekday::Saturday | Weekday::Sunday) {
+                count += 1;
+            }
+            day = day.tomorrow()?;
+        }
+        Ok(Number::from_i64(count))
+    }
+
     /// Seconds (or milliseconds, for big numbers) since 1970 as a date.
     pub(super) fn timestamp_moment(&self, n: Number) -> Result<Moment> {
         let seconds = if n.abs() >= Number::pow10(11) { n / Number::from_i64(1000) } else { n };

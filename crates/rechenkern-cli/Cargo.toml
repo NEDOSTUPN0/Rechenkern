@@ -16,3 +16,4 @@ clap = { version = "4.6.7", features = ["derive"] }
 dirs = "7.0.0"
 rechenkern = { path = "../rechenkern", features = ["online"] }
 rustyline = "18.0.1"
+serde_json = "1.0.151"

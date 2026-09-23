@@ -164,6 +164,9 @@ fn definitions() -> Vec<Def> {
             .plural("millennia")
             .spelled()
             .calendar(Cal::Year, 1000),
+        unit("workday", "workday", Dim::WORKDAY, "1")
+            .aliases(&["workdays", "work day", "work days", "business day", "business days", "weekdays"])
+            .spelled(),
         // Length
         unit("m", "meter", Dim::LENGTH, "1").aliases(&["metre", "metres"]).prefixes(LENGTH),
         unit("in", "inch", Dim::LENGTH, "0.0254").plural("inches").aliases(&["\""]),

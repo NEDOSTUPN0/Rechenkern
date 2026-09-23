@@ -358,6 +358,12 @@ fn dates() {
         ("days in February 2020", "29 days"),
         ("days in Q3", "92 days"),
         ("hours in a week", "168 hours"),
+        ("workdays until christmas", "66 workdays"),
+        ("10 March to 17 March in workdays", "5 workdays"),
+        ("workdays between April 12 and June 15", "45 workdays"),
+        ("workdays in 3 weeks", "15 workdays"),
+        ("$500/workday * 20 workdays", "$10,000.00"),
+        ("weekday on march 9, 2024", "Saturday"),
     ]);
 }
 

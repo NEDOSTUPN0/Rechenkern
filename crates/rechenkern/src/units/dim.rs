@@ -2,8 +2,9 @@
 
 use std::fmt;
 
-const BASES: usize = 9;
-const NAMES: [&str; BASES] = ["length", "mass", "time", "current", "temperature", "amount", "angle", "data", "money"];
+const BASES: usize = 10;
+const NAMES: [&str; BASES] =
+    ["length", "mass", "time", "current", "temperature", "amount", "angle", "data", "money", "workdays"];
 
 /// Exponents of the base quantities, e.g. speed is `length¹·time⁻¹`.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Default, Debug)]
@@ -20,6 +21,8 @@ impl Dim {
     pub const ANGLE: Dim = Dim::base(6);
     pub const DATA: Dim = Dim::base(7);
     pub const MONEY: Dim = Dim::base(8);
+    /// Workdays are counted on a calendar, so they don't convert to time.
+    pub const WORKDAY: Dim = Dim::base(9);
 
     pub const AREA: Dim = Dim::LENGTH.pow(2);
     pub const VOLUME: Dim = Dim::LENGTH.pow(3);

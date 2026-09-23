@@ -158,6 +158,12 @@ impl Unit {
     }
 }
 
+impl std::fmt::Display for Unit {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.write_str(&crate::format::unit_text(self, false))
+    }
+}
+
 /// All known units and their spellings.
 pub struct Registry {
     defs: Vec<UnitDef>,

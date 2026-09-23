@@ -310,7 +310,7 @@ impl Parser<'_> {
 
     fn bare_unit(&mut self, unit: Unit, n: usize) -> Result<Expr> {
         self.pos += n;
-        if unit.dim() == Dim::TIME
+        if (unit.dim() == Dim::TIME || unit.dim() == Dim::WORKDAY)
             && let Some(expr) = self.time_unit_phrase(&unit)?
         {
             return Ok(expr);
@@ -405,20 +405,7 @@ impl Parser<'_> {
 
     /// "week of year", "day of the week on March 9", "weekday on 2024-03-09".
     fn date_part(&mut self) -> Result<Option<Expr>> {
-        const PARTS: &[(&str, Format)] = &[
-            ("week of year", Format::WeekNumber),
-            ("week of the year", Format::WeekNumber),
-            ("week number", Format::WeekNumber),
-            ("day of year", Format::DayOfYear),
-            ("day of the year", Format::DayOfYear),
-            ("day number", Format::DayOfYear),
-            ("day of month", Format::DayOfMonth),
-            ("day of the month", Format::DayOfMonth),
-            ("day of week", Format::Weekday),
-            ("day of the week", Format::Weekday),
-            ("weekday", Format::Weekday),
-        ];
-        let Some((format, n)) = self.phrase_at(self.pos, PARTS) else { return Ok(None) };
+        let Some((format, n)) = self.phrase_at(self.pos, words::DATE_PARTS) else { return Ok(None) };
         self.pos += n;
         let date = if self.eat_word("on") || self.eat_word("of") || self.eat_word("for") {
             self.additive()?

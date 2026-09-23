@@ -261,6 +261,13 @@ impl Env<'_> {
     }
 
     fn to_unit(&self, value: Value, unit: &Unit) -> Result<Value> {
+        if unit.dim() == Dim::WORKDAY && !matches!(&value, Value::Quantity(q) if q.unit.dim() == Dim::WORKDAY) {
+            let duration = match value {
+                Value::Duration(d) => d,
+                v => Duration::new(self.span_of(&v)?),
+            };
+            return Ok(Value::Quantity(Quantity::new(self.workdays(&duration)?, unit.clone())));
+        }
         match value {
             Value::Quantity(q) => Ok(Value::Quantity(self.convert_quantity(&q, unit)?)),
             Value::Duration(d) => Ok(Value::Quantity(self.duration_in(&d, unit)?)),

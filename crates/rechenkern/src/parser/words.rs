@@ -244,6 +244,21 @@ pub const FORMATS: &[(&str, Format)] = &[
     ("weekday", Format::Weekday),
 ];
 
+/// Questions about a date: "week of year", "weekday on March 9".
+pub const DATE_PARTS: &[(&str, Format)] = &[
+    ("week of year", Format::WeekNumber),
+    ("week of the year", Format::WeekNumber),
+    ("week number", Format::WeekNumber),
+    ("day of year", Format::DayOfYear),
+    ("day of the year", Format::DayOfYear),
+    ("day number", Format::DayOfYear),
+    ("day of month", Format::DayOfMonth),
+    ("day of the month", Format::DayOfMonth),
+    ("day of week", Format::Weekday),
+    ("day of the week", Format::Weekday),
+    ("weekday", Format::Weekday),
+];
+
 pub const HOLIDAYS: &[(&str, Holiday)] = &[
     ("new year's eve", Holiday::NewYearsEve),
     ("new years eve", Holiday::NewYearsEve),

@@ -670,6 +670,7 @@ dependencies = [
  "jiff",
  "rechenkern",
  "rustyline",
+ "serde_json",
 ]
 
 [[package]]
