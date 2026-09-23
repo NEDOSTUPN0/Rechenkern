@@ -10,7 +10,7 @@ use std::collections::HashMap;
 
 use jiff::Zoned;
 
-use crate::ast::{Direction, Expr, Format, LineRef, Rounding, Target};
+use crate::ast::{Direction, Expr, Format, GrowthResult, LineRef, Rounding, Target};
 use crate::config::Config;
 use crate::error::{Error, Result, bail};
 use crate::format::unit_text;
@@ -84,6 +84,7 @@ impl Env<'_> {
     pub fn eval(&self, expr: &Expr) -> Result<Value> {
         Ok(match expr {
             Expr::Number(n) => Value::number(*n),
+            Expr::Bool(b) => Value::Bool(*b),
             Expr::WithUnit(inner, unit) => match self.eval(inner)? {
                 Value::Quantity(q) if q.unit.is_none() => Value::Quantity(Quantity::new(q.number, unit.clone())),
                 v => bail!("can't give {} a unit", v.kind()),
@@ -111,7 +112,51 @@ impl Env<'_> {
             Expr::ZoneDiff(a, b) => self.zone_difference(a, b)?,
             Expr::Convert(..) => self.answer(expr)?.0,
             Expr::Round(inner, rounding) => self.round(self.eval(inner)?, *rounding)?,
+            Expr::If { .. } => match self.branch(expr)? {
+                Some(e) => self.eval(e)?,
+                None => bail!("the condition isn't met"),
+            },
+            Expr::Growth { principal, time, rate, per_year, result } => {
+                self.growth(self.eval(principal)?, self.eval(time)?, self.eval(rate)?, *per_year, *result)?
+            }
         })
+    }
+
+    /// The branch of `a if cond else b` to evaluate; `None` if there is none.
+    pub fn branch<'e>(&self, expr: &'e Expr) -> Result<Option<&'e Expr>> {
+        let Expr::If { cond, then, otherwise } = expr else { return Ok(Some(expr)) };
+        let chosen = if self.truthy(&self.eval(cond)?)? { then } else { otherwise };
+        Ok(chosen.as_deref())
+    }
+
+    pub fn truthy(&self, value: &Value) -> Result<bool> {
+        Ok(match value {
+            Value::Bool(b) => *b,
+            Value::Quantity(q) => !q.number.is_zero(),
+            Value::Percent(p) => !p.is_zero(),
+            v => bail!("{} is neither true nor false", v.kind()),
+        })
+    }
+
+    /// Compound growth of `principal` over `time` at yearly `rate`.
+    fn growth(&self, principal: Value, time: Value, rate: Value, per_year: i64, result: GrowthResult) -> Result<Value> {
+        let years = match &time {
+            Value::Duration(d) => self.duration_in(d, &registry().get("yr"))?.number,
+            Value::Quantity(q) if q.unit.dim() == Dim::TIME => self.convert_quantity(q, &registry().get("yr"))?.number,
+            v => bail!("expected a length of time, not {}", v.kind()),
+        };
+        let rate = match rate {
+            Value::Percent(p) => p / Number::from_i64(100),
+            v => bail!("expected a percentage rate, not {}", v.kind()),
+        };
+        let n = Number::from_i64(per_year);
+        let factor = (Number::ONE + rate / n).pow(years * n);
+        let grown = self.mul(principal.clone(), Value::number(factor))?;
+        match result {
+            GrowthResult::Future => Ok(grown),
+            GrowthResult::Interest => self.sub(grown, principal),
+            GrowthResult::Present => self.div(principal, Value::number(factor)),
+        }
     }
 
     /// Size of one unit in base units; currencies use exchange rates.

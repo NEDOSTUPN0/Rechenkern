@@ -233,6 +233,10 @@ impl Parser<'_> {
         if let Some((func, n)) = self.phrase_at(i, words::FUNCTIONS) {
             return self.call(func, n);
         }
+        if matches!(w, "true" | "false") {
+            self.pos += 1;
+            return Ok(Some(Expr::Bool(w == "true")));
+        }
         if let Some((expr, n)) = self.physical_constant(i) {
             self.pos += n;
             return Ok(Some(expr));

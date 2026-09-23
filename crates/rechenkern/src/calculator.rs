@@ -152,12 +152,24 @@ impl Calculator {
             lines: &self.lines,
             rates: &self.rates,
         };
-        let (value, display, is_total, name) = match &stmt {
+        // Pick the branch of "if ... then ... else ...".
+        let mut stmt = &stmt;
+        while let Stmt::If { cond, then, otherwise } = stmt {
+            let chosen = if env.truthy(&env.eval(cond)?)? { Some(then) } else { otherwise.as_ref() };
+            match chosen {
+                Some(s) => stmt = s,
+                None => return Ok(None),
+            }
+        }
+        let (value, display, is_total, name) = match stmt {
+            Stmt::If { .. } => unreachable!("branches are resolved above"),
             Stmt::Expr(expr) => {
+                let Some(expr) = env.branch(expr)? else { return Ok(None) };
                 let (value, display) = env.answer(expr)?;
                 (value, display, matches!(expr, Expr::Line(LineRef::Sum)), None)
             }
             Stmt::Assign { name, op, expr } => {
+                let Some(expr) = env.branch(expr)? else { return Ok(None) };
                 let (mut value, display) = env.answer(expr)?;
                 if let Some(op) = op {
                     let old = self

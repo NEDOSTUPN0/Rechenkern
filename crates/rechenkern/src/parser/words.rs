@@ -14,7 +14,7 @@ pub const KEYWORDS: &[&str] = &[
     "midnight", "am", "pm", "percent", "pct", "percentage", "squared", "cubed", "rounded", "nearest", "power",
     "square", "cubic", "remainder", "twice", "double", "triple", "quadruple", "permutation", "permutations",
     "combination", "combinations", "choose", "difference", "later", "base", "timestamp", "current", "unix",
-    "epoch", "week", "day", "month", "year",
+    "epoch", "week", "day", "month", "year", "true", "false",
 ];
 
 pub fn number_word(w: &str) -> Option<i64> {

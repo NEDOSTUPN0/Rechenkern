@@ -15,11 +15,18 @@ pub enum Stmt {
         op: Option<Op>,
         expr: Expr,
     },
+    /// `if cond then stmt else stmt`.
+    If {
+        cond: Expr,
+        then: Box<Stmt>,
+        otherwise: Option<Box<Stmt>>,
+    },
 }
 
 #[derive(Clone, Debug)]
 pub enum Expr {
     Number(Number),
+    Bool(bool),
     /// A value with a unit attached: `5 km`.
     WithUnit(Box<Expr>, Unit),
     /// A unit on its own, worth one unit: `km` in `km in miles`.
@@ -42,6 +49,30 @@ pub enum Expr {
     ZoneDiff(TimeZone, TimeZone),
     Convert(Box<Expr>, Target),
     Round(Box<Expr>, Rounding),
+    /// `a if cond else b`; a missing branch means no answer.
+    If {
+        cond: Box<Expr>,
+        then: Option<Box<Expr>>,
+        otherwise: Option<Box<Expr>>,
+    },
+    /// Compound growth: `$1,000 after 3 years at 7% compounding monthly`.
+    Growth {
+        principal: Box<Expr>,
+        time: Box<Expr>,
+        rate: Box<Expr>,
+        per_year: i64,
+        result: GrowthResult,
+    },
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GrowthResult {
+    /// The final amount.
+    Future,
+    /// Only the interest earned.
+    Interest,
+    /// What a future amount is worth today.
+    Present,
 }
 
 impl Expr {

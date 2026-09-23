@@ -1,7 +1,7 @@
 //! Whole-line phrases: percentage questions and proportions.
 
 use super::Parser;
-use crate::ast::{Expr, Format, Op};
+use crate::ast::{Expr, Format, GrowthResult, Op};
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -9,6 +9,9 @@ use crate::number::Number;
 impl Parser<'_> {
     /// Tries phrases such as "20 is what % of 200" on the whole line.
     pub(super) fn phrase(&mut self) -> Result<Option<Expr>> {
+        if let Some(expr) = self.growth()? {
+            return Ok(Some(expr));
+        }
         let end = self.toks.len();
         let one = || Expr::Number(Number::ONE);
         let pct = |e: Expr| Self::formatted(e, Format::Percent);
@@ -110,8 +113,55 @@ impl Parser<'_> {
         Ok(None)
     }
 
+    /// "$1,000 after 3 years at 7%", "interest on $500 for 2 years @ 5% compounding monthly",
+    /// "present value of $1,000 after 20 years at 10%".
+    fn growth(&self) -> Result<Option<Expr>> {
+        let (result, start) = if self.matches_at(0, &["interest", "on"]) {
+            (GrowthResult::Interest, 2)
+        } else if self.matches_at(0, &["present", "value", "of"]) {
+            (GrowthResult::Present, 3)
+        } else if self.matches_at(0, &["future", "value", "of"]) {
+            (GrowthResult::Future, 3)
+        } else {
+            (GrowthResult::Future, 0)
+        };
+        let Some(during) = ["after", "for", "over", "in"].iter().filter_map(|w| self.find(start + 1, &[w])).min()
+        else {
+            return Ok(None);
+        };
+        let Some(at) = self.find(during + 1, &["at"]).or_else(|| self.find_sym(during + 1, "@")) else {
+            return Ok(None);
+        };
+        let compounding =
+            ["compounding", "compounded", "compound"].iter().filter_map(|w| self.find(at + 1, &[w])).min();
+        let rate_end = compounding.unwrap_or(self.toks.len());
+        if !self.matches_at(rate_end - 1, &["%"]) {
+            return Ok(None);
+        }
+        let per_year = match compounding.and_then(|c| self.lower(c + 1)).as_deref() {
+            None | Some("yearly" | "annually" | "annual") => 1,
+            Some("semiannually" | "biannually") => 2,
+            Some("quarterly") => 4,
+            Some("monthly") => 12,
+            Some("weekly") => 52,
+            Some("daily") => 365,
+            Some(other) => crate::error::bail!("unknown compounding period \"{other}\""),
+        };
+        Ok(Some(Expr::Growth {
+            principal: self.part(start, during)?.boxed(),
+            time: self.part(during + 1, at)?.boxed(),
+            rate: self.part(at + 1, rate_end)?.boxed(),
+            per_year,
+            result,
+        }))
+    }
+
+    fn find_sym(&self, from: usize, sym: &str) -> Option<usize> {
+        (from..self.toks.len()).find(|&i| self.toks[i].is_sym(sym))
+    }
+
     /// Parses tokens `from..to` as one expression.
-    fn part(&self, from: usize, to: usize) -> Result<Expr> {
+    pub(super) fn part(&self, from: usize, to: usize) -> Result<Expr> {
         if from >= to {
             crate::error::bail!("missing a value");
         }
@@ -138,7 +188,7 @@ impl Parser<'_> {
     }
 
     /// First occurrence of `seq` from `from`, outside parentheses.
-    fn find(&self, from: usize, seq: &[&str]) -> Option<usize> {
+    pub(super) fn find(&self, from: usize, seq: &[&str]) -> Option<usize> {
         let mut depth = 0;
         for i in from..self.toks.len() {
             match self.toks[i].tok {

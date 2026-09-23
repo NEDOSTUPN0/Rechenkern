@@ -62,14 +62,43 @@ impl<'a> Parser<'a> {
         if !(0..self.toks.len()).any(|i| self.significant(i)) {
             return Ok(None);
         }
+        // "if earnings > $30k then tax = 20% else tax = 5%"
+        if self.toks.first().is_some_and(|t| t.is_word("if"))
+            && let Some(then) = self.find(1, &["then"])
+        {
+            let end = self.toks.len();
+            let otherwise = self.find(then + 1, &["else"]);
+            let cond = self.part(1, then)?;
+            let branch = |from: usize, to: usize| -> Result<Box<Stmt>> {
+                self.sub(from, to).statement()?.map(Box::new).ok_or_else(|| crate::Error::new("empty branch"))
+            };
+            let then = branch(then + 1, otherwise.unwrap_or(end))?;
+            let otherwise = otherwise.map(|e| branch(e + 1, end)).transpose()?;
+            return Ok(Some(Stmt::If { cond, then, otherwise }));
+        }
         if let Some(stmt) = self.assignment()? {
             return Ok(Some(stmt));
         }
-        let expr = match self.phrase()? {
-            Some(expr) => expr,
-            None => self.expr_to_end()?,
-        };
-        Ok(Some(Stmt::Expr(expr)))
+        Ok(Some(Stmt::Expr(self.value()?)))
+    }
+
+    /// A whole-line value, with an optional trailing condition:
+    /// "true if income > expenses", "false unless expenses > income".
+    fn value(&mut self) -> Result<Expr> {
+        let end = self.toks.len();
+        for (word, negate) in [("if", false), ("unless", true)] {
+            let Some(at) = self.find(1, &[word]) else { continue };
+            let otherwise = self.find(at + 1, &["else"]);
+            let value = Some(self.part(0, at)?.boxed());
+            let cond = self.part(at + 1, otherwise.unwrap_or(end))?.boxed();
+            let other = otherwise.map(|e| self.part(e + 1, end)).transpose()?.map(Expr::boxed);
+            let (then, otherwise) = if negate { (other, value) } else { (value, other) };
+            return Ok(Expr::If { cond, then, otherwise });
+        }
+        match self.phrase()? {
+            Some(expr) => Ok(expr),
+            None => self.expr_to_end(),
+        }
     }
 
     /// Parses an expression that must use up the tokens.
@@ -94,11 +123,7 @@ impl<'a> Parser<'a> {
             Tok::Sym("-=") => Some(Op::Sub),
             _ => None,
         };
-        let mut rhs = self.sub(eq + 1, self.toks.len());
-        let expr = match rhs.phrase()? {
-            Some(e) => e,
-            None => rhs.expr_to_end()?,
-        };
+        let expr = self.sub(eq + 1, self.toks.len()).value()?;
         Ok(Some(Stmt::Assign { name, op, expr }))
     }
 
@@ -212,7 +237,8 @@ impl<'a> Parser<'a> {
                 Tok::Word(w) => match w.to_lowercase().as_str() {
                     "plus" => (Op::Add, 1, false),
                     "minus" => (Op::Sub, 1, false),
-                    "and" if !self.in_list => (Op::Add, 1, false),
+                    // "$20 and $15" adds, "x > 1 and x < 5" is logic.
+                    "and" if !self.in_list && self.amount_follows(1) => (Op::Add, 1, false),
                     // "3 days after March 1", "2 weeks from now"
                     "after" | "from" => (Op::Add, 1, true),
                     "before" => (Op::Sub, 1, true),
@@ -608,6 +634,19 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// A number or an amount of money starts `skip` tokens ahead.
+    fn amount_follows(&self, skip: usize) -> bool {
+        let mut p = self.clone();
+        p.pos += skip;
+        match p.peek().map(|t| &t.tok) {
+            Some(Tok::Num(_)) => true,
+            Some(Tok::Word(_)) => p.unit_at(p.pos, false).is_some_and(|(u, n)| {
+                u.is_money() && matches!(p.toks.get(p.pos + n).map(|t| &t.tok), Some(Tok::Num(_)))
+            }),
+            _ => false,
+        }
+    }
+
     /// "a day", "each month": an article and a unit at token `i`.
     fn article_unit_at(&self, i: usize) -> bool {
         self.toks.get(i).is_some_and(|t| ["a", "an", "each", "every"].iter().any(|w| t.is_word(w)))
@@ -615,15 +654,11 @@ impl<'a> Parser<'a> {
     }
 
     /// A time amount starts at token `i`: "2 hours", "a year".
-    fn duration_at(&self, mut i: usize) -> bool {
-        if self.toks.get(i).is_some_and(|t| ["a", "an", "one"].iter().any(|w| t.is_word(w))) {
-            i += 1;
-        } else if matches!(self.toks.get(i).map(|t| &t.tok), Some(Tok::Num(_))) {
-            i += 1;
-        } else {
-            return false;
-        }
-        self.unit_at(i, true).is_some_and(|(u, _)| u.dim() == crate::units::Dim::TIME)
+    fn duration_at(&self, i: usize) -> bool {
+        let amount = self.toks.get(i).is_some_and(|t| {
+            matches!(t.tok, Tok::Num(_)) || ["a", "an", "one"].iter().any(|w| t.is_word(w))
+        });
+        amount && self.unit_at(i + 1, true).is_some_and(|(u, _)| u.dim() == crate::units::Dim::TIME)
     }
 
     /// The `%` at the cursor is modulo: `10 % 3`, but not `10% + 5` or `10%3`.

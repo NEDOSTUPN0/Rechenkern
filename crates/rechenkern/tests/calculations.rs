@@ -253,6 +253,10 @@ fn units() {
         ("20km == 20,000 m", "true"),
         ("5 km in kg", "<error: can't convert km to kg>"),
         ("1 light year in km", "9,460,730,472,581 km"),
+        ("1 mb in kb", "1,000 kB"),
+        ("5 Mb in kB", "625 kB"),
+        ("180 cm in feet and inches", "5 ft 10.87 in"),
+        ("speed of light in km/h", "1,079,252,849 km/h"),
     ]);
 }
 
@@ -269,6 +273,14 @@ fn rates() {
         ("30 hours at $30/hour", "$900.00"),
         ("$500 at $20/hour", "25 hours"),
         ("$30 × 4 days", "$120.00"),
+        ("$24 a day for a year", "$8,765.82"),
+        ("twice a day", "2/day"),
+        ("3 times a week", "3/week"),
+        ("5 km a day for 2 weeks", "70 km"),
+        ("4 nights * $120/night", "$480.00"),
+        ("$100 split 4 ways", "$25.00"),
+        ("60 mph for 2.5 hours", "150 mi"),
+        ("1 m/s^2 * 2 s", "2 m/s"),
     ]);
 }
 
@@ -333,6 +345,9 @@ fn dates() {
         ("2019-04-01T15:30:00Z to date", "Mon, 1 Apr 2019 17:30"),
         ("2026-09-23 + 1 day", "Thu, 24 Sep 2026"),
         ("now as iso8601", "2026-09-23T14:30:00+02:00"),
+        ("days in February 2020", "29 days"),
+        ("days in Q3", "92 days"),
+        ("hours in a week", "168 hours"),
     ]);
 }
 
@@ -349,6 +364,8 @@ fn clock_times() {
         ("16:00 + 3 hours 12 minutes", "19:12"),
         ("tomorrow at 3pm", "Thu, 24 Sep 2026 15:00"),
         ("noon to 5:30pm in minutes", "330 minutes"),
+        ("1:30 + 0:45", "02:15"),
+        ("now to midnight", "9 hours 30 minutes"),
     ]);
 }
 
@@ -368,6 +385,7 @@ fn time_zones() {
         ("time difference between Seattle and Moscow", "10 hours"),
         ("date in vancouver", "Wed, 23 Sep 2026"),
         ("time in auckland", "Thu, 24 Sep 2026 00:30 NZST"),
+        ("current time in new york", "08:30 EDT"),
     ]);
 }
 
@@ -397,4 +415,27 @@ fn sheets() {
     assert_eq!(sheet("10\nprev * 2"), "20");
     assert_eq!(sheet("10\n20\nline1 + line 2"), "30");
     assert_eq!(sheet("a = 5\n---\na"), "<none>");
+}
+
+#[test]
+fn compound_growth() {
+    check(&[
+        ("$1,000 after 3 years at 7%", "$1,225.04"),
+        ("$1,000 for 3 years at 7% compounding monthly", "$1,232.93"),
+        ("$1,000 for 3 years at 7% compounding quarterly", "$1,231.44"),
+        ("interest on $1,000 after 3 years @ 7%", "$225.04"),
+        ("present value of $1,000 after 20 years at 10%", "$148.64"),
+        ("$25k over 10 years at 7.5%", "$51,525.79"),
+    ]);
+}
+
+#[test]
+fn conditionals() {
+    let tax = "earnings = $45k\nif earnings > $30k then tax = 20% else tax = 5%\nearnings * tax";
+    assert_eq!(sheet(tax), "$9,000.00");
+    assert_eq!(sheet("income = $35k\nexpenses = $21.5k\nprofitable = true if income > expenses"), "true");
+    assert_eq!(sheet("income = $35k\nexpenses = $21.5k\ninsolvent = false unless expenses > income"), "false");
+    assert_eq!(sheet("BMI = 24\nhealthy = BMI >= 18.5 and BMI < 25"), "true");
+    assert_eq!(sheet("cost = $500\ndiscount = true\nif discount then cost = cost - 10%\ncost"), "$450.00");
+    assert_eq!(sheet("x = 1\nif x > 5 then 10"), "<none>");
 }
