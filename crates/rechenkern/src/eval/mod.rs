@@ -116,8 +116,9 @@ impl Env<'_> {
                 Some(e) => self.eval(e)?,
                 None => bail!("the condition isn't met"),
             },
-            Expr::Growth { principal, time, rate, per_year, result } => {
-                self.growth(self.eval(principal)?, self.eval(time)?, self.eval(rate)?, *per_year, *result)?
+            Expr::Growth { principal, time, rate, period, compounds, result } => {
+                let (principal, time, rate) = (self.eval(principal)?, self.eval(time)?, self.eval(rate)?);
+                self.growth(principal, time, rate, period, *compounds, *result)?
             }
         })
     }
@@ -139,18 +140,26 @@ impl Env<'_> {
     }
 
     /// Compound growth of `principal` over `time` at yearly `rate`.
-    fn growth(&self, principal: Value, time: Value, rate: Value, per_year: i64, result: GrowthResult) -> Result<Value> {
-        let years = match &time {
-            Value::Duration(d) => self.duration_in(d, &registry().get("yr"))?.number,
-            Value::Quantity(q) if q.unit.dim() == Dim::TIME => self.convert_quantity(q, &registry().get("yr"))?.number,
+    fn growth(
+        &self,
+        principal: Value,
+        time: Value,
+        rate: Value,
+        period: &Unit,
+        compounds: i64,
+        result: GrowthResult,
+    ) -> Result<Value> {
+        let periods = match &time {
+            Value::Duration(d) => self.duration_in(d, period)?.number,
+            Value::Quantity(q) if q.unit.dim() == Dim::TIME => self.convert_quantity(q, period)?.number,
             v => bail!("expected a length of time, not {}", v.kind()),
         };
         let rate = match rate {
             Value::Percent(p) => p / Number::from_i64(100),
             v => bail!("expected a percentage rate, not {}", v.kind()),
         };
-        let n = Number::from_i64(per_year);
-        let factor = (Number::ONE + rate / n).pow(years * n);
+        let n = Number::from_i64(compounds);
+        let factor = (Number::ONE + rate / n).pow(periods * n);
         let grown = self.mul(principal.clone(), Value::number(factor))?;
         match result {
             GrowthResult::Future => Ok(grown),

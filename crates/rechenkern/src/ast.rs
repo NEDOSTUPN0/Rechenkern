@@ -60,7 +60,10 @@ pub enum Expr {
         principal: Box<Expr>,
         time: Box<Expr>,
         rate: Box<Expr>,
-        per_year: i64,
+        /// The rate applies once per this time unit (a year by default)...
+        period: Unit,
+        /// ...compounding this many times within it.
+        compounds: i64,
         result: GrowthResult,
     },
 }

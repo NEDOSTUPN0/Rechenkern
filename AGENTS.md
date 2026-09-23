@@ -66,6 +66,15 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   right-hand unit wins (`$200 + €200` is in euros). Plain numbers take the
   other side's unit (`$20 + 30` = `$50`).
 - Money times a non-money unit stays money (`$30 × 4 days` = `$120`).
+- Time quantities in different units add up to a `Duration` (`1 day - 2 hours`
+  = 22 hours); months and longer meet in the smaller unit (`1 year - 2 months`
+  = 10 months). Seconds that come out of unit algebra (`3 GB / 10 MB/s`)
+  become a duration too.
+- `if … then … else …`, `x if cond`, `x unless cond`: a false condition with
+  no `else` gives no answer (and assigns nothing).
+- Compound growth (`$1,000 after 3 years at 7% compounding monthly`) is a
+  whole-line phrase in `parser/phrases.rs`; the rate is yearly unless written
+  per period (`10% per month`).
 - Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`.
 - Month = 30.436875 days, year = 365.2425 days (as in Soulver). Date
   arithmetic uses calendar spans (`Jan 31 + 1 month` = `Feb 29` in 2020).

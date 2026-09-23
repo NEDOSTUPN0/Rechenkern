@@ -5,6 +5,7 @@ use crate::ast::{Expr, Format, GrowthResult, Op, Target, TimeExpr};
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
+use crate::units::{Dim, registry};
 
 impl Parser<'_> {
     /// Tries phrases such as "20 is what % of 200" on the whole line.
@@ -147,11 +148,24 @@ impl Parser<'_> {
         };
         let compounding =
             ["compounding", "compounded", "compound"].iter().filter_map(|w| self.find(at + 1, &[w])).min();
-        let rate_end = compounding.unwrap_or(self.toks.len());
-        if !self.matches_at(rate_end - 1, &["%"]) {
+        let mut rate_end = compounding.unwrap_or(self.toks.len());
+        // "10% per month" grows every month; plain rates are yearly.
+        let mut period = registry().get("yr");
+        let per = self
+            .toks
+            .get(rate_end.wrapping_sub(2))
+            .is_some_and(|t| t.is_sym("/") || ["per", "a", "an", "every", "each"].iter().any(|w| t.is_word(w)));
+        if per
+            && self.matches_at(rate_end.wrapping_sub(3), &["%"])
+            && let Some((unit, 1)) = self.unit_at(rate_end - 1, false).filter(|(u, _)| u.dim() == Dim::TIME)
+        {
+            period = unit;
+            rate_end -= 2;
+        }
+        if !self.matches_at(rate_end.wrapping_sub(1), &["%"]) {
             return Ok(None);
         }
-        let per_year = match compounding.and_then(|c| self.lower(c + 1)).as_deref() {
+        let compounds = match compounding.and_then(|c| self.lower(c + 1)).as_deref() {
             None | Some("yearly" | "annually" | "annual") => 1,
             Some("semiannually" | "biannually") => 2,
             Some("quarterly") => 4,
@@ -164,7 +178,8 @@ impl Parser<'_> {
             principal: self.part(start, during)?.boxed(),
             time: self.part(during + 1, at)?.boxed(),
             rate: self.part(at + 1, rate_end)?.boxed(),
-            per_year,
+            period,
+            compounds,
             result,
         }))
     }

@@ -264,8 +264,11 @@ impl Env<'_> {
             }
         };
         let n = q.number.pow(exp);
-        if !n.is_finite() {
+        if n.to_f64().is_nan() {
             bail!("result is not a real number");
+        }
+        if !n.is_finite() {
+            bail!("result is too large");
         }
         Ok(Value::Quantity(Quantity::new(n, unit)))
     }

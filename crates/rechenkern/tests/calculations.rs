@@ -83,6 +83,7 @@ fn arithmetic() {
         ("twice 21", "42"),
         ("seven times six", "42"),
         ("1/0", "<error: division by zero>"),
+        ("2^99999", "<error: result is too large>"),
     ]);
 }
 
@@ -436,6 +437,8 @@ fn compound_growth() {
         ("interest on $1,000 after 3 years @ 7%", "$225.04"),
         ("present value of $1,000 after 20 years at 10%", "$148.64"),
         ("$25k over 10 years at 7.5%", "$51,525.79"),
+        ("20k after 6 months at 10% per month", "35,431.22"),
+        ("$100 for 2 years at 1%/month", "$126.97"),
     ]);
 }
 
@@ -448,4 +451,90 @@ fn conditionals() {
     assert_eq!(sheet("BMI = 24\nhealthy = BMI >= 18.5 and BMI < 25"), "true");
     assert_eq!(sheet("cost = $500\ndiscount = true\nif discount then cost = cost - 10%\ncost"), "$450.00");
     assert_eq!(sheet("x = 1\nif x > 5 then 10"), "<none>");
+}
+
+#[test]
+fn odd_input_never_panics() {
+    let words = [
+        "",
+        "(",
+        ")",
+        "$",
+        "€",
+        "°",
+        "in",
+        "to",
+        "of",
+        "at",
+        "per",
+        "a",
+        "the",
+        "-",
+        "+",
+        "*",
+        "/",
+        "^",
+        "%",
+        "!",
+        "=",
+        "5",
+        "0",
+        "1e400",
+        "0x",
+        "12:",
+        "12:30",
+        "2026-13-45",
+        "31/02/2026",
+        "Feb",
+        "30",
+        "km",
+        "usd",
+        "tokyo",
+        "now",
+        "today",
+        "christmas",
+        "sqrt",
+        "sum",
+        "prev",
+        "line",
+        "is",
+        "what",
+        "if",
+        "then",
+        "else",
+        "x",
+        "and",
+        "or",
+        "999999999999999999999999999999",
+        "½",
+        "\"",
+        "'",
+        "//",
+        "#",
+        ":",
+        "π",
+        "tenge",
+        "->",
+        "@",
+        "&",
+        "<<",
+        "√",
+    ];
+    // A small deterministic generator keeps the test reproducible.
+    let mut seed = 42u64;
+    let mut next = |n: usize| {
+        seed ^= seed << 13;
+        seed ^= seed >> 7;
+        seed ^= seed << 17;
+        (seed % n as u64) as usize
+    };
+    let mut calc = calculator();
+    for _ in 0..20_000 {
+        let len = 1 + next(6);
+        let line: Vec<&str> = (0..len).map(|_| words[next(words.len())]).collect();
+        let _ = calc.calculate(&line.join(" "));
+    }
+    for line in ["170!", "171!", "10!!!", "2^99999", "1e28 * 1e28", "0.1^9999", "-1^0.5", "sqrt(-1)", "ln(0)", "1/0%"] {
+        let _ = calc.calculate(line);
+    }
 }
