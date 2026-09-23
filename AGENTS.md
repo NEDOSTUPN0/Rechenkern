@@ -8,6 +8,8 @@ language calculator engine in the spirit of SoulverCore.
 - NixOS: the toolchain comes from the flake dev shell. Run everything through
   it: `nix develop -c cargo test`, `nix develop -c cargo clippy --all-targets`,
   `nix develop -c cargo fmt`.
+- `nix build` / `nix run . -- "5 km in miles"` build the CLI package (runs the
+  tests too, offline, with jiff's bundled tzdb).
 - Keep `cargo clippy --all-targets` warning free and run `cargo fmt`
   (`rustfmt.toml`: width 120). Data tables may use `#[rustfmt::skip]`.
 - `crates/rechenkern/tests/calculations.rs` is the main test suite: input line

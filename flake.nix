@@ -9,6 +9,16 @@
       forAll = f: nixpkgs.lib.genAttrs systems (s: f nixpkgs.legacyPackages.${s});
     in
     {
+      packages = forAll (pkgs: {
+        default = pkgs.rustPlatform.buildRustPackage {
+          pname = "rechenkern";
+          version = "0.1.0";
+          src = ./.;
+          cargoLock.lockFile = ./Cargo.lock;
+          meta.mainProgram = "rechenkern";
+        };
+      });
+
       devShells = forAll (pkgs: {
         default = pkgs.mkShell {
           packages = with pkgs; [ cargo rustc clippy rustfmt rust-analyzer ];
