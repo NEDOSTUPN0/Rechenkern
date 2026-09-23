@@ -1,0 +1,21 @@
+[package]
+name = "rechenkern"
+description = "Natural language calculator engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dev-dependencies]
+jiff = "0.2.37"
+
+[dependencies]
+jiff = { version = "0.2.37", features = ["tzdb-bundle-always"] }
+rust_decimal = "1.43.0"
+serde_json = { version = "1.0.151", optional = true }
+ureq = { version = "3.4.2", optional = true }
+
+[features]
+default = []
+# Fetch exchange rates over HTTP with an on-disk cache.
+online = ["dep:ureq", "dep:serde_json"]
