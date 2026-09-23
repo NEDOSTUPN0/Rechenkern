@@ -29,7 +29,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 | --- | --- |
 | `number.rs` | `Number`: exact `rust_decimal` with `f64` fallback for huge/tiny values |
 | `lexer.rs` | Raw tokens; words stay raw, the parser decides their meaning |
-| `parser/mod.rs` | Precedence climbing, noise skipping, token helpers |
+| `parser/mod.rs` | Statements and precedence climbing |
+| `parser/tokens.rs` | Token helpers: noise skipping, lookahead, unit and name lookup |
 | `parser/primary.rs` | Numbers with units, words, functions, variables |
 | `parser/time.rs` | Dates, clock times, zones, "days until ..." phrases |
 | `parser/target.rs` | `in`/`to`/`as` targets and rounding |
