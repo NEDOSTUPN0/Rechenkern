@@ -118,6 +118,7 @@ impl<'a> Parser<'a> {
             || self.unit_at(i, false).is_some()
             || self.var_at(i).is_some()
             || self.place_time_at(i).is_some()
+            || self.place_converted_at(i).is_some()
     }
 
     /// A unit spelled at token `i`: its value and length in tokens.
@@ -189,6 +190,14 @@ impl<'a> Parser<'a> {
         let (tz, n) = self.place_at(i)?;
         let next = self.lower(i + n)?;
         matches!(next.as_str(), "time" | "date").then_some((tz, n + 1, next == "date"))
+    }
+
+    /// A place followed by a zone conversion: "PST to EST", "Tokyo in London".
+    pub(super) fn place_converted_at(&self, i: usize) -> Option<(TimeZone, usize)> {
+        let (tz, n) = self.place_at(i)?;
+        let next = self.toks.get(i + n)?;
+        let is_keyword = next.is_sym("->") || ["in", "to", "into"].iter().any(|w| next.is_word(w));
+        (is_keyword && self.zone_at(i + n + 1).is_some()).then_some((tz, n))
     }
 
     /// An operand starts after skipping `skip` tokens.

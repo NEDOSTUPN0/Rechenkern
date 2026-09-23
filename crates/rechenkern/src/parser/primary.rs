@@ -216,6 +216,10 @@ impl Parser<'_> {
             let now = Expr::Time(if date_only { TimeExpr::Today(0) } else { TimeExpr::Now });
             return Ok(Some(Expr::Convert(now.boxed(), Target::Zone(zone))));
         }
+        if let Some((zone, n)) = self.place_converted_at(i) {
+            self.pos += n;
+            return Ok(Some(Expr::Convert(Expr::Time(TimeExpr::Now).boxed(), Target::Zone(zone))));
+        }
         if let Some(expr) = self.line_ref()? {
             return Ok(Some(expr));
         }

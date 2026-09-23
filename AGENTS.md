@@ -62,6 +62,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - `BareUnit in X` is reversed: `seconds in a day` = 1 day in seconds.
 - A clock time followed by a zone is read in that zone (`3pm Tokyo`);
   `3pm in Tokyo` converts local 3pm; `9am in New York to Tokyo` places, then converts.
+- A place right before `in`/`to` + another zone means "now there": `PST to EST`.
+- `in feet and inches` splits into parts, but a list of currencies converts to
+  each one (`$10 in EUR, JPY` = `€9.00, ¥1,500`, `Display::Each`).
 
 ## Semantics worth knowing
 

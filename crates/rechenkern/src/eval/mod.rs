@@ -20,7 +20,7 @@ use crate::units::{Dim, Unit, UnitId, registry};
 use crate::value::{Duration, Moment, MomentKind, Quantity, Value};
 
 /// How an answer is written, beyond its value.
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default)]
 pub enum Display {
     #[default]
     Auto,
@@ -33,6 +33,8 @@ pub enum Display {
     Parts(Vec<Unit>),
     /// No thousands separators, e.g. for timestamps.
     Plain,
+    /// Several conversions of one value: "€9.00, ¥1,500".
+    Each(Vec<Value>),
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -278,6 +280,11 @@ impl Env<'_> {
 
     /// `in feet and inches`, `in hours and minutes`.
     fn to_parts(&self, value: Value, units: &[Unit]) -> Result<(Value, Display)> {
+        // Currencies don't split: "in EUR, JPY" converts to each.
+        if units.iter().any(Unit::is_money) {
+            let values: Vec<Value> = units.iter().map(|u| self.to_unit(value.clone(), u)).collect::<Result<_>>()?;
+            return Ok((values[0].clone(), Display::Each(values)));
+        }
         let time = units.iter().all(|u| u.dim() == Dim::TIME);
         let q = match value {
             Value::Duration(d) if time => self.duration_in(&d, &registry().get("s"))?,
@@ -312,7 +319,7 @@ impl Env<'_> {
             }
             Format::Decimal => match value {
                 Value::Percent(p) => (Value::number(p / Number::from_i64(100)), Display::Auto),
-                v => (v, if display == Display::Plain { display } else { Display::Auto }),
+                v => (v, if matches!(display, Display::Plain) { display } else { Display::Auto }),
             },
             Format::Scientific => (value, Display::Scientific),
             Format::Fraction => match value {

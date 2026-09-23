@@ -12,6 +12,9 @@ use crate::value::{Duration, Moment, MomentKind, Quantity, Value};
 use crate::zones;
 
 pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &Zoned) -> String {
+    if let Display::Each(values) = display {
+        return values.iter().map(|v| render(v, &Display::Auto, config, now)).collect::<Vec<_>>().join(", ");
+    }
     match value {
         Value::Quantity(q) => quantity(q, display, config),
         Value::Percent(p) => format!("{}%", number(*p, config)),
@@ -153,7 +156,7 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         Display::Plain => {
             plain_digits(q.number, config.precision.max(20)).unwrap_or_else(|| scientific(q.number, config.precision))
         }
-        Display::Auto => {
+        Display::Auto | Display::Each(_) => {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config);
             }

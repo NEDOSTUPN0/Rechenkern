@@ -313,6 +313,8 @@ fn currencies() {
         ("20 dollars", "$20.00"),
         ("15 bucks", "$15.00"),
         ("$19 for breakfast + $22 for the uber", "$41.00"),
+        ("10 USD in EUR, JPY", "€9.00, ¥1,500"),
+        ("$10 in eur and gbp", "€9.00, £8.00"),
     ]);
 }
 
@@ -410,6 +412,8 @@ fn time_zones() {
         ("time in marseile", "<error: unknown place \"marseile\", did you mean \"Marseille\"?>"),
         ("3pm to gotham city", "<error: unknown place \"gotham city\">"),
         ("time to go", "14:30"),
+        ("PST to EST", "14:30 EDT"),
+        ("tokyo in london", "19:30 BST"),
     ]);
 }
 
