@@ -92,6 +92,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   hides seconds of `now`.
 - Numbers show `Config::precision` significant digits (default 10) but never
   round the whole part; currencies use their minor units.
+- Numbers take both `10.50` and `10,50`: thousands come in groups of three, so
+  only a lone separator before three digits (`1,500`, `1.500`) depends on
+  `Config::decimal_comma` (CLI: from `LC_NUMERIC`/`LANG`), which also sets the
+  output style. A comma is never a decimal in a call (`max(1,5)`) or a glued
+  list (`1,2,3`).
 - `$` means `Config::dollar` (USD by default). Lowercase currency codes that
   are English words (`all`, `try`, `top`...) only work in uppercase.
 

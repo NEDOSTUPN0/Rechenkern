@@ -88,6 +88,31 @@ fn arithmetic() {
 }
 
 #[test]
+fn decimal_separators() {
+    check(&[
+        ("10,50 eur", "€10.50"),
+        ("€10,50 + €2,25", "€12.75"),
+        ("1,5 + 2,5", "4"),
+        ("1.234,56 * 2", "2,469.12"),
+        ("1,500 + 1", "1,501"),
+        ("1.500 + 1", "2.5"),
+        ("max(1,5)", "5"),
+        ("sum of 1,2,3", "6"),
+    ]);
+    let mut calc = calculator();
+    calc.config_mut().decimal_comma = true;
+    for (input, expected) in [
+        ("1,500 + 1", "2,5"),
+        ("1.500 + 1", "1.501"),
+        ("10.50 eur", "€10,50"),
+        ("$1,234,567.8", "$1.234.567,80"),
+        ("10 USD in EUR, JPY", "€9,00; ¥1.500"),
+    ] {
+        assert_eq!(calc.calculate(input).unwrap().unwrap().text(), expected, "{input}");
+    }
+}
+
+#[test]
 fn bases_and_bits() {
     check(&[
         ("0xFF + 1", "256"),

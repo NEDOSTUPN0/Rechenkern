@@ -111,10 +111,22 @@ struct Lexer<'a> {
     i: usize,
     tokens: Vec<Token>,
     space: bool,
+    /// Decides `1,500` and `1.500`: with a decimal comma they are 1500.
+    decimal_comma: bool,
+    /// Open parentheses; `true` for a call like `max(`, where commas separate arguments.
+    parens: Vec<bool>,
 }
 
-pub fn lex(src: &str) -> Vec<Token> {
-    let mut lx = Lexer { src, chars: src.char_indices().collect(), i: 0, tokens: Vec::new(), space: false };
+pub fn lex(src: &str, decimal_comma: bool) -> Vec<Token> {
+    let mut lx = Lexer {
+        src,
+        chars: src.char_indices().collect(),
+        i: 0,
+        tokens: Vec::new(),
+        space: false,
+        decimal_comma,
+        parens: Vec::new(),
+    };
     lx.run();
     lx.tokens
 }
@@ -129,6 +141,12 @@ impl Lexer<'_> {
     }
 
     fn push(&mut self, tok: Tok, start: usize) {
+        if tok == Tok::Sym("(") {
+            let call = !self.space && matches!(self.tokens.last(), Some(Token { tok: Tok::Word(_), .. }));
+            self.parens.push(call);
+        } else if tok == Tok::Sym(")") {
+            self.parens.pop();
+        }
         let token = Token { tok, start: self.offset(start), end: self.offset(self.i), space_before: self.space };
         self.tokens.push(token);
         self.space = false;
@@ -244,18 +262,25 @@ impl Lexer<'_> {
         if let Some(tok) = self.radix_number().or_else(|| self.date()).or_else(|| self.clock()) {
             return tok;
         }
-        let mut text = String::new();
         let at = |lx: &Self, k: usize| lx.chars.get(k).map(|&(_, c)| c);
-        loop {
-            match self.peek(0) {
-                Some(c) if c.is_ascii_digit() => text.push(c),
-                Some('_') if self.peek(1).is_some_and(|c| c.is_ascii_digit()) => {}
-                // Thousands separator: exactly three digits follow.
-                Some(',') if !text.is_empty() && !text.contains('.') && self.digits(self.i + 1) == 3 => {}
-                Some('.') if !text.contains('.') && self.peek(1).is_some_and(|c| c.is_ascii_digit()) => text.push('.'),
-                _ => break,
-            }
+        let mut text = self.digit_run();
+        let mut groups = Vec::new();
+        while let Some(sep @ (',' | '.')) = self.peek(0)
+            && self.peek(1).is_some_and(|c| c.is_ascii_digit())
+        {
+            let start = self.i;
             self.i += 1;
+            groups.push((sep, self.digit_run(), start));
+        }
+        let (used, decimal) = self.separators(&text, &groups);
+        if let Some(&(_, _, end)) = groups.get(used) {
+            self.i = end;
+        }
+        for (k, (_, digits, _)) in groups[..used].iter().enumerate() {
+            if Some(k) == decimal {
+                text.push('.');
+            }
+            text.push_str(digits);
         }
         // Exponent: "1.5e-3".
         if matches!(self.peek(0), Some('e' | 'E')) {
@@ -267,6 +292,54 @@ impl Lexer<'_> {
             }
         }
         Tok::Num(Number::parse(&text).unwrap_or(Number::ZERO))
+    }
+
+    /// Digits, allowing `_` between them: `1_000`.
+    fn digit_run(&mut self) -> String {
+        let mut digits = String::new();
+        loop {
+            match self.peek(0) {
+                Some(c) if c.is_ascii_digit() => digits.push(c),
+                Some('_') if !digits.is_empty() && self.peek(1).is_some_and(|c| c.is_ascii_digit()) => {}
+                _ => return digits,
+            }
+            self.i += 1;
+        }
+    }
+
+    /// How many separator groups belong to the number, and which one is the decimal point.
+    /// Thousands come in groups of three, so only `1,500` or `1.500` needs the setting.
+    fn separators(&self, int: &str, groups: &[(char, String, usize)]) -> (usize, Option<usize>) {
+        let Some(&(first, _, _)) = groups.first() else { return (0, None) };
+        let whole = !int.is_empty() && !int.starts_with('0');
+        let run = groups.iter().take_while(|(sep, digits, _)| *sep == first && digits.len() == 3).count();
+        let decimal_after = groups.get(run).is_some_and(|(sep, _, _)| *sep != first);
+        let grouping = if self.decimal_comma { '.' } else { ',' };
+        let (used, decimal) = if whole && int.len() <= 3 && (run >= 2 || (run == 1 && decimal_after)) {
+            // "1,234,567", "1.234,56": the other separator marks the decimals.
+            if decimal_after { (run + 1, Some(run)) } else { (run, None) }
+        } else if run >= 1 && whole && first == grouping {
+            (1, None)
+        } else if first == ',' && groups.len() > 1 {
+            // "1,5,3" is a list.
+            (0, None)
+        } else {
+            (1, Some(0))
+        };
+        // In `max(1,5)` the comma separates arguments, in `1,2,3` items.
+        let in_call = self.parens.last() == Some(&true);
+        if (in_call || self.in_glued_list()) && decimal.is_some_and(|k| groups[k].0 == ',') {
+            return (0, None);
+        }
+        (used, decimal)
+    }
+
+    /// The number continues a list without spaces, like the `3` in `1,2,3`.
+    fn in_glued_list(&self) -> bool {
+        match self.tokens.as_slice() {
+            [.., Token { tok: Tok::Num(_), .. }, comma] => comma.is_sym(",") && !comma.space_before && !self.space,
+            _ => false,
+        }
     }
 
     fn radix_number(&mut self) -> Option<Tok> {
@@ -352,7 +425,7 @@ mod tests {
     use super::*;
 
     fn toks(s: &str) -> Vec<Tok> {
-        lex(s).into_iter().map(|t| t.tok).collect()
+        lex(s, false).into_iter().map(|t| t.tok).collect()
     }
 
     fn num(s: &str) -> Tok {
@@ -365,7 +438,17 @@ mod tests {
         assert_eq!(toks("1_000 0x1F 0b101"), vec![num("1000"), num("31"), num("5")]);
         assert_eq!(toks("1.5e3"), vec![num("1500")]);
         assert_eq!(toks("max(1,2)")[2..5], [num("1"), Tok::Sym(","), num("2")]);
+        assert_eq!(toks("1.234,5 10,50 10.50"), vec![num("1234.5"), num("10.5"), num("10.5")]);
+        assert_eq!(toks("1,000,000 0.125")[..2], [num("1000000"), num("0.125")]);
+        assert_eq!(toks("1,5,3"), vec![num("1"), Tok::Sym(","), num("5"), Tok::Sym(","), num("3")]);
         assert_eq!(toks("1½"), vec![num("1.5")]);
+    }
+
+    #[test]
+    fn lone_separator_before_three_digits() {
+        let toks_with = |s: &str, comma: bool| lex(s, comma).into_iter().map(|t| t.tok).collect::<Vec<_>>();
+        assert_eq!(toks_with("1,500 1.500", false), vec![num("1500"), num("1.5")]);
+        assert_eq!(toks_with("1,500 1.500", true), vec![num("1.5"), num("1500")]);
     }
 
     #[test]

@@ -13,7 +13,8 @@ use crate::zones;
 
 pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &Zoned) -> String {
     if let Display::Each(values) = display {
-        return values.iter().map(|v| render(v, &Display::Auto, config, now)).collect::<Vec<_>>().join(", ");
+        let separator = if config.decimal_comma { "; " } else { ", " };
+        return values.iter().map(|v| render(v, &Display::Auto, config, now)).collect::<Vec<_>>().join(separator);
     }
     match value {
         Value::Quantity(q) => quantity(q, display, config),
@@ -28,7 +29,7 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &Zo
 /// A number with the configured precision and thousands separators.
 pub(crate) fn number(n: Number, config: &Config) -> String {
     match plain_digits(n, config.precision) {
-        Some(digits) => group(&digits, config.thousands_separators),
+        Some(digits) => group(&digits, config),
         None => scientific(n, config.precision),
     }
 }
@@ -58,19 +59,20 @@ fn trim_zeros(s: String) -> String {
     if s.contains('.') { s.trim_end_matches('0').trim_end_matches('.').to_string() } else { s }
 }
 
-/// Inserts thousands separators into the whole part.
-fn group(digits: &str, separators: bool) -> String {
+/// Inserts thousands separators into the whole part, in the configured style.
+fn group(digits: &str, config: &Config) -> String {
+    let (thousands, decimal) = if config.decimal_comma { ('.', ',') } else { (',', '.') };
     let (sign, rest) = digits.strip_prefix('-').map_or(("", digits), |r| ("-", r));
     let (int, frac) = rest.split_once('.').map_or((rest, None), |(i, f)| (i, Some(f)));
     let mut out = String::from(sign);
     for (i, c) in int.chars().enumerate() {
-        if separators && i > 0 && (int.len() - i) % 3 == 0 {
-            out.push(',');
+        if config.thousands_separators && i > 0 && (int.len() - i) % 3 == 0 {
+            out.push(thousands);
         }
         out.push(c);
     }
     if let Some(f) = frac {
-        out.push('.');
+        out.push(decimal);
         out.push_str(f);
     }
     out
@@ -85,7 +87,7 @@ fn scientific(n: Number, precision: u32) -> String {
 }
 
 /// Exactly `dp` decimals, as for money: `12.50`.
-fn fixed(n: Number, dp: u32, separators: bool) -> String {
+fn fixed(n: Number, dp: u32, config: &Config) -> String {
     let rounded = n.round_dp(dp);
     let text = match rounded {
         Number::Exact(d) => {
@@ -95,7 +97,7 @@ fn fixed(n: Number, dp: u32, separators: bool) -> String {
         }
         Number::Float(f) => format!("{f:.*}", dp as usize),
     };
-    group(&text, separators)
+    group(&text, config)
 }
 
 pub(crate) fn radix(n: Number, radix: u32) -> Result<String> {
@@ -183,10 +185,10 @@ fn money(q: &Quantity, currency: &Currency, config: &Config) -> String {
         group(
             &plain_digits(n.abs().round_dp(8), config.precision)
                 .unwrap_or_else(|| scientific(n.abs(), config.precision)),
-            config.thousands_separators,
+            config,
         )
     } else {
-        fixed(n.abs(), currency.decimals as u32, config.thousands_separators)
+        fixed(n.abs(), currency.decimals as u32, config)
     };
     let sign = if n.is_negative() && !n.round_dp(currency.decimals as u32).is_zero() { "-" } else { "" };
     let amount = match currency.symbol {

@@ -25,6 +25,9 @@ pub struct Config {
     pub precision: u32,
     /// Group thousands: `1,234,567`.
     pub thousands_separators: bool,
+    /// Write `1.234,5` instead of `1,234.5`. Input takes both styles; this
+    /// only decides a lone separator before three digits (`1,500`, `1.500`).
+    pub decimal_comma: bool,
     /// Show clock times as `15:30` instead of `3:30 pm`.
     pub clock_24h: bool,
     /// Order for dates written with slashes. Dotted dates are always day first.
@@ -43,6 +46,7 @@ impl Default for Config {
         Config {
             precision: 10,
             thousands_separators: true,
+            decimal_comma: false,
             clock_24h: true,
             date_order: DateOrder::DayFirst,
             dollar: "USD".into(),

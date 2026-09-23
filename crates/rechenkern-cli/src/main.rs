@@ -133,6 +133,7 @@ fn config(args: &Args) -> Result<Config, String> {
     Ok(Config {
         precision: args.precision.clamp(1, 28),
         thousands_separators: !args.no_separators,
+        decimal_comma: locale_decimal_comma(),
         clock_24h: !args.twelve_hour,
         date_order: match args.date_order {
             Some(Order::Dmy) => DateOrder::DayFirst,
@@ -153,6 +154,21 @@ fn locale_date_order() -> DateOrder {
         Some(l) if l.starts_with("en_US") => DateOrder::MonthFirst,
         _ => DateOrder::DayFirst,
     }
+}
+
+/// Most of continental Europe and Latin America write `1.234,5`.
+fn locale_decimal_comma() -> bool {
+    const COMMA: &[&str] = &[
+        "az", "be", "bg", "bs", "ca", "cs", "da", "de", "el", "es", "et", "eu", "fi", "fr", "gl", "hr", "hu", "hy",
+        "id", "is", "it", "ka", "kk", "ky", "lt", "lv", "mk", "nb", "nl", "nn", "no", "pl", "pt", "ro", "ru", "sk",
+        "sl", "sq", "sr", "sv", "tr", "uk", "uz", "vi",
+    ];
+    // Regions that use a decimal point despite the language.
+    const POINT: &[&str] = &["de_CH", "it_CH", "es_MX", "es_US", "es_PR"];
+    let var = |name: &str| std::env::var(name).ok().filter(|s| !s.is_empty());
+    let Some(locale) = ["LC_ALL", "LC_NUMERIC", "LANG"].iter().find_map(|v| var(v)) else { return false };
+    let lang = locale.split(['_', '.', '@']).next().unwrap_or_default();
+    COMMA.contains(&lang) && !POINT.iter().any(|p| locale.starts_with(p))
 }
 
 /// Calculates a whole text; each input line gets one output line.
