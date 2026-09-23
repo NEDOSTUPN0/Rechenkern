@@ -29,32 +29,12 @@ pub const AMBIGUOUS_CODES: &[&str] = &[
     "sos", "ton", "top", "try", "uni",
 ];
 
+#[rustfmt::skip]
 pub static CURRENCIES: &[Currency] = &[
     // Most used first: ambiguous names resolve to the earliest entry.
-    fiat(
-        "USD",
-        "$",
-        2,
-        &[
-            "US$",
-            "USD$",
-            "dollar",
-            "dollars",
-            "buck",
-            "bucks",
-            "us dollar",
-            "us dollars",
-            "american dollar",
-            "american dollars",
-        ],
-    ),
+    fiat("USD", "$", 2, &["US$", "USD$", "dollar", "dollars", "buck", "bucks", "us dollar", "us dollars", "american dollar", "american dollars"]),
     fiat("EUR", "€", 2, &["€", "euro", "euros"]),
-    fiat(
-        "GBP",
-        "£",
-        2,
-        &["£", "quid", "sterling", "pound sterling", "pounds sterling", "british pound", "british pounds"],
-    ),
+    fiat("GBP", "£", 2, &["£", "quid", "sterling", "pound sterling", "pounds sterling", "british pound", "british pounds"]),
     fiat("JPY", "¥", 0, &["¥", "JP¥", "円", "yen", "japanese yen"]),
     fiat("CNY", "CN¥", 2, &["CN¥", "元", "yuan", "renminbi", "rmb", "chinese yuan"]),
     fiat("CHF", "", 2, &["franc", "francs", "swiss franc", "swiss francs"]),
@@ -65,22 +45,7 @@ pub static CURRENCIES: &[Currency] = &[
     fiat("SGD", "S$", 2, &["S$", "singapore dollar", "singapore dollars"]),
     fiat("TWD", "NT$", 2, &["NT$", "taiwan dollar", "taiwan dollars", "new taiwan dollar", "new taiwan dollars"]),
     fiat("INR", "₹", 2, &["₹", "Rs", "rupee", "rupees", "indian rupee", "indian rupees"]),
-    fiat(
-        "RUB",
-        "₽",
-        2,
-        &[
-            "₽",
-            "ruble",
-            "rubles",
-            "rouble",
-            "roubles",
-            "russian ruble",
-            "russian rubles",
-            "russian rouble",
-            "russian roubles",
-        ],
-    ),
+    fiat("RUB", "₽", 2, &["₽", "ruble", "rubles", "rouble", "roubles", "russian ruble", "russian rubles", "russian rouble", "russian roubles"]),
     fiat("KZT", "₸", 2, &["₸", "tenge", "kazakh tenge", "kazakhstani tenge"]),
     fiat("UAH", "₴", 2, &["₴", "hryvnia", "hryvnias", "hryvnya", "ukrainian hryvnia"]),
     fiat("KRW", "₩", 0, &["₩", "korean won", "south korean won"]),
