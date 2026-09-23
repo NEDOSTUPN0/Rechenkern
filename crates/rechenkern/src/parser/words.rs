@@ -287,6 +287,22 @@ pub const HOLIDAYS: &[(&str, Holiday)] = &[
     ("orthodox christmas", Holiday::OrthodoxChristmas),
 ];
 
+/// An event with a known date.
+pub struct Event {
+    /// Lowercase names; numbers as digits.
+    pub names: &'static [&'static str],
+    pub date: (i16, i8, i8),
+    /// Shown next to the date on its own, not used in calculations.
+    pub note: &'static str,
+}
+
+pub const EVENTS: &[Event] = &[Event {
+    names: &["gta 6", "gta vi", "gta6", "gtavi", "grand theft auto 6", "grand theft auto vi"],
+    // Delayed twice already; drop the note once it is out.
+    date: (2026, 11, 19),
+    note: "probably",
+}];
+
 /// Month number for a month name; `short` is set for abbreviations.
 pub fn month(w: &str) -> Option<(i8, bool)> {
     const NAMES: [&str; 12] = [

@@ -37,6 +37,8 @@ pub enum Expr {
     Binary(Op, Box<Expr>, Box<Expr>),
     /// Adjacent parts added together: `5 ft 3 in`, `1 hour 30 min`.
     Composite(Vec<Expr>),
+    /// A value with a remark shown only when it is the whole answer.
+    Noted(Box<Expr>, &'static str),
     Call(Func, Vec<Expr>),
     Var(String),
     Line(LineRef),

@@ -35,6 +35,8 @@ pub enum Display {
     Plain,
     /// Several conversions of one value: "€9.00, ¥1,500".
     Each(Vec<Value>),
+    /// A remark after the value: "Thu, 19 Nov 2026 (probably)".
+    Note(&'static str),
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -79,6 +81,7 @@ impl Env<'_> {
                 };
                 Ok((value, display))
             }
+            Expr::Noted(inner, note) => Ok((self.eval(inner)?, Display::Note(note))),
             _ => Ok((self.eval(expr)?, Display::Auto)),
         }
     }
@@ -100,6 +103,7 @@ impl Env<'_> {
             Expr::Factorial(inner) => functions::factorial(self.eval(inner)?)?,
             Expr::Binary(op, a, b) => self.binary(*op, self.eval(a)?, self.eval(b)?)?,
             Expr::Composite(parts) => self.composite(parts)?,
+            Expr::Noted(inner, _) => self.eval(inner)?,
             Expr::Call(func, args) => {
                 let args = args.iter().map(|a| self.eval(a)).collect::<Result<Vec<_>>>()?;
                 self.call(*func, args)?

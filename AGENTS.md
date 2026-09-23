@@ -88,6 +88,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   arithmetic uses calendar spans (`Jan 31 + 1 month` = `Feb 29` in 2020).
 - A date without a year is this year unless that is more than 270 days away.
   Holidays without a year are the next occurrence.
+- Events with a fixed date (`GTA 6 release date`) live in `words::EVENTS`;
+  their note (`(probably)`) is display only (`Expr::Noted`), never part of a
+  calculation. Update or drop entries when the date changes or passes.
 - Clock-only answers show the date when it isn't today; `Moment::seconds`
   hides seconds of `now`.
 - Numbers show `Config::precision` significant digits (default 10) but never

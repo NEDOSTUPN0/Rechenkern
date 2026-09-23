@@ -113,6 +113,7 @@ impl<'a> Parser<'a> {
             || words::is_line_word(w)
             || self.phrase_at(i, words::FUNCTIONS).is_some()
             || self.phrase_at(i, words::HOLIDAYS).is_some()
+            || self.event_at(i).is_some()
             || self.phrase_at(i, words::DATE_PARTS).is_some()
             || self.phrase_at(i, words::PHYSICAL_CONSTANTS).is_some()
             || self.unit_at(i, false).is_some()

@@ -12,6 +12,9 @@ use crate::value::{Duration, Moment, MomentKind, Quantity, Value};
 use crate::zones;
 
 pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &Zoned) -> String {
+    if let Display::Note(note) = display {
+        return format!("{} ({note})", render(value, &Display::Auto, config, now));
+    }
     if let Display::Each(values) = display {
         let separator = if config.decimal_comma { "; " } else { ", " };
         return values.iter().map(|v| render(v, &Display::Auto, config, now)).collect::<Vec<_>>().join(separator);
@@ -158,7 +161,7 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         Display::Plain => {
             plain_digits(q.number, config.precision.max(20)).unwrap_or_else(|| scientific(q.number, config.precision))
         }
-        Display::Auto | Display::Each(_) => {
+        Display::Auto | Display::Each(_) | Display::Note(_) => {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config);
             }

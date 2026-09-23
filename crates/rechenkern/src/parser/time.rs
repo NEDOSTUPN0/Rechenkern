@@ -334,7 +334,33 @@ impl Parser<'_> {
             let year = self.year().map(|y| y as i16);
             return Ok(Some(Expr::Time(TimeExpr::Holiday { holiday, year })));
         }
+        if let Some((event, n)) = self.event_at(self.pos) {
+            self.pos += n;
+            if !self.eat_word("release") {
+                self.eat_word("launch");
+            }
+            self.eat_word("date");
+            let (year, month, day) = event.date;
+            let date = Expr::Time(TimeExpr::Date { year: Some(year), month, day });
+            return Ok(Some(Expr::Noted(date.boxed(), event.note)));
+        }
         Ok(None)
+    }
+
+    /// An event name at token `i`, such as `GTA 6`.
+    pub(super) fn event_at(&self, i: usize) -> Option<(&'static words::Event, usize)> {
+        let text = |k: usize| match &self.toks.get(k)?.tok {
+            Tok::Word(w) => Some(w.to_lowercase()),
+            Tok::Num(n) if n.is_integer() => Some(n.to_string()),
+            _ => None,
+        };
+        words::EVENTS.iter().find_map(|event| {
+            event.names.iter().find_map(|name| {
+                let n = name.split(' ').count();
+                let typed: Option<Vec<String>> = (i..i + n).map(text).collect();
+                (typed?.join(" ") == *name).then_some((event, n))
+            })
+        })
     }
 
     /// Phrases starting with "time", "date" or "difference".
@@ -474,6 +500,7 @@ impl Parser<'_> {
                 ) || words::month(&w).is_some()
                     || words::weekday(&w).is_some()
                     || p.phrase_at(p.pos, words::HOLIDAYS).is_some()
+                    || p.event_at(p.pos).is_some()
                     || p.var_at(p.pos).is_some()
             }
             _ => false,
