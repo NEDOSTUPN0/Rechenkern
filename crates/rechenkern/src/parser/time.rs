@@ -386,7 +386,7 @@ impl Parser<'_> {
         Ok([a, b])
     }
 
-    /// "difference between Seattle and Moscow" or between two dates.
+    /// "difference between Seattle and Tokyo" or between two dates.
     fn difference(&mut self) -> Result<Expr> {
         if let Some((a, n)) = self.zone_at(self.pos)
             && self.toks.get(self.pos + n).is_some_and(|t| t.is_word("and") || t.is_sym("&"))

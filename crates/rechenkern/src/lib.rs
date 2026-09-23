@@ -1,7 +1,7 @@
 //! Rechenkern is a natural language calculator engine.
 //!
 //! It reads lines like `$20 for lunch + 15% tip`, `5 km in miles`,
-//! `time in Kazakhstan` or `days until christmas` and answers them.
+//! `time in Tokyo` or `days until christmas` and answers them.
 //!
 //! ```
 //! use rechenkern::Calculator;

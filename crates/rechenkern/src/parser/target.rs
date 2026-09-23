@@ -2,10 +2,11 @@
 
 use super::{Parser, words};
 use crate::ast::{Direction, Expr, Format, Func, Rounding, Target, TimeExpr};
-use crate::error::Result;
-use crate::lexer::Tok;
+use crate::error::{Result, bail};
+use crate::lexer::{Tok, Token};
 use crate::number::Number;
 use crate::units::{Unit, registry};
+use crate::zones;
 
 impl Parser<'_> {
     /// One conversion step after `expr`, or `None` if there is none.
@@ -59,8 +60,33 @@ impl Parser<'_> {
             let end = self.bit_or()?;
             return Ok(Some(Expr::Range(expr.clone().boxed(), end.boxed())));
         }
+        // "time in Qwertyville": a time zone was asked for, but the place is unknown.
+        // After "to" only a clock time asks for a zone: "time to go" does not.
+        let asks_zone = if keyword == "to" { is_clock(expr) } else { is_moment(expr) };
+        if asks_zone {
+            self.unknown_place()?;
+        }
         self.pos = start;
         Ok(None)
+    }
+
+    /// Fails with a helpful message if words that aren't a known place follow.
+    fn unknown_place(&self) -> Result<()> {
+        let mut i = self.pos;
+        while self.lower(i).is_some_and(|w| matches!(w.as_str(), "a" | "an" | "the")) {
+            i += 1;
+        }
+        let (words, _) = self.name_words(i);
+        let count = (0..words.len()).take_while(|&k| !self.significant(i + k)).count().min(3);
+        if count == 0 {
+            return Ok(());
+        }
+        let typed: Vec<&str> = self.toks[i..].iter().filter_map(Token::word).take(count).collect();
+        let typed = typed.join(" ");
+        match zones::suggest(&words[..count].join(" ")) {
+            Some(hint) => bail!("unknown place \"{typed}\", did you mean \"{hint}\"?"),
+            None => bail!("unknown place \"{typed}\""),
+        }
     }
 
     fn zone_conversion_follows(&self) -> bool {
@@ -240,6 +266,24 @@ impl Parser<'_> {
             return Some(registry().get("in"));
         }
         self.unit_phrase(false)
+    }
+}
+
+/// A date or time, or a time zone conversion of one.
+fn is_moment(expr: &Expr) -> bool {
+    match expr {
+        Expr::Time(_) | Expr::InZone(..) => true,
+        Expr::Convert(inner, Target::Zone(_)) => is_moment(inner),
+        _ => false,
+    }
+}
+
+/// A written clock time like `3pm`, possibly placed in a zone.
+fn is_clock(expr: &Expr) -> bool {
+    match expr {
+        Expr::Time(TimeExpr::Clock { .. }) => true,
+        Expr::InZone(inner, _) | Expr::Convert(inner, Target::Zone(_)) => is_clock(inner),
+        _ => false,
     }
 }
 

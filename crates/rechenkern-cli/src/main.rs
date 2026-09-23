@@ -42,7 +42,7 @@ struct Args {
     /// Trigonometry takes degrees instead of radians.
     #[arg(long)]
     degrees: bool,
-    /// Local time zone, e.g. Europe/Berlin [default: system].
+    /// Local time zone, e.g. America/New_York [default: system].
     #[arg(long)]
     tz: Option<String>,
     /// Never download exchange rates; use cached ones.

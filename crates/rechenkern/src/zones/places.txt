@@ -366,6 +366,8 @@ victoria = Australia/Melbourne
 western australia = Australia/Perth
 
 # Cities
+# (names that are also English words, like "split", must be listed here:
+# scripts/cities.py drops them from cities.txt)
 abu dhabi = Asia/Dubai
 abuja = Africa/Lagos
 ahmedabad = Asia/Kolkata
@@ -383,6 +385,7 @@ baltimore = America/New_York
 bangalore = Asia/Kolkata
 barcelona = Europe/Madrid
 basel = Europe/Zurich
+bath = Europe/London
 beijing = Asia/Shanghai
 bengaluru = Asia/Kolkata
 bern = Europe/Zurich
@@ -465,6 +468,7 @@ miami = America/New_York
 milan = Europe/Rome
 milwaukee = America/Chicago
 minneapolis = America/Chicago
+mobile = America/Chicago
 montreal = America/Toronto
 mountain view = America/Los_Angeles
 mumbai = Asia/Kolkata
@@ -519,6 +523,7 @@ shenzhen = Asia/Shanghai
 shymkent = Asia/Almaty
 silicon valley = America/Los_Angeles
 sochi = Europe/Moscow
+split = Europe/Zagreb
 st louis = America/Chicago
 st petersburg = Europe/Moscow
 saint louis = America/Chicago

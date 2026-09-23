@@ -3,11 +3,11 @@
 use jiff::tz::TimeZone;
 use rechenkern::{Calculator, Config, Number, RateTable};
 
-/// A calculator at Wed 23 Sep 2026 14:30 in Berlin, with fixed rates.
+/// A calculator at Wed 23 Sep 2026 14:30 in New York, with fixed rates.
 fn calculator() -> Calculator {
     let config = Config {
-        now: Some("2026-09-23T14:30:00+02:00[Europe/Berlin]".parse().unwrap()),
-        time_zone: Some(TimeZone::get("Europe/Berlin").unwrap()),
+        now: Some("2026-09-23T14:30:00-04:00[America/New_York]".parse().unwrap()),
+        time_zone: Some(TimeZone::get("America/New_York").unwrap()),
         ..Config::default()
     };
     let mut calc = Calculator::with_config(config);
@@ -349,12 +349,12 @@ fn dates() {
         ("week of year", "39"),
         ("day of the week on March 9, 2024", "Saturday"),
         ("day number on March 15, 2024", "75"),
-        ("1559740303 to date", "Wed, 5 Jun 2019 15:11:43"),
-        ("1733823083000 to date", "Tue, 10 Dec 2024 10:31:23"),
-        ("April 1, 2019 to timestamp", "1554069600"),
-        ("2019-04-01T15:30:00Z to date", "Mon, 1 Apr 2019 17:30"),
+        ("1559740303 to date", "Wed, 5 Jun 2019 09:11:43"),
+        ("1733823083000 to date", "Tue, 10 Dec 2024 04:31:23"),
+        ("April 1, 2019 to timestamp", "1554091200"),
+        ("2019-04-01T15:30:00Z to date", "Mon, 1 Apr 2019 11:30"),
         ("2026-09-23 + 1 day", "Thu, 24 Sep 2026"),
-        ("now as iso8601", "2026-09-23T14:30:00+02:00"),
+        ("now as iso8601", "2026-09-23T14:30:00-04:00"),
         ("days in February 2020", "29 days"),
         ("days in Q3", "92 days"),
         ("hours in a week", "168 hours"),
@@ -388,21 +388,28 @@ fn clock_times() {
 #[test]
 fn time_zones() {
     check(&[
-        ("time in tokyo", "21:30 JST"),
-        ("time in kazakhstan", "17:30 UTC+5"),
-        ("time in new york", "08:30 EDT"),
-        ("tokyo time", "21:30 JST"),
-        ("now in utc", "12:30 UTC"),
-        ("3pm in tokyo", "22:00 JST"),
+        ("time in tokyo", "Thu, 24 Sep 2026 03:30 JST"),
+        ("time in uzbekistan", "23:30 UTC+5"),
+        ("time in london", "19:30 BST"),
+        ("tokyo time", "Thu, 24 Sep 2026 03:30 JST"),
+        ("now in utc", "18:30 UTC"),
+        ("3pm in tokyo", "Thu, 24 Sep 2026 04:00 JST"),
         ("6pm Sydney in Chicago", "03:00 CDT"),
         ("2am PST to GMT", "09:00 UTC"),
         ("3pm GMT+8 to Paris", "09:00 CEST"),
         ("9:35am in New York to Japan", "22:35 JST"),
-        ("time difference between Seattle and Moscow", "10 hours"),
+        ("time difference between Seattle and Tokyo", "16 hours"),
         ("date in vancouver", "Wed, 23 Sep 2026"),
-        ("time in auckland", "Thu, 24 Sep 2026 00:30 NZST"),
-        ("current time in new york", "08:30 EDT"),
+        ("time in auckland", "Thu, 24 Sep 2026 06:30 NZST"),
+        ("current time in paris", "20:30 CEST"),
         ("time in Tokyo when it is 9am in London", "17:00 JST"),
+        ("time in marseille", "20:30 CEST"),
+        ("time in aix-en-provence", "20:30 CEST"),
+        ("time in sao jose dos campos", "15:30 UTC-3"),
+        ("time in qwertyville", "<error: unknown place \"qwertyville\">"),
+        ("time in marseile", "<error: unknown place \"marseile\", did you mean \"Marseille\"?>"),
+        ("3pm to gotham city", "<error: unknown place \"gotham city\">"),
+        ("time to go", "14:30"),
     ]);
 }
 

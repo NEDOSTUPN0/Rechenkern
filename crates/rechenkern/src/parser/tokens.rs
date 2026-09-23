@@ -161,8 +161,27 @@ impl<'a> Parser<'a> {
         })
     }
 
+    /// A place name at token `i`; words may be joined by hyphens: "Aix-en-Provence".
     pub(super) fn place_at(&self, i: usize) -> Option<(TimeZone, usize)> {
-        (1..=zones::MAX_WORDS).rev().find_map(|n| Some((zones::find(&self.join_words(i, n)?.to_lowercase())?, n)))
+        let (words, ends) = self.name_words(i);
+        (1..=words.len()).rev().find_map(|n| Some((zones::find(&words[..n].join(" "))?, ends[n - 1] - i)))
+    }
+
+    /// Up to `MAX_WORDS` lowercase words from token `i`, and the token index after each.
+    pub(super) fn name_words(&self, i: usize) -> (Vec<String>, Vec<usize>) {
+        let (mut words, mut ends) = (Vec::new(), Vec::new());
+        let mut k = i;
+        while words.len() < zones::MAX_WORDS {
+            let Some(word) = self.toks.get(k).and_then(Token::word) else { break };
+            words.push(word.to_lowercase());
+            k += 1;
+            ends.push(k);
+            let hyphen = self.toks.get(k).is_some_and(|t| t.is_sym("-") && !t.space_before);
+            if hyphen && self.toks.get(k + 1).is_some_and(|t| t.word().is_some() && !t.space_before) {
+                k += 1;
+            }
+        }
+        (words, ends)
     }
 
     /// "Tokyo time" or "Paris date".
