@@ -199,6 +199,8 @@ fn percentages() {
         ("30 × 50%", "15"),
         ("2/10 as fraction", "1/5"),
         ("50% as fraction", "1/2"),
+        ("0.333333 as fraction", "333333/1000000"),
+        ("81 is 9 to what power", "2"),
         ("2/3 of 600", "400"),
         ("50 is 1/5 of what", "250"),
         ("20/5 as multiplier", "4x"),
@@ -256,6 +258,13 @@ fn units() {
         ("1 mb in kb", "1,000 kB"),
         ("5 Mb in kB", "625 kB"),
         ("180 cm in feet and inches", "5 ft 10.87 in"),
+        ("72 in in feet and inches", "6 ft"),
+        ("1 day - 2 hours", "22 hours"),
+        ("1 hour + 30 minutes", "1 hour 30 minutes"),
+        ("1 year - 2 months", "10 months"),
+        ("100 km / 50 km/h", "2 hours"),
+        ("time to upload 3GB at 10 MB/s", "5 minutes"),
+        ("1 hour 30 minutes at 1.5x", "1 hour"),
         ("speed of light in km/h", "1,079,252,849 km/h"),
     ]);
 }
@@ -386,6 +395,7 @@ fn time_zones() {
         ("date in vancouver", "Wed, 23 Sep 2026"),
         ("time in auckland", "Thu, 24 Sep 2026 00:30 NZST"),
         ("current time in new york", "08:30 EDT"),
+        ("time in Tokyo when it is 9am in London", "17:00 JST"),
     ]);
 }
 

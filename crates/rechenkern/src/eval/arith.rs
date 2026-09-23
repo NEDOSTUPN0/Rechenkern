@@ -7,7 +7,7 @@ use crate::ast::Op;
 use crate::error::{Error, Result, bail};
 use crate::format::unit_text;
 use crate::number::Number;
-use crate::units::Unit;
+use crate::units::{Dim, Unit, registry};
 use crate::value::{Duration, MomentKind, Quantity, Value};
 
 fn hundred() -> Number {
@@ -109,6 +109,24 @@ impl Env<'_> {
         if x.unit.dim() != y.unit.dim() {
             bail!("can't combine {} and {}", unit_text(&x.unit, true), unit_text(&y.unit, true));
         }
+        if x.unit.dim() == Dim::TIME && !is_calendar(&x.unit) && !is_calendar(&y.unit) {
+            let (a, b) = (Value::Quantity(x.clone()), Value::Quantity(y.clone()));
+            let seconds =
+                if sub { self.seconds(&a)? - self.seconds(&b)? } else { self.seconds(&a)? + self.seconds(&b)? };
+            let largest = [&x.unit, &y.unit]
+                .iter()
+                .filter_map(|u| u.single()?.calendar.map(|(cal, _)| cal))
+                .max()
+                .unwrap_or(jiff::Unit::Second);
+            return Ok(Value::Duration(Duration::new(super::time::balance(seconds, largest)?)));
+        }
+        // "1 year - 2 months" is 10 months: calendar units meet in the smaller one.
+        if x.unit.dim() == Dim::TIME && is_calendar(&x.unit) && is_calendar(&y.unit) {
+            let scale = |id| self.scale(id);
+            let target = if x.unit.scale(&scale)? < y.unit.scale(&scale)? { &x.unit } else { &y.unit };
+            let (a, b) = (self.convert_quantity(&x, target)?.number, self.convert_quantity(&y, target)?.number);
+            return Ok(Value::Quantity(Quantity::new(combine(a, b), target.clone())));
+        }
         let temperature = x.unit.single().is_some_and(|d| d.is_temperature());
         // Money and rates use the last unit: "$20/day + $300/week" is per week.
         let target = if y.unit.currency().is_some() || y.unit.factors().len() > 1 {
@@ -133,7 +151,10 @@ impl Env<'_> {
 
     pub(super) fn mul(&self, a: Value, b: Value) -> Result<Value> {
         Ok(match (a, b) {
-            (Value::Quantity(x), Value::Quantity(y)) => Value::Quantity(self.mul_quantities(x, y, false)?),
+            (Value::Quantity(x), Value::Quantity(y)) => {
+                let units = (x.unit.clone(), y.unit.clone());
+                self.tidy_time(self.mul_quantities(x, y, false)?, units)?
+            }
             (Value::Quantity(q), Value::Percent(p)) | (Value::Percent(p), Value::Quantity(q)) => {
                 Value::Quantity(Quantity::new(q.number * p / hundred(), q.unit))
             }
@@ -155,7 +176,8 @@ impl Env<'_> {
         Ok(match (a, b) {
             (Value::Quantity(x), Value::Quantity(y)) => {
                 zero(y.number)?;
-                Value::Quantity(self.mul_quantities(x, y, true)?)
+                let units = (x.unit.clone(), y.unit.clone());
+                self.tidy_time(self.mul_quantities(x, y, true)?, units)?
             }
             // "$50 / 20%" is the whole that $50 is 20% of.
             (Value::Quantity(x), Value::Percent(p)) => {
@@ -186,6 +208,17 @@ impl Env<'_> {
             }
             (a, b) => bail!("can't divide {} by {}", a.kind(), b.kind()),
         })
+    }
+
+    /// Seconds that come out of unit algebra read better as a time span:
+    /// "3 GB / 10 MB/s" is 5 minutes, not 300 seconds.
+    fn tidy_time(&self, q: Quantity, (a, b): (Unit, Unit)) -> Result<Value> {
+        let second = registry().get("s");
+        let derived = q.unit.same_as(&second) && !a.same_as(&second) && !b.same_as(&second);
+        if derived && q.number.abs() >= Number::from_i64(60) {
+            return Ok(Value::Duration(Duration::new(super::time::balance(q.number, jiff::Unit::Hour)?)));
+        }
+        Ok(Value::Quantity(q))
     }
 
     /// Multiplies or divides quantities, merging units of the same kind.
@@ -264,6 +297,11 @@ impl Env<'_> {
 
     /// "30 hours at $30/hour" multiplies, "$500 at $20/hour" divides.
     fn at(&self, a: Value, b: Value) -> Result<Value> {
+        // Playback speed: "1 hour at 1.5x".
+        let is_time = matches!(&a, Value::Duration(_)) || matches!(&a, Value::Quantity(q) if q.unit.dim() == Dim::TIME);
+        if is_time && matches!(&b, Value::Quantity(q) if q.unit.is_none()) {
+            return self.div(a, b);
+        }
         let product = self.mul(a.clone(), b.clone());
         let quotient = self.div(a, b);
         let factors = |v: &Result<Value>| match v {
@@ -299,6 +337,11 @@ impl Env<'_> {
             _ => ord != Ordering::Less,
         }))
     }
+}
+
+/// Months and longer have no fixed length.
+fn is_calendar(unit: &Unit) -> bool {
+    unit.single().and_then(|d| d.calendar).is_none_or(|(cal, _)| cal >= jiff::Unit::Month)
 }
 
 fn bitwise(op: Op, a: Value, b: Value) -> Result<Value> {

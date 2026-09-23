@@ -1,7 +1,7 @@
 //! Whole-line phrases: percentage questions and proportions.
 
 use super::Parser;
-use crate::ast::{Expr, Format, GrowthResult, Op};
+use crate::ast::{Expr, Format, GrowthResult, Op, Target, TimeExpr};
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -10,6 +10,9 @@ impl Parser<'_> {
     /// Tries phrases such as "20 is what % of 200" on the whole line.
     pub(super) fn phrase(&mut self) -> Result<Option<Expr>> {
         if let Some(expr) = self.growth()? {
+            return Ok(Some(expr));
+        }
+        if let Some(expr) = self.when_it_is()? {
             return Ok(Some(expr));
         }
         let end = self.toks.len();
@@ -105,6 +108,16 @@ impl Parser<'_> {
             return Ok(Some(Self::formatted(change, format)));
         }
 
+        // "81 is 9 to what power"
+        for tail in [&["to", "what", "power"][..], &["to", "the", "what", "power"][..]] {
+            if self.ends_with(tail)
+                && let Some(is) = self.find(0, &["is"])
+            {
+                let (a, b) = (self.part(0, is)?, self.part(is + 1, end - tail.len())?);
+                return Ok(Some(Expr::Call(crate::ast::Func::Log, vec![a, b])));
+            }
+        }
+
         // "3/20 is what %"
         if self.ends_with(&["is", "what", "%"]) {
             let a = self.part(0, end - 3)?;
@@ -154,6 +167,26 @@ impl Parser<'_> {
             per_year,
             result,
         }))
+    }
+
+    /// "time in Tokyo when it is 9am in London".
+    fn when_it_is(&self) -> Result<Option<Expr>> {
+        let (at, len) = match (self.find(1, &["when", "it", "is"]), self.find(1, &["when", "it's"])) {
+            (Some(at), _) => (at, 3),
+            (None, Some(at)) => (at, 2),
+            _ => return Ok(None),
+        };
+        let moment = match self.part(at + len, self.toks.len())? {
+            // "9am in London" places the clock in London.
+            Expr::Convert(inner, Target::Zone(zone)) => Expr::InZone(inner, zone),
+            other => other,
+        };
+        match self.part(0, at)? {
+            Expr::Convert(inner, target) if matches!(*inner, Expr::Time(TimeExpr::Now)) => {
+                Ok(Some(Expr::Convert(moment.boxed(), target)))
+            }
+            _ => Ok(None),
+        }
     }
 
     fn find_sym(&self, from: usize, sym: &str) -> Option<usize> {

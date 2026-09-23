@@ -655,9 +655,10 @@ impl<'a> Parser<'a> {
 
     /// A time amount starts at token `i`: "2 hours", "a year".
     fn duration_at(&self, i: usize) -> bool {
-        let amount = self.toks.get(i).is_some_and(|t| {
-            matches!(t.tok, Tok::Num(_)) || ["a", "an", "one"].iter().any(|w| t.is_word(w))
-        });
+        let amount = self
+            .toks
+            .get(i)
+            .is_some_and(|t| matches!(t.tok, Tok::Num(_)) || ["a", "an", "one"].iter().any(|w| t.is_word(w)));
         amount && self.unit_at(i + 1, true).is_some_and(|(u, _)| u.dim() == crate::units::Dim::TIME)
     }
 

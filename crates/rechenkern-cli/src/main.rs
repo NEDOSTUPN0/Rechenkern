@@ -13,6 +13,7 @@ use rustyline::error::ReadlineError;
 #[command(name = "rechenkern", version, about = "Natural language calculator: `rechenkern 10 usd to eur`")]
 struct Args {
     /// Expression to calculate. Without it, reads lines from stdin or starts a prompt.
+    #[arg(allow_hyphen_values = true)]
     expression: Vec<String>,
     /// Calculate every line of a file.
     #[arg(short, long)]

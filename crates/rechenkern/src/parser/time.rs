@@ -345,6 +345,15 @@ impl Parser<'_> {
         if w == "time" && self.at_word("difference") {
             self.pos += 1;
         }
+        // "time to upload 3GB at 10 MB/s" is just the division.
+        let verbs = ["upload", "download", "transfer", "copy", "send"];
+        if w == "time"
+            && self.toks.get(self.pos).is_some_and(|t| t.is_word("to"))
+            && verbs.iter().any(|v| self.words_at(self.pos + 1, &[v]))
+        {
+            self.pos += 2;
+            return self.additive().map(Some);
+        }
         if w == "difference" || self.toks[self.pos - 1].is_word("difference") {
             self.eat_word("between");
             return self.difference().map(Some);

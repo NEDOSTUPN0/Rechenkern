@@ -111,6 +111,13 @@ fn fraction(n: Number, config: &Config) -> String {
     if n.is_integer() {
         return number(n, config);
     }
+    if let Some(d) = n.as_decimal().map(|d| d.normalize())
+        && d.scale() <= 6
+    {
+        let (num, den) = (d.mantissa().unsigned_abs(), 10u128.pow(d.scale()));
+        let g = gcd(num, den);
+        return format!("{}{}/{}", if n.is_negative() { "-" } else { "" }, num / g, den / g);
+    }
     let x = n.abs().to_f64();
     let (mut h0, mut h1, mut k0, mut k1) = (0i64, 1i64, 1i64, 0i64);
     let mut rest = x;
@@ -130,6 +137,10 @@ fn fraction(n: Number, config: &Config) -> String {
         return number(n, config);
     }
     format!("{}{h1}/{k1}", if n.is_negative() { "-" } else { "" })
+}
+
+fn gcd(a: u128, b: u128) -> u128 {
+    if b == 0 { a } else { gcd(b, a % b) }
 }
 
 fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
@@ -262,6 +273,9 @@ fn parts(q: &Quantity, units: &[Unit], config: &Config) -> String {
             }
         }
         let count = if i + 1 == units.len() { count.round_dp(2) } else { count };
+        if count.is_zero() && !out.is_empty() {
+            continue;
+        }
         out.push(with_unit(&number(count, config), count, u));
     }
     format!("{}{}", if negative { "-" } else { "" }, out.join(" "))

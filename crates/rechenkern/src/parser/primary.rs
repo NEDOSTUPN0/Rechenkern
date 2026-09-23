@@ -61,6 +61,11 @@ impl Parser<'_> {
             return Ok(clock);
         }
         let value = self.multipliers(n, false);
+        // "1.5x" is a plain multiplier.
+        if self.cur().is_some_and(|t| t.word() == Some("x") && !t.space_before) && !self.operand_follows(1) {
+            self.pos += 1;
+            return Ok(Expr::Number(value));
+        }
         self.quantity(Expr::Number(value))
     }
 
