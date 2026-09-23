@@ -653,7 +653,7 @@ dependencies = [
 
 [[package]]
 name = "rechenkern"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "jiff",
  "rust_decimal",
@@ -663,7 +663,7 @@ dependencies = [
 
 [[package]]
 name = "rechenkern-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap",
  "dirs",
