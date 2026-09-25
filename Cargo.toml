@@ -7,3 +7,7 @@ version = "0.1.1"
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/NEDOSTUPN0/Rechenkern"
+
+[profile.release]
+lto = true
+codegen-units = 1

@@ -1,7 +1,9 @@
 //! Settings that change how lines are read and answers are written.
 
-use jiff::Zoned;
+use std::cell::OnceCell;
+
 use jiff::tz::TimeZone;
+use jiff::{Timestamp, Zoned};
 
 /// How to read ambiguous numeric dates like `03/04/2026`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -66,7 +68,23 @@ impl Config {
     pub fn now(&self) -> Zoned {
         match &self.now {
             Some(now) => now.with_time_zone(self.local_zone()),
-            None => Zoned::now().with_time_zone(self.local_zone()),
+            None => Timestamp::now().to_zoned(self.local_zone()),
         }
+    }
+}
+
+/// The current time for one line: read on first use, then fixed.
+pub(crate) struct Now<'a> {
+    config: &'a Config,
+    time: OnceCell<Zoned>,
+}
+
+impl<'a> Now<'a> {
+    pub fn new(config: &'a Config) -> Now<'a> {
+        Now { config, time: OnceCell::new() }
+    }
+
+    pub fn get(&self) -> &Zoned {
+        self.time.get_or_init(|| self.config.now())
     }
 }

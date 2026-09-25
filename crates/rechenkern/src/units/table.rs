@@ -1,11 +1,10 @@
 //! Built-in unit definitions and the registry builder.
 
-use std::collections::HashMap;
-
 use jiff::Unit as Cal;
 
 use super::{Dim, Registry, Unit, UnitDef, UnitId};
 use crate::currency::{AMBIGUOUS_CODES, CURRENCIES};
+use crate::hash::TableMap;
 use crate::number::Number;
 
 struct Prefix {
@@ -362,11 +361,10 @@ const EXTRA: &[(&str, &str)] = &[
     ("cals", "cal"),
 ];
 
-#[derive(Default)]
 struct Builder {
     defs: Vec<UnitDef>,
-    exact: HashMap<String, Unit>,
-    folded: HashMap<String, Unit>,
+    exact: TableMap<String, Unit>,
+    folded: TableMap<String, Unit>,
 }
 
 impl Builder {
@@ -400,7 +398,12 @@ impl Builder {
 }
 
 pub(super) fn build() -> Registry {
-    let mut b = Builder::default();
+    // Room for every spelling up front, so the tables never grow while filling.
+    let mut b = Builder {
+        defs: Vec::with_capacity(512),
+        exact: TableMap::with_capacity_and_hasher(1024, Default::default()),
+        folded: TableMap::with_capacity_and_hasher(2048, Default::default()),
+    };
     let defs = definitions();
 
     let mut ids = Vec::new();
@@ -492,12 +495,13 @@ pub(super) fn build() -> Registry {
         }
     }
 
-    let max_words = b.folded.keys().chain(b.exact.keys()).map(|k| k.split(' ').count()).max().unwrap_or(1);
+    let max_words =
+        b.folded.keys().chain(b.exact.keys()).map(|k| k.bytes().filter(|&b| b == b' ').count() + 1).max().unwrap_or(1);
     Registry { defs: b.defs, exact: b.exact, folded: b.folded, compound_symbols, max_words }
 }
 
 /// Parses definitions like "km/h", "W*h" or "m^2" made of exact symbols.
-fn parse_compound(exact: &HashMap<String, Unit>, text: &str) -> Unit {
+fn parse_compound(exact: &TableMap<String, Unit>, text: &str) -> Unit {
     let (num, den) = text.split_once('/').unwrap_or((text, ""));
     let mut factors = Vec::new();
     for (part, sign) in [(num, 1), (den, -1)] {

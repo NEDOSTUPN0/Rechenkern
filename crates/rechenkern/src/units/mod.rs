@@ -3,12 +3,12 @@
 mod dim;
 mod table;
 
-use std::collections::HashMap;
 use std::sync::LazyLock;
 
 pub use dim::Dim;
 
 use crate::currency::Currency;
+use crate::hash::TableMap;
 use crate::number::Number;
 
 /// Index of a [`UnitDef`] in the registry.
@@ -168,9 +168,9 @@ impl std::fmt::Display for Unit {
 pub struct Registry {
     defs: Vec<UnitDef>,
     /// Case-sensitive symbols like "MB" or "°C".
-    exact: HashMap<String, Unit>,
+    exact: TableMap<String, Unit>,
     /// Lowercase names like "kilometers" or "light year".
-    folded: HashMap<String, Unit>,
+    folded: TableMap<String, Unit>,
     /// Preferred symbols for compound units, e.g. `mi/h` is shown as "mph".
     compound_symbols: Vec<(Vec<(UnitId, i8)>, String)>,
     /// Longest multi-word name, in words.

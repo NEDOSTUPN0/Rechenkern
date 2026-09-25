@@ -329,7 +329,7 @@ impl Parser<'_> {
         {
             return Ok(Some(expr));
         }
-        if let Some((holiday, n)) = self.phrase_at(self.pos, words::HOLIDAYS) {
+        if let Some((holiday, n)) = self.phrase_at(self.pos, &words::HOLIDAYS) {
             self.pos += n;
             let year = self.year().map(|y| y as i16);
             return Ok(Some(Expr::Time(TimeExpr::Holiday { holiday, year })));
@@ -349,16 +349,22 @@ impl Parser<'_> {
 
     /// An event name at token `i`, such as `GTA 6`.
     pub(super) fn event_at(&self, i: usize) -> Option<(&'static words::Event, usize)> {
-        let text = |k: usize| match &self.toks.get(k)?.tok {
-            Tok::Word(w) => Some(w.to_lowercase()),
-            Tok::Num(n) if n.is_integer() => Some(n.to_string()),
-            _ => None,
+        // Names are lowercase; numbers in them are whole.
+        let spells = |k: usize, part: &str| match self.toks.get(k).map(|t| &t.tok) {
+            Some(Tok::Word(w)) => w.chars().flat_map(char::to_lowercase).eq(part.chars()),
+            Some(Tok::Num(n)) => n.is_integer() && n.to_string() == part,
+            _ => false,
         };
         words::EVENTS.iter().find_map(|event| {
             event.names.iter().find_map(|name| {
-                let n = name.split(' ').count();
-                let typed: Option<Vec<String>> = (i..i + n).map(text).collect();
-                (typed?.join(" ") == *name).then_some((event, n))
+                let mut n = 0;
+                for part in name.split(' ') {
+                    if !spells(i + n, part) {
+                        return None;
+                    }
+                    n += 1;
+                }
+                Some((event, n))
             })
         })
     }
@@ -499,7 +505,7 @@ impl Parser<'_> {
                     "now" | "today" | "tomorrow" | "yesterday" | "next" | "last" | "this" | "noon" | "midnight"
                 ) || words::month(&w).is_some()
                     || words::weekday(&w).is_some()
-                    || p.phrase_at(p.pos, words::HOLIDAYS).is_some()
+                    || p.phrase_at(p.pos, &words::HOLIDAYS).is_some()
                     || p.event_at(p.pos).is_some()
                     || p.var_at(p.pos).is_some()
             }

@@ -18,6 +18,7 @@ pub mod currency;
 mod error;
 mod eval;
 mod format;
+mod hash;
 mod lexer;
 mod number;
 #[cfg(feature = "online")]

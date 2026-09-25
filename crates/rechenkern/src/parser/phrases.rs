@@ -16,6 +16,10 @@ impl Parser<'_> {
         if let Some(expr) = self.when_it_is()? {
             return Ok(Some(expr));
         }
+        // Every phrase below has one of these words.
+        if !self.toks.iter().any(|t| ["is", "as", "what"].iter().any(|w| t.is_word(w))) {
+            return Ok(None);
+        }
         let end = self.toks.len();
         let one = || Expr::Number(Number::ONE);
         let pct = |e: Expr| Self::formatted(e, Format::Percent);
@@ -130,6 +134,10 @@ impl Parser<'_> {
     /// "$1,000 after 3 years at 7%", "interest on $500 for 2 years @ 5% compounding monthly",
     /// "present value of $1,000 after 20 years at 10%".
     fn growth(&self) -> Result<Option<Expr>> {
+        // A rate is always given in percent.
+        if !(0..self.toks.len()).any(|i| self.matches_at(i, &["%"])) {
+            return Ok(None);
+        }
         let (result, start) = if self.matches_at(0, &["interest", "on"]) {
             (GrowthResult::Interest, 2)
         } else if self.matches_at(0, &["present", "value", "of"]) {
@@ -221,11 +229,7 @@ impl Parser<'_> {
         seq.iter().enumerate().all(|(k, s)| {
             let Some(t) = self.toks.get(i + k) else { return false };
             match *s {
-                "%" => {
-                    t.is_sym("%")
-                        || t.word()
-                            .is_some_and(|w| matches!(w.to_lowercase().as_str(), "percent" | "percentage" | "pct"))
-                }
+                "%" => t.is_sym("%") || ["percent", "percentage", "pct"].iter().any(|w| t.is_word(w)),
                 w => t.is_word(w),
             }
         })

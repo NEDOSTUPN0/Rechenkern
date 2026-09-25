@@ -17,6 +17,9 @@ language calculator engine in the spirit of SoulverCore.
   and fixed exchange rates. Every new phrase or fix gets a case there.
 - Try things by hand: `cargo run -q -- "10 usd to eur"`, pipe a file into
   `cargo run -q -- -a` for sheet mode.
+- `nix develop -c cargo bench` times every line of `benches/lines.txt` and the
+  sheet `benches/sheet.txt`; `benches/soulver.swift` times SoulverCore on the
+  same input. Check it after touching the parser.
 
 ## Layout
 
@@ -117,9 +120,25 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   searched in place with a binary search, so it costs nothing at startup.
   English-word names of small towns are dropped there so they don't clash
   with normal text; add important ones to `places.txt` by hand.
+- IANA city names come from jiff's bundled zone list (the same names as the
+  system tzdb, without opening every zone file); the zones themselves still
+  load from the system tzdb.
 - `in`/`to` + unknown words after a date or time is an error ("unknown place"),
   with a "did you mean" hint by edit distance. After `to` only a clock time
   counts, so "time to go" is not a place.
+
+## Performance
+
+A line takes about 2 µs, so keep new work off the hot path:
+
+- `significant()` and `place_at()` are remembered per token (`TokenMemo`).
+  Clones share the memo; `sub()` parsers get a new one, since look-ahead
+  depends on where the slice ends.
+- Phrase tables are `words::Phrases`, looked up by their first word.
+- Built-in lookup tables use `hash::TableMap` (Fx hash), not the default
+  hasher. User data (variables, rates) keeps the default.
+- The current time is read lazily per line (`config::Now`), so lines without
+  dates never touch the time zone database.
 
 ## Conventions
 

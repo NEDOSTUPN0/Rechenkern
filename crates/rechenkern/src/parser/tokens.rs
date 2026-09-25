@@ -71,21 +71,49 @@ impl<'a> Parser<'a> {
         words.iter().enumerate().all(|(k, w)| self.toks.get(i + k).is_some_and(|t| t.is_word(w)))
     }
 
-    /// `n` consecutive words from `i`, joined by spaces.
-    pub(super) fn join_words(&self, i: usize, n: usize) -> Option<String> {
-        let words: Option<Vec<&str>> = (i..i + n).map(|k| self.toks.get(k)?.word()).collect();
-        Some(words?.join(" "))
+    /// Up to `max` consecutive words from `i`, joined by spaces (lowercase if
+    /// asked), and where each word ends in the text.
+    pub(super) fn joined_words(&self, i: usize, max: usize, lowercase: bool) -> (String, Vec<usize>) {
+        let (mut text, mut ends) = (String::new(), Vec::new());
+        for word in self.toks.iter().skip(i).take(max).map_while(Token::word) {
+            if !text.is_empty() {
+                text.push(' ');
+            }
+            if lowercase {
+                text.push_str(&word.to_lowercase());
+            } else {
+                text.push_str(word);
+            }
+            ends.push(text.len());
+        }
+        (text, ends)
+    }
+
+    /// Length in words of `phrase` if the tokens from `i` spell it.
+    fn phrase_len_at(&self, i: usize, phrase: &str) -> Option<usize> {
+        let (mut rest, mut n) = (phrase, 0);
+        loop {
+            let word = self.toks.get(i + n)?.word()?;
+            if !rest.get(..word.len())?.eq_ignore_ascii_case(word) {
+                return None;
+            }
+            n += 1;
+            rest = &rest[word.len()..];
+            if rest.is_empty() {
+                return Some(n);
+            }
+            rest = rest.strip_prefix(' ')?;
+        }
     }
 
     /// Longest phrase from `table` starting at token `i`.
-    pub(super) fn phrase_at<T: Copy>(&self, i: usize, table: &[(&str, T)]) -> Option<(T, usize)> {
+    pub(super) fn phrase_at<T: Copy>(&self, i: usize, table: &words::Phrases<T>) -> Option<(T, usize)> {
+        let first = self.toks.get(i)?.word()?;
         let mut best: Option<(T, usize)> = None;
-        for &(phrase, value) in table {
-            let n = phrase.split(' ').count();
-            if best.is_some_and(|(_, m)| m >= n) {
-                continue;
-            }
-            if self.join_words(i, n).is_some_and(|w| w.eq_ignore_ascii_case(phrase)) {
+        for &(phrase, value) in table.starting_with(first) {
+            if let Some(n) = self.phrase_len_at(i, phrase)
+                && best.is_none_or(|(_, m)| n > m)
+            {
                 best = Some((value, n));
             }
         }
@@ -94,6 +122,15 @@ impl<'a> Parser<'a> {
 
     /// Whether the token at `i` is a word worth parsing.
     pub(super) fn significant(&self, i: usize) -> bool {
+        let Some(memo) = self.memo.get(i) else { return false };
+        memo.significant.get().unwrap_or_else(|| {
+            let significant = self.find_significance(i);
+            memo.significant.set(Some(significant));
+            significant
+        })
+    }
+
+    fn find_significance(&self, i: usize) -> bool {
         let Some(tok) = self.toks.get(i) else { return false };
         let Some(word) = tok.word() else { return true };
         let w = word.to_lowercase();
@@ -111,11 +148,11 @@ impl<'a> Parser<'a> {
             || words::month(w).is_some()
             || words::weekday(w).is_some()
             || words::is_line_word(w)
-            || self.phrase_at(i, words::FUNCTIONS).is_some()
-            || self.phrase_at(i, words::HOLIDAYS).is_some()
+            || self.phrase_at(i, &words::FUNCTIONS).is_some()
+            || self.phrase_at(i, &words::HOLIDAYS).is_some()
             || self.event_at(i).is_some()
-            || self.phrase_at(i, words::DATE_PARTS).is_some()
-            || self.phrase_at(i, words::PHYSICAL_CONSTANTS).is_some()
+            || self.phrase_at(i, &words::DATE_PARTS).is_some()
+            || self.phrase_at(i, &words::PHYSICAL_CONSTANTS).is_some()
             || self.unit_at(i, false).is_some()
             || self.var_at(i).is_some()
             || self.place_time_at(i).is_some()
@@ -143,12 +180,12 @@ impl<'a> Parser<'a> {
         }
         // "min(" is a function.
         if self.toks.get(i + 1).is_some_and(|t| t.is_sym("(") && !t.space_before)
-            && self.phrase_at(i, words::FUNCTIONS).is_some()
+            && self.phrase_at(i, &words::FUNCTIONS).is_some()
         {
             return None;
         }
-        let max = registry().max_words();
-        (1..=max).rev().find_map(|n| Some((registry().lookup(&self.join_words(i, n)?)?, n)))
+        let (text, ends) = self.joined_words(i, registry().max_words(), false);
+        (1..=ends.len()).rev().find_map(|n| Some((registry().lookup(&text[..ends[n - 1]])?, n)))
     }
 
     pub(super) fn dollar(&self) -> Unit {
@@ -157,16 +194,32 @@ impl<'a> Parser<'a> {
 
     /// A variable name made of the words at `i`.
     pub(super) fn var_at(&self, i: usize) -> Option<(String, usize)> {
-        (1..=6).rev().find_map(|n| {
-            let name = self.join_words(i, n)?.to_lowercase();
-            (self.scope.is_var)(&name).then_some((name, n))
+        let (text, ends) = self.joined_words(i, 6, true);
+        (1..=ends.len()).rev().find_map(|n| {
+            let name = &text[..ends[n - 1]];
+            (self.scope.is_var)(name).then(|| (name.to_string(), n))
         })
     }
 
     /// A place name at token `i`; words may be joined by hyphens: "Aix-en-Provence".
     pub(super) fn place_at(&self, i: usize) -> Option<(TimeZone, usize)> {
+        match self.memo.get(i) {
+            Some(memo) => memo.place.get_or_init(|| self.find_place(i)).clone(),
+            None => self.find_place(i),
+        }
+    }
+
+    fn find_place(&self, i: usize) -> Option<(TimeZone, usize)> {
         let (words, ends) = self.name_words(i);
-        (1..=words.len()).rev().find_map(|n| Some((zones::find(&words[..n].join(" "))?, ends[n - 1] - i)))
+        let text = words.join(" ");
+        let mut cut = text.len();
+        for n in (1..=words.len()).rev() {
+            if let Some(zone) = zones::find(&text[..cut]) {
+                return Some((zone, ends[n - 1] - i));
+            }
+            cut = cut.saturating_sub(words[n - 1].len() + 1);
+        }
+        None
     }
 
     /// Up to `MAX_WORDS` lowercase words from token `i`, and the token index after each.
@@ -279,7 +332,7 @@ impl<'a> Parser<'a> {
         words::constant(&w).is_some()
             || self.var_at(self.pos).is_some()
             || (self
-                .phrase_at(self.pos, words::FUNCTIONS)
+                .phrase_at(self.pos, &words::FUNCTIONS)
                 .is_some_and(|(f, _)| !matches!(f, Func::Sum | Func::Average | Func::Count))
                 && self.toks.get(self.pos + 1).is_some_and(|t| t.is_sym("(")))
     }

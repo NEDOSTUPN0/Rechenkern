@@ -19,3 +19,7 @@ ureq = { version = "3.4.2", optional = true }
 default = []
 # Fetch exchange rates over HTTP with an on-disk cache.
 online = ["dep:ureq", "dep:serde_json"]
+
+[[bench]]
+name = "calculate"
+harness = false

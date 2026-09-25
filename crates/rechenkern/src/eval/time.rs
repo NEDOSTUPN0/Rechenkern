@@ -155,11 +155,11 @@ fn days(n: i64) -> Span {
 
 impl Env<'_> {
     fn today(&self) -> Date {
-        self.now.date()
+        self.now.get().date()
     }
 
     fn local_zone(&self) -> TimeZone {
-        self.now.time_zone().clone()
+        self.now.get().time_zone().clone()
     }
 
     fn date_moment(&self, date: Date) -> Result<Moment> {
@@ -170,7 +170,7 @@ impl Env<'_> {
         let today = self.today();
         match t {
             TimeExpr::Now => {
-                Ok(Moment { time: self.now.clone(), kind: MomentKind::Clock, zoned: false, seconds: false })
+                Ok(Moment { time: self.now.get().clone(), kind: MomentKind::Clock, zoned: false, seconds: false })
             }
             TimeExpr::Today(offset) => self.date_moment(today.checked_add(days(*offset))?),
             TimeExpr::Date { year: Some(y), month, day } => self.date_moment(Date::new(*y, *month, *day)?),
@@ -254,7 +254,7 @@ impl Env<'_> {
         if m.kind == MomentKind::Date {
             // "date in Vancouver" is today's date over there.
             let date = if m.time.date() == self.today() {
-                self.now.with_time_zone(zone.clone()).date()
+                self.now.get().with_time_zone(zone.clone()).date()
             } else {
                 m.time.date()
             };
@@ -272,7 +272,7 @@ impl Env<'_> {
 
     /// Difference between two zones' UTC offsets right now.
     pub(super) fn zone_difference(&self, a: &TimeZone, b: &TimeZone) -> Result<Value> {
-        let now = self.now.timestamp();
+        let now = self.now.get().timestamp();
         let seconds = b.to_offset(now).seconds() - a.to_offset(now).seconds();
         Ok(Value::Duration(Duration::new(balance(Number::from_i64(seconds as i64), Cal::Hour)?)))
     }

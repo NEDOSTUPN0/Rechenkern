@@ -239,7 +239,7 @@ impl Parser<'_> {
             let b = self.unary()?;
             return Ok(Some(Expr::binary(Op::Mod, a, b)));
         }
-        if let Some((func, n)) = self.phrase_at(i, words::FUNCTIONS) {
+        if let Some((func, n)) = self.phrase_at(i, &words::FUNCTIONS) {
             return self.call(func, n);
         }
         if matches!(w, "true" | "false") {
@@ -392,7 +392,7 @@ impl Parser<'_> {
 
     /// "speed of light", "standard gravity".
     fn physical_constant(&self, i: usize) -> Option<(Expr, usize)> {
-        let (index, n) = self.phrase_at(i, words::PHYSICAL_CONSTANTS)?;
+        let (index, n) = self.phrase_at(i, &words::PHYSICAL_CONSTANTS)?;
         let (value, per_second) = match index {
             0 => ("299792458", 1),
             1 => ("343", 1),
@@ -409,7 +409,7 @@ impl Parser<'_> {
 
     /// "week of year", "day of the week on March 9", "weekday on 2024-03-09".
     fn date_part(&mut self) -> Result<Option<Expr>> {
-        let Some((format, n)) = self.phrase_at(self.pos, words::DATE_PARTS) else { return Ok(None) };
+        let Some((format, n)) = self.phrase_at(self.pos, &words::DATE_PARTS) else { return Ok(None) };
         self.pos += n;
         let date = if self.eat_word("on") || self.eat_word("of") || self.eat_word("for") {
             self.additive()?

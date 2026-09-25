@@ -1,0 +1,31 @@
+# Trip budget
+flights = $1,240
+hotel = $145 * 6
+food = $45 * 7
+museum tickets = 4 * €18
+transport = $120 + 15%
+insurance = 3% of flights
+total = flights + hotel + food + museum tickets + transport + insurance
+each = total / 3
+savings = $2,000
+savings - each
+
+# Salary
+hourly rate = $38.50
+hours = 37.5 * 52
+gross = hourly rate * hours
+tax = 22% of gross
+net = gross - tax
+net / 12
+
+# Running
+distance = 42.195 km
+pace = 5 min
+distance in miles
+distance / 1 km * pace
+
+# Loan
+loan = $25,000
+rate = 6.5%
+loan * rate
+loan / 60

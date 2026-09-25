@@ -10,6 +10,11 @@ mod time;
 mod tokens;
 mod words;
 
+use std::cell::{Cell, OnceCell};
+use std::rc::Rc;
+
+use jiff::tz::TimeZone;
+
 use crate::ast::{Expr, Func, Op, Stmt, TimeExpr};
 use crate::config::Config;
 use crate::error::{Result, bail};
@@ -37,16 +42,26 @@ pub(crate) struct Parser<'a> {
     scope: &'a Scope<'a>,
     /// Inside a list or `between`, "and" separates items instead of adding.
     in_list: bool,
+    /// Lookups remembered per token, shared by clones over the same tokens.
+    memo: Rc<[TokenMemo]>,
+}
+
+/// Answers about one token that don't change while parsing a line.
+#[derive(Default)]
+struct TokenMemo {
+    significant: Cell<Option<bool>>,
+    place: OnceCell<Option<(TimeZone, usize)>>,
 }
 
 impl<'a> Parser<'a> {
     fn new(src: &'a str, toks: &'a [Token], scope: &'a Scope<'a>) -> Parser<'a> {
-        Parser { src, toks, pos: 0, scope, in_list: false }
+        let memo = toks.iter().map(|_| TokenMemo::default()).collect();
+        Parser { src, toks, pos: 0, scope, in_list: false, memo }
     }
 
     /// A parser over part of the tokens.
     fn sub(&self, from: usize, to: usize) -> Parser<'a> {
-        Parser { toks: &self.toks[from..to], pos: 0, in_list: false, ..self.clone() }
+        Parser::new(self.src, &self.toks[from..to], self.scope)
     }
 
     fn config(&self) -> &Config {

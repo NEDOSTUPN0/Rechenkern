@@ -1,10 +1,11 @@
 //! Time zones by place name, abbreviation or UTC offset.
 
-use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use jiff::Zoned;
 use jiff::tz::{Offset, TimeZone};
+
+use crate::hash::TableMap;
 
 const PLACES: &str = include_str!("places.txt");
 /// About 57k city names from GeoNames, sorted for binary search.
@@ -27,15 +28,17 @@ const SKIPPED_PREFIXES: &[&str] = &[
 ];
 
 /// Lowercase place name -> IANA zone id.
-static INDEX: LazyLock<HashMap<String, String>> = LazyLock::new(|| {
-    let mut index = HashMap::new();
+static INDEX: LazyLock<TableMap<String, String>> = LazyLock::new(|| {
+    let mut index = TableMap::default();
     for line in PLACES.lines().map(str::trim).filter(|l| !l.is_empty() && !l.starts_with('#')) {
         if let Some((name, zone)) = line.split_once('=') {
             index.insert(name.trim().to_string(), zone.trim().to_string());
         }
     }
-    // Cities from the zone database itself: "Asia/Almaty" -> "almaty".
-    for id in jiff::tz::db().available() {
+    // Cities from the zone database itself: "Asia/Almaty" -> "almaty". The
+    // bundled copy lists the same names as the system one without opening
+    // every zone file; `find` checks that the system has the zone.
+    for id in jiff::tz::TimeZoneDatabase::bundled().available() {
         let id = id.as_str();
         if !id.contains('/') || SKIPPED_PREFIXES.iter().any(|p| id.starts_with(p)) {
             continue;
@@ -57,7 +60,19 @@ fn city_lines() -> &'static str {
 
 /// All cities as (name, zone id).
 fn cities() -> impl Iterator<Item = (&'static str, &'static str)> {
-    city_lines().lines().filter_map(|l| l.split_once('\t'))
+    // Scanning bytes is much faster here than `lines()` and `split_once()`.
+    let mut rest = city_lines();
+    std::iter::from_fn(move || {
+        while !rest.is_empty() {
+            let end = rest.bytes().position(|b| b == b'\n').unwrap_or(rest.len());
+            let line = &rest[..end];
+            rest = rest.get(end + 1..).unwrap_or_default();
+            if let Some(tab) = line.bytes().position(|b| b == b'\t') {
+                return Some((&line[..tab], &line[tab + 1..]));
+            }
+        }
+        None
+    })
 }
 
 /// Binary search right in the sorted text: no index to build at startup.
@@ -85,8 +100,8 @@ pub const MAX_WORDS: usize = 5;
 
 /// Finds a zone by lowercase place name or abbreviation, like "new york" or "pst".
 pub fn find(name: &str) -> Option<TimeZone> {
-    if let Some(id) = INDEX.get(name) {
-        return TimeZone::get(id).ok();
+    if let Some(zone) = INDEX.get(name).and_then(|id| TimeZone::get(id).ok()) {
+        return Some(zone);
     }
     // Full ids like "asia/tokyo" typed by the user.
     if name.contains('/') {
@@ -101,18 +116,25 @@ pub fn suggest(name: &str) -> Option<String> {
         return None;
     }
     let limit = if name.chars().count() <= 5 { 1 } else { 2 };
-    let known = INDEX.keys().map(String::as_str).chain(cities().map(|(city, _)| city));
-    let (best, distance) = known
-        .filter(|k| k.len().abs_diff(name.len()) <= limit)
-        .map(|k| (k, edit_distance(k, name)))
-        .min_by_key(|&(_, d)| d)?;
+    let target: Vec<char> = name.chars().collect();
+    let mut row = Vec::new();
+    let mut distance =
+        |k: &str| (k.len().abs_diff(name.len()) <= limit).then(|| edit_distance(k, &target, limit, &mut row));
+    // Listed places win ties over other cities, and ties among them go alphabetically.
+    let listed = INDEX.keys().filter_map(|k| Some((distance(k)?, k.as_str()))).min();
+    let city = cities().filter_map(|(city, _)| Some((distance(city)?, city))).min_by_key(|&(d, _)| d);
+    let (distance, best) = match (listed, city) {
+        (Some(listed), Some(city)) if city.0 < listed.0 => city,
+        (listed, city) => listed.or(city)?,
+    };
     (distance <= limit).then(|| title_case(best))
 }
 
-/// Levenshtein distance between two strings.
-fn edit_distance(a: &str, b: &str) -> usize {
-    let b: Vec<char> = b.chars().collect();
-    let mut row: Vec<usize> = (0..=b.len()).collect();
+/// Levenshtein distance from `a` to `b`, or anything above `limit` once it
+/// can't get back under it.
+fn edit_distance(a: &str, b: &[char], limit: usize, row: &mut Vec<usize>) -> usize {
+    row.clear();
+    row.extend(0..=b.len());
     for (i, ca) in a.chars().enumerate() {
         let mut diagonal = row[0];
         row[0] = i + 1;
@@ -120,6 +142,9 @@ fn edit_distance(a: &str, b: &str) -> usize {
             let substitution = diagonal + usize::from(ca != cb);
             diagonal = row[j + 1];
             row[j + 1] = substitution.min(row[j] + 1).min(diagonal + 1);
+        }
+        if row.iter().all(|&d| d > limit) {
+            return limit + 1;
         }
     }
     row[b.len()]

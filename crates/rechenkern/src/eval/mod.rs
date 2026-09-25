@@ -8,10 +8,8 @@ pub(crate) use time::get as span_field;
 
 use std::collections::HashMap;
 
-use jiff::Zoned;
-
 use crate::ast::{Direction, Expr, Format, GrowthResult, LineRef, Rounding, Target};
-use crate::config::Config;
+use crate::config::{Config, Now};
 use crate::error::{Error, Result, bail};
 use crate::format::unit_text;
 use crate::number::Number;
@@ -59,7 +57,7 @@ pub(crate) struct Line {
 /// Everything a calculation can see.
 pub(crate) struct Env<'a> {
     pub config: &'a Config,
-    pub now: Zoned,
+    pub now: Now<'a>,
     pub vars: &'a HashMap<String, Value>,
     pub lines: &'a [Line],
     pub rates: &'a Rates,

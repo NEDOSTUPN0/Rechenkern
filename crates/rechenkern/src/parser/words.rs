@@ -1,9 +1,43 @@
 //! Vocabulary: keywords, number words, functions, months and holidays.
 
+use std::borrow::Cow;
+use std::sync::OnceLock;
+
 use jiff::civil::Weekday;
 
 use crate::ast::{Format, Func, Holiday};
+use crate::hash::TableMap;
 use crate::number::Number;
+
+/// Phrases and what they mean, found by their first word.
+pub struct Phrases<T: 'static> {
+    entries: &'static [(&'static str, T)],
+    /// Lowercase first word -> positions in `entries`, in table order.
+    by_first_word: OnceLock<TableMap<String, Vec<usize>>>,
+}
+
+impl<T> Phrases<T> {
+    pub const fn new(entries: &'static [(&'static str, T)]) -> Phrases<T> {
+        Phrases { entries, by_first_word: OnceLock::new() }
+    }
+
+    /// Entries whose first word is `word` (ASCII case ignored), in table order.
+    pub fn starting_with(&self, word: &str) -> impl Iterator<Item = &(&'static str, T)> {
+        let index = self.by_first_word.get_or_init(|| {
+            let mut index: TableMap<String, Vec<usize>> = TableMap::default();
+            for (k, (phrase, _)) in self.entries.iter().enumerate() {
+                let first = phrase.split(' ').next().unwrap_or(phrase);
+                index.entry(first.to_ascii_lowercase()).or_default().push(k);
+            }
+            index
+        });
+        let key = match word.bytes().any(|b| b.is_ascii_uppercase()) {
+            true => Cow::Owned(word.to_ascii_lowercase()),
+            false => Cow::Borrowed(word),
+        };
+        index.get(key.as_ref()).into_iter().flatten().map(|&k| &self.entries[k])
+    }
+}
 
 /// Words the expression parser acts on. Anything unknown is ignored as a comment.
 #[rustfmt::skip]
@@ -108,16 +142,16 @@ pub fn constant(w: &str) -> Option<Number> {
 }
 
 /// Named physical constants; the number indexes values in the parser.
-pub const PHYSICAL_CONSTANTS: &[(&str, usize)] = &[
+pub static PHYSICAL_CONSTANTS: Phrases<usize> = Phrases::new(&[
     ("speed of light", 0),
     ("speed of sound", 1),
     ("standard gravity", 2),
     ("earth gravity", 2),
     ("avogadro's number", 3),
     ("avogadro constant", 3),
-];
+]);
 
-pub const FUNCTIONS: &[(&str, Func)] = &[
+pub static FUNCTIONS: Phrases<Func> = Phrases::new(&[
     ("sqrt", Func::Sqrt),
     ("square root", Func::Sqrt),
     ("cbrt", Func::Cbrt),
@@ -198,9 +232,9 @@ pub const FUNCTIONS: &[(&str, Func)] = &[
     ("bin", Func::Bin),
     ("oct", Func::Oct),
     ("int", Func::Int),
-];
+]);
 
-pub const FORMATS: &[(&str, Format)] = &[
+pub static FORMATS: Phrases<Format> = Phrases::new(&[
     ("hex", Format::Hex),
     ("hexadecimal", Format::Hex),
     ("base 16", Format::Hex),
@@ -242,10 +276,10 @@ pub const FORMATS: &[(&str, Format)] = &[
     ("day of the week", Format::Weekday),
     ("day of week", Format::Weekday),
     ("weekday", Format::Weekday),
-];
+]);
 
 /// Questions about a date: "week of year", "weekday on March 9".
-pub const DATE_PARTS: &[(&str, Format)] = &[
+pub static DATE_PARTS: Phrases<Format> = Phrases::new(&[
     ("week of year", Format::WeekNumber),
     ("week of the year", Format::WeekNumber),
     ("week number", Format::WeekNumber),
@@ -257,9 +291,9 @@ pub const DATE_PARTS: &[(&str, Format)] = &[
     ("day of week", Format::Weekday),
     ("day of the week", Format::Weekday),
     ("weekday", Format::Weekday),
-];
+]);
 
-pub const HOLIDAYS: &[(&str, Holiday)] = &[
+pub static HOLIDAYS: Phrases<Holiday> = Phrases::new(&[
     ("new year's eve", Holiday::NewYearsEve),
     ("new years eve", Holiday::NewYearsEve),
     ("new year's day", Holiday::NewYear),
@@ -285,7 +319,7 @@ pub const HOLIDAYS: &[(&str, Holiday)] = &[
     ("xmas", Holiday::Christmas),
     ("boxing day", Holiday::BoxingDay),
     ("orthodox christmas", Holiday::OrthodoxChristmas),
-];
+]);
 
 /// An event with a known date.
 pub struct Event {

@@ -1,0 +1,63 @@
+// Lines that Rechenkern and SoulverCore both understand the same way.
+2 + 3 * 4
+(2 + 3) * 4
+2^10
+10 / 4
+1/3
+sqrt(16)
+cube root of 27
+fact(5)
+3 million
+half of 175
+sin(90 degrees)
+log(1000)
+average of 36, 42, 19 and 81
+20% of 50
+200 + 10%
+10% off 200
+20 is what % of 200
+50 to 75 is what %
+$10 for lunch + 15% tip
+5 km in miles
+100 pounds in kg
+65 kg in pounds
+60 mph in km/h
+100 °F in °C
+1 GB in MB
+3 hours 30 minutes in minutes
+12.5 minutes in minutes and seconds
+180 cm in feet and inches
+10m × 10m
+1 acre in m2
+100 km / 50 km/h
+5 m/s in km/h
+10 usd to eur
+$5k in eur
+$200 + €200
+£8 in yen
+$25/hour * 14 hours
+$24 a day for a year
+$19 for breakfast + $22 for the uber
+I spent $128 + $45 on clothes
+$1,000 after 3 years at 7%
+interest on $1,000 after 3 years @ 7%
+today + 3 weeks
+tomorrow
+next friday
+days until christmas
+3 weeks after March 14, 2019
+April 1, 2019 - 3 months 5 days
+days between 3 March and 30 May
+1559740303 to date
+7:30am to 8:45pm
+3:45pm + 4 hr 10 min
+time in tokyo
+3pm tokyo in london
+6pm Sydney in Chicago
+9:35am in New York to Japan
+255 in hex
+0xFF + 1
+99 in binary
+1/3 to 2 dp
+37 to nearest 10
+0.35 as %

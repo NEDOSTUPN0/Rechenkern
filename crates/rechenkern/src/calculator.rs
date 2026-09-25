@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::fmt;
 
 use crate::ast::{Expr, LineRef, Stmt};
-use crate::config::Config;
+use crate::config::{Config, Now};
 use crate::error::Result;
 use crate::eval::{Env, Line, LineKind};
 use crate::format;
@@ -147,7 +147,7 @@ impl Calculator {
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
         let env = Env {
             config: &self.config,
-            now: self.config.now(),
+            now: Now::new(&self.config),
             vars: &self.vars,
             lines: &self.lines,
             rates: &self.rates,

@@ -2,7 +2,7 @@
 
 use jiff::Zoned;
 
-use crate::config::Config;
+use crate::config::{Config, Now};
 use crate::currency::Currency;
 use crate::error::{Result, bail};
 use crate::eval::Display;
@@ -11,7 +11,7 @@ use crate::units::{Unit, UnitId, registry};
 use crate::value::{Duration, Moment, MomentKind, Quantity, Value};
 use crate::zones;
 
-pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &Zoned) -> String {
+pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &Now) -> String {
     if let Display::Note(note) = display {
         return format!("{} ({note})", render(value, &Display::Auto, config, now));
     }
@@ -22,7 +22,7 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &Zo
     match value {
         Value::Quantity(q) => quantity(q, display, config),
         Value::Percent(p) => format!("{}%", number(*p, config)),
-        Value::Moment(m) => moment(m, config, now),
+        Value::Moment(m) => moment(m, config, now.get()),
         Value::Duration(d) => duration(d),
         Value::Bool(b) => b.to_string(),
         Value::Text(t) => t.clone(),
