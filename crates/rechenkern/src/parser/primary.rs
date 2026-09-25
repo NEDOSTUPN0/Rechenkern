@@ -78,7 +78,7 @@ impl Parser<'_> {
             } else {
                 None
             };
-            match glued.or_else(|| words::scale_word(&w.to_lowercase())) {
+            match glued.or_else(|| words::scale_word(w)) {
                 Some(m) => {
                     n = n * m;
                     self.pos += 1;
@@ -257,7 +257,7 @@ impl Parser<'_> {
         if let Some(n) = self.number_words() {
             return self.number(n).map(Some);
         }
-        if let Some(n) = words::scale_word(w).or_else(|| words::fraction_word(w)) {
+        if let Some(n) = words::scale_word(self.toks[i].word().unwrap_or(w)).or_else(|| words::fraction_word(w)) {
             self.pos += 1;
             return Ok(Some(Expr::Number(n)));
         }

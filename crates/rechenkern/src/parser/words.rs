@@ -8,6 +8,7 @@ use jiff::civil::Weekday;
 use crate::ast::{Format, Func, Holiday};
 use crate::hash::TableMap;
 use crate::number::Number;
+use crate::units::registry;
 
 /// Phrases and what they mean, found by their first word.
 pub struct Phrases<T: 'static> {
@@ -83,7 +84,7 @@ pub fn number_word(w: &str) -> Option<i64> {
 
 /// Words that multiply the number before them: `3 million`, `2 dozen`.
 pub fn scale_word(w: &str) -> Option<Number> {
-    Some(match w {
+    let n = match w.to_lowercase().as_str() {
         "hundred" => Number::from_i64(100),
         "thousand" => Number::pow10(3),
         "million" | "mil" | "mn" => Number::pow10(6),
@@ -93,7 +94,9 @@ pub fn scale_word(w: &str) -> Option<Number> {
         "dozen" => Number::from_i64(12),
         "gross" => Number::from_i64(144),
         _ => return None,
-    })
+    };
+    // A unit symbol wins: "5 mN" is millinewtons.
+    registry().lookup(w).is_none().then_some(n)
 }
 
 /// Letter suffixes glued to numbers: `5k`, `2.5M`, `10G`.

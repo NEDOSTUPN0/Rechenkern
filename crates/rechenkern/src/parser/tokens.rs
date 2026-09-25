@@ -142,7 +142,7 @@ impl<'a> Parser<'a> {
             || (w == "for" && self.duration_at(i + 1))
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || words::number_word(w).is_some()
-            || words::scale_word(w).is_some()
+            || words::scale_word(word).is_some()
             || words::fraction_word(w).is_some()
             || words::constant(w).is_some()
             || words::month(w).is_some()
