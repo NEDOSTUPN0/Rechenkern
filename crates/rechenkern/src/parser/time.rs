@@ -3,7 +3,7 @@
 use jiff::tz::TimeZone;
 
 use super::{Parser, words};
-use crate::ast::{Expr, Format, Target, TimeExpr, Which};
+use crate::ast::{Expr, Format, Func, Target, TimeExpr, Which};
 use crate::config::DateOrder;
 use crate::error::{Result, bail};
 use crate::lexer::Tok;
@@ -464,15 +464,25 @@ impl Parser<'_> {
                 self.eat_word("to");
                 Expr::Range(a.boxed(), self.additive()?.boxed())
             }
-            // "days in February 2020", "days in Q3"
-            "in" => match self.period_at(self.pos + 1) {
-                Some((start, span, n)) => {
-                    self.pos += 1 + n;
-                    let end = Expr::binary(crate::ast::Op::Add, start.clone(), span);
-                    Expr::Range(start.boxed(), end.boxed())
+            // "days in February 2020", "days in Q3", "days left in 2026"
+            "in" | "left" | "remaining" => {
+                let left = w != "in";
+                let at = self.pos + if left { 2 } else { 1 };
+                let Some((first, span, n)) = self.period_at(at).filter(|_| !left || self.words_at(at - 1, &["in"]))
+                else {
+                    return Ok(None);
+                };
+                self.pos = at + n;
+                let end = Expr::binary(crate::ast::Op::Add, first.clone(), span);
+                if left {
+                    // What is left starts now, or when the period does; a past period has none.
+                    let from = Expr::Call(Func::Max, vec![start(), first]);
+                    let end = Expr::Call(Func::Max, vec![end, from.clone()]);
+                    Expr::Range(from.boxed(), end.boxed())
+                } else {
+                    Expr::Range(first.boxed(), end.boxed())
                 }
-                None => return Ok(None),
-            },
+            }
             _ => return Ok(None),
         };
         Ok(Some(Expr::Convert(range.boxed(), Target::Unit(unit.clone()))))
@@ -480,19 +490,25 @@ impl Parser<'_> {
 
     /// A calendar period at token `i`: its first day, length and size in tokens.
     fn period_at(&self, i: usize) -> Option<(Expr, Expr, usize)> {
+        let months = |n: i64| Expr::WithUnit(Expr::Number(Number::from_i64(n)).boxed(), registry().get("mo"));
+        let mut p = self.clone();
+        p.pos = i;
+        // "2024" is the whole year.
+        if let Some(year) = p.year() {
+            let start = Expr::Time(TimeExpr::Date { year: Some(year as i16), month: 1, day: 1 });
+            return Some((start, months(12), p.pos - i));
+        }
         let w = self.lower(i)?;
         let quarter = w.strip_prefix('q').and_then(|q| q.parse::<i8>().ok()).filter(|q| (1..=4).contains(q));
-        let (month, months) = match (words::month(&w), quarter) {
+        let (month, count) = match (words::month(&w), quarter) {
             (Some((month, _)), _) => (month, 1),
             (None, Some(q)) => ((q - 1) * 3 + 1, 3),
             _ => return None,
         };
-        let mut p = self.clone();
         p.pos = i + 1;
         let year = p.year().map(|y| y as i16);
         let start = Expr::Time(TimeExpr::Date { year, month, day: 1 });
-        let span = Expr::WithUnit(Expr::Number(Number::from_i64(months)).boxed(), registry().get("mo"));
-        Some((start, span, p.pos - i))
+        Some((start, months(count), p.pos - i))
     }
 
     /// A date or time starts at token `i`.
