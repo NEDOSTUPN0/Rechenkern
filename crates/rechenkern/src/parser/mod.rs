@@ -399,8 +399,8 @@ impl<'a> Parser<'a> {
         loop {
             let Some(tok) = self.cur() else { return Ok(expr) };
             // "$120/night" and "5 km per hour" are rates that bind tightly:
-            // "4 nights * $120/night" multiplies by the rate.
-            let rate = tok.is_sym("/") || tok.is_word("per");
+            // "4 nights * $120/night" multiplies by the rate. "per cent" is a percentage.
+            let rate = tok.is_sym("/") || (tok.is_word("per") && !self.words_at(self.pos + 1, &["cent"]));
             if rate && self.unit_at(self.pos + 1, false).is_some() {
                 self.pos += 1;
                 let unit = self.unit_phrase(false).expect("unit checked above");

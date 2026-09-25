@@ -183,7 +183,9 @@ fn with_unit(digits: &str, n: Number, unit: &Unit) -> String {
 
 /// Money: "$12.50", "1,200 KZT", "$20.00/hour".
 fn money(q: &Quantity, currency: &Currency, config: &Config) -> String {
-    let n = q.number;
+    // Cents and satoshis are shown in the whole currency.
+    let minor = q.unit.factors().iter().map(|&(id, _)| registry().def(id)).find(|d| d.currency.is_some());
+    let n = q.number * minor.map_or(Number::ONE, |d| d.scale);
     let digits = if currency.crypto {
         group(
             &plain_digits(n.abs().round_dp(8), config.precision)

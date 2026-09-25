@@ -176,7 +176,8 @@ impl Env<'_> {
     pub fn scale(&self, id: UnitId) -> Result<Number> {
         let def = registry().def(id);
         match def.currency {
-            Some(c) => self.rates.usd_value(c.code),
+            // A cent's scale is its part of the dollar.
+            Some(c) => Ok(self.rates.usd_value(c.code)? * def.scale),
             None => Ok(def.scale),
         }
     }

@@ -225,6 +225,14 @@ pub static CURRENCIES: &[Currency] = &[
     crypto("ICP", &[]),
 ];
 
+/// The smallest unit of a currency, worth 10^-decimals of it: (code, name, plural, aliases).
+pub static MINOR_UNITS: &[(&str, &str, &str, &[&str])] = &[
+    ("USD", "cent", "cents", &["¢"]),
+    ("EUR", "euro cent", "euro cents", &[]),
+    ("GBP", "penny", "pence", &["pennies"]),
+    ("BTC", "satoshi", "satoshis", &["sats"]),
+];
+
 /// Finds a currency by its ISO code (case-insensitive).
 pub fn find(code: &str) -> Option<&'static Currency> {
     CURRENCIES.iter().find(|c| c.code.eq_ignore_ascii_case(code))

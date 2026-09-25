@@ -3,7 +3,7 @@
 use jiff::Unit as Cal;
 
 use super::{Dim, Registry, Unit, UnitDef, UnitId};
-use crate::currency::{AMBIGUOUS_CODES, CURRENCIES};
+use crate::currency::{AMBIGUOUS_CODES, CURRENCIES, MINOR_UNITS, find};
 use crate::hash::TableMap;
 use crate::number::Number;
 
@@ -452,6 +452,22 @@ pub(super) fn build() -> Registry {
         for alias in c.aliases {
             b.spelling(alias, &unit);
         }
+    }
+    for &(code, name, plural, aliases) in MINOR_UNITS {
+        let currency = find(code).expect("minor unit of a known currency");
+        let id = b.push(UnitDef {
+            symbol: name.into(),
+            name: name.into(),
+            plural: plural.into(),
+            dim: Dim::MONEY,
+            scale: Number::pow10(-(currency.decimals as i32)),
+            offset: Number::ZERO,
+            spelled: true,
+            tight: false,
+            calendar: None,
+            currency: Some(currency),
+        });
+        b.register(id, aliases.iter().map(|a| a.to_string()));
     }
 
     // Prefixed units come last so they never shadow a base unit.

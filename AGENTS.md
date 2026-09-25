@@ -105,6 +105,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   list (`1,2,3`).
 - `$` means `Config::dollar` (USD by default). Lowercase currency codes that
   are English words (`all`, `try`, `top`...) only work in uppercase.
+- Cents, pence and satoshis (`currency::MINOR_UNITS`) are money units worth a
+  fraction of their currency; answers show them in the whole currency.
 
 ## Data sources
 

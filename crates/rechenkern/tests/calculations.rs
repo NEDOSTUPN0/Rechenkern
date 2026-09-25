@@ -350,6 +350,11 @@ fn currencies() {
         ("$19 for breakfast + $22 for the uber", "$41.00"),
         ("10 USD in EUR, JPY", "€9.00, ¥1,500"),
         ("$10 in eur and gbp", "€9.00, £8.00"),
+        ("50 cents in dollars", "$0.50"),
+        ("$4.99 + 50¢", "$5.49"),
+        ("80 pence in USD", "$1.00"),
+        ("1000 sats in USD", "$1.00"),
+        ("20 per cent of 50", "10"),
     ]);
 }
 
