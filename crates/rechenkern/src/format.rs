@@ -203,10 +203,7 @@ fn money(q: &Quantity, currency: &Currency, config: &Config) -> String {
     // The rest of a rate: "/hour".
     let rest: Vec<(UnitId, i8)> =
         q.unit.factors().iter().copied().filter(|&(id, _)| registry().def(id).currency.is_none()).collect();
-    if rest.is_empty() {
-        return amount;
-    }
-    format!("{amount}{}", unit_text(&unit_from(&rest), false))
+    with_unit(&amount, n, &unit_from(&rest))
 }
 
 fn unit_from(factors: &[(UnitId, i8)]) -> Unit {

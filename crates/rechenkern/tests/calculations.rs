@@ -327,6 +327,7 @@ fn rates() {
         ("$100 split 4 ways", "$25.00"),
         ("60 mph for 2.5 hours", "150 mi"),
         ("1 m/s^2 * 2 s", "2 m/s"),
+        ("$50/hour * 3 workdays", "$150.00 workday/h"),
     ]);
 }
 
