@@ -267,6 +267,9 @@ impl Parser<'_> {
         if words::KEYWORDS.contains(&w) || w == "x" {
             bail!("unexpected \"{}\"", self.toks[i].word().unwrap_or(w));
         }
+        if self.toks.get(i + 1).is_some_and(|t| t.is_sym("(") && !t.space_before) {
+            bail!("unknown function \"{}\"", self.toks[i].word().unwrap_or(w));
+        }
         Ok(None)
     }
 

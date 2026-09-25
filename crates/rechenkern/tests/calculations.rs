@@ -177,6 +177,7 @@ fn functions() {
         ("clamp 26 between 5 and 25", "25"),
         ("sqrt(16 m^2)", "4 m"),
         ("log()", "<error: missing a value>"),
+        ("cot(1)", "<error: unknown function \"cot\">"),
         ("root(", "<error: missing a value>"),
     ]);
 }
