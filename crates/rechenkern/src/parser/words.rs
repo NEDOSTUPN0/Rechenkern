@@ -164,6 +164,7 @@ pub static FUNCTIONS: Phrases<Func> = Phrases::new(&[
     ("ln", Func::Ln),
     ("natural log", Func::Ln),
     ("log", Func::Log),
+    ("logarithm", Func::Log),
     ("log2", Func::Log2),
     ("log10", Func::Log10),
     ("lg", Func::Log10),

@@ -358,6 +358,12 @@ impl Parser<'_> {
             let x = self.unary()?;
             return Ok(Some(Expr::Call(func, vec![degree, x])));
         }
+        // "log base 2 of 8"
+        if func == Func::Log && self.eat_word("base") {
+            let base = self.unary()?;
+            self.eat_word("of");
+            return Ok(Some(Expr::Call(func, vec![self.unary()?, base])));
+        }
         let mut args = if self.eat_sym("(") {
             let mut args = Vec::new();
             while !self.at_sym(")") && self.peek().is_some() {
@@ -371,7 +377,9 @@ impl Parser<'_> {
         } else if self.eat_word("of") || self.eat_word("between") {
             self.list()?
         } else {
-            vec![self.unary()?]
+            let first = self.unary()?;
+            // "log 4 of 20": the base comes first, like the degree of a root.
+            if func == Func::Log && self.eat_word("of") { vec![self.unary()?, first] } else { vec![first] }
         };
         if func == Func::Log && self.eat_word("base") {
             args.push(self.unary()?);
