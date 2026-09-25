@@ -155,6 +155,8 @@ fn functions() {
         ("fact(5)", "120"),
         ("gcd of 20 and 30", "10"),
         ("lcm of 5 and 8", "40"),
+        ("greatest common divisor of 20 and 30", "10"),
+        ("least common multiple of 4 and 6", "12"),
         ("total of 3, 4, 7 and 9", "23"),
         ("average of 36, 42, 19 and 81", "44.5"),
         ("median of 10, 20 and 30", "20"),
