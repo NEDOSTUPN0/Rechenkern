@@ -24,6 +24,15 @@ pub(super) fn now_for(expr: &Expr) -> Expr {
     Expr::Time(if unit.is_some_and(is_date_unit) { TimeExpr::Today(0) } else { TimeExpr::Now })
 }
 
+/// Whether `expr` may be a length of time: "$100 from 1990" is not date arithmetic.
+pub(super) fn maybe_duration(expr: &Expr) -> bool {
+    match expr {
+        Expr::Number(_) | Expr::Percent(_) | Expr::Bool(_) => false,
+        Expr::WithUnit(_, u) | Expr::BareUnit(u) => u.dim() == Dim::TIME || u.dim() == Dim::WORKDAY,
+        _ => true,
+    }
+}
+
 /// Days, weeks, months and years count whole dates.
 fn is_date_unit(unit: &Unit) -> bool {
     unit.single().and_then(|d| d.calendar).is_some_and(|(cal, _)| cal >= jiff::Unit::Day)

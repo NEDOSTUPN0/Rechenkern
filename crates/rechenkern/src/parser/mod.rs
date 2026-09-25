@@ -261,6 +261,10 @@ impl<'a> Parser<'a> {
             if !self.operand_follows(len) {
                 return Ok(lhs);
             }
+            // "$100 from 1990" is not date arithmetic.
+            if swap && !time::maybe_duration(&lhs) {
+                bail!("expected a length of time before \"{}\"", self.src[tok.start..tok.end].trim());
+            }
             self.pos += len;
             let mut rhs = self.multiplicative()?;
             // "4 days from now" is a date, not a clock time.
