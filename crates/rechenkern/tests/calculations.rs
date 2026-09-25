@@ -415,6 +415,7 @@ fn dates() {
         ("days since July 15", "70 days"),
         ("days between 3 March and 30 May", "88 days"),
         ("days between 3 March and 3 March", "0 days"),
+        ("whole weeks between 3 March and 30 May", "12 weeks"),
         ("3 March to 30 May", "2 months 3 weeks 6 days"),
         ("January 10 - February 5", "3 weeks 5 days"),
         ("weeks until new year", "14.28571429 weeks"),

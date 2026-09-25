@@ -1,7 +1,7 @@
 //! Primary expressions: numbers with units, functions, variables and words.
 
 use super::{Parser, words};
-use crate::ast::{Direction, Expr, Format, Func, LineRef, Op, Target, TimeExpr};
+use crate::ast::{Direction, Expr, Format, Func, LineRef, Op, Rounding, Target, TimeExpr};
 use crate::error::{Result, bail};
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -316,11 +316,13 @@ impl Parser<'_> {
     }
 
     fn bare_unit(&mut self, unit: Unit, n: usize) -> Result<Expr> {
+        // "whole weeks between March 3 and May 30" counts complete weeks only.
+        let whole = self.pos > 0 && self.toks[self.pos - 1].is_word("whole");
         self.pos += n;
         if (unit.dim() == Dim::TIME || unit.dim() == Dim::WORKDAY)
             && let Some(expr) = self.time_unit_phrase(&unit)?
         {
-            return Ok(expr);
+            return Ok(if whole { Expr::Round(expr.boxed(), Rounding::Places(0, Direction::Down)) } else { expr });
         }
         // Currency before the amount: "$5", "€10", "USD 20".
         if unit.is_money()
