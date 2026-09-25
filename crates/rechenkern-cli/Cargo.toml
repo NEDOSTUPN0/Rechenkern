@@ -3,6 +3,8 @@ name = "rechenkern-cli"
 description = "Command line interface for Rechenkern"
 version.workspace = true
 edition.workspace = true
+# rustyline needs File::lock
+rust-version = "1.89"
 license.workspace = true
 repository.workspace = true
 
