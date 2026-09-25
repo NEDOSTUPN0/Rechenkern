@@ -414,6 +414,7 @@ fn dates() {
         ("gta 6 release date + 1 week", "Thu, 26 Nov 2026"),
         ("days since July 15", "70 days"),
         ("days between 3 March and 30 May", "88 days"),
+        ("days between 3 March and 3 March", "0 days"),
         ("3 March to 30 May", "2 months 3 weeks 6 days"),
         ("January 10 - February 5", "3 weeks 5 days"),
         ("weeks until new year", "14.28571429 weeks"),

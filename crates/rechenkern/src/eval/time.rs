@@ -363,8 +363,10 @@ impl Env<'_> {
         if unit.dim() != Dim::TIME {
             bail!("can't convert a duration to {}", crate::format::unit_text(unit, true));
         }
+        // An empty span counts as seconds: jiff panics totalling it against a date.
         if let (Some((cal, multiple)), Some(anchor)) = (unit.single().and_then(|u| u.calendar), d.anchor)
             && cal >= Cal::Day
+            && !d.span.is_zero()
         {
             let total = Number::from_f64(d.span.total((cal, anchor))?) / Number::from_i64(multiple);
             return Ok(Quantity::new(total, unit.clone()));
