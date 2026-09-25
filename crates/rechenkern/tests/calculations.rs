@@ -169,6 +169,8 @@ fn functions() {
         ("3 permutations of 10", "720"),
         ("clamp 26 between 5 and 25", "25"),
         ("sqrt(16 m^2)", "4 m"),
+        ("log()", "<error: missing a value>"),
+        ("root(", "<error: missing a value>"),
     ]);
 }
 
@@ -579,7 +581,21 @@ fn odd_input_never_panics() {
         let line: Vec<&str> = (0..len).map(|_| words[next(words.len())]).collect();
         let _ = calc.calculate(&line.join(" "));
     }
-    for line in ["170!", "171!", "10!!!", "2^99999", "1e28 * 1e28", "0.1^9999", "-1^0.5", "sqrt(-1)", "ln(0)", "1/0%"] {
+    for line in [
+        "170!",
+        "171!",
+        "10!!!",
+        "2^99999",
+        "1e28 * 1e28",
+        "0.1^9999",
+        "-1^0.5",
+        "sqrt(-1)",
+        "ln(0)",
+        "1/0%",
+        "clamp()",
+        "npr{}",
+        "midpoint(",
+    ] {
         let _ = calc.calculate(line);
     }
 }

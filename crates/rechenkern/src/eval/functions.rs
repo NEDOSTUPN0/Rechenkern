@@ -83,7 +83,7 @@ impl Env<'_> {
             Log | Clamp | Root | Midpoint | Perm | Comb => {}
             _ => arity(1)?,
         }
-        let x = &args[0];
+        let Some(x) = args.first() else { bail!("missing a value") };
         match func {
             Sqrt => self.root(x, 2),
             Cbrt => self.root(x, 3),
