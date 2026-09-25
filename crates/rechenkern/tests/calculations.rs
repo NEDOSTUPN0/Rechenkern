@@ -458,6 +458,7 @@ fn comments_and_labels() {
         ("$999 (for iPhone 16)", "$999.00"),
         ("I spent $128 + $45 on clothes // on 10-02-2019", "$173.00"),
         ("Cost of 128 GB iPhone 16: $999", "$999.00"),
+        ("Groceries — $200", "$200.00"),
         ("# Heading 5", "<none>"),
         ("just some text", "<none>"),
     ]);

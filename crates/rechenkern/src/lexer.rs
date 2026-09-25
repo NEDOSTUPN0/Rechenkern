@@ -66,7 +66,8 @@ const MULTI_SYMBOLS: &[(&str, &str)] = &[
 fn single_symbol(c: char) -> Option<&'static str> {
     Some(match c {
         '+' => "+",
-        '-' | '−' | '–' | '—' => "-",
+        // Not the em dash: "Groceries — $200" is a label.
+        '-' | '−' | '–' => "-",
         '*' | '×' | '·' | '⋅' | '∙' => "*",
         '/' | '÷' | '∕' => "/",
         '^' => "^",
