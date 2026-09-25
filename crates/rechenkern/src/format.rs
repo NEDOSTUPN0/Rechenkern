@@ -268,6 +268,9 @@ fn parts(q: &Quantity, units: &[Unit], config: &Config) -> String {
     let (Some(first), true) = (scale(&q.unit), units.iter().all(|u| scale(u).is_some())) else {
         return quantity(q, &Display::Auto, config);
     };
+    // "in inches and feet" still starts with feet.
+    let mut units = units.to_vec();
+    units.sort_by(|a, b| scale(b).partial_cmp(&scale(a)).unwrap_or(std::cmp::Ordering::Equal));
     let negative = q.number.is_negative();
     let mut rest = q.number.abs() * first;
     let mut out = Vec::new();

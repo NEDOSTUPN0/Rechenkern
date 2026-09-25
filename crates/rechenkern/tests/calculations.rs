@@ -295,6 +295,7 @@ fn units() {
         ("1 GB / 100 MBps", "10 seconds"),
         ("180 cm in feet and inches", "5 ft 10.87 in"),
         ("72 in in feet and inches", "6 ft"),
+        ("180 cm in inches and feet", "5 ft 10.87 in"),
         ("1 day - 2 hours", "22 hours"),
         ("1 hour + 30 minutes", "1 hour 30 minutes"),
         ("1 year - 2 months", "10 months"),
