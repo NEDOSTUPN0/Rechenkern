@@ -134,7 +134,7 @@ answer them the same way, and the same 31 line sheet.
 | ---------------------------------------- | ---------: | ----------: | -----: |
 | One line, median                         |     1.7 µs |      127 µs |   ~75× |
 | One line, mean                           |     1.9 µs |      122 µs |   ~64× |
-| Lines per second                         |    526,000 |       8,200 |        |
+| Lines per second                         |    526,000 |       8,200 |   ~64× |
 | Sheet of 31 lines with variables         |      48 µs |       24 ms |  ~500× |
 | Start, answer one line, exit             |     0.6 ms |       63 ms |  ~100× |
 
