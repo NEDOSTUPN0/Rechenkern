@@ -376,19 +376,22 @@ impl Lexer<'_> {
         }
         let third_at = second_at + second + 1;
         let third = self.digits(third_at);
+        let parts = [
+            self.slice(self.i, self.i + first).parse().ok()?,
+            self.slice(second_at, second_at + second).parse().ok()?,
+            self.slice(third_at, third_at + third).parse().ok()?,
+        ];
+        let year_first = first == 4 && matches!(third, 1 | 2);
         let valid = match sep {
-            '-' => first == 4 && matches!(third, 1 | 2),
+            '-' => year_first,
+            // "2026/09/23", but "3600/60/60" is a division.
+            '.' | '/' if year_first => (1..=12).contains(&parts[1]) && (1..=31).contains(&parts[2]),
             '.' | '/' => matches!(first, 1 | 2) && third == 4,
             _ => false,
         };
         if !valid {
             return None;
         }
-        let parts = [
-            self.slice(self.i, self.i + first).parse().ok()?,
-            self.slice(second_at, second_at + second).parse().ok()?,
-            self.slice(third_at, third_at + third).parse().ok()?,
-        ];
         let start = self.i;
         self.i = third_at + third;
         if sep == '-' && self.peek(0) == Some('T') && self.peek(1).is_some_and(|c| c.is_ascii_digit()) {
@@ -397,7 +400,7 @@ impl Lexer<'_> {
             }
             return Some(Tok::IsoDateTime(self.slice(start, self.i).to_string()));
         }
-        Some(Tok::Date { parts, sep })
+        Some(Tok::Date { parts, sep: if year_first { '-' } else { sep } })
     }
 
     /// `9:30`, `21:05:10`, `00:00:01.5`.
@@ -467,6 +470,8 @@ mod tests {
     fn dates_and_clocks() {
         assert_eq!(toks("2026-09-23"), vec![Tok::Date { parts: [2026, 9, 23], sep: '-' }]);
         assert_eq!(toks("23.09.2026"), vec![Tok::Date { parts: [23, 9, 2026], sep: '.' }]);
+        assert_eq!(toks("2026/09/23"), vec![Tok::Date { parts: [2026, 9, 23], sep: '-' }]);
+        assert_eq!(toks("3600/60/60").len(), 5);
         assert_eq!(toks("15:30"), vec![Tok::Clock { h: 15, m: 30, s: None }]);
         assert!(matches!(toks("2019-04-01T15:30:00Z")[0], Tok::IsoDateTime(_)));
         assert_eq!(toks("10-3"), vec![num("10"), Tok::Sym("-"), num("3")]);

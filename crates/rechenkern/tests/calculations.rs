@@ -389,6 +389,7 @@ fn dates() {
         ("April 1, 2019 to timestamp", "1554091200"),
         ("2019-04-01T15:30:00Z to date", "Mon, 1 Apr 2019 11:30"),
         ("2026-09-23 + 1 day", "Thu, 24 Sep 2026"),
+        ("2026/09/23 + 1 day", "Thu, 24 Sep 2026"),
         ("now as iso8601", "2026-09-23T14:30:00-04:00"),
         ("days in February 2020", "29 days"),
         ("days in Q3", "92 days"),
