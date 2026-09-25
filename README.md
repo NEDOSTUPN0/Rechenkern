@@ -165,4 +165,5 @@ MIT
 ---
 
 Rechenkern was written entirely with Claude Code
+
 So far it seems to work just fine.
