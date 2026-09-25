@@ -160,7 +160,9 @@ SoulverCore.
 
 ## License
 
-MIT
+[MIT](LICENSE). You're free to use Rechenkern in personal, public and commercial
+projects; just keep the copyright and license notice. The bundled city data is from
+GeoNames under CC BY 4.0, so credit GeoNames if you ship it.
 
 ---
 
