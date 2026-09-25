@@ -65,28 +65,23 @@ impl Parser<'_> {
             return Ok(Some(pct(ratio)));
         }
 
-        // "20 is 10% of what", "220 is 10% on what", "180 is 10% off what"
+        // "20 is 10% of what", "180 is 10% off what", "10% on what is 220"
         for kind in ["of", "on", "off"] {
-            if !self.ends_with(&[kind, "what"]) {
+            let (a, p) = if self.ends_with(&[kind, "what"])
+                && let Some(is) = self.find(0, &["is"]).filter(|&i| i < end - 2)
+            {
+                (self.part(0, is)?, self.part(is + 1, end - 2)?)
+            } else if let Some(at) = self.find(0, &[kind, "what", "is"]) {
+                (self.part(at + 3, end)?, self.part(0, at)?)
+            } else {
                 continue;
-            }
-            // "10% of what is 20" is handled below.
-            let Some(is) = self.find(0, &["is"]).filter(|&i| i < end - 2) else { continue };
-            let a = self.part(0, is)?;
-            let p = self.part(is + 1, end - 2)?;
+            };
             let divisor = match kind {
                 "of" => p,
                 "on" => Expr::binary(Op::Add, one(), p),
                 _ => Expr::binary(Op::Sub, one(), p),
             };
             return Ok(Some(Expr::binary(Op::Div, a, divisor)));
-        }
-
-        // "10% of what is 20"
-        if let Some(at) = self.find(0, &["of", "what", "is"]) {
-            let p = self.part(0, at)?;
-            let a = self.part(at + 3, end)?;
-            return Ok(Some(Expr::binary(Op::Div, a, p)));
         }
 
         // "50 to 75 is what %", "40 to 90 as %", "50 to 75 is what x"
