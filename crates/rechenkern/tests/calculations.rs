@@ -80,6 +80,8 @@ fn arithmetic() {
         ("3 million", "3,000,000"),
         ("2 dozen", "24"),
         ("half of 175", "87.5"),
+        ("two thirds of 90", "60"),
+        ("3 quarters of an hour in minutes", "45 minutes"),
         ("twice 21", "42"),
         ("seven times six", "42"),
         ("1/0", "<error: division by zero>"),

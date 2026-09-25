@@ -121,14 +121,14 @@ pub fn money_multiplier(w: &str) -> Option<Number> {
     })
 }
 
-/// Fractions spelled out: `half of 10`, `a third of 90`.
+/// Fractions spelled out: `half of 10`, `a third of 90`, `two thirds of 90`.
 pub fn fraction_word(w: &str) -> Option<Number> {
     Some(match w {
-        "half" => Number::ratio(1, 2),
-        "third" => Number::ratio(1, 3),
-        "quarter" => Number::ratio(1, 4),
-        "fifth" => Number::ratio(1, 5),
-        "tenth" => Number::ratio(1, 10),
+        "half" | "halves" => Number::ratio(1, 2),
+        "third" | "thirds" => Number::ratio(1, 3),
+        "quarter" | "quarters" => Number::ratio(1, 4),
+        "fifth" | "fifths" => Number::ratio(1, 5),
+        "tenth" | "tenths" => Number::ratio(1, 10),
         _ => return None,
     })
 }

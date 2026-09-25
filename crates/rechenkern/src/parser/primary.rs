@@ -69,7 +69,7 @@ impl Parser<'_> {
         self.quantity(Expr::Number(value))
     }
 
-    /// Applies `5k`, `2.5 million`, `3 dozen`; money allows `$5m`, `$2B`.
+    /// Applies `5k`, `2.5 million`, `3 dozen`, `two thirds`; money allows `$5m`, `$2B`.
     fn multipliers(&mut self, mut n: Number, money: bool) -> Number {
         while let Some(tok) = self.cur() {
             let Some(w) = tok.word() else { break };
@@ -78,7 +78,7 @@ impl Parser<'_> {
             } else {
                 None
             };
-            match glued.or_else(|| words::scale_word(w)) {
+            match glued.or_else(|| words::scale_word(w)).or_else(|| words::fraction_word(&w.to_lowercase())) {
                 Some(m) => {
                     n = n * m;
                     self.pos += 1;
