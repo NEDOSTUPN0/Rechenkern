@@ -223,7 +223,8 @@ impl Lexer<'_> {
         let start = self.i;
         while let Some(c) = self.peek(0) {
             let apostrophe = matches!(c, '\'' | '’') && self.peek(1).is_some_and(char::is_alphabetic);
-            if c.is_alphanumeric() || c == '_' || apostrophe {
+            // Not `is_alphanumeric`: "m²" is meters and a power.
+            if c.is_alphabetic() || c.is_ascii_digit() || c == '_' || apostrophe {
                 self.i += 1;
             } else {
                 break;
@@ -454,6 +455,7 @@ mod tests {
     #[test]
     fn words_and_symbols() {
         assert_eq!(toks("5km×2"), vec![num("5"), Tok::Word("km".into()), Tok::Sym("*"), num("2")]);
+        assert_eq!(toks("5 m²"), vec![num("5"), Tok::Word("m".into()), Tok::Sym("²")]);
         assert_eq!(toks("US$5"), vec![Tok::Word("US$".into()), num("5")]);
         assert_eq!(toks("3 p.m."), vec![num("3"), Tok::Word("pm".into())]);
         assert_eq!(toks(r#"5'11""#), vec![num("5"), Tok::Sym("'"), num("11"), Tok::Sym("\"")]);
