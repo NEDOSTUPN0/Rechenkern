@@ -141,6 +141,8 @@ impl<'a> Parser<'a> {
             // "for 2 hours" and "split 4 ways" only matter before an amount.
             || (w == "for" && self.duration_at(i + 1))
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
+            // "round 56 down": a direction only after "round".
+            || (matches!(w, "up" | "down") && self.toks[..i].iter().any(|t| t.is_word("round")))
             || words::number_word(w).is_some()
             || words::scale_word(word).is_some()
             || words::fraction_word(w).is_some()

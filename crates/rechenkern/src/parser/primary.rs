@@ -1,7 +1,7 @@
 //! Primary expressions: numbers with units, functions, variables and words.
 
 use super::{Parser, words};
-use crate::ast::{Expr, Format, Func, LineRef, Op, Target, TimeExpr};
+use crate::ast::{Direction, Expr, Format, Func, LineRef, Op, Target, TimeExpr};
 use crate::error::{Result, bail};
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -341,6 +341,16 @@ impl Parser<'_> {
             }
             self.pos = start;
             return Ok(None);
+        }
+        // "round up 2.5", "round 56 down to nearest 10"
+        if func == Func::Round && !self.at_sym("(") {
+            let dir = self.direction();
+            let x = self.unary()?;
+            let dir = if dir == Direction::Nearest { self.direction() } else { dir };
+            if dir != Direction::Nearest {
+                return self.rounded_to(&x, dir).map(Some);
+            }
+            return Ok(Some(Expr::Call(func, vec![x])));
         }
         if func == Func::Root && !self.at_sym("(") {
             let degree = self.unary()?;

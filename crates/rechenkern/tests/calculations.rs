@@ -190,6 +190,9 @@ fn rounding() {
         ("0.534 to nearest 16th", "9/16"),
         ("round 1/3 to 2 dp", "0.33"),
         ("123456 to 2 sf", "120,000"),
+        ("round 56 down to nearest 10", "50"),
+        ("round up 56.2", "57"),
+        ("round 5.99 down", "5"),
     ]);
 }
 

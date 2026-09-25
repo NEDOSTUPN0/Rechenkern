@@ -12,14 +12,9 @@ impl Parser<'_> {
     /// One conversion step after `expr`, or `None` if there is none.
     pub(super) fn conversion(&mut self, expr: &Expr) -> Result<Option<Expr>> {
         let start = self.pos;
-        if self.at_word("rounded") {
-            self.pos += 1;
+        if self.eat_word("rounded") {
             let dir = self.direction();
-            let (rounding, format) = match self.eat_word("to") {
-                true => self.rounding(dir)?.unwrap_or((Rounding::Places(0, dir), None)),
-                false => (Rounding::Places(0, dir), None),
-            };
-            return Ok(Some(rounded(expr, rounding, format)));
+            return self.rounded_to(expr, dir).map(Some);
         }
         let Some(tok) = self.peek() else { return Ok(None) };
         let keyword = match &tok.tok {
@@ -96,7 +91,7 @@ impl Parser<'_> {
         is_keyword && p.zone_at(p.pos + 1).is_some()
     }
 
-    fn direction(&mut self) -> Direction {
+    pub(super) fn direction(&mut self) -> Direction {
         if self.eat_word("up") {
             Direction::Up
         } else if self.eat_word("down") {
@@ -104,6 +99,15 @@ impl Parser<'_> {
         } else {
             Direction::Nearest
         }
+    }
+
+    /// Rounds `expr` in a direction, then to what follows `to`: "rounded down to 2 dp".
+    pub(super) fn rounded_to(&mut self, expr: &Expr, dir: Direction) -> Result<Expr> {
+        let (rounding, format) = match self.eat_word("to") {
+            true => self.rounding(dir)?.unwrap_or((Rounding::Places(0, dir), None)),
+            false => (Rounding::Places(0, dir), None),
+        };
+        Ok(rounded(expr, rounding, format))
     }
 
     /// `2 dp`, `3 decimal places`, `4 sf`, `nearest 10`, `nearest thousand`, `nearest 16th`.
