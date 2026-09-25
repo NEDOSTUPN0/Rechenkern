@@ -106,6 +106,11 @@ impl Unit {
         Unit { factors }
     }
 
+    /// The factors with positive powers: `$` of `$/month`.
+    pub fn numerator(&self) -> Unit {
+        Unit { factors: self.factors.iter().copied().filter(|f| f.1 > 0).collect() }
+    }
+
     /// Root of the unit if every exponent is divisible by `n`.
     pub fn root(&self, n: i8) -> Option<Unit> {
         let factors = self.factors.iter().map(|&(id, e)| (e % n == 0).then_some((id, e / n))).collect::<Option<_>>()?;

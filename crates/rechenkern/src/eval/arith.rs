@@ -236,6 +236,10 @@ impl Env<'_> {
                 return Ok(Quantity::new(number, money));
             }
         }
+        // "$500/month / 30 days" spreads the money over those days: $16.67/day.
+        if divide && x.unit.dim() == Dim::MONEY.div(Dim::TIME) && y.unit.dim() == Dim::TIME {
+            return Ok(Quantity::new(number, x.unit.numerator().product(&y_unit)));
+        }
         let (unit, factor) = x.unit.mul(&y_unit, &|id| self.scale(id))?;
         Ok(Quantity::new(number * factor, unit))
     }

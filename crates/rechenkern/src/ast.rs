@@ -256,6 +256,8 @@ pub enum Target {
     Unit(Unit),
     /// Several units at once: `in feet and inches`.
     Units(Vec<Unit>),
+    /// The same rate over another period: `$1,000/month in per week`.
+    Per(Unit),
     Zone(TimeZone),
     Format(Format),
 }

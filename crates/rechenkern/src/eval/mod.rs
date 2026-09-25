@@ -260,6 +260,13 @@ impl Env<'_> {
         Ok(match target {
             Target::Unit(unit) => (self.to_unit(value, unit)?, Display::Auto),
             Target::Units(units) => self.to_parts(value, units)?,
+            Target::Per(period) => {
+                let unit = match &value {
+                    Value::Quantity(q) => q.unit.numerator().product(&period.pow(-1)),
+                    v => bail!("{} is not a rate", v.kind()),
+                };
+                (self.to_unit(value, &unit)?, Display::Auto)
+            }
             Target::Zone(zone) => (Value::Moment(self.to_zone(value, zone)?), Display::Auto),
             Target::Format(format) => self.to_format(value, *format, display)?,
         })

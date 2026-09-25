@@ -74,7 +74,10 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Addition of different units: the larger unit wins; for money and rates the
   right-hand unit wins (`$200 + €200` is in euros). Plain numbers take the
   other side's unit (`$20 + 30` = `$50`).
-- Money times a non-money unit stays money (`$30 × 4 days` = `$120`).
+- Money times a non-money unit stays money (`$30 × 4 days` = `$120`), and a
+  money rate divided by a time spreads it (`$500/month / 30 days` = `$16.67/day`).
+- `in per week`, `as per day` and `is what per week` give a rate a new period
+  (`Target::Per`).
 - Time quantities in different units add up to a `Duration` (`1 day - 2 hours`
   = 22 hours); months and longer meet in the smaller unit (`1 year - 2 months`
   = 10 months). Seconds that come out of unit algebra (`3 GB / 10 MB/s`)

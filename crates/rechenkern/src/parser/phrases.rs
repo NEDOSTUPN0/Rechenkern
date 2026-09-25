@@ -128,6 +128,18 @@ impl Parser<'_> {
             let a = self.part(0, end - 3)?;
             return Ok(Some(pct(a)));
         }
+
+        // "$1,000/month is what per week", "5 km is how much in miles"
+        for seq in [&["is", "what"][..], &["is", "how", "much"][..]] {
+            let Some(at) = self.find(0, seq) else { continue };
+            let mut p = self.sub(at + seq.len(), end);
+            p.eat_word("in");
+            if let Some(target) = p.target()
+                && p.pos == p.toks.len()
+            {
+                return Ok(Some(Expr::Convert(self.part(0, at)?.boxed(), target)));
+            }
+        }
         Ok(None)
     }
 

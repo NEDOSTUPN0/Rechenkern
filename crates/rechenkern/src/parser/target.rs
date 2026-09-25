@@ -208,6 +208,14 @@ impl Parser<'_> {
             self.pos += 1;
             return Some(Target::Format(Format::Multiplier));
         }
+        if self.cur().is_some_and(|t| t.is_word("per") || t.is_sym("/")) {
+            let mut p = self.clone();
+            p.pos += 1;
+            if let Some(period) = p.unit_expr(false) {
+                *self = p;
+                return Some(Target::Per(period));
+            }
+        }
         if let Some((format, n)) = self.phrase_at(self.pos, &words::FORMATS) {
             // "in dec" is decimal, but "in days" stays a unit.
             if self.unit_at(self.pos, false).is_none_or(|(_, m)| m < n) {

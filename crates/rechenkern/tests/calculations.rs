@@ -328,6 +328,11 @@ fn rates() {
         ("60 mph for 2.5 hours", "150 mi"),
         ("1 m/s^2 * 2 s", "2 m/s"),
         ("$50/hour * 3 workdays", "$150.00 workday/h"),
+        ("$1,000/month is what per week", "$229.98/week"),
+        ("$1,000/month as per day", "$32.85/day"),
+        ("60 mph is how much per minute", "1 mi/min"),
+        ("5 km is what in miles", "3.106855961 mi"),
+        ("$500/month / 30 days", "$16.67/day"),
     ]);
 }
 
