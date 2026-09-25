@@ -49,20 +49,32 @@ impl Parser<'_> {
             return Ok(Some(pct(Expr::binary(Op::Div, part, whole))));
         }
 
-        // "20 is what % of 200", "180 is what % off 200", "180 is what % on 150"
-        for (seq, skip) in [(&["is", "what", "%"][..], 3), (&["as", "a", "%"][..], 3), (&["as", "%"][..], 2)] {
+        // "20 is what % of 200", "180 is what % off 200", "5 is what multiplier on 1"
+        for seq in [&["is", "what"][..], &["as", "a"][..], &["as"][..]] {
             let Some(at) = self.find(0, seq) else { continue };
-            let Some(kind) = self.lower(at + skip).filter(|w| matches!(w.as_str(), "of" | "on" | "off")) else {
+            let k = at + seq.len();
+            let format = if self.matches_at(k, &["%"]) {
+                Format::Percent
+            } else if self.matches_at(k, &["multiplier"]) || self.matches_at(k, &["x"]) {
+                Format::Multiplier
+            } else {
                 continue;
             };
+            // "10 is what % 20" means "of", but "10 is what % with 20" doesn't.
+            let kind = self.lower(k + 1).filter(|w| matches!(w.as_str(), "of" | "on" | "off"));
+            let from = k + 1 + usize::from(kind.is_some());
+            let comment = self.toks.get(from).is_some_and(|t| t.word().is_some() && !self.significant(from));
+            if from >= end || comment {
+                continue;
+            }
             let a = self.part(0, at)?;
-            let b = self.part(at + skip + 1, end)?;
-            let ratio = match kind.as_str() {
-                "of" => Expr::binary(Op::Div, a, b),
-                "on" => Expr::binary(Op::Div, Expr::binary(Op::Sub, a, b.clone()), b),
-                _ => Expr::binary(Op::Div, Expr::binary(Op::Sub, b.clone(), a), b),
+            let b = self.part(from, end)?;
+            let ratio = match kind.as_deref() {
+                Some("on") => Expr::binary(Op::Div, Expr::binary(Op::Sub, a, b.clone()), b),
+                Some("off") => Expr::binary(Op::Div, Expr::binary(Op::Sub, b.clone(), a), b),
+                _ => Expr::binary(Op::Div, a, b),
             };
-            return Ok(Some(pct(ratio)));
+            return Ok(Some(Self::formatted(ratio, format)));
         }
 
         // "20 is 10% of what", "180 is 10% off what", "10% on what is 220"
