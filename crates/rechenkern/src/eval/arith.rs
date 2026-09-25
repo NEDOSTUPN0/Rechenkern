@@ -2,8 +2,8 @@
 
 use std::cmp::Ordering;
 
-use super::Env;
-use crate::ast::Op;
+use super::{Display, Env};
+use crate::ast::{Format, Op};
 use crate::error::{Error, Result, bail};
 use crate::format::unit_text;
 use crate::number::Number;
@@ -30,6 +30,7 @@ impl Env<'_> {
             Op::Pow => self.pow(a, b),
             Op::Mod => self.rem(a, b),
             Op::Of => self.of(a, b),
+            Op::OutOf => Ok(self.to_format(self.div(a, b)?, Format::Percent, Display::Auto)?.0),
             Op::On | Op::Off => self.on_off(a, b, op == Op::Off),
             Op::At => self.at(a, b),
             Op::BitAnd | Op::BitOr | Op::BitXor | Op::Shl | Op::Shr => bitwise(op, a, b),

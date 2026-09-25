@@ -141,6 +141,7 @@ impl<'a> Parser<'a> {
             // "for 2 hours" and "split 4 ways" only matter before an amount.
             || (w == "for" && self.duration_at(i + 1))
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
+            || (w == "out" && self.words_at(i + 1, &["of"]))
             // "round 56 down": a direction only after "round".
             || (matches!(w, "up" | "down") && self.toks[..i].iter().any(|t| t.is_word("round")))
             // "cot(1)" is a call even if the function is unknown.

@@ -102,6 +102,8 @@ pub enum Op {
     Mod,
     /// `20% of 50`, `half of 10`.
     Of,
+    /// `4 out of 10`: a share as a percentage.
+    OutOf,
     /// `10% on 200`: add the percentage.
     On,
     /// `10% off 200`: subtract the percentage.

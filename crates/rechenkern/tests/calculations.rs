@@ -225,6 +225,8 @@ fn percentages() {
         ("40 is what % of 90", "44.44444444%"),
         ("20 as a % of 200", "10%"),
         ("10 is what % 20", "50%"),
+        ("4 out of 10", "40%"),
+        ("$30 out of $120", "25%"),
         ("5 is what multiplier on 1", "4x"),
         ("5 as a multiplier of 2", "2.5x"),
         ("what % of 200 is 20", "10%"),

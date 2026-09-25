@@ -325,6 +325,7 @@ impl<'a> Parser<'a> {
                 "for" if self.duration_at(self.pos + 1) => (Op::Mul, 1),
                 "mod" | "modulo" => (Op::Mod, 1),
                 "of" => (Op::Of, 1),
+                "out" if next_is(self, "of") => (Op::OutOf, 2),
                 "on" => (Op::On, 1),
                 "off" => (Op::Off, 1),
                 "at" => (Op::At, 1),
