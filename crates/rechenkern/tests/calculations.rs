@@ -291,6 +291,8 @@ fn units() {
         ("1 light year in km", "9,460,730,472,581 km"),
         ("1 mb in kb", "1,000 kB"),
         ("5 Mb in kB", "625 kB"),
+        ("10 MBps in Mbps", "80 Mbps"),
+        ("1 GB / 100 MBps", "10 seconds"),
         ("180 cm in feet and inches", "5 ft 10.87 in"),
         ("72 in in feet and inches", "6 ft"),
         ("1 day - 2 hours", "22 hours"),

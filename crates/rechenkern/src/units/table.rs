@@ -328,6 +328,12 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("Mbps", &["Mbps", "mbps"], "Mbit/s"),
     ("Gbps", &["Gbps", "gbps"], "Gbit/s"),
     ("Tbps", &["Tbps", "tbps"], "Tbit/s"),
+    // A capital B is bytes.
+    ("", &["Bps", "bytes per second"], "B/s"),
+    ("", &["kBps", "KBps"], "kB/s"),
+    ("", &["MBps"], "MB/s"),
+    ("", &["GBps"], "GB/s"),
+    ("", &["TBps"], "TB/s"),
     ("", &["sqm"], "m^2"),
     ("", &["sqkm"], "km^2"),
     ("", &["sqcm"], "cm^2"),
