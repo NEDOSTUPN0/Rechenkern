@@ -410,6 +410,16 @@ impl Parser<'_> {
                 let [a, b] = self.pair()?;
                 return Ok(Some(timespan(Expr::Range(a.boxed(), b.boxed()))));
             }
+            // "time Tokyo", "time at Tokyo now", "time now in Tokyo"
+            self.eat_word("now");
+            let mut p = self.clone();
+            p.eat_word("at");
+            if let Some((zone, n)) = p.zone_at(p.pos) {
+                *self = p;
+                self.pos += n;
+                self.eat_word("now");
+                return Ok(Some(Expr::Convert(now().boxed(), Target::Zone(zone))));
+            }
             return Ok(Some(now()));
         }
         Ok(Some(Expr::Time(TimeExpr::Today(0))))

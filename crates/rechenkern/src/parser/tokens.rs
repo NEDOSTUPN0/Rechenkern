@@ -245,9 +245,12 @@ impl<'a> Parser<'a> {
         (words, ends)
     }
 
-    /// "Tokyo time" or "Paris date".
+    /// "Tokyo time", "Tokyo local time" or "Paris date".
     pub(super) fn place_time_at(&self, i: usize) -> Option<(TimeZone, usize, bool)> {
-        let (tz, n) = self.place_at(i)?;
+        let (tz, mut n) = self.place_at(i)?;
+        if self.words_at(i + n, &["local"]) {
+            n += 1;
+        }
         let next = self.lower(i + n)?;
         matches!(next.as_str(), "time" | "date").then_some((tz, n + 1, next == "date"))
     }
