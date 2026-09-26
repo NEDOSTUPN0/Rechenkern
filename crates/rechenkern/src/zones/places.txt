@@ -36,6 +36,7 @@ nst = America/St_Johns
 ndt = America/St_Johns
 bst = Europe/London
 wet = Europe/Lisbon
+west = Europe/Lisbon
 cet = Europe/Berlin
 cest = Europe/Berlin
 eet = Europe/Athens
