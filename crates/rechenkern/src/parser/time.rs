@@ -174,9 +174,7 @@ impl Parser<'_> {
     pub(super) fn day_first_date(&mut self, n: Number) -> Result<Option<Expr>> {
         let Some(day) = n.to_i64().filter(|d| (1..=31).contains(d)) else { return Ok(None) };
         let mut p = self.clone();
-        if p.cur().and_then(|t| t.word()).is_some_and(|w| matches!(w, "st" | "nd" | "rd" | "th")) {
-            p.pos += 1;
-        }
+        p.eat_ordinal();
         p.eat_word("of");
         let Some((month, _)) = p.lower(p.pos).and_then(|w| words::month(&w)) else { return Ok(None) };
         p.pos += 1;
@@ -207,9 +205,7 @@ impl Parser<'_> {
         if p.lower(p.pos).is_some_and(|w| w == "am" || w == "pm") {
             return Ok(None);
         }
-        if p.cur().and_then(|t| t.word()).is_some_and(|w| matches!(w, "st" | "nd" | "rd" | "th")) {
-            p.pos += 1;
-        }
+        p.eat_ordinal();
         let year = p.year();
         *self = p;
         match year {

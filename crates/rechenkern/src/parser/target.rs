@@ -139,8 +139,7 @@ impl Parser<'_> {
                 Tok::Num(n) => {
                     self.pos += 1;
                     // "nearest 16th" rounds to sixteenths.
-                    if self.cur().and_then(|t| t.word()).is_some_and(|w| matches!(w, "st" | "nd" | "rd" | "th")) {
-                        self.pos += 1;
+                    if self.eat_ordinal() {
                         return Ok(Some((Rounding::Multiple(Number::ONE / *n, dir), Some(Format::Fraction))));
                     }
                     *n * self.scale_words()

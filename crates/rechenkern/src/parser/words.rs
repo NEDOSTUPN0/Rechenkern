@@ -154,6 +154,19 @@ pub static PHYSICAL_CONSTANTS: Phrases<usize> = Phrases::new(&[
     ("avogadro constant", 3),
 ]);
 
+/// Words between a base and its exponent: "3 raised to 9".
+pub static POWER_WORDS: Phrases<()> = Phrases::new(&[
+    ("to the power of", ()),
+    ("to the power", ()),
+    ("to the", ()),
+    ("raised to the power of", ()),
+    ("raised to the power", ()),
+    ("raised to the", ()),
+    ("raised to", ()),
+    ("exponent", ()),
+    ("power", ()),
+]);
+
 pub static FUNCTIONS: Phrases<Func> = Phrases::new(&[
     ("sqrt", Func::Sqrt),
     ("square root", Func::Sqrt),

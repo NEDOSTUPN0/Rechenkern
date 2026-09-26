@@ -441,16 +441,30 @@ impl<'a> Parser<'a> {
 
     fn power(&mut self) -> Result<Expr> {
         let base = self.postfix()?;
+        // "3 to the power of 2", "3 raised to the 9th power", "3 exponent 9"; not "March 1 to the 15th".
+        if !matches!(base, Expr::Time(_))
+            && let Some(exp) = self.exponent_in_words()
+        {
+            return Ok(Expr::binary(Op::Pow, base, exp));
+        }
         if self.at_sym("^") {
             self.pos += 1;
             return Ok(Expr::binary(Op::Pow, base, self.unary()?));
         }
-        // "3 to the power of 2"
-        if self.at_word("to") && self.words_at(self.pos + 1, &["the", "power", "of"]) {
-            self.pos += 4;
-            return Ok(Expr::binary(Op::Pow, base, self.unary()?));
-        }
         Ok(base)
+    }
+
+    /// The plain number after "raised to", "to the", "exponent": "raised to the 9th power".
+    fn exponent_in_words(&mut self) -> Option<Expr> {
+        let ((), n) = self.phrase_at(self.pos, &words::POWER_WORDS)?;
+        let mut p = self.clone();
+        p.pos += n;
+        let exp = p.unary().ok().filter(is_plain)?;
+        if p.eat_ordinal() {
+            p.eat_word("power");
+        }
+        *self = p;
+        Some(exp)
     }
 
     fn postfix(&mut self) -> Result<Expr> {

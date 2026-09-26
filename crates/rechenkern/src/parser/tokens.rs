@@ -71,6 +71,15 @@ impl<'a> Parser<'a> {
         words.iter().enumerate().all(|(k, w)| self.toks.get(i + k).is_some_and(|t| t.is_word(w)))
     }
 
+    /// Skips the ending of an ordinal number: the "th" of "9th".
+    pub(super) fn eat_ordinal(&mut self) -> bool {
+        let ordinal = self.cur().and_then(Token::word).is_some_and(|w| matches!(w, "st" | "nd" | "rd" | "th"));
+        if ordinal {
+            self.pos += 1;
+        }
+        ordinal
+    }
+
     /// Up to `max` consecutive words from `i`, joined by spaces (lowercase if
     /// asked), and where each word ends in the text.
     pub(super) fn joined_words(&self, i: usize, max: usize, lowercase: bool) -> (String, Vec<usize>) {
