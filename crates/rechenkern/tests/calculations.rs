@@ -328,6 +328,11 @@ fn units() {
         ("time to upload 3GB at 10 MB/s", "5 minutes"),
         ("1 hour 30 minutes at 1.5x", "1 hour"),
         ("speed of light in km/h", "1,079,252,849 km/h"),
+        ("3/4 cup in ml", "177.4411774 mL"),
+        ("100 / 4 kg", "25 kg"),
+        ("1/2 km + 3 km", "3.5 km"),
+        ("10 / 2 km/h", "5 km/h"),
+        ("100 per 4 kg", "25/kg"),
     ]);
 }
 

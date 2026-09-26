@@ -334,10 +334,21 @@ impl<'a> Parser<'a> {
             }
             // "3 permutations of 10" means 10 permutation 3.
             let swap = matches!(op, Op::Perm | Op::Comb) && len == 2;
+            let slash = self.cur().is_some_and(|t| t.is_sym("/"));
             self.pos += len;
+            let number_follows = self.cur().is_some_and(|t| matches!(t.tok, Tok::Num(_)));
             // "30 hours at $30/hour": the rate on the right is one value.
             let rhs =
                 if matches!(op, Op::At | Op::Of | Op::On | Op::Off) { self.multiplicative()? } else { self.unary()? };
+            // "3/4 cup", "100 / 4 kg": a plain number over an amount is a part of that amount.
+            if slash
+                && number_follows
+                && is_plain(&lhs)
+                && let Some(part) = over_amount(&lhs, &rhs)
+            {
+                lhs = part;
+                continue;
+            }
             // "per day" and "/ day" make a rate instead of cancelling units.
             let op = if op == Op::Div && matches!(rhs, Expr::BareUnit(_)) { Op::Per } else { op };
             lhs = if swap { Expr::binary(op, rhs, lhs) } else { Expr::binary(op, lhs, rhs) };
@@ -517,5 +528,21 @@ fn text_weight(expr: &Expr) -> u8 {
         2
     } else {
         1
+    }
+}
+
+/// A number without units: `3`, `-(2 + 1)`, `pi`.
+fn is_plain(expr: &Expr) -> bool {
+    !expr.contains(&|e| !matches!(e, Expr::Number(_) | Expr::Neg(_) | Expr::Factorial(_) | Expr::Binary(..)))
+}
+
+/// `n / 4 kg` as `(n / 4) kg`, keeping the unit of the amount: `(10 / 2) km/h`.
+fn over_amount(n: &Expr, amount: &Expr) -> Option<Expr> {
+    match amount {
+        Expr::WithUnit(number, unit) if matches!(**number, Expr::Number(_)) => {
+            Some(Expr::WithUnit(Expr::binary(Op::Div, n.clone(), (**number).clone()).boxed(), unit.clone()))
+        }
+        Expr::Binary(Op::Per, amount, per) => Some(Expr::Binary(Op::Per, over_amount(n, amount)?.boxed(), per.clone())),
+        _ => None,
     }
 }
