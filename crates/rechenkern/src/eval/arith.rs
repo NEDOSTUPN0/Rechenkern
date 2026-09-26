@@ -224,6 +224,11 @@ impl Env<'_> {
 
     /// Multiplies or divides quantities, merging units of the same kind.
     fn mul_quantities(&self, x: Quantity, y: Quantity, divide: bool) -> Result<Quantity> {
+        // "8 L/100km × 500 km": against another unit, a unit per an amount is a plain rate.
+        let (x, y) = match x.unit.is_none() || y.unit.is_none() {
+            true => (x, y),
+            false => (plain_rates(x), plain_rates(y)),
+        };
         let y_unit = if divide { y.unit.pow(-1) } else { y.unit.clone() };
         let number = if divide { x.number / y.number } else { x.number * y.number };
         // "$30 × 4 days" means $30 a day: money times a non-money unit stays money.
@@ -368,4 +373,9 @@ fn bitwise(op: Op, a: Value, b: Value) -> Result<Value> {
     };
     let n = i64::try_from(r).map(Number::from_i64).unwrap_or_else(|_| Number::from_f64(r as f64));
     Ok(Value::number(n))
+}
+
+fn plain_rates(q: Quantity) -> Quantity {
+    let (unit, multiplier) = q.unit.plain_rates();
+    Quantity::new(q.number * multiplier, unit)
 }

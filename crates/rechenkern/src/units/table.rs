@@ -213,6 +213,9 @@ fn definitions() -> Vec<Def> {
         unit("tbsp", "tablespoon", Dim::VOLUME, "0.00001478676478125").aliases(&["Tbsp", "tbs"]),
         unit("tsp", "teaspoon", Dim::VOLUME, "0.00000492892159375"),
         unit("bbl", "barrel", Dim::VOLUME, "0.158987294928"),
+        // Fuel consumption: a unit per an amount, read and multiplied by its symbol.
+        unit("L/100km", "liter per 100 kilometers", Dim::VOLUME.div(Dim::LENGTH), "0.00000001")
+            .plural("liters per 100 kilometers"),
         // Angle (base: radian)
         unit("rad", "radian", Dim::ANGLE, "1").prefixes(&[MILLI]),
         unit("°", "degree", Dim::ANGLE, "1").scale(pi / Number::from_i64(180)).aliases(&["deg", "degs"]).tight(),
@@ -524,9 +527,25 @@ pub(super) fn build() -> Registry {
         }
     }
 
+    let per_amount = (0..b.defs.len() as UnitId)
+        .filter_map(|id| {
+            let (rate, amount) = parse_per_amount(&b.exact, &b.defs[id as usize].symbol)?;
+            Some((id, rate, amount))
+        })
+        .collect();
+
     let max_words =
         b.folded.keys().chain(b.exact.keys()).map(|k| k.bytes().filter(|&b| b == b' ').count() + 1).max().unwrap_or(1);
-    Registry { defs: b.defs, exact: b.exact, folded: b.folded, compound_symbols, max_words }
+    Registry { defs: b.defs, exact: b.exact, folded: b.folded, compound_symbols, per_amount, max_words }
+}
+
+/// A symbol like "L/100km" names a unit per an amount of another: 0.01 L/km.
+fn parse_per_amount(exact: &TableMap<String, Unit>, symbol: &str) -> Option<(Unit, Number)> {
+    let (num, den) = symbol.split_once('/')?;
+    let digits = den.find(|c: char| !c.is_ascii_digit())?;
+    let amount = den[..digits].parse().ok()?;
+    let rate = exact.get(num)?.product(&exact.get(&den[digits..])?.pow(-1));
+    Some((rate, Number::ratio(1, amount)))
 }
 
 /// Regular plural of a currency name: "forint" -> "forints". Symbols get none.

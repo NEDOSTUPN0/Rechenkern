@@ -72,6 +72,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - `/unit` and `per unit` right after a value form a rate at postfix level, so
   `4 nights * $120/night` multiplies by the rate (`Op::Per` keeps units apart,
   plain `Op::Div` merges units of the same kind: `3 hours / 3 days` = 0.04).
+- A unit per an amount (`L/100km`) is a unit of its own, found by its symbol:
+  `liters per 100 km` builds "L/100km". Against another unit it works as the
+  plain rate (`8 L/100km * 500 km` = 40 L).
 - `BareUnit in X` is reversed: `seconds in a day` = 1 day in seconds.
 - A clock time followed by a zone is read in that zone (`3pm Tokyo`);
   `3pm in Tokyo` converts local 3pm; `9am in New York to Tokyo` places, then converts.

@@ -180,6 +180,19 @@ impl Parser<'_> {
             unit = unit.pow(e);
             self.pos += len;
         }
+        Some(self.per_amount(&unit).unwrap_or(unit))
+    }
+
+    /// A unit per an amount of another unit, known as a unit of its own: "L/100km", "liters per 100 km".
+    fn per_amount(&mut self, unit: &Unit) -> Option<Unit> {
+        if !self.cur().is_some_and(|t| t.is_sym("/") || t.is_word("per")) {
+            return None;
+        }
+        let Tok::Num(amount) = self.toks.get(self.pos + 1)?.tok else { return None };
+        let (per, n) = self.unit_at(self.pos + 2, true)?;
+        let symbol = format!("{}/{amount}{}", unit.single()?.symbol, per.single()?.symbol);
+        let unit = registry().lookup(&symbol)?;
+        self.pos += 2 + n;
         Some(unit)
     }
 

@@ -338,6 +338,13 @@ fn units() {
         ("0.08 L/km in mpg", "29.40182292 mpg"),
         ("3 per kg in lb", "1.36077711/lb"),
         ("0 Hz in seconds", "<error: division by zero>"),
+        ("30 mpg in L/100km", "7.840486111 L/100km"),
+        ("8 liters per 100 km in mpg", "29.40182292 mpg"),
+        ("5 l/100 km in km/L", "20 km/L"),
+        ("40 L / 500 km in L/100km", "8 L/100km"),
+        ("8 L/100km * 500 km", "40 L"),
+        ("8 L/100km * 2", "16 L/100km"),
+        ("cost of 500 km at 8 L/100km at $1.5/L", "$60.00"),
     ]);
 }
 

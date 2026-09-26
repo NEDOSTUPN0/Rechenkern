@@ -151,6 +151,24 @@ impl Unit {
         self.factors.iter().try_fold(Number::ONE, |acc, &(id, e)| Ok(acc * scale(id)?.powi(e as i64)))
     }
 
+    /// The unit with each unit per an amount written as a plain rate, and the
+    /// multiplier that goes with it: `L/100km` is 0.01 `L/km`.
+    pub fn plain_rates(&self) -> (Unit, Number) {
+        let reg = registry();
+        let mut unit = Unit::none();
+        let mut multiplier = Number::ONE;
+        for &(id, e) in &self.factors {
+            match reg.per_amount(id) {
+                Some((rate, amount)) => {
+                    unit = unit.product(&rate.pow(e));
+                    multiplier = multiplier * amount.powi(e as i64);
+                }
+                None => unit = unit.product(&Unit { factors: vec![(id, e)] }),
+            }
+        }
+        (unit, multiplier)
+    }
+
     /// Factors sorted by id, for order independent comparison.
     fn key(&self) -> Vec<(UnitId, i8)> {
         let mut key = self.factors.clone();
@@ -178,6 +196,8 @@ pub struct Registry {
     folded: TableMap<String, Unit>,
     /// Preferred symbols for compound units, e.g. `mi/h` is shown as "mph".
     compound_symbols: Vec<(Vec<(UnitId, i8)>, String)>,
+    /// Units per an amount of another unit, as a plain rate and its size: `L/100km` is 0.01 `L/km`.
+    per_amount: Vec<(UnitId, Unit, Number)>,
     /// Longest multi-word name, in words.
     max_words: usize,
 }
@@ -223,6 +243,10 @@ impl Registry {
 
     pub fn max_words(&self) -> usize {
         self.max_words
+    }
+
+    fn per_amount(&self, id: UnitId) -> Option<(&Unit, Number)> {
+        self.per_amount.iter().find(|p| p.0 == id).map(|(_, rate, amount)| (rate, *amount))
     }
 
     /// Preferred symbol for a compound unit ("mph", "kWh").
