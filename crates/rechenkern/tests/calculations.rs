@@ -289,6 +289,11 @@ fn percentages() {
         ("$10 for lunch + 15% tip", "$11.50"),
         ("6 is to 60 as 8 is to what", "80"),
         ("5 is to 10 as what is to 80", "40"),
+        ("10 is % of 20", "50%"),
+        ("what percent is 25 of 100", "25%"),
+        ("20 is % on 10", "100%"),
+        ("10 is what discount off 20", "50%"),
+        ("20 percentage of 50", "10"),
     ]);
 }
 

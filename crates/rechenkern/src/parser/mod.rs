@@ -497,7 +497,7 @@ impl<'a> Parser<'a> {
                     Expr::binary(Op::Pow, expr, Expr::Number(exp.into()))
                 }
                 Tok::Word(w) => match w.to_lowercase().as_str() {
-                    "percent" | "pct" => {
+                    "percent" | "pct" | "percentage" => {
                         self.pos += 1;
                         Expr::Percent(expr.boxed())
                     }

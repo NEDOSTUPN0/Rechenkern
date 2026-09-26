@@ -46,7 +46,7 @@ impl Parser<'_> {
             }
         }
 
-        // "what % of 200 is 20"
+        // "what % of 200 is 20", "what % is 20 of 200"
         if self.matches_at(0, &["what", "%", "of"])
             && let Some(is) = self.find(3, &["is"])
         {
@@ -54,14 +54,22 @@ impl Parser<'_> {
             let part = self.part(is + 1, end)?;
             return Ok(Some(pct(Expr::binary(Op::Div, part, whole))));
         }
+        if self.matches_at(0, &["what", "%", "is"])
+            && let Some(of) = self.find(3, &["of"])
+        {
+            let part = self.part(3, of)?;
+            let whole = self.part(of + 1, end)?;
+            return Ok(Some(pct(Expr::binary(Op::Div, part, whole))));
+        }
 
-        // "20 is what % of 200", "180 is what % off 200", "5 is what multiplier on 1"
-        for seq in [&["is", "what"][..], &["as", "a"][..], &["as"][..]] {
+        // "20 is what % of 200", "20 is % of 200", "180 is what discount off 200", "5 is what multiplier on 1"
+        for seq in [&["is", "what"][..], &["is"][..], &["as", "a"][..], &["as"][..]] {
             let Some(at) = self.find(0, seq) else { continue };
             let k = at + seq.len();
-            let format = if self.matches_at(k, &["%"]) {
+            let format = if self.matches_at(k, &["%"]) || self.matches_at(k, &["discount"]) {
                 Format::Percent
-            } else if self.matches_at(k, &["multiplier"]) || self.matches_at(k, &["x"]) {
+            // "5 is x on 1" could be a variable x, so a multiplier needs "what" or "as".
+            } else if (self.matches_at(k, &["multiplier"]) || self.matches_at(k, &["x"])) && seq != ["is"] {
                 Format::Multiplier
             } else {
                 continue;
