@@ -329,11 +329,12 @@ impl<'a> Parser<'a> {
         amount && self.unit_at(i + 1, true).is_some_and(|(u, _)| u.dim() == crate::units::Dim::TIME)
     }
 
-    /// The `%` at the cursor is modulo: `10 % 3`, but not `10% + 5` or `10%3`.
+    /// The `%` at the cursor is modulo: `10 % 3`, but not `10% + 5`, `10%3` or `10% coffee 5`.
     pub(super) fn modulo_follows(&self) -> bool {
-        let spaced = self.toks.get(self.pos + 1).is_some_and(|t| t.space_before);
-        let sign = self.toks.get(self.pos + 1).is_some_and(|t| t.is_sym("+") || t.is_sym("-"));
-        spaced && !sign && self.operand_follows(1)
+        let Some(next) = self.toks.get(self.pos + 1) else { return false };
+        let sign = next.is_sym("+") || next.is_sym("-");
+        let comment = next.word().is_some() && !self.significant(self.pos + 1);
+        next.space_before && !sign && !comment && self.operand_follows(1)
     }
 
     /// Something that multiplies without an operator follows: "(", a function,
