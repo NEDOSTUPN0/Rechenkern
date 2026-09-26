@@ -337,9 +337,14 @@ impl<'a> Parser<'a> {
     }
 
     /// Something that multiplies without an operator follows: "(", a function,
-    /// a constant or a variable.
+    /// a constant or a variable. Not after a comment: "5 cats (3)" is two values.
     pub(super) fn implicit_mul_follows(&mut self) -> bool {
         let Some(tok) = self.peek() else { return false };
+        let comment_before =
+            self.pos > 0 && self.toks[self.pos - 1].word().is_some() && !self.significant(self.pos - 1);
+        if comment_before {
+            return false;
+        }
         if tok.is_sym("(") {
             return true;
         }
