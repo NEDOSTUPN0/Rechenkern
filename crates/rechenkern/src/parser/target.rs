@@ -44,7 +44,19 @@ impl Parser<'_> {
         {
             return Ok(Some(rounded(expr, rounding, format)));
         }
-        if let Some(target) = self.target() {
+        // A date or time goes to a place, even one named like a unit: "time in Cordoba".
+        let zone = match is_moment(expr) {
+            true => self.zone_at(self.pos).filter(|&(_, n)| self.unit_at(self.pos, false).is_none_or(|(_, m)| m <= n)),
+            false => None,
+        };
+        let target = match zone {
+            Some((zone, n)) => {
+                self.pos += n;
+                Some(Target::Zone(zone))
+            }
+            None => self.target(),
+        };
+        if let Some(target) = target {
             // "9am in New York to Tokyo": the first zone says where the clock is.
             if let Target::Zone(zone) = &target
                 && matches!(expr, Expr::Time(TimeExpr::Clock { .. }))

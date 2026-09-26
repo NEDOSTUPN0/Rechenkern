@@ -500,6 +500,8 @@ fn time_zones() {
         ("current time in paris", "20:30 CEST"),
         ("time in Tokyo when it is 9am in London", "17:00 JST"),
         ("time in marseille", "20:30 CEST"),
+        ("time in cordoba", "15:30 UTC-3"),
+        ("time in the hague", "20:30 CEST"),
         ("time in aix-en-provence", "20:30 CEST"),
         ("time in sao jose dos campos", "15:30 UTC-3"),
         ("time in qwertyville", "<error: unknown place \"qwertyville\">"),
