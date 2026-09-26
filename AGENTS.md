@@ -97,6 +97,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Events with a fixed date (`GTA 6 release date`) live in `words::EVENTS`;
   their note (`(probably)`) is display only (`Expr::Noted`), never part of a
   calculation. Update or drop entries when the date changes or passes.
+- Daylight abbreviations (`EDT`, `AEDT`, `BST`) are fixed offsets; standard
+  ones (`EST`, `AEST`) follow the region all year, as people use them.
 - Clock-only answers show the date when it isn't today; `Moment::seconds`
   hides seconds of `now`.
 - Numbers show `Config::precision` significant digits (default 10) but never

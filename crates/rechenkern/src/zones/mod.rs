@@ -100,7 +100,7 @@ pub const MAX_WORDS: usize = 5;
 
 /// Finds a zone by lowercase place name or abbreviation, like "new york" or "pst".
 pub fn find(name: &str) -> Option<TimeZone> {
-    if let Some(zone) = INDEX.get(name).and_then(|id| TimeZone::get(id).ok()) {
+    if let Some(zone) = INDEX.get(name).and_then(|id| listed(id)) {
         return Some(zone);
     }
     // Full ids like "asia/tokyo" typed by the user.
@@ -108,6 +108,11 @@ pub fn find(name: &str) -> Option<TimeZone> {
         return TimeZone::get(name).ok();
     }
     city(name).and_then(|id| TimeZone::get(id).ok())
+}
+
+/// A zone from `places.txt`: an IANA id or a fixed offset in POSIX form ("EDT4").
+fn listed(id: &str) -> Option<TimeZone> {
+    TimeZone::get(id).or_else(|_| TimeZone::posix(id)).ok()
 }
 
 /// The known place spelled most like `name`, for "did you mean" hints.
@@ -231,7 +236,7 @@ mod tests {
     #[test]
     fn all_listed_zones_exist() {
         for (name, id) in INDEX.iter() {
-            assert!(TimeZone::get(id).is_ok(), "{name} = {id}");
+            assert!(listed(id).is_some(), "{name} = {id}");
         }
     }
 }

@@ -3,44 +3,46 @@
 # zone id (tokyo, almaty, new york...) are added automatically.
 # Countries spanning several zones use the capital's zone.
 
-# Abbreviations
+# Abbreviations. Standard time names the region's time all year, as people
+# use it ("EST" in summer); daylight time is a fixed offset in POSIX form,
+# where the sign is reversed ("EDT4" is UTC-4).
 utc = UTC
 gmt = UTC
 z = UTC
 zulu = UTC
 est = America/New_York
-edt = America/New_York
+edt = EDT4
 eastern = America/New_York
 eastern time = America/New_York
 cst = America/Chicago
-cdt = America/Chicago
+cdt = CDT5
 central = America/Chicago
 central time = America/Chicago
 mst = America/Denver
-mdt = America/Denver
+mdt = MDT6
 mountain = America/Denver
 mountain time = America/Denver
 pst = America/Los_Angeles
-pdt = America/Los_Angeles
+pdt = PDT7
 pacific = America/Los_Angeles
 pacific time = America/Los_Angeles
 akst = America/Anchorage
-akdt = America/Anchorage
+akdt = AKDT8
 alaska time = America/Anchorage
 hst = Pacific/Honolulu
 hawaii time = Pacific/Honolulu
 ast = America/Halifax
-adt = America/Halifax
+adt = ADT3
 atlantic time = America/Halifax
 nst = America/St_Johns
-ndt = America/St_Johns
-bst = Europe/London
+ndt = NDT2:30
+bst = BST-1
 wet = Europe/Lisbon
-west = Europe/Lisbon
+west = WEST-1
 cet = Europe/Berlin
-cest = Europe/Berlin
+cest = CEST-2
 eet = Europe/Athens
-eest = Europe/Athens
+eest = EEST-3
 msk = Europe/Moscow
 gst = Asia/Dubai
 irst = Asia/Tehran
@@ -56,11 +58,11 @@ jst = Asia/Tokyo
 kst = Asia/Seoul
 awst = Australia/Perth
 acst = Australia/Adelaide
-acdt = Australia/Adelaide
+acdt = ACDT-10:30
 aest = Australia/Sydney
-aedt = Australia/Sydney
+aedt = AEDT-11
 nzst = Pacific/Auckland
-nzdt = Pacific/Auckland
+nzdt = NZDT-13
 sast = Africa/Johannesburg
 brt = America/Sao_Paulo
 

@@ -510,6 +510,8 @@ fn time_zones() {
         ("time in cordoba", "15:30 UTC-3"),
         ("time in the hague", "20:30 CEST"),
         ("3pm WEST in UTC", "14:00 UTC"),
+        ("Jan 10 3pm EDT in UTC", "Sat, 10 Jan 2026 19:00 UTC"),
+        ("Jan 10 3pm EST in UTC", "Sat, 10 Jan 2026 20:00 UTC"),
         ("time in aix-en-provence", "20:30 CEST"),
         ("time in sao jose dos campos", "15:30 UTC-3"),
         ("time in qwertyville", "<error: unknown place \"qwertyville\">"),
