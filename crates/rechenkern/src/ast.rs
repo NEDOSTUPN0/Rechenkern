@@ -252,6 +252,8 @@ pub enum Holiday {
     Christmas,
     BoxingDay,
     OrthodoxChristmas,
+    ChineseNewYear,
+    ChineseNewYearsEve,
 }
 
 /// What `in`, `to` or `as` converts into.

@@ -414,6 +414,8 @@ fn dates() {
         ("greek easter 2027", "Sun, 2 May 2027"),
         ("orthodox good friday 2027", "Fri, 30 Apr 2027"),
         ("serbian christmas 2027", "Thu, 7 Jan 2027"),
+        ("chinese new year 2027", "Sat, 6 Feb 2027"),
+        ("days until lunar new year", "136 days"),
         ("days until christmas", "93 days"),
         ("GTA 6 release date", "Thu, 19 Nov 2026 (probably)"),
         ("days until GTA VI", "57 days"),

@@ -433,7 +433,34 @@ fn holiday_date(holiday: Holiday, year: i16) -> Result<Date> {
         Holiday::OrthodoxGoodFriday => orthodox_easter(year)?.checked_sub(days(2))?,
         Holiday::Thanksgiving => d(11, 1)?.nth_weekday_of_month(4, Weekday::Thursday)?,
         Holiday::BlackFriday => d(11, 1)?.nth_weekday_of_month(4, Weekday::Thursday)?.checked_add(days(1))?,
+        Holiday::ChineseNewYear => chinese_new_year(year)?,
+        Holiday::ChineseNewYearsEve => chinese_new_year(year)?.checked_sub(days(1))?,
     })
+}
+
+/// Days after January 21 that Chinese New Year falls on, from 1900 to 2100.
+/// From the Chinese calendar in ICU, checked against the new moons.
+#[rustfmt::skip]
+const CHINESE_NEW_YEAR: [u8; 201] = [
+    10, 29, 18, 8, 26, 14, 4, 23, 12, 1, 20, 9, 28, 16, 5, 24, 14, 2, 21, 11,
+    30, 18, 7, 26, 15, 3, 23, 12, 2, 20, 9, 27, 16, 5, 24, 14, 3, 21, 10, 29,
+    18, 6, 25, 15, 4, 23, 12, 1, 20, 8, 27, 16, 6, 24, 13, 3, 22, 10, 28, 18,
+    7, 25, 15, 4, 23, 12, 0, 19, 9, 27, 16, 6, 25, 13, 2, 21, 10, 28, 17, 7,
+    26, 15, 4, 23, 12, 30, 19, 8, 27, 16, 6, 25, 14, 2, 20, 10, 29, 17, 7, 26,
+    15, 3, 22, 11, 1, 19, 8, 28, 17, 5, 24, 13, 2, 20, 10, 29, 18, 7, 26, 15,
+    4, 22, 11, 1, 20, 8, 27, 16, 5, 23, 13, 2, 21, 10, 29, 18, 7, 25, 14, 3,
+    22, 11, 1, 20, 9, 27, 16, 5, 24, 12, 2, 21, 11, 29, 18, 7, 25, 14, 3, 22,
+    12, 0, 19, 8, 27, 15, 5, 24, 13, 2, 21, 10, 29, 17, 6, 25, 15, 3, 22, 12,
+    1, 19, 8, 27, 16, 5, 24, 13, 3, 20, 9, 28, 17, 6, 25, 15, 4, 22, 11, 0,
+    19,
+];
+
+/// Chinese New Year, which follows the moon, so it comes from a table.
+fn chinese_new_year(year: i16) -> Result<Date> {
+    let Some(&offset) = usize::try_from(year - 1900).ok().and_then(|i| CHINESE_NEW_YEAR.get(i)) else {
+        bail!("Chinese New Year is only known from 1900 to 2100");
+    };
+    Ok(Date::new(year, 1, 21)?.checked_add(days(offset as i64))?)
 }
 
 /// Western Easter (anonymous Gregorian algorithm).
@@ -472,5 +499,13 @@ mod tests {
         assert_eq!(easter(2024).unwrap(), Date::new(2024, 3, 31).unwrap());
         assert_eq!(easter(2027).unwrap(), Date::new(2027, 3, 28).unwrap());
         assert_eq!(orthodox_easter(2024).unwrap(), Date::new(2024, 5, 5).unwrap());
+    }
+
+    #[test]
+    fn chinese_new_year_dates() {
+        assert_eq!(chinese_new_year(1900).unwrap(), Date::new(1900, 1, 31).unwrap());
+        assert_eq!(chinese_new_year(2024).unwrap(), Date::new(2024, 2, 10).unwrap());
+        assert_eq!(chinese_new_year(2100).unwrap(), Date::new(2100, 2, 9).unwrap());
+        assert!(chinese_new_year(2101).is_err());
     }
 }

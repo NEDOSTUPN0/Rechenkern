@@ -347,6 +347,14 @@ pub static HOLIDAYS: Phrases<Holiday> = Phrases::new(&[
     ("serbian christmas", Holiday::OrthodoxChristmas),
     ("coptic christmas", Holiday::OrthodoxChristmas),
     ("ethiopian christmas", Holiday::OrthodoxChristmas),
+    ("chinese new year", Holiday::ChineseNewYear),
+    ("lunar new year", Holiday::ChineseNewYear),
+    ("spring festival", Holiday::ChineseNewYear),
+    ("chinese new year's eve", Holiday::ChineseNewYearsEve),
+    ("chinese new years eve", Holiday::ChineseNewYearsEve),
+    ("chinese new year eve", Holiday::ChineseNewYearsEve),
+    ("lunar new year's eve", Holiday::ChineseNewYearsEve),
+    ("lunar new years eve", Holiday::ChineseNewYearsEve),
 ]);
 
 /// An event with a known date.
