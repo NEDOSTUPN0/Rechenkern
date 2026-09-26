@@ -398,6 +398,8 @@ fn dates() {
         ("January 30 2020 + 3 months 2 weeks 5 days", "Tue, 19 May 2020"),
         ("January 31 2020 + 1 month", "Sat, 29 Feb 2020"),
         ("3 days ago", "Sun, 20 Sep 2026"),
+        ("3 days in the past", "Sun, 20 Sep 2026"),
+        ("2 weeks in the future", "Wed, 7 Oct 2026"),
         ("4 days from now", "Sun, 27 Sep 2026"),
         ("$100 from 1990 is worth what today", "<error: expected a length of time before \"from\">"),
         ("in 3 days", "Sat, 26 Sep 2026"),

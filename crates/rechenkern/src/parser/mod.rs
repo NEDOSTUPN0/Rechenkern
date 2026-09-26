@@ -400,6 +400,8 @@ impl<'a> Parser<'a> {
     }
 
     fn postfix(&mut self) -> Result<Expr> {
+        let from_now =
+            |expr: Expr, later: bool| Expr::binary(if later { Op::Add } else { Op::Sub }, time::now_for(&expr), expr);
         let mut expr = self.primary()?;
         loop {
             let Some(tok) = self.cur() else { return Ok(expr) };
@@ -440,13 +442,15 @@ impl<'a> Parser<'a> {
                         self.pos += 1;
                         Expr::binary(Op::Pow, expr, Expr::Number(exp.into()))
                     }
-                    "ago" => {
+                    "ago" | "later" => {
                         self.pos += 1;
-                        Expr::binary(Op::Sub, time::now_for(&expr), expr)
+                        from_now(expr, w.eq_ignore_ascii_case("later"))
                     }
-                    "later" => {
-                        self.pos += 1;
-                        Expr::binary(Op::Add, time::now_for(&expr), expr)
+                    // "3 days in the past", "2 weeks in the future"
+                    "in" if ["past", "future"].iter().any(|w| self.words_at(self.pos + 1, &["the", w])) => {
+                        let later = self.words_at(self.pos + 1, &["the", "future"]);
+                        self.pos += 3;
+                        from_now(expr, later)
                     }
                     _ => return Ok(expr),
                 },
