@@ -445,6 +445,10 @@ pub(super) fn build() -> Registry {
         });
         let unit = Unit::of(id);
         b.exact.entry(c.code.into()).or_insert_with(|| unit.clone());
+        // "HKD$" for dollars with a symbol like "HK$".
+        if c.symbol.is_some_and(|s| s.ends_with('$')) {
+            b.exact.entry(format!("{}$", c.code)).or_insert_with(|| unit.clone());
+        }
         let lower = c.code.to_lowercase();
         if !AMBIGUOUS_CODES.contains(&lower.as_str()) {
             b.folded.entry(lower).or_insert_with(|| unit.clone());

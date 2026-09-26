@@ -179,6 +179,12 @@ impl<'a> Parser<'a> {
         }
         let word = tok.word()?;
         if word == "$" {
+            // "$AUD": the code says which dollar.
+            if let Some(next) = self.toks.get(i + 1).filter(|t| !t.space_before).and_then(Token::word)
+                && let Some(u) = registry().lookup(next).filter(Unit::is_money)
+            {
+                return Some((u, 2));
+            }
             return Some((self.dollar(), 1));
         }
         if word.eq_ignore_ascii_case("in") || (!after_number && matches!(word, "a" | "A" | "an")) {

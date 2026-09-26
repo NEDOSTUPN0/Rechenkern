@@ -33,7 +33,7 @@ pub const AMBIGUOUS_CODES: &[&str] = &[
 #[rustfmt::skip]
 pub static CURRENCIES: &[Currency] = &[
     // Most used first: ambiguous names resolve to the earliest entry.
-    fiat("USD", "$", 2, &["US$", "USD$", "dollar", "buck", "us dollar", "american dollar"]),
+    fiat("USD", "$", 2, &["US$", "dollar", "buck", "us dollar", "american dollar"]),
     fiat("EUR", "€", 2, &["€", "euro"]),
     fiat("GBP", "£", 2, &["£", "quid", "sterling", "pound sterling", "pounds sterling", "british pound"]),
     fiat("JPY", "¥", 0, &["¥", "JP¥", "円", "yen", "japanese yen"]),
