@@ -55,6 +55,41 @@ fn gcd(a: i64, b: i64) -> i64 {
     if b == 0 { a.abs() } else { gcd(b, a % b) }
 }
 
+/// Deterministic Miller-Rabin: these bases decide every 64-bit number.
+fn is_prime(n: i64) -> bool {
+    const BASES: [u64; 12] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+    let Ok(n) = u64::try_from(n) else { return false };
+    if n < 2 {
+        return false;
+    }
+    if let Some(&p) = BASES.iter().find(|&&p| n % p == 0) {
+        return n == p;
+    }
+    let mul = |a: u64, b: u64| (a as u128 * b as u128 % n as u128) as u64;
+    let pow = |mut base: u64, mut exp: u64| {
+        let mut result = 1;
+        while exp > 0 {
+            if exp & 1 == 1 {
+                result = mul(result, base);
+            }
+            base = mul(base, base);
+            exp >>= 1;
+        }
+        result
+    };
+    let (d, s) = ((n - 1) >> (n - 1).trailing_zeros(), (n - 1).trailing_zeros());
+    BASES.iter().all(|&a| {
+        let mut x = pow(a, d);
+        if x == 1 || x == n - 1 {
+            return true;
+        }
+        (1..s).any(|_| {
+            x = mul(x, x);
+            x == n - 1
+        })
+    })
+}
+
 /// Small xorshift generator seeded from the clock; good enough for dice.
 fn random() -> f64 {
     use std::hash::{BuildHasher, RandomState};
@@ -164,6 +199,8 @@ impl Env<'_> {
                 };
                 real(n.apply(f))
             }
+            // "is 17.5 prime" is simply false.
+            IsPrime => Ok(Value::Bool(plain(x, "prime")?.to_i64().is_some_and(is_prime))),
             Midpoint => {
                 arity(2)?;
                 match (&args[0], &args[1]) {

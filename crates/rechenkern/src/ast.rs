@@ -217,6 +217,8 @@ pub enum Func {
     Bin,
     Oct,
     Int,
+    /// `is 17 prime`: true or false.
+    IsPrime,
 }
 
 /// Reference to answers of earlier lines.

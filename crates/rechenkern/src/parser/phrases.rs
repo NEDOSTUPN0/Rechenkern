@@ -1,7 +1,7 @@
 //! Whole-line phrases: percentage questions and proportions.
 
 use super::Parser;
-use crate::ast::{Expr, Format, GrowthResult, Op, Target, TimeExpr};
+use crate::ast::{Expr, Format, Func, GrowthResult, Op, Target, TimeExpr};
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -17,6 +17,9 @@ impl Parser<'_> {
             return Ok(Some(expr));
         }
         if let Some(expr) = self.percent_change()? {
+            return Ok(Some(expr));
+        }
+        if let Some(expr) = self.prime_check() {
             return Ok(Some(expr));
         }
         // Every phrase below has one of these words.
@@ -281,6 +284,23 @@ impl Parser<'_> {
 
     fn find_sym(&self, from: usize, sym: &str) -> Option<usize> {
         (from..self.toks.len()).find(|&i| self.toks[i].is_sym(sym))
+    }
+
+    /// "is 17 prime", "is 17 a prime number", "is prime 17".
+    fn prime_check(&self) -> Option<Expr> {
+        if !self.matches_at(0, &["is"]) {
+            return None;
+        }
+        let end = self.toks.len();
+        let n = if self.matches_at(1, &["prime"]) {
+            self.part(2, end)
+        } else {
+            let tails = [&["a", "prime", "number"][..], &["prime", "number"], &["prime"]];
+            let tail = tails.into_iter().find(|t| self.ends_with(t))?;
+            self.part(1, end - tail.len())
+        };
+        // Anything but a number there is ordinary text.
+        n.ok().map(|n| Expr::Call(Func::IsPrime, vec![n]))
     }
 
     /// Parses tokens `from..to` as one expression.
