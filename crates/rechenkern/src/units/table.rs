@@ -451,6 +451,9 @@ pub(super) fn build() -> Registry {
         }
         for alias in c.aliases {
             b.spelling(alias, &unit);
+            if let Some(plural) = plural(alias) {
+                b.spelling(&plural, &unit);
+            }
         }
     }
     for &(code, name, plural, aliases) in MINOR_UNITS {
@@ -520,6 +523,12 @@ pub(super) fn build() -> Registry {
     let max_words =
         b.folded.keys().chain(b.exact.keys()).map(|k| k.bytes().filter(|&b| b == b' ').count() + 1).max().unwrap_or(1);
     Registry { defs: b.defs, exact: b.exact, folded: b.folded, compound_symbols, max_words }
+}
+
+/// Regular plural of a currency name: "forint" -> "forints". Symbols get none.
+fn plural(alias: &str) -> Option<String> {
+    let is_name = alias.len() > 2 && alias.chars().all(|c| c.is_lowercase() || " '".contains(c));
+    (is_name && !alias.ends_with(['s', 'h'])).then(|| format!("{alias}s"))
 }
 
 /// Parses definitions like "km/h", "W*h" or "m^2" made of exact symbols.

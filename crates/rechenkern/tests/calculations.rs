@@ -372,6 +372,8 @@ fn currencies() {
         ("USD 20", "$20.00"),
         ("20 dollars", "$20.00"),
         ("15 bucks", "$15.00"),
+        ("500 kazakhstani tenges in rubles", "₽90.00"),
+        ("1000 hungarian forints", "1,000.00 HUF"),
         ("$19 for breakfast + $22 for the uber", "$41.00"),
         ("10 USD in EUR, JPY", "€9.00, ¥1,500"),
         ("$10 in eur and gbp", "€9.00, £8.00"),
