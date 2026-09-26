@@ -26,8 +26,8 @@ const fn crypto(code: &'static str, aliases: &'static [&'static str]) -> Currenc
 
 /// Lowercase codes that are common English words or units, so only uppercase works.
 pub const AMBIGUOUS_CODES: &[&str] = &[
-    "all", "apt", "atom", "bam", "bob", "cup", "dot", "etc", "gel", "imp", "link", "mad", "mop", "near", "op", "pen",
-    "sos", "ton", "top", "try", "uni",
+    "all", "apt", "atom", "bam", "bob", "cup", "dash", "dot", "etc", "gel", "imp", "link", "mad", "mop", "near", "op",
+    "pen", "sos", "ton", "top", "try", "uni",
 ];
 
 #[rustfmt::skip]
@@ -166,6 +166,7 @@ pub static CURRENCIES: &[Currency] = &[
     fiat("SRD", "", 2, &["surinamese dollar"]),
     fiat("SSP", "", 2, &["south sudanese pound"]),
     fiat("STN", "", 2, &["dobra", "são tomé and príncipe dobra"]),
+    fiat("SVC", "", 2, &["salvadoran colon", "el salvador colon"]),
     fiat("SYP", "", 2, &["syrian pound"]),
     fiat("SZL", "", 2, &["lilangeni", "emalangeni", "swazi lilangeni", "swazi emalangeni"]),
     fiat("TJS", "", 2, &["somoni", "tajikistani somoni"]),
@@ -224,6 +225,10 @@ pub static CURRENCIES: &[Currency] = &[
     crypto("HBAR", &["hedera"]),
     crypto("FIL", &["filecoin"]),
     crypto("ICP", &[]),
+    crypto("BSV", &["bitcoin sv"]),
+    crypto("DASH", &[]),
+    crypto("NEO", &[]),
+    crypto("LUNA", &[]),
 ];
 
 /// The smallest unit of a currency, worth 10^-decimals of it: (code, name, plural, aliases).

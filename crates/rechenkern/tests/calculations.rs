@@ -379,6 +379,7 @@ fn currencies() {
         ("10 TL", "₺10.00"),
         ("$CAD 20", "C$20.00"),
         ("HKD$ 10", "HK$10.00"),
+        ("3 DASH", "3 DASH"),
         ("$19 for breakfast + $22 for the uber", "$41.00"),
         ("10 USD in EUR, JPY", "€9.00, ¥1,500"),
         ("$10 in eur and gbp", "€9.00, £8.00"),
