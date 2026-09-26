@@ -248,6 +248,10 @@ impl Parser<'_> {
                 // "in 3 days"
                 self.pos += 1;
                 let amount = self.multiplicative()?;
+                // "in Q3" is the quarter itself.
+                if let Expr::Period(..) = amount {
+                    return Ok(Some(amount));
+                }
                 return Ok(Some(Expr::binary(crate::ast::Op::Add, now_for(&amount), amount)));
             }
             "from" if self.operand_follows(1) => {
@@ -274,6 +278,10 @@ impl Parser<'_> {
             }
             _ => {}
         }
+        if let Some((first, length, n)) = self.quarter_at(self.pos, &w) {
+            self.pos += n;
+            return Ok(Some(Expr::Period(first.boxed(), length.boxed())));
+        }
         if let Some(expr) = self.time_word_date()? {
             return self.date_tail(expr).map(Some);
         }
@@ -299,11 +307,7 @@ impl Parser<'_> {
             "tomorrow" => return day(self, 1, 1),
             "yesterday" => return day(self, 1, -1),
             "next" | "last" | "this" => {
-                let which = match w.as_str() {
-                    "next" => Which::Next,
-                    "last" => Which::Last,
-                    _ => Which::This,
-                };
+                let which = words::which(&w).unwrap_or(Which::This);
                 if let Some((weekday, _)) = words::weekday(&next) {
                     self.pos += 2;
                     return Ok(Some(Expr::Time(TimeExpr::Weekday(weekday, Some(which)))));
@@ -437,14 +441,18 @@ impl Parser<'_> {
         words.iter().any(|w| self.eat_word(w)).then_some(false)
     }
 
-    /// The end of a range; "through March 10" counts March 10 too, so it ends a day later.
+    /// The end of a range; "through March 10" counts March 10 too, so it ends a day later,
+    /// and "through Q4" ends with the quarter.
     pub(super) fn range_end(&mut self, through: bool) -> Result<Expr> {
         let end = self.additive()?;
         if !through || super::target::is_clock(&end) {
             return Ok(end);
         }
-        let day = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("d"));
-        Ok(Expr::binary(crate::ast::Op::Add, end, day))
+        let (end, length) = match end {
+            Expr::Period(first, length) => (*first, *length),
+            end => (end, Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("d"))),
+        };
+        Ok(Expr::binary(crate::ast::Op::Add, end, length))
     }
 
     /// "difference between Seattle and Tokyo", "Seattle Tokyo", "Tokyo" (from here)
@@ -525,16 +533,42 @@ impl Parser<'_> {
             return Some((start, months(12), p.pos - i));
         }
         let w = self.lower(i)?;
-        let quarter = w.strip_prefix('q').and_then(|q| q.parse::<i8>().ok()).filter(|q| (1..=4).contains(q));
-        let (month, count) = match (words::month(&w), quarter) {
-            (Some((month, _)), _) => (month, 1),
-            (None, Some(q)) => ((q - 1) * 3 + 1, 3),
-            _ => return None,
-        };
+        if let Some(quarter) = self.quarter_at(i, &w) {
+            return Some(quarter);
+        }
+        let (month, _) = words::month(&w)?;
         p.pos = i + 1;
         let year = p.year().map(|y| y as i16);
         let start = Expr::Time(TimeExpr::Date { year, month, day: 1 });
-        Some((start, months(count), p.pos - i))
+        Some((start, months(1), p.pos - i))
+    }
+
+    /// The quarter at token `i` is a value, not a label as in "Q2 sales 600" or "Q3 $10k".
+    pub(super) fn quarter_starts(&self, i: usize) -> bool {
+        let mut p = self.clone();
+        p.pos = i + 1;
+        match p.cur().map(|t| &t.tok) {
+            Some(Tok::Num(_)) => p.year().is_some(),
+            Some(Tok::Word(_)) => self.significant(i + 1) && self.unit_at(i + 1, false).is_none(),
+            _ => true,
+        }
+    }
+
+    /// A quarter at token `i`, whose word is `w`: `Q3`, `Q3 2026`, `Q3 of 2026`, `next quarter`.
+    fn quarter_at(&self, i: usize, w: &str) -> Option<(Expr, Expr, usize)> {
+        let (first, n) = match (words::which(w), words::quarter(w)) {
+            (Some(which), _) if self.words_at(i + 1, &["quarter"]) => (TimeExpr::Quarter(which), 2),
+            (_, Some(quarter)) => {
+                let mut p = self.clone();
+                p.pos = i + 1 + usize::from(self.words_at(i + 1, &["of"]));
+                let year = p.year().map(|y| y as i16);
+                let n = if year.is_some() { p.pos - i } else { 1 };
+                (TimeExpr::Date { year, month: (quarter - 1) * 3 + 1, day: 1 }, n)
+            }
+            _ => return None,
+        };
+        let length = Expr::WithUnit(Expr::Number(Number::from_i64(3)).boxed(), registry().get("mo"));
+        Some((Expr::Time(first), length, n))
     }
 
     /// A date or time starts at token `i`.
@@ -555,6 +589,7 @@ impl Parser<'_> {
                     w.as_str(),
                     "now" | "today" | "tomorrow" | "yesterday" | "next" | "last" | "this" | "noon" | "midnight"
                 ) || words::month(&w).is_some()
+                    || words::quarter(&w).is_some()
                     || words::weekday(&w).is_some()
                     || p.phrase_at(p.pos, &words::HOLIDAYS).is_some()
                     || p.event_at(p.pos).is_some()

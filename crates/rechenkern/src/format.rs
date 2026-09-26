@@ -19,6 +19,11 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
         let separator = if config.decimal_comma { "; " } else { ", " };
         return values.iter().map(|v| render(v, &Display::Auto, config, now)).collect::<Vec<_>>().join(separator);
     }
+    if let (Display::Period, Value::Duration(d)) = (display, value)
+        && let Some(text) = period(d)
+    {
+        return text;
+    }
     match value {
         Value::Quantity(q) => quantity(q, display, config),
         Value::Percent(p) => format!("{}%", number(*p, config)),
@@ -161,7 +166,7 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         Display::Plain => {
             plain_digits(q.number, config.precision.max(20)).unwrap_or_else(|| scientific(q.number, config.precision))
         }
-        Display::Auto | Display::Each(_) | Display::Note(_) => {
+        Display::Auto | Display::Each(_) | Display::Note(_) | Display::Period => {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config);
             }
@@ -311,6 +316,14 @@ fn moment(m: &Moment, config: &Config, now: &Zoned) -> String {
         text.push_str(&zones::label(&m.time));
     }
     text
+}
+
+/// The first and last day of an anchored duration: "1 Jul – 30 Sep 2026".
+fn period(d: &Duration) -> Option<String> {
+    let first = d.anchor?.date();
+    let last = first.checked_add(d.span).ok()?.yesterday().ok()?;
+    let start = if first.year() == last.year() { first.strftime("%-d %b") } else { first.strftime("%-d %b %Y") };
+    Some(format!("{start} – {}", last.strftime("%-d %b %Y")))
 }
 
 fn clock(time: &Zoned, h24: bool, seconds: bool) -> String {

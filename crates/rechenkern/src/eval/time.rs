@@ -5,7 +5,7 @@ use jiff::tz::TimeZone;
 use jiff::{Span, Timestamp, Unit as Cal, Zoned};
 
 use super::Env;
-use crate::ast::{Holiday, TimeExpr, Which};
+use crate::ast::{Expr, Holiday, TimeExpr, Which};
 use crate::error::{Error, Result, bail};
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
@@ -195,12 +195,11 @@ impl Env<'_> {
             }
             TimeExpr::Weekday(weekday, which) => self.date_moment(weekday_date(today, *weekday, *which)?),
             TimeExpr::Period(unit, which) => {
-                let step = match which {
-                    Which::Next => 1,
-                    Which::Last => -1,
-                    Which::This => 0,
-                };
-                self.date_moment(today.checked_add(set(Span::new(), *unit, step)?)?)
+                self.date_moment(today.checked_add(set(Span::new(), *unit, which.step())?)?)
+            }
+            TimeExpr::Quarter(which) => {
+                let first = today.first_of_month().checked_sub(Span::new().months((today.month() - 1) % 3))?;
+                self.date_moment(first.checked_add(Span::new().months(3 * which.step()))?)
             }
             TimeExpr::Clock { hour, minute, second, on } => {
                 let (date, zone) = match on {
@@ -261,6 +260,21 @@ impl Env<'_> {
             return Ok(Moment { time: date.to_zoned(zone.clone())?, zoned: true, ..m });
         }
         Ok(Moment { time: m.time.with_time_zone(zone.clone()), zoned: true, ..m })
+    }
+
+    /// A range endpoint; a period there is its first day: `days until Q4`.
+    pub(super) fn endpoint(&self, e: &Expr) -> Result<Value> {
+        match e {
+            Expr::Period(first, _) => self.eval(first),
+            e => self.eval(e),
+        }
+    }
+
+    /// A period as the time from its first day to the next period's.
+    pub(super) fn period(&self, first: &Expr, length: &Expr) -> Result<Value> {
+        let first = self.eval(first)?;
+        let end = self.add(first.clone(), self.eval(length)?)?;
+        self.range(first, end)
     }
 
     pub(super) fn range(&self, a: Value, b: Value) -> Result<Value> {

@@ -35,6 +35,8 @@ pub enum Display {
     Each(Vec<Value>),
     /// A remark after the value: "Thu, 19 Nov 2026 (probably)".
     Note(&'static str),
+    /// A duration as its first and last day: "1 Jul – 30 Sep 2026".
+    Period,
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -80,6 +82,7 @@ impl Env<'_> {
                 Ok((value, display))
             }
             Expr::Noted(inner, note) => Ok((self.eval(inner)?, Display::Note(note))),
+            Expr::Period(..) => Ok((self.eval(expr)?, Display::Period)),
             _ => Ok((self.eval(expr)?, Display::Auto)),
         }
     }
@@ -112,7 +115,8 @@ impl Env<'_> {
             Expr::Line(line) => self.line(*line)?,
             Expr::Time(t) => Value::Moment(self.moment(t)?),
             Expr::InZone(inner, zone) => Value::Moment(self.place_in_zone(self.eval(inner)?, zone)?),
-            Expr::Range(a, b) => self.range(self.eval(a)?, self.eval(b)?)?,
+            Expr::Range(a, b) => self.range(self.endpoint(a)?, self.endpoint(b)?)?,
+            Expr::Period(first, length) => self.period(first, length)?,
             Expr::ZoneDiff(a, b) => self.zone_difference(a, b)?,
             Expr::Convert(..) => self.answer(expr)?.0,
             Expr::Round(inner, rounding) => self.round(self.eval(inner)?, *rounding)?,

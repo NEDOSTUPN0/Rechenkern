@@ -47,6 +47,8 @@ pub enum Expr {
     InZone(Box<Expr>, TimeZone),
     /// Time between two moments: `9am to 5pm`.
     Range(Box<Expr>, Box<Expr>),
+    /// A calendar period, its first day and length: `Q3 2026`.
+    Period(Box<Expr>, Box<Expr>),
     /// Difference between the UTC offsets of two zones.
     ZoneDiff(TimeZone, TimeZone),
     Convert(Box<Expr>, Target),
@@ -98,7 +100,7 @@ impl Expr {
     pub fn contains(&self, f: &impl Fn(&Expr) -> bool) -> bool {
         f(self)
             || match self {
-                Expr::Binary(_, a, b) | Expr::Range(a, b) => a.contains(f) || b.contains(f),
+                Expr::Binary(_, a, b) | Expr::Range(a, b) | Expr::Period(a, b) => a.contains(f) || b.contains(f),
                 Expr::Composite(parts) => parts.iter().any(|p| p.contains(f)),
                 Expr::WithUnit(e, _)
                 | Expr::Percent(e)
@@ -241,6 +243,17 @@ pub enum Which {
     This,
 }
 
+impl Which {
+    /// Periods to move from the current one.
+    pub fn step(self) -> i64 {
+        match self {
+            Which::Next => 1,
+            Which::Last => -1,
+            Which::This => 0,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum TimeExpr {
     /// Current date and time: `now`, `time`.
@@ -256,6 +269,8 @@ pub enum TimeExpr {
     Weekday(Weekday, Option<Which>),
     /// `next week`, `last month`: today moved by one period.
     Period(jiff::Unit, Which),
+    /// First day of this, next or last quarter.
+    Quarter(Which),
     /// A time of day, optionally on a given date.
     Clock {
         hour: i8,

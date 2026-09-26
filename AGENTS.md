@@ -110,6 +110,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   `monthly`/`weekly` spread the total over the loan's time.
 - Workdays (Mon–Fri, no public holidays yet) have their own dimension, so they
   never mix with time; `in workdays` counts them over a range or duration.
+- Quarters (`Q3 2026`, `next quarter`) are periods (`Expr::Period`): alone they show
+  their first and last day, in a calculation they are their length (`Q3 in days` =
+  92 days), and a range starts at their first day (`days until Q4`) or runs through
+  them (`Q1 through Q2`). A quarter right before a value or a comment is a label
+  (`Q2 sales 600`, `Q3 $10k`).
 - Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`.
 - Month = 30.436875 days, year = 365.2425 days (as in Soulver). Date
   arithmetic uses calendar spans (`Jan 31 + 1 month` = `Feb 29` in 2020).

@@ -5,7 +5,7 @@ use std::sync::OnceLock;
 
 use jiff::civil::Weekday;
 
-use crate::ast::{Format, Func, Holiday};
+use crate::ast::{Format, Func, Holiday, Which};
 use crate::hash::TableMap;
 use crate::number::Number;
 use crate::units::registry;
@@ -396,6 +396,21 @@ pub const EVENTS: &[Event] = &[Event {
     date: (2026, 11, 19),
     note: "probably",
 }];
+
+/// Quarter number for `q1` to `q4`.
+pub fn quarter(w: &str) -> Option<i8> {
+    w.strip_prefix('q').and_then(|q| q.parse().ok()).filter(|q| (1..=4).contains(q))
+}
+
+/// `next`, `last` or `this` before a period.
+pub fn which(w: &str) -> Option<Which> {
+    match w {
+        "next" => Some(Which::Next),
+        "last" => Some(Which::Last),
+        "this" => Some(Which::This),
+        _ => None,
+    }
+}
 
 /// Month number for a month name; `short` is set for abbreviations.
 pub fn month(w: &str) -> Option<(i8, bool)> {
