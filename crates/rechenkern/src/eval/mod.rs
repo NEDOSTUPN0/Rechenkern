@@ -143,31 +143,46 @@ impl Env<'_> {
         })
     }
 
-    /// Compound growth of `principal` over `time` at yearly `rate`.
+    /// Compound growth of `principal` over `time` at `rate` per `period`, or a loan.
     fn growth(
         &self,
         principal: Value,
         time: Value,
         rate: Value,
         period: &Unit,
-        compounds: i64,
+        compounds: Option<i64>,
         result: GrowthResult,
     ) -> Result<Value> {
-        let periods = match &time {
-            Value::Duration(d) => self.duration_in(d, period)?.number,
-            Value::Quantity(q) if q.unit.dim() == Dim::TIME => self.convert_quantity(q, period)?.number,
+        let length_in = |unit: &Unit| match &time {
+            Value::Duration(d) => Ok(self.duration_in(d, unit)?.number),
+            Value::Quantity(q) if q.unit.dim() == Dim::TIME => Ok(self.convert_quantity(q, unit)?.number),
             v => bail!("expected a length of time, not {}", v.kind()),
         };
         let rate = match rate {
             Value::Percent(p) => p / Number::from_i64(100),
             v => bail!("expected a percentage rate, not {}", v.kind()),
         };
-        let n = Number::from_i64(compounds);
-        let factor = (Number::ONE + rate / n).pow(periods * n);
-        let grown = self.mul(principal.clone(), Value::number(factor))?;
+        let loan = matches!(result, GrowthResult::Repayment | GrowthResult::LoanInterest);
+        // Number of compounding steps and the rate of each; a loan is paid back monthly.
+        let (steps, rate) = match compounds.map(Number::from_i64) {
+            Some(n) => (length_in(period)? * n, rate / n),
+            None if loan => {
+                let month = registry().get("mo");
+                (length_in(&month)?, rate * self.convert_quantity(&Quantity::new(Number::ONE, month), period)?.number)
+            }
+            None => (length_in(period)?, rate),
+        };
+        let factor = (Number::ONE + rate).pow(steps);
+        // What the principal turns into: grown, or paid back in equal payments, one per step.
+        let multiple = match loan {
+            true if rate.is_zero() => Number::ONE,
+            true => steps * rate * factor / (factor - Number::ONE),
+            false => factor,
+        };
+        let total = self.mul(principal.clone(), Value::number(multiple))?;
         match result {
-            GrowthResult::Future => Ok(grown),
-            GrowthResult::Interest => self.sub(grown, principal),
+            GrowthResult::Future | GrowthResult::Repayment => Ok(total),
+            GrowthResult::Interest | GrowthResult::LoanInterest => self.sub(total, principal),
             GrowthResult::Present => self.div(principal, Value::number(factor)),
         }
     }

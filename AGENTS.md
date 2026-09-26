@@ -88,7 +88,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   no `else` gives no answer (and assigns nothing).
 - Compound growth (`$1,000 after 3 years at 7% compounding monthly`) is a
   whole-line phrase in `parser/phrases.rs`; the rate is yearly unless written
-  per period (`10% per month`).
+  per period (`10% per month`). Loans (`total repayment on`, `total interest on`,
+  `monthly repayment on`) use the same phrase and are paid back monthly;
+  `monthly`/`weekly` spread the total over the loan's time.
 - Workdays (Mon–Fri, no public holidays yet) have their own dimension, so they
   never mix with time; `in workdays` counts them over a range or duration.
 - Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`.

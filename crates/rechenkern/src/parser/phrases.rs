@@ -154,31 +154,40 @@ impl Parser<'_> {
     }
 
     /// "$1,000 after 3 years at 7%", "interest on $500 for 2 years @ 5% compounding monthly",
-    /// "present value of $1,000 after 20 years at 10%".
+    /// "present value of $1,000 after 20 years at 10%", "monthly repayment on $300k at 6% for 30 years".
     fn growth(&self) -> Result<Option<Expr>> {
         // A rate is always given in percent.
         if !(0..self.toks.len()).any(|i| self.matches_at(i, &["%"])) {
             return Ok(None);
         }
-        let (result, start) = if self.matches_at(0, &["interest", "on"]) {
-            (GrowthResult::Interest, 2)
-        } else if self.matches_at(0, &["present", "value", "of"]) {
-            (GrowthResult::Present, 3)
-        } else if self.matches_at(0, &["future", "value", "of"]) {
-            (GrowthResult::Future, 3)
-        } else {
-            (GrowthResult::Future, 0)
+        // "total" and "monthly" ask about a loan: "total interest on", "monthly repayment on".
+        let every = self.lower(0).and_then(|w| payment_period(&w));
+        let loan = every.is_some() || self.matches_at(0, &["total"]);
+        let first = usize::from(loan);
+        let Some(&(words, result)) = GROWTH_PHRASES.iter().find(|(words, _)| self.matches_at(first, words)) else {
+            return Ok(None);
         };
+        let result = match result {
+            GrowthResult::Interest if loan => GrowthResult::LoanInterest,
+            GrowthResult::Future | GrowthResult::Present if loan => return Ok(None),
+            r => r,
+        };
+        let start = first + words.len();
         let Some(during) = ["after", "for", "over", "in"].iter().filter_map(|w| self.find(start + 1, &[w])).min()
         else {
             return Ok(None);
         };
-        let Some(at) = self.find(during + 1, &["at"]).or_else(|| self.find_sym(during + 1, "@")) else {
+        let Some(at) = self.find(start + 1, &["at"]).or_else(|| self.find_sym(start + 1, "@")) else {
             return Ok(None);
         };
         let compounding =
             ["compounding", "compounded", "compound"].iter().filter_map(|w| self.find(at + 1, &[w])).min();
-        let mut rate_end = compounding.unwrap_or(self.toks.len());
+        let end = compounding.unwrap_or(self.toks.len());
+        // "for 3 years at 7%" or "at 7% for 3 years".
+        let (principal_end, time, mut rate_end) = match during < at {
+            true => (during, (during + 1, at), end),
+            false => (at, (during + 1, end), during),
+        };
         // "10% per month" grows every month; plain rates are yearly.
         let mut period = registry().get("yr");
         let per = self
@@ -195,22 +204,32 @@ impl Parser<'_> {
         if !self.matches_at(rate_end.wrapping_sub(1), &["%"]) {
             return Ok(None);
         }
-        let compounds = match compounding.and_then(|c| self.lower(c + 1)).as_deref() {
-            None | Some("yearly" | "annually" | "annual") => 1,
-            Some("semiannually" | "biannually") => 2,
-            Some("quarterly") => 4,
-            Some("monthly") => 12,
-            Some("weekly") => 52,
-            Some("daily") => 365,
+        let compounds = match compounding.map(|c| self.lower(c + 1).unwrap_or_default()).as_deref() {
+            None => None,
+            Some("yearly" | "annually" | "annual") => Some(1),
+            Some("semiannually" | "biannually") => Some(2),
+            Some("quarterly") => Some(4),
+            Some("monthly") => Some(12),
+            Some("weekly") => Some(52),
+            Some("daily") => Some(365),
             Some(other) => crate::error::bail!("unknown compounding period \"{other}\""),
         };
-        Ok(Some(Expr::Growth {
-            principal: self.part(start, during)?.boxed(),
-            time: self.part(during + 1, at)?.boxed(),
+        let time = self.part(time.0, time.1)?;
+        let growth = Expr::Growth {
+            principal: self.part(start, principal_end)?.boxed(),
+            time: time.clone().boxed(),
             rate: self.part(at + 1, rate_end)?.boxed(),
             period,
             compounds,
             result,
+        };
+        // "monthly repayment": the whole loan spread over its time.
+        Ok(Some(match every {
+            Some((n, unit)) => {
+                let every = Expr::WithUnit(Expr::Number(Number::from_i64(n)).boxed(), registry().get(unit));
+                Expr::binary(Op::Mul, Expr::binary(Op::Div, growth, time), every)
+            }
+            None => growth,
         }))
     }
 
@@ -295,4 +314,28 @@ impl Parser<'_> {
 /// Relative change from `a` to `b`: (b - a) / a.
 fn change(a: Expr, b: Expr) -> Expr {
     Expr::binary(Op::Div, Expr::binary(Op::Sub, b, a.clone()), a)
+}
+
+/// Phrases before the principal and what they ask for; loans need "total" or a period first.
+const GROWTH_PHRASES: &[(&[&str], GrowthResult)] = &[
+    (&["interest", "repayment", "on"], GrowthResult::LoanInterest),
+    (&["interest", "on"], GrowthResult::Interest),
+    (&["present", "value", "of"], GrowthResult::Present),
+    (&["future", "value", "of"], GrowthResult::Future),
+    (&["repayment", "on"], GrowthResult::Repayment),
+    (&["repayments", "on"], GrowthResult::Repayment),
+    (&["payment", "on"], GrowthResult::Repayment),
+    (&[], GrowthResult::Future),
+];
+
+/// How long "monthly" is in "monthly repayment": a count of a unit.
+fn payment_period(word: &str) -> Option<(i64, &'static str)> {
+    Some(match word {
+        "daily" => (1, "d"),
+        "weekly" => (1, "wk"),
+        "monthly" => (1, "mo"),
+        "quarterly" => (3, "mo"),
+        "yearly" | "annual" | "annually" => (1, "yr"),
+        _ => return None,
+    })
 }

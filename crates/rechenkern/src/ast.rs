@@ -57,15 +57,16 @@ pub enum Expr {
         then: Option<Box<Expr>>,
         otherwise: Option<Box<Expr>>,
     },
-    /// Compound growth: `$1,000 after 3 years at 7% compounding monthly`.
+    /// Compound growth: `$1,000 after 3 years at 7% compounding monthly`,
+    /// or a loan paid back monthly: `total repayment on $10,000 for 5 years at 5%`.
     Growth {
         principal: Box<Expr>,
         time: Box<Expr>,
         rate: Box<Expr>,
         /// The rate applies once per this time unit (a year by default)...
         period: Unit,
-        /// ...compounding this many times within it.
-        compounds: i64,
+        /// ...compounding this many times within it: once if `None`, monthly for a loan.
+        compounds: Option<i64>,
         result: GrowthResult,
     },
 }
@@ -78,6 +79,10 @@ pub enum GrowthResult {
     Interest,
     /// What a future amount is worth today.
     Present,
+    /// Everything paid back on a loan.
+    Repayment,
+    /// The interest paid on a loan.
+    LoanInterest,
 }
 
 impl Expr {
