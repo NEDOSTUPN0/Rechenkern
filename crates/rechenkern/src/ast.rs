@@ -93,6 +93,18 @@ impl Expr {
     pub fn binary(op: Op, a: Expr, b: Expr) -> Expr {
         Expr::Binary(op, a.boxed(), b.boxed())
     }
+
+    /// The unit of the first or last value written in it: `$` in `2 x $3`, none in the rate `$5/hour`.
+    pub fn edge_unit(&self, last: bool) -> Option<&Unit> {
+        match self {
+            Expr::WithUnit(_, unit) => Some(unit),
+            Expr::Binary(Op::Per, ..) => None,
+            Expr::Binary(_, a, b) => if last { b } else { a }.edge_unit(last),
+            Expr::Composite(parts) => if last { parts.last() } else { parts.first() }?.edge_unit(last),
+            Expr::Neg(e) => e.edge_unit(last),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

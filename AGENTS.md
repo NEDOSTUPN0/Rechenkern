@@ -57,6 +57,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   `at_word()`/`eat_word()`, which scan past noise to that word.
 - Leftover tokens: keywords are ignored, anything else is an error.
 - Parentheses that contain unknown words are comments: `$999 (for iPhone 16)`.
+- Values of the same kind side by side add up, also across comments
+  (`$20 for lunch $15 for taxi`, `2 x $3 coffee $5` = $11); a rate never does.
+  Implicit multiplication (`2 pi`, `2(3 + 4)`) never crosses a comment word.
 - A list marker starting the line (`1. `, `2) `, `a) `) is skipped, unless a date
   starts there (`1. May 2024`).
 - `in` is never looked up as a unit. After a number it is inches only when no

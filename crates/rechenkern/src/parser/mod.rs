@@ -243,6 +243,10 @@ impl<'a> Parser<'a> {
     fn additive(&mut self) -> Result<Expr> {
         let mut lhs = self.multiplicative()?;
         loop {
+            if let Some(rhs) = self.same_kind_follows(&lhs) {
+                lhs = Expr::binary(Op::Add, lhs, rhs);
+                continue;
+            }
             let Some(tok) = self.peek() else { return Ok(lhs) };
             let (op, len, swap) = match &tok.tok {
                 Tok::Sym("+") => (Op::Add, 1, false),
@@ -274,6 +278,21 @@ impl<'a> Parser<'a> {
             }
             lhs = if swap { Expr::binary(op, rhs, lhs) } else { Expr::binary(op, lhs, rhs) };
         }
+    }
+
+    /// A value of the same kind as the one `lhs` ends with, added without an operator:
+    /// "$20 for lunch $15 for taxi", "3 km walk 2 km run".
+    fn same_kind_follows(&mut self, lhs: &Expr) -> Option<Expr> {
+        let dim = lhs.edge_unit(true)?.dim();
+        if !self.amount_follows(0) {
+            return None;
+        }
+        let mut p = self.clone();
+        let rhs = p.multiplicative().ok()?;
+        (rhs.edge_unit(false)?.dim() == dim).then(|| {
+            *self = p;
+            rhs
+        })
     }
 
     fn multiplicative(&mut self) -> Result<Expr> {
