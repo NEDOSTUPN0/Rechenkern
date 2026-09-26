@@ -12,7 +12,7 @@ impl Parser<'_> {
     /// One conversion step after `expr`, or `None` if there is none.
     pub(super) fn conversion(&mut self, expr: &Expr) -> Result<Option<Expr>> {
         let start = self.pos;
-        if self.eat_word("rounded") {
+        if self.eat_rounding_word() {
             let dir = self.direction();
             return self.rounded_to(expr, dir).map(Some);
         }
@@ -107,6 +107,18 @@ impl Parser<'_> {
         is_keyword && p.zone_at(p.pos + 1).is_some()
     }
 
+    /// "rounded", or "round" before a direction or "to": "37 round up to nearest 10".
+    fn eat_rounding_word(&mut self) -> bool {
+        if self.eat_word("rounded") {
+            return true;
+        }
+        let round = self.at_word("round") && matches!(self.lower(self.pos + 1).as_deref(), Some("up" | "down" | "to"));
+        if round {
+            self.pos += 1;
+        }
+        round
+    }
+
     pub(super) fn direction(&mut self) -> Direction {
         if self.eat_word("up") {
             Direction::Up
@@ -117,11 +129,26 @@ impl Parser<'_> {
         }
     }
 
-    /// Rounds `expr` in a direction, then to what follows `to`: "rounded down to 2 dp".
+    /// Rounds `expr` in a direction, then to what follows: "rounded down to 2 dp",
+    /// "rounded 3 dp", "rounded down to 10".
     pub(super) fn rounded_to(&mut self, expr: &Expr, dir: Direction) -> Result<Expr> {
-        let (rounding, format) = match self.eat_word("to") {
-            true => self.rounding(dir)?.unwrap_or((Rounding::Places(0, dir), None)),
-            false => (Rounding::Places(0, dir), None),
+        let start = self.pos;
+        let to = self.eat_word("to");
+        let (rounding, format) = match self.rounding(dir)? {
+            Some(rounding) => rounding,
+            None => match self.cur().map(|t| &t.tok) {
+                Some(Tok::Num(n)) if to => {
+                    let n = *n;
+                    self.pos += 1;
+                    (Rounding::Multiple(n, dir), None)
+                }
+                // "rounded to EUR" converts after rounding.
+                _ if to && self.clone().target().is_some() => {
+                    self.pos = start;
+                    (Rounding::Places(0, dir), None)
+                }
+                _ => (Rounding::Places(0, dir), None),
+            },
         };
         Ok(rounded(expr, rounding, format))
     }
@@ -130,7 +157,13 @@ impl Parser<'_> {
     fn rounding(&mut self, dir: Direction) -> Result<Option<(Rounding, Option<Format>)>> {
         let start = self.pos;
         self.eat_word("the");
-        if self.eat_word("nearest") {
+        // "up to next 10", "down to last 10"; "to next 10" rounds up.
+        let dir = match self.lower(self.pos).as_deref() {
+            Some("next") if dir == Direction::Nearest => Direction::Up,
+            Some("last") if dir == Direction::Nearest => Direction::Down,
+            _ => dir,
+        };
+        if self.eat_word("nearest") || self.eat_word("next") || self.eat_word("last") {
             let Some(tok) = self.cur() else {
                 self.pos = start;
                 return Ok(None);

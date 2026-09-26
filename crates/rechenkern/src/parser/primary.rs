@@ -381,7 +381,7 @@ impl Parser<'_> {
             let dir = self.direction();
             let x = self.unary()?;
             let dir = if dir == Direction::Nearest { self.direction() } else { dir };
-            if dir != Direction::Nearest {
+            if dir != Direction::Nearest || self.at_word("to") {
                 return self.rounded_to(&x, dir).map(Some);
             }
             return Ok(Some(Expr::Call(func, vec![x])));

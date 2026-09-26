@@ -218,6 +218,12 @@ fn rounding() {
         ("round 56 down to nearest 10", "50"),
         ("round up 56.2", "57"),
         ("round 5.99 down", "5"),
+        ("π rounded 3 dp", "3.142"),
+        ("37 round up to nearest 10", "40"),
+        ("37 rounded down to last 10", "30"),
+        ("37 rounded down to 10", "30"),
+        ("round 56 to next 10", "60"),
+        ("round down 56 to 10", "50"),
     ]);
 }
 
