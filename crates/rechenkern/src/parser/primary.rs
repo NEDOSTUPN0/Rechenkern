@@ -2,14 +2,14 @@
 
 use super::{Parser, words};
 use crate::ast::{Direction, Expr, Format, Func, LineRef, Op, Rounding, Target, TimeExpr};
-use crate::error::{Result, bail};
+use crate::error::{Error, Result, bail};
 use crate::lexer::Tok;
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
 
 impl Parser<'_> {
     pub(super) fn primary(&mut self) -> Result<Expr> {
-        let Some(tok) = self.peek() else { bail!("expected a value at the end") };
+        let Some(tok) = self.peek() else { return Err(Error::unclear("expected a value at the end")) };
         match &tok.tok {
             Tok::Num(n) => {
                 self.pos += 1;
@@ -49,7 +49,7 @@ impl Parser<'_> {
                     self.primary()
                 }
             },
-            _ => bail!("unexpected \"{}\"", &self.src[tok.start..tok.end]),
+            _ => Err(Error::unclear(format!("unexpected \"{}\"", &self.src[tok.start..tok.end]))),
         }
     }
 
@@ -114,7 +114,14 @@ impl Parser<'_> {
             self.pos += 1;
             return Some(registry().get(symbol));
         }
-        self.unit_phrase(true)
+        let start = self.pos;
+        let unit = self.unit_phrase(true)?;
+        // "Model 3 $40k": a currency before a number is that number's.
+        if unit.is_money() && self.cur().is_some_and(|t| matches!(t.tok, Tok::Num(_))) {
+            self.pos = start;
+            return None;
+        }
+        Some(unit)
     }
 
     /// After a number, "in" means inches unless a conversion target follows.
@@ -265,7 +272,7 @@ impl Parser<'_> {
             return self.bare_unit(unit, n).map(Some);
         }
         if words::KEYWORDS.contains(&w) || w == "x" {
-            bail!("unexpected \"{}\"", self.toks[i].word().unwrap_or(w));
+            return Err(Error::unclear(format!("unexpected \"{}\"", self.toks[i].word().unwrap_or(w))));
         }
         if self.toks.get(i + 1).is_some_and(|t| t.is_sym("(") && !t.space_before) {
             bail!("unknown function \"{}\"", self.toks[i].word().unwrap_or(w));

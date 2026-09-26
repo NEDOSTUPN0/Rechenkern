@@ -94,6 +94,24 @@ impl Expr {
         Expr::Binary(op, a.boxed(), b.boxed())
     }
 
+    /// This expression or one inside it (not inside a call) matches `f`.
+    pub fn contains(&self, f: &impl Fn(&Expr) -> bool) -> bool {
+        f(self)
+            || match self {
+                Expr::Binary(_, a, b) | Expr::Range(a, b) => a.contains(f) || b.contains(f),
+                Expr::Composite(parts) => parts.iter().any(|p| p.contains(f)),
+                Expr::WithUnit(e, _)
+                | Expr::Percent(e)
+                | Expr::Neg(e)
+                | Expr::Factorial(e)
+                | Expr::Noted(e, _)
+                | Expr::InZone(e, _)
+                | Expr::Convert(e, _)
+                | Expr::Round(e, _) => e.contains(f),
+                _ => false,
+            }
+    }
+
     /// The unit of the first or last value written in it: `$` in `2 x $3`, none in the rate `$5/hour`.
     pub fn edge_unit(&self, last: bool) -> Option<&Unit> {
         match self {

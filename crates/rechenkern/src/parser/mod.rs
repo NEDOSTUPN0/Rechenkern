@@ -17,8 +17,9 @@ use jiff::tz::TimeZone;
 
 use crate::ast::{Expr, Func, Op, Stmt, TimeExpr};
 use crate::config::Config;
-use crate::error::{Result, bail};
+use crate::error::{Error, Result, bail};
 use crate::lexer::{self, Tok, Token};
+use crate::units::Unit;
 
 /// What the parser needs to know about the calculator.
 pub struct Scope<'a> {
@@ -110,8 +111,30 @@ impl<'a> Parser<'a> {
         }
         match self.phrase()? {
             Some(expr) => Ok(expr),
-            None => self.expr_to_end(),
+            // Words that make no calculation: pick one of the values in the text.
+            None => self.expr_to_end().or_else(|e| if e.is_unclear() { self.value_in_text().ok_or(e) } else { Err(e) }),
         }
+    }
+
+    /// Numbers in text: the last of the values that matter most, as in
+    /// "iPhone 16 Pro $999" or "Room 101 costs $10".
+    fn value_in_text(&self) -> Option<Expr> {
+        let mut values = Vec::new();
+        let mut p = self.clone();
+        p.pos = 0;
+        while p.peek().is_some() {
+            let mut value = p.clone();
+            match value.expr() {
+                // A unit without a number is a word here: "5 cats km".
+                Ok(expr) if value.pos > p.pos && !matches!(expr, Expr::BareUnit(_)) => {
+                    values.push(expr);
+                    p = value;
+                }
+                _ => p.pos += 1,
+            }
+        }
+        // The last one wins a tie.
+        values.into_iter().max_by_key(text_weight)
     }
 
     /// Parses an expression that must use up the tokens.
@@ -149,7 +172,7 @@ impl<'a> Parser<'a> {
                 _ => false,
             };
             if !weak {
-                bail!("didn't understand \"{}\"", self.src[tok.start..].trim());
+                return Err(Error::unclear(format!("didn't understand \"{}\"", self.src[tok.start..].trim())));
             }
             self.pos += 1;
         }
@@ -477,5 +500,22 @@ impl<'a> Parser<'a> {
                 _ => return Ok(expr),
             };
         }
+    }
+}
+
+/// Which value in text is the answer: a calculation, then money, then other
+/// units, then plain numbers, then dates (as SoulverCore picks them).
+fn text_weight(expr: &Expr) -> u8 {
+    let has = |f: fn(&Expr) -> bool| expr.contains(&f);
+    if has(|e| matches!(e, Expr::Time(_))) {
+        0
+    } else if has(|e| matches!(e, Expr::Binary(Op::Add | Op::Sub | Op::Mul | Op::Div, ..) | Expr::Composite(_))) {
+        4
+    } else if expr.edge_unit(false).is_some_and(Unit::is_money) {
+        3
+    } else if has(|e| matches!(e, Expr::WithUnit(..))) {
+        2
+    } else {
+        1
     }
 }

@@ -60,6 +60,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Values of the same kind side by side add up, also across comments
   (`$20 for lunch $15 for taxi`, `2 x $3 coffee $5` = $11); a rate never does.
   Implicit multiplication (`2 pi`, `2(3 + 4)`) never crosses a comment word.
+- Numbers in text: when the words make no calculation (`Error::is_unclear`),
+  the answer is the last value of the strongest kind, as in SoulverCore: a
+  calculation, then money, then other units, then plain numbers, then dates
+  (`iPhone 16 Pro $999`, `2 x 4 lumber $5` = 8, `2 cats 3 dogs` = 3). Other
+  errors (unknown place, unknown function) stay errors.
 - A list marker starting the line (`1. `, `2) `, `a) `) is skipped, unless a date
   starts there (`1. May 2024`).
 - `in` is never looked up as a unit. After a number it is inches only when no
