@@ -81,6 +81,8 @@ fn arithmetic() {
         ("2 dozen", "24"),
         ("half of 175", "87.5"),
         ("two thirds of 90", "60"),
+        ("1 1/2 + 1", "2.5"),
+        ("2 3/4 cups in ml", "650.6176504 mL"),
         ("3 quarters of an hour in minutes", "45 minutes"),
         ("twice 21", "42"),
         ("seven times six", "42"),

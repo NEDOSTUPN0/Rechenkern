@@ -169,6 +169,7 @@ impl Lexer<'_> {
             } else if c.is_ascii_digit() || (c == '.' && self.peek(1).is_some_and(|d| d.is_ascii_digit())) {
                 let tok = self.number();
                 self.push(tok, start);
+                self.mixed_fraction();
             } else if let Some((a, b)) = vulgar_fraction(c) {
                 self.i += 1;
                 let frac = Number::ratio(a, b);
@@ -218,6 +219,30 @@ impl Lexer<'_> {
                 self.space = true;
             }
         }
+    }
+
+    /// Joins "1 1/2" into one number once its denominator is read.
+    fn mixed_fraction(&mut self) {
+        let n = self.tokens.len();
+        let [whole, num, slash, den] = &self.tokens[n.saturating_sub(4)..] else { return };
+        // Plain digits only: not "0xFF 1/3" or "1.5e3 1/5".
+        let digits = |t: &Token| match t.tok {
+            Tok::Num(v) if self.src[t.start..t.end].bytes().all(|b| b.is_ascii_digit()) => v.to_i64(),
+            _ => None,
+        };
+        let (Some(w), Some(a), Some(b)) = (digits(whole), digits(num), digits(den)) else { return };
+        let glued = slash.is_sym("/") && num.space_before && !slash.space_before && !den.space_before;
+        // Not "2/10 1/3", "1 1/2/3" or "5 10/4".
+        let in_fraction = (n > 4 && self.tokens[n - 5].is_sym("/")) || self.peek(0) == Some('/');
+        if !glued || in_fraction || !(0 < a && a < b) {
+            return;
+        }
+        let value = Number::from_i64(w) + Number::ratio(a, b);
+        let end = den.end;
+        self.tokens.truncate(n - 3);
+        let last = self.tokens.last_mut().expect("the whole part");
+        last.tok = Tok::Num(value);
+        last.end = end;
     }
 
     fn word(&mut self) -> Tok {
@@ -447,6 +472,10 @@ mod tests {
         assert_eq!(toks("1,000,000 0.125")[..2], [num("1000000"), num("0.125")]);
         assert_eq!(toks("1,5,3"), vec![num("1"), Tok::Sym(","), num("5"), Tok::Sym(","), num("3")]);
         assert_eq!(toks("1½"), vec![num("1.5")]);
+        assert_eq!(toks("2 3/4"), vec![num("2.75")]);
+        assert_eq!(toks("5 10/4").len(), 4);
+        assert_eq!(toks("1 1/2/3").len(), 6);
+        assert_eq!(toks("2/10 1/3").len(), 6);
     }
 
     #[test]
