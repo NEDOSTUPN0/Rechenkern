@@ -80,6 +80,28 @@ impl Parser<'_> {
             return Ok(Some(Self::formatted(ratio, format)));
         }
 
+        // "81 is 9 to what power", "20 is 4 to the power of what"
+        for tail in [
+            &["to", "what", "power"][..],
+            &["to", "the", "what", "power"][..],
+            &["to", "the", "power", "of", "what"][..],
+            &["to", "the", "what"][..],
+        ] {
+            if self.ends_with(tail)
+                && let Some(is) = self.find(0, &["is"])
+            {
+                let (a, b) = (self.part(0, is)?, self.part(is + 1, end - tail.len())?);
+                return Ok(Some(Expr::Call(crate::ast::Func::Log, vec![a, b])));
+            }
+        }
+        // "4 to what power is 20", "4 with what exponent is 20"
+        for seq in [&["to", "what", "power", "is"][..], &["with", "what", "exponent", "is"][..]] {
+            if let Some(at) = self.find(0, seq) {
+                let (a, b) = (self.part(at + seq.len(), end)?, self.part(0, at)?);
+                return Ok(Some(Expr::Call(crate::ast::Func::Log, vec![a, b])));
+            }
+        }
+
         // "20 is 10% of what", "180 is 10% off what", "10% on what is 220"
         for kind in ["of", "on", "off"] {
             let (a, p) = if self.ends_with(&[kind, "what"])
@@ -121,16 +143,6 @@ impl Parser<'_> {
                 _ => Expr::binary(Op::Div, b, a),
             };
             return Ok(Some(Self::formatted(change, format)));
-        }
-
-        // "81 is 9 to what power"
-        for tail in [&["to", "what", "power"][..], &["to", "the", "what", "power"][..]] {
-            if self.ends_with(tail)
-                && let Some(is) = self.find(0, &["is"])
-            {
-                let (a, b) = (self.part(0, is)?, self.part(is + 1, end - tail.len())?);
-                return Ok(Some(Expr::Call(crate::ast::Func::Log, vec![a, b])));
-            }
         }
 
         // "3/20 is what %"

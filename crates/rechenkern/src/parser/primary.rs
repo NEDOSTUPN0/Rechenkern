@@ -419,6 +419,10 @@ impl Parser<'_> {
             // "log 4 of 20": the base comes first, like the degree of a root.
             if func == Func::Log && self.eat_word("of") { vec![self.unary()?, first] } else { vec![first] }
         };
+        // "log 20 base 4", "logarithm of 20 to base 4"
+        if func == Func::Log && self.at_word("to") && self.words_at(self.pos + 1, &["base"]) {
+            self.pos += 1;
+        }
         if func == Func::Log && self.eat_word("base") {
             args.push(self.unary()?);
         }
