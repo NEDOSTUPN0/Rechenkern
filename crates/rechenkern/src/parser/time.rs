@@ -257,10 +257,8 @@ impl Parser<'_> {
             "from" if self.operand_follows(1) => {
                 self.pos += 1;
                 let start = self.additive()?;
-                if !self.eat_word("to") && !self.eat_word("until") && !self.eat_word("till") {
-                    return Ok(Some(start));
-                }
-                let end = self.additive()?;
+                let Some(through) = self.range_word(&["to", "until", "till"]) else { return Ok(Some(start)) };
+                let end = self.range_end(through)?;
                 return Ok(Some(Expr::Range(start.boxed(), end.boxed())));
             }
             "current" if next == "timestamp" => {
@@ -421,10 +419,28 @@ impl Parser<'_> {
     fn pair(&mut self) -> Result<[Expr; 2]> {
         let saved = std::mem::replace(&mut self.in_list, true);
         let a = self.additive()?;
-        self.eat_word("and");
-        let b = self.additive()?;
+        let through = self.range_word(&["and"]) == Some(true);
+        let b = self.range_end(through)?;
         self.in_list = saved;
         Ok([a, b])
+    }
+
+    /// Eats a word that joins a range; `Some(true)` for "through".
+    pub(super) fn range_word(&mut self, words: &[&str]) -> Option<bool> {
+        if self.eat_word("through") || self.eat_word("thru") {
+            return Some(true);
+        }
+        words.iter().any(|w| self.eat_word(w)).then_some(false)
+    }
+
+    /// The end of a range; "through March 10" counts March 10 too, so it ends a day later.
+    pub(super) fn range_end(&mut self, through: bool) -> Result<Expr> {
+        let end = self.additive()?;
+        if !through || super::target::is_clock(&end) {
+            return Ok(end);
+        }
+        let day = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("d"));
+        Ok(Expr::binary(crate::ast::Op::Add, end, day))
     }
 
     /// "difference between Seattle and Tokyo" or between two dates.
@@ -461,8 +477,8 @@ impl Parser<'_> {
             "from" if self.date_starts(self.pos + 1) => {
                 self.pos += 1;
                 let a = self.additive()?;
-                self.eat_word("to");
-                Expr::Range(a.boxed(), self.additive()?.boxed())
+                let through = self.range_word(&["to"]) == Some(true);
+                Expr::Range(a.boxed(), self.range_end(through)?.boxed())
             }
             // "days in February 2020", "days in Q3", "days left in 2026"
             "in" | "left" | "remaining" => {
@@ -512,7 +528,7 @@ impl Parser<'_> {
     }
 
     /// A date or time starts at token `i`.
-    fn date_starts(&self, i: usize) -> bool {
+    pub(super) fn date_starts(&self, i: usize) -> bool {
         let mut p = self.clone();
         p.pos = i;
         p.skip_noise();

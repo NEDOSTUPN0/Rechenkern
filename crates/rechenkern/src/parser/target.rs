@@ -16,6 +16,10 @@ impl Parser<'_> {
             let dir = self.direction();
             return self.rounded_to(expr, dir).map(Some);
         }
+        // "March 3 through March 10"
+        if self.range_word(&[]).is_some() {
+            return Ok(Some(Expr::Range(expr.clone().boxed(), self.range_end(true)?.boxed())));
+        }
         let Some(tok) = self.peek() else { return Ok(None) };
         let keyword = match &tok.tok {
             Tok::Sym("->") => "->".to_string(),
@@ -291,7 +295,7 @@ fn is_moment(expr: &Expr) -> bool {
 }
 
 /// A written clock time like `3pm`, possibly placed in a zone.
-fn is_clock(expr: &Expr) -> bool {
+pub(super) fn is_clock(expr: &Expr) -> bool {
     match expr {
         Expr::Time(TimeExpr::Clock { .. }) => true,
         Expr::InZone(inner, _) | Expr::Convert(inner, Target::Zone(_)) => is_clock(inner),
