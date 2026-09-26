@@ -427,8 +427,10 @@ fn holiday_date(holiday: Holiday, year: i16) -> Result<Date> {
         Holiday::OrthodoxChristmas => d(1, 7)?,
         Holiday::Easter => easter(year)?,
         Holiday::GoodFriday => easter(year)?.checked_sub(days(2))?,
+        Holiday::HolySaturday => easter(year)?.checked_sub(days(1))?,
         Holiday::EasterMonday => easter(year)?.checked_add(days(1))?,
         Holiday::OrthodoxEaster => orthodox_easter(year)?,
+        Holiday::OrthodoxGoodFriday => orthodox_easter(year)?.checked_sub(days(2))?,
         Holiday::Thanksgiving => d(11, 1)?.nth_weekday_of_month(4, Weekday::Thursday)?,
         Holiday::BlackFriday => d(11, 1)?.nth_weekday_of_month(4, Weekday::Thursday)?.checked_add(days(1))?,
     })
