@@ -54,12 +54,13 @@ impl Parser<'_> {
             let part = self.part(is + 1, end)?;
             return Ok(Some(pct(Expr::binary(Op::Div, part, whole))));
         }
+        // "what % is 25 with 100"
         if self.matches_at(0, &["what", "%", "is"])
-            && let Some(of) = self.find(3, &["of"])
+            && let Some((at, kind)) = SHARES.iter().find_map(|&kind| Some((self.find(3, &[kind])?, kind)))
         {
-            let part = self.part(3, of)?;
-            let whole = self.part(of + 1, end)?;
-            return Ok(Some(pct(Expr::binary(Op::Div, part, whole))));
+            let part = self.part(3, at)?;
+            let whole = self.share_part(kind, at + 1, end)?;
+            return Ok(Some(pct(share(kind, part, whole))));
         }
 
         // "20 is what % of 200", "20 is % of 200", "180 is what discount off 200", "5 is what multiplier on 1"
@@ -74,21 +75,21 @@ impl Parser<'_> {
             } else {
                 continue;
             };
-            // "10 is what % 20" means "of", but "10 is what % with 20" doesn't.
-            let kind = self.lower(k + 1).filter(|w| matches!(w.as_str(), "of" | "on" | "off"));
-            let from = k + 1 + usize::from(kind.is_some());
+            // "10 is what % 20" means "of"; "15 is what % after adding 3".
+            let kind = SHARES.iter().copied().find(|kind| self.matches_at(k + 1, &[kind]));
+            let from = match kind {
+                Some("after") => k + 2 + usize::from(self.matches_at(k + 2, &["adding"])),
+                Some(_) => k + 2,
+                None => k + 1,
+            };
             let comment = self.toks.get(from).is_some_and(|t| t.word().is_some() && !self.significant(from));
             if from >= end || comment {
                 continue;
             }
+            let kind = kind.unwrap_or("of");
             let a = self.part(0, at)?;
-            let b = self.part(from, end)?;
-            let ratio = match kind.as_deref() {
-                Some("on") => Expr::binary(Op::Div, Expr::binary(Op::Sub, a, b.clone()), b),
-                Some("off") => Expr::binary(Op::Div, Expr::binary(Op::Sub, b.clone(), a), b),
-                _ => Expr::binary(Op::Div, a, b),
-            };
-            return Ok(Some(Self::formatted(ratio, format)));
+            let b = self.share_part(kind, from, end)?;
+            return Ok(Some(Self::formatted(share(kind, a, b), format)));
         }
 
         // "81 is 9 to what power", "20 is 4 to the power of what"
@@ -311,6 +312,17 @@ impl Parser<'_> {
         n.ok().map(|n| Expr::Call(Func::IsPrime, vec![n]))
     }
 
+    /// What a share is taken of: the sum of a list after "with" ("10 is what % with 20, 30").
+    fn share_part(&self, kind: &str, from: usize, to: usize) -> Result<Expr> {
+        if kind != "with" {
+            return self.part(from, to);
+        }
+        let mut p = self.sub(from, to);
+        let mut items = p.list()?;
+        p.finish()?;
+        Ok(if items.len() == 1 { items.remove(0) } else { Expr::Call(Func::Sum, items) })
+    }
+
     /// Parses tokens `from..to` as one expression.
     pub(super) fn part(&self, from: usize, to: usize) -> Result<Expr> {
         if from >= to {
@@ -352,6 +364,23 @@ impl Parser<'_> {
 }
 
 /// Relative change from `a` to `b`: (b - a) / a.
+/// Words saying what a share is taken of: "20 is what % of 200".
+const SHARES: [&str; 5] = ["of", "on", "off", "with", "after"];
+
+/// The share `a` is of `b`: "on" and "off" compare the difference with `b`,
+/// "with" takes the total of both, and "after" adding `b` compares it with what `a` was before.
+fn share(kind: &str, a: Expr, b: Expr) -> Expr {
+    let div = |x, y| Expr::binary(Op::Div, x, y);
+    let sub = |x, y| Expr::binary(Op::Sub, x, y);
+    match kind {
+        "on" => div(sub(a, b.clone()), b),
+        "off" => div(sub(b.clone(), a), b),
+        "with" => div(a.clone(), Expr::binary(Op::Add, a, b)),
+        "after" => div(b.clone(), sub(a, b)),
+        _ => div(a, b),
+    }
+}
+
 fn change(a: Expr, b: Expr) -> Expr {
     Expr::binary(Op::Div, Expr::binary(Op::Sub, b, a.clone()), a)
 }

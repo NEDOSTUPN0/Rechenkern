@@ -294,6 +294,9 @@ fn percentages() {
         ("20 is % on 10", "100%"),
         ("10 is what discount off 20", "50%"),
         ("20 percentage of 50", "10"),
+        ("10 is what % with 20, 30", "16.66666667%"),
+        ("what % is 25 with 100", "20%"),
+        ("15 as % after adding 3", "25%"),
     ]);
 }
 
