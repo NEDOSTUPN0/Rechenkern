@@ -381,9 +381,7 @@ impl Parser<'_> {
         let now = || Expr::Time(TimeExpr::Now);
         let timespan = |e: Expr| Self::formatted(e, Format::Timespan);
         self.pos += 1;
-        if w == "time" && self.at_word("difference") {
-            self.pos += 1;
-        }
+        let difference = w == "difference" || (w == "time" && (self.eat_word("difference") || self.eat_word("diff")));
         // "time to upload 3GB at 10 MB/s" is just the division.
         let verbs = ["upload", "download", "transfer", "copy", "send"];
         if w == "time"
@@ -393,7 +391,7 @@ impl Parser<'_> {
             self.pos += 2;
             return self.additive().map(Some);
         }
-        if w == "difference" || self.toks[self.pos - 1].is_word("difference") {
+        if difference {
             self.eat_word("between");
             return self.difference().map(Some);
         }
@@ -453,14 +451,20 @@ impl Parser<'_> {
         Ok(Expr::binary(crate::ast::Op::Add, end, day))
     }
 
-    /// "difference between Seattle and Tokyo" or between two dates.
+    /// "difference between Seattle and Tokyo", "Seattle Tokyo", "Tokyo" (from here)
+    /// or between two dates.
     fn difference(&mut self) -> Result<Expr> {
-        if let Some((a, n)) = self.zone_at(self.pos)
-            && self.toks.get(self.pos + n).is_some_and(|t| t.is_word("and") || t.is_sym("&"))
-            && let Some((b, m)) = self.zone_at(self.pos + n + 1)
-        {
-            self.pos += n + 1 + m;
-            return Ok(Expr::ZoneDiff(a, b));
+        if let Some((a, n)) = self.zone_at(self.pos) {
+            let and = self.toks.get(self.pos + n).is_some_and(|t| t.is_word("and") || t.is_sym("&"));
+            let next = self.pos + n + usize::from(and);
+            if let Some((b, m)) = self.zone_at(next) {
+                self.pos = next + m;
+                return Ok(Expr::ZoneDiff(a, b));
+            }
+            if !and {
+                self.pos = next;
+                return Ok(Expr::ZoneDiff(self.config().local_zone(), a));
+            }
         }
         let [a, b] = self.pair()?;
         Ok(Expr::Range(a.boxed(), b.boxed()))

@@ -493,6 +493,8 @@ fn time_zones() {
         ("3pm GMT+8 to Paris", "09:00 CEST"),
         ("9:35am in New York to Japan", "22:35 JST"),
         ("time difference between Seattle and Tokyo", "16 hours"),
+        ("time diff Seattle Tokyo", "16 hours"),
+        ("time difference Tokyo", "13 hours"),
         ("date in vancouver", "Wed, 23 Sep 2026"),
         ("time in auckland", "Thu, 24 Sep 2026 06:30 NZST"),
         ("current time in paris", "20:30 CEST"),
