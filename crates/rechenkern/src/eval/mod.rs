@@ -296,6 +296,14 @@ impl Env<'_> {
             return Ok(Value::Quantity(Quantity::new(self.workdays(&duration)?, unit.clone())));
         }
         match value {
+            // "30 mpg in L/100km", "2 seconds in Hz": a unit of the inverse kind takes the reciprocal,
+            // but a count per a unit other than time changes that unit: "3 per kg in lb" = 1.36/lb.
+            Value::Quantity(q) if !unit.dim().is_none() && q.unit.dim() == unit.dim().pow(-1) => {
+                if q.unit.dim() != Dim::FREQUENCY && q.unit.factors().iter().all(|&(_, e)| e < 0) {
+                    return self.to_unit(Value::Quantity(q), &unit.pow(-1));
+                }
+                self.to_unit(self.div(Value::number(Number::ONE), Value::Quantity(q))?, unit)
+            }
             Value::Quantity(q) => Ok(Value::Quantity(self.convert_quantity(&q, unit)?)),
             Value::Duration(d) => Ok(Value::Quantity(self.duration_in(&d, unit)?)),
             Value::Percent(p) if unit.is_none() => Ok(Value::number(p / Number::from_i64(100))),

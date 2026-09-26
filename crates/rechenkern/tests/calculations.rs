@@ -333,6 +333,11 @@ fn units() {
         ("1/2 km + 3 km", "3.5 km"),
         ("10 / 2 km/h", "5 km/h"),
         ("100 per 4 kg", "25/kg"),
+        ("2 seconds in Hz", "0.5 Hz"),
+        ("2 per hour in seconds", "1,800 seconds"),
+        ("0.08 L/km in mpg", "29.40182292 mpg"),
+        ("3 per kg in lb", "1.36077711/lb"),
+        ("0 Hz in seconds", "<error: division by zero>"),
     ]);
 }
 

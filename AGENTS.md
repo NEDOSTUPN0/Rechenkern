@@ -91,6 +91,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   money rate divided by a time spreads it (`$500/month / 30 days` = `$16.67/day`).
 - `in per week`, `as per day` and `is what per week` give a rate a new period
   (`Target::Per`).
+- Converting to the inverse kind takes the reciprocal (`2 seconds in Hz`,
+  `30 mpg in L/100km`); a count per a unit other than time converts that unit
+  instead (`3 per kg in lb` = 1.36/lb), as in SoulverCore.
 - Time quantities in different units add up to a `Duration` (`1 day - 2 hours`
   = 22 hours); months and longer meet in the smaller unit (`1 year - 2 months`
   = 10 months). Seconds that come out of unit algebra (`3 GB / 10 MB/s`)
