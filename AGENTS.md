@@ -57,6 +57,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   `at_word()`/`eat_word()`, which scan past noise to that word.
 - Leftover tokens: keywords are ignored, anything else is an error.
 - Parentheses that contain unknown words are comments: `$999 (for iPhone 16)`.
+- A list marker starting the line (`1. `, `2) `, `a) `) is skipped, unless a date
+  starts there (`1. May 2024`).
 - `in` is never looked up as a unit. After a number it is inches only when no
   conversion target follows (`5 in`, `5 in to cm`, but `5 in cm`).
 - `/unit` and `per unit` right after a value form a rate at postfix level, so

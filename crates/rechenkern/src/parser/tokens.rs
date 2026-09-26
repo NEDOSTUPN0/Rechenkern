@@ -352,6 +352,24 @@ impl<'a> Parser<'a> {
                 && self.toks.get(self.pos + 1).is_some_and(|t| t.is_sym("(")))
     }
 
+    /// Tokens of a list marker that starts the line: "1. ", "2) ", "a) ".
+    /// "1. May" stays a date.
+    pub(super) fn list_marker(&self) -> usize {
+        let Some(first) = self.toks.first() else { return 0 };
+        let text = &self.src[first.start..first.end];
+        let is_label = match first.tok {
+            Tok::Num(_) => text.len() <= 3 && text.bytes().all(|b| b.is_ascii_digit()),
+            Tok::Word(_) => text.chars().count() == 1 && text.chars().all(char::is_alphabetic),
+            _ => false,
+        };
+        let rest = &self.src[first.end..];
+        let Some(after) = [".)", ".", ")"].iter().find_map(|m| rest.strip_prefix(m)) else { return 0 };
+        if !is_label || !after.starts_with(char::is_whitespace) || self.date_starts(0) {
+            return 0;
+        }
+        if self.toks.get(1).is_some_and(|t| t.is_sym(")")) { 2 } else { 1 }
+    }
+
     /// Removes parentheses that hold comments: "$999 (for iPhone 16)".
     pub(super) fn without_comment_groups(&self) -> Vec<Token> {
         let mut keep = vec![true; self.toks.len()];

@@ -29,7 +29,8 @@ pub struct Scope<'a> {
 /// Parses one line; `None` means the line has nothing to calculate.
 pub fn parse(src: &str, scope: &Scope) -> Result<Option<Stmt>> {
     let tokens = lexer::lex(src, scope.config.decimal_comma);
-    let tokens = Parser::new(src, &tokens, scope).without_comment_groups();
+    let marker = Parser::new(src, &tokens, scope).list_marker();
+    let tokens = Parser::new(src, &tokens[marker..], scope).without_comment_groups();
     let mut parser = Parser::new(src, &tokens, scope);
     parser.statement()
 }

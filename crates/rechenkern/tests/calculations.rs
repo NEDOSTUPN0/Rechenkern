@@ -533,6 +533,10 @@ fn comments_and_labels() {
         ("I spent $128 + $45 on clothes // on 10-02-2019", "$173.00"),
         ("Cost of 128 GB iPhone 16: $999", "$999.00"),
         ("Groceries — $200", "$200.00"),
+        ("1. $10", "$10.00"),
+        ("2) Rent $900", "$900.00"),
+        ("a) 3 + 4", "7"),
+        ("1. May 2024", "Wed, 1 May 2024"),
         ("# Heading 5", "<none>"),
         ("just some text", "<none>"),
     ]);
