@@ -121,6 +121,12 @@ pub fn money_multiplier(w: &str) -> Option<Number> {
     })
 }
 
+/// Ordinal numbers spelled out, for the degree of a root: `fourth root of 16`.
+pub fn ordinal_word(w: &str) -> Option<i64> {
+    let ordinals = ["second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
+    ordinals.iter().position(|&o| o == w).map(|k| k as i64 + 2)
+}
+
 /// Fractions spelled out: `half of 10`, `a third of 90`, `two thirds of 90`.
 pub fn fraction_word(w: &str) -> Option<Number> {
     Some(match w {
@@ -172,6 +178,8 @@ pub static FUNCTIONS: Phrases<Func> = Phrases::new(&[
     ("square root", Func::Sqrt),
     ("cbrt", Func::Cbrt),
     ("cube root", Func::Cbrt),
+    ("squared root", Func::Sqrt),
+    ("cubed root", Func::Cbrt),
     ("root", Func::Root),
     ("exp", Func::Exp),
     ("ln", Func::Ln),

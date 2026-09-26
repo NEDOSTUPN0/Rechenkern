@@ -61,6 +61,9 @@ impl Parser<'_> {
             return Ok(clock);
         }
         let value = self.multipliers(n, false);
+        if let Some(root) = self.root_of_degree(value)? {
+            return Ok(root);
+        }
         // "1.5x" is a plain multiplier.
         if self.cur().is_some_and(|t| t.word() == Some("x") && !t.space_before) && !self.operand_follows(1) {
             self.pos += 1;
@@ -259,6 +262,12 @@ impl Parser<'_> {
             let b = self.unary()?;
             return Ok(Some(Expr::binary(Op::Mod, a, b)));
         }
+        if let Some(degree) = words::ordinal_word(w)
+            && self.words_at(i + 1, &["root"])
+        {
+            self.pos += 1;
+            return self.root_of_degree(Number::from_i64(degree));
+        }
         if let Some((func, n)) = self.phrase_at(i, &words::FUNCTIONS) {
             return self.call(func, n);
         }
@@ -378,6 +387,10 @@ impl Parser<'_> {
             return Ok(Some(Expr::Call(func, vec![x])));
         }
         if func == Func::Root && !self.at_sym("(") {
+            // "root of 16" is the square root.
+            if self.eat_word("of") {
+                return Ok(Some(Expr::Call(Func::Sqrt, vec![self.unary()?])));
+            }
             let degree = self.unary()?;
             self.eat_word("of");
             let x = self.unary()?;
@@ -420,6 +433,23 @@ impl Parser<'_> {
             }
         }
         Ok(Some(Expr::Call(func, args)))
+    }
+
+    /// A root after its degree: "4th root of 16", "fourth root of 16", "5 root of 100".
+    fn root_of_degree(&mut self, degree: Number) -> Result<Option<Expr>> {
+        let mut p = self.clone();
+        p.eat_ordinal();
+        if !p.cur().is_some_and(|t| t.is_word("root")) || degree.to_i64().is_none_or(|d| d < 2) {
+            return Ok(None);
+        }
+        p.pos += 1;
+        p.eat_word("of");
+        if !p.operand_follows(0) {
+            return Ok(None);
+        }
+        let x = p.unary()?;
+        *self = p;
+        Ok(Some(Expr::Call(Func::Root, vec![Expr::Number(degree), x])))
     }
 
     /// Items separated by commas and "and": `3, 4 and 5`.

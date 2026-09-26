@@ -159,6 +159,7 @@ impl<'a> Parser<'a> {
             || words::number_word(w).is_some()
             || words::scale_word(word).is_some()
             || words::fraction_word(w).is_some()
+            || (words::ordinal_word(w).is_some() && self.words_at(i + 1, &["root"]))
             || words::constant(w).is_some()
             || words::month(w).is_some()
             || words::weekday(w).is_some()
