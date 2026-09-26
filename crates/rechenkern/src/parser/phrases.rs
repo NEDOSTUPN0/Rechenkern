@@ -46,6 +46,10 @@ impl Parser<'_> {
             }
         }
 
+        if let Some(expr) = self.percent_proportion()? {
+            return Ok(Some(expr));
+        }
+
         // "what % of 200 is 20", "what % is 20 of 200"
         if self.matches_at(0, &["what", "%", "of"])
             && let Some(is) = self.find(3, &["is"])
@@ -254,6 +258,28 @@ impl Parser<'_> {
                 Expr::binary(Op::Mul, Expr::binary(Op::Div, growth, time), every)
             }
             None => growth,
+        }))
+    }
+
+    /// "if 30 is 20%, what is 50%" = 75, "20% is 30, what is 60" = 40%: a value known
+    /// as a percentage of a whole gives other parts of it.
+    fn percent_proportion(&self) -> Result<Option<Expr>> {
+        let first = usize::from(self.matches_at(0, &["if"]));
+        let Some(is) = self.find(first, &["is"]) else { return Ok(None) };
+        let Some(what) = self.find(is + 1, &["what", "is"]) else { return Ok(None) };
+        let known_end = what - usize::from(self.toks[what - 1].is_sym(","));
+        let (value, percent) = if self.matches_at(known_end.wrapping_sub(1), &["%"]) {
+            (self.part(first, is)?, self.part(is + 1, known_end)?)
+        } else if self.matches_at(is.wrapping_sub(1), &["%"]) {
+            (self.part(is + 1, known_end)?, self.part(first, is)?)
+        } else {
+            return Ok(None);
+        };
+        let whole = Expr::binary(Op::Div, value, percent);
+        let asked = self.part(what + 2, self.toks.len())?;
+        Ok(Some(match self.ends_with(&["%"]) {
+            true => Expr::binary(Op::Of, asked, whole),
+            false => Self::formatted(Expr::binary(Op::Div, asked, whole), Format::Percent),
         }))
     }
 
