@@ -16,6 +16,9 @@ impl Parser<'_> {
         if let Some(expr) = self.when_it_is()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.percent_change()? {
+            return Ok(Some(expr));
+        }
         // Every phrase below has one of these words.
         if !self.toks.iter().any(|t| ["is", "as", "what"].iter().any(|w| t.is_word(w))) {
             return Ok(None);
@@ -114,7 +117,7 @@ impl Parser<'_> {
             let a = self.part(0, to)?;
             let b = self.part(to + 1, at)?;
             let change = match format {
-                Format::Percent => Expr::binary(Op::Div, Expr::binary(Op::Sub, b, a.clone()), a),
+                Format::Percent => change(a, b),
                 _ => Expr::binary(Op::Div, b, a),
             };
             return Ok(Some(Self::formatted(change, format)));
@@ -211,6 +214,20 @@ impl Parser<'_> {
         }))
     }
 
+    /// "% change from 10 to 20", "percent increase from 10 to 20", "what % change is 10 to 20".
+    fn percent_change(&self) -> Result<Option<Expr>> {
+        let start = usize::from(self.matches_at(0, &["what"]));
+        let kind = self.lower(start + 1);
+        if !self.matches_at(start, &["%"]) || !matches!(kind.as_deref(), Some("change" | "increase" | "decrease")) {
+            return Ok(None);
+        }
+        let from =
+            start + 2 + usize::from(self.matches_at(start + 2, &["from"]) || self.matches_at(start + 2, &["is"]));
+        let Some(to) = self.find(from, &["to"]) else { return Ok(None) };
+        let (a, b) = (self.part(from, to)?, self.part(to + 1, self.toks.len())?);
+        Ok(Some(Self::formatted(change(a, b), Format::Percent)))
+    }
+
     /// "time in Tokyo when it is 9am in London".
     fn when_it_is(&self) -> Result<Option<Expr>> {
         let (at, len) = match (self.find(1, &["when", "it", "is"]), self.find(1, &["when", "it's"])) {
@@ -273,4 +290,9 @@ impl Parser<'_> {
         }
         None
     }
+}
+
+/// Relative change from `a` to `b`: (b - a) / a.
+fn change(a: Expr, b: Expr) -> Expr {
+    Expr::binary(Op::Div, Expr::binary(Op::Sub, b, a.clone()), a)
 }
