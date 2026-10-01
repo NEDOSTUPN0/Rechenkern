@@ -81,19 +81,29 @@ impl<'a> Parser<'a> {
     }
 
     /// Up to `max` consecutive words from `i`, joined by spaces (lowercase if
-    /// asked), and where each word ends in the text.
-    pub(super) fn joined_words(&self, i: usize, max: usize, lowercase: bool) -> (String, Vec<usize>) {
+    /// asked); a hyphen between words stays, as in "light-year". Also where
+    /// each word ends in the text, and the tokens it takes up to there.
+    pub(super) fn joined_words(&self, i: usize, max: usize, lowercase: bool) -> (String, Vec<(usize, usize)>) {
         let (mut text, mut ends) = (String::new(), Vec::new());
-        for word in self.toks.iter().skip(i).take(max).map_while(Token::word) {
-            if !text.is_empty() {
-                text.push(' ');
-            }
+        let mut k = i;
+        while ends.len() < max {
+            let Some(word) = self.toks.get(k).and_then(Token::word) else { break };
             if lowercase {
                 text.push_str(&word.to_lowercase());
             } else {
                 text.push_str(word);
             }
-            ends.push(text.len());
+            k += 1;
+            ends.push((text.len(), k - i));
+            let glued = |t: &Token| !t.space_before;
+            let hyphen = self.toks.get(k).is_some_and(|t| t.is_sym("-") && glued(t))
+                && self.toks.get(k + 1).is_some_and(|t| t.word().is_some() && glued(t));
+            if hyphen {
+                text.push('-');
+                k += 1;
+            } else {
+                text.push(' ');
+            }
         }
         (text, ends)
     }
@@ -210,7 +220,7 @@ impl<'a> Parser<'a> {
             return None;
         }
         let (text, ends) = self.joined_words(i, registry().max_words(), false);
-        (1..=ends.len()).rev().find_map(|n| Some((registry().lookup(&text[..ends[n - 1]])?, n)))
+        ends.iter().rev().find_map(|&(end, n)| Some((registry().lookup(&text[..end])?, n)))
     }
 
     pub(super) fn dollar(&self) -> Unit {
@@ -220,8 +230,8 @@ impl<'a> Parser<'a> {
     /// A variable name made of the words at `i`.
     pub(super) fn var_at(&self, i: usize) -> Option<(String, usize)> {
         let (text, ends) = self.joined_words(i, 6, true);
-        (1..=ends.len()).rev().find_map(|n| {
-            let name = &text[..ends[n - 1]];
+        ends.iter().rev().find_map(|&(end, n)| {
+            let name = &text[..end];
             (self.scope.is_var)(name).then(|| (name.to_string(), n))
         })
     }

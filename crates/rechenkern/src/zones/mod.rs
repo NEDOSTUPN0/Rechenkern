@@ -64,7 +64,7 @@ static INDEX: LazyLock<TableMap<String, Listed>> = LazyLock::new(|| {
         if !id.contains('/') || SKIPPED_PREFIXES.iter().any(|p| id.starts_with(p)) {
             continue;
         }
-        let city = id.rsplit('/').next().unwrap_or(id).replace('_', " ").to_lowercase();
+        let city = zone_city_name(id);
         index.entry(city).or_insert_with(|| Listed { zone: id.to_string(), coordinates: None });
     }
     index
@@ -181,10 +181,15 @@ pub fn locate(name: &str) -> Option<Location> {
     // A zone's own city: "Zurich" for Europe/Zurich.
     let zone_city = || {
         let id = zone.iana_name()?;
-        (id.rsplit('/').next()?.replace('_', " ").to_lowercase() == name).then(|| zone_coordinates(id))?
+        (zone_city_name(id) == name).then(|| zone_coordinates(id))?
     };
     let (latitude, longitude) = listed.or_else(city).or_else(zone_city)?;
     Some(Location { zone, latitude, longitude })
+}
+
+/// "America/Port-au-Prince" -> "port au prince", as hyphenated names are read.
+fn zone_city_name(id: &str) -> String {
+    id.rsplit('/').next().unwrap_or(id).replace(['_', '-'], " ").to_lowercase()
 }
 
 /// The principal place of a zone: New York for America/New_York.

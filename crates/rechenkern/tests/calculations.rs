@@ -385,6 +385,9 @@ fn units() {
         ("8 L/100km * 500 km", "40 L"),
         ("8 L/100km * 2", "16 L/100km"),
         ("cost of 500 km at 8 L/100km at $1.5/L", "$60.00"),
+        ("2.5 pound-force in N", "11.12055404 N"),
+        ("1 light-year in km", "9,460,730,472,581 km"),
+        ("3 kilowatt-hours in J", "10,800,000 J"),
     ]);
 }
 
@@ -656,6 +659,7 @@ fn time_zones() {
         ("time in auckland", "Thu, 24 Sep 2026 06:30 NZST"),
         ("current time in paris", "20:30 CEST"),
         ("time in Tokyo when it is 9am in London", "17:00 JST"),
+        ("time in port-au-prince", "14:30 EDT"),
         ("time in marseille", "20:30 CEST"),
         ("time in cordoba", "15:30 UTC-3"),
         ("time in the hague", "20:30 CEST"),
