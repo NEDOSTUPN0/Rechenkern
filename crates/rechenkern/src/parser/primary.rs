@@ -36,8 +36,7 @@ impl Parser<'_> {
                 self.eat_sym(")");
                 Ok(expr)
             }
-            Tok::Sym("°") if self.unit_at(self.pos, false).is_some_and(|(u, _)| u.dim() == Dim::TEMPERATURE) => {
-                let (unit, n) = self.unit_at(self.pos, false).unwrap();
+            Tok::Sym("°") if let Some((unit, n)) = self.unit_at(self.pos, false) => {
                 self.pos += n;
                 Ok(Expr::BareUnit(unit))
             }
@@ -115,7 +114,8 @@ impl Parser<'_> {
         };
         if let Some(symbol) = symbol {
             self.pos += 1;
-            return Some(registry().get(symbol));
+            // "2 in²" is square inches, not (2 in)².
+            return Some(self.unit_exponent(registry().get(symbol)));
         }
         let start = self.pos;
         let unit = self.unit_phrase(true)?;
@@ -167,7 +167,12 @@ impl Parser<'_> {
             return None;
         }
         self.pos += n;
-        let mut unit = unit.pow(power);
+        let unit = self.unit_exponent(unit.pow(power));
+        Some(self.per_amount(&unit).unwrap_or(unit))
+    }
+
+    /// A power written after a unit: `m²`, `m^3`, `m squared`.
+    fn unit_exponent(&mut self, unit: Unit) -> Unit {
         let exp = match self.cur().map(|t| &t.tok) {
             Some(Tok::Sym("²")) => Some((2, 1)),
             Some(Tok::Sym("³")) => Some((3, 1)),
@@ -179,11 +184,9 @@ impl Parser<'_> {
             Some(Tok::Word(w)) if w.eq_ignore_ascii_case("cubed") => Some((3, 1)),
             _ => None,
         };
-        if let Some((e, len)) = exp {
-            unit = unit.pow(e);
-            self.pos += len;
-        }
-        Some(self.per_amount(&unit).unwrap_or(unit))
+        let Some((e, len)) = exp else { return unit };
+        self.pos += len;
+        unit.pow(e)
     }
 
     /// A unit per an amount of another unit, known as a unit of its own: "L/100km", "liters per 100 km".
@@ -271,8 +274,11 @@ impl Parser<'_> {
             self.pos += 1;
             return self.root_of_degree(Number::from_i64(degree));
         }
-        if let Some((func, n)) = self.phrase_at(i, &words::FUNCTIONS) {
-            return self.call(func, n);
+        // Without arguments "min" may be minutes: "1 BTU·min".
+        if let Some((func, n)) = self.phrase_at(i, &words::FUNCTIONS)
+            && let Some(call) = self.call(func, n)?
+        {
+            return Ok(Some(call));
         }
         if matches!(w, "true" | "false") {
             self.pos += 1;

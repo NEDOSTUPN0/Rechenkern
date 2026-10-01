@@ -126,8 +126,8 @@ impl<'a> Parser<'a> {
         while p.peek().is_some() {
             let mut value = p.clone();
             match value.expr() {
-                // A unit without a number is a word here: "5 cats km".
-                Ok(expr) if value.pos > p.pos && !matches!(expr, Expr::BareUnit(_)) => {
+                // Units without a number are words here: "5 cats km", "5:30 min/km".
+                Ok(expr) if value.pos > p.pos && unit_product(&expr).is_none() && !is_unit_rate(&expr) => {
                     values.push(expr);
                     p = value;
                 }
@@ -353,8 +353,11 @@ impl<'a> Parser<'a> {
                 lhs = part;
                 continue;
             }
-            // "per day" and "/ day" make a rate instead of cancelling units.
-            let op = if op == Op::Div && matches!(rhs, Expr::BareUnit(_)) { Op::Per } else { op };
+            // "per day", "/ day" and "/(s·week)" make a rate instead of cancelling units.
+            let (op, rhs) = match unit_product(&rhs) {
+                Some(unit) if op == Op::Div => (Op::Per, Expr::BareUnit(unit)),
+                _ => (op, rhs),
+            };
             lhs = if swap { Expr::binary(op, rhs, lhs) } else { Expr::binary(op, lhs, rhs) };
         }
     }
@@ -546,6 +549,23 @@ fn text_weight(expr: &Expr) -> u8 {
         2
     } else {
         1
+    }
+}
+
+/// A unit, or units multiplied as written: `day`, `(s·week)`.
+fn unit_product(expr: &Expr) -> Option<Unit> {
+    match expr {
+        Expr::BareUnit(unit) => Some(unit.clone()),
+        Expr::Binary(Op::Mul, a, b) => Some(unit_product(a)?.product(&unit_product(b)?)),
+        _ => None,
+    }
+}
+
+/// Units over units, with no number: `min/km`.
+fn is_unit_rate(expr: &Expr) -> bool {
+    match expr {
+        Expr::Binary(Op::Per | Op::Div, a, b) => unit_product(a).is_some() && unit_product(b).is_some(),
+        _ => false,
     }
 }
 

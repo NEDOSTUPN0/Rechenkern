@@ -210,7 +210,10 @@ impl<'a> Parser<'a> {
             }
             return Some((self.dollar(), 1));
         }
-        if word.eq_ignore_ascii_case("in") || (!after_number && matches!(word, "a" | "A" | "an")) {
+        // "A" is an article before a word ("A coffee"), amperes otherwise ("5 V/A").
+        let article = matches!(word, "a" | "an")
+            || (word == "A" && self.toks.get(i + 1).is_some_and(|t| t.word().is_some() && t.space_before));
+        if word.eq_ignore_ascii_case("in") || (!after_number && article) {
             return None;
         }
         // "min(" is a function.
@@ -310,7 +313,8 @@ impl<'a> Parser<'a> {
         let Some(tok) = p.peek() else { return false };
         match &tok.tok {
             Tok::Num(_) | Tok::Clock { .. } | Tok::Date { .. } | Tok::IsoDateTime(_) => true,
-            Tok::Sym(s) => matches!(*s, "(" | "-" | "+" | "√" | "∛"),
+            // "°" is a unit: "fl oz·°F", "ct·°".
+            Tok::Sym(s) => matches!(*s, "(" | "-" | "+" | "√" | "∛" | "°"),
             Tok::Word(w) => {
                 let w = w.to_lowercase();
                 !matches!(

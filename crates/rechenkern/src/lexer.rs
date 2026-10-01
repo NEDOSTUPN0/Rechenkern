@@ -269,10 +269,12 @@ impl Lexer<'_> {
             }
             word = format!("{}m", word.to_lowercase());
         }
-        // "US$", "C$", "R$"
-        if self.peek(0) == Some('$') && word.chars().all(|c| c.is_ascii_uppercase()) {
+        // "US$", "C$", "R$", "CN¥"
+        if let Some(sign @ ('$' | '¥')) = self.peek(0)
+            && word.chars().all(|c| c.is_ascii_uppercase())
+        {
             self.i += 1;
-            word.push('$');
+            word.push(sign);
         }
         Tok::Word(word)
     }
@@ -490,6 +492,7 @@ mod tests {
         assert_eq!(toks("5km×2"), vec![num("5"), Tok::Word("km".into()), Tok::Sym("*"), num("2")]);
         assert_eq!(toks("5 m²"), vec![num("5"), Tok::Word("m".into()), Tok::Sym("²")]);
         assert_eq!(toks("US$5"), vec![Tok::Word("US$".into()), num("5")]);
+        assert_eq!(toks("CN¥5"), vec![Tok::Word("CN¥".into()), num("5")]);
         assert_eq!(toks("3 p.m."), vec![num("3"), Tok::Word("pm".into())]);
         assert_eq!(toks(r#"5'11""#), vec![num("5"), Tok::Sym("'"), num("11"), Tok::Sym("\"")]);
         assert_eq!(toks(r#"Boeing "747" is 5 // note"#).len(), 3);

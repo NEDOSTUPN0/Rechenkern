@@ -249,7 +249,10 @@ impl Parser<'_> {
     /// What to convert into: a unit, several units, a format or a time zone.
     pub(super) fn target(&mut self) -> Option<Target> {
         let start = self.pos;
-        while matches!(self.lower(self.pos).as_deref(), Some("a" | "an" | "the")) {
+        // "in a day"; but "in A" alone is amperes.
+        while matches!(self.lower(self.pos).as_deref(), Some("a" | "an" | "the"))
+            && self.toks.get(self.pos + 1).is_some_and(|t| t.word().is_some())
+        {
             self.pos += 1;
         }
         if self.cur().is_some_and(|t| t.is_sym("%")) {
@@ -325,7 +328,8 @@ impl Parser<'_> {
             self.pos += 1;
             return Some(registry().get("in"));
         }
-        self.unit_phrase(false)
+        // Articles are skipped already: "A" here is amperes.
+        self.unit_phrase(true)
     }
 }
 

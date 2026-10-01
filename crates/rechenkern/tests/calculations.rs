@@ -388,12 +388,20 @@ fn units() {
         ("8 L/100km * 500 km", "40 L"),
         ("8 L/100km * 2", "16 L/100km"),
         ("cost of 500 km at 8 L/100km at $1.5/L", "$60.00"),
+        ("2 in²", "2 in²"),
+        ("2 in^2 in cm²", "12.9032 cm²"),
         ("1 N * 1 in", "1 N·inch"),
         ("1 picometer", "1 picometer"),
         ("3 picometers in m", "3e-12 m"),
         ("2.5 pound-force in N", "11.12055404 N"),
         ("1 light-year in km", "9,460,730,472,581 km"),
         ("3 kilowatt-hours in J", "10,800,000 J"),
+        ("2.5 kA in A", "2,500 A"),
+        ("5 V/A", "5 V/A"),
+        ("1 W/(m·K)", "1 W/(m·K)"),
+        ("1 Mbit/(s·week)", "1 Mbit/(s·week)"),
+        ("1 BTU·min", "1 BTU·min"),
+        ("1 fl oz·°F", "1 fl oz·°F"),
     ]);
 }
 
@@ -440,6 +448,7 @@ fn currencies() {
         ("$5k in eur", "€4,500.00"),
         ("€9 in dollars", "$10.00"),
         ("£8 in yen", "¥1,500"),
+        ("CN¥5 + CN¥1.50", "CN¥6.50"),
         ("500 tenge in rubles", "₽90.00"),
         ("1 btc in usd", "$100,000.00"),
         ("$100 in btc", "0.001 BTC"),
@@ -713,6 +722,8 @@ fn comments_and_labels() {
         ("$20 for lunch, $15 for taxi", "$35.00"),
         ("3 km walk, 5 km run", "8 km"),
         ("max($10, $20)", "$20.00"),
+        ("A coffee $5", "$5.00"),
+        ("5:30 min/km", "05:30"),
     ]);
 }
 
