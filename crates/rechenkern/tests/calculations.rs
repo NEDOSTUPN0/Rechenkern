@@ -584,6 +584,7 @@ fn sun_and_moon() {
         ("sunset in London - sunrise in London", "12 hours 9 minutes"),
         ("daylight hours in Sydney in hours", "12.16666667 hours"),
         ("sunrise at JFK", "06:45 EDT"),
+        ("sunrise in San Fernando del Valle de Catamarca", "07:11 UTC-3"),
         // Without a place, here; "tomorrow" is tomorrow at the place.
         ("sunrise", "06:45"),
         ("time until sunset", "4 hours 21 minutes"),
@@ -661,6 +662,7 @@ fn time_zones() {
         ("Jan 10 3pm EST in UTC", "Sat, 10 Jan 2026 20:00 UTC"),
         ("time in aix-en-provence", "20:30 CEST"),
         ("time in sao jose dos campos", "15:30 UTC-3"),
+        ("time in San Fernando del Valle de Catamarca", "15:30 UTC-3"),
         ("time in qwertyville", "<error: unknown place \"qwertyville\">"),
         ("time in marseile", "<error: unknown place \"marseile\", did you mean \"Marseille\"?>"),
         ("3pm to gotham city", "<error: unknown place \"gotham city\">"),

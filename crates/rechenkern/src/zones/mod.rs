@@ -147,8 +147,8 @@ fn city(name: &str) -> Option<City> {
     None
 }
 
-/// Longest place name in words.
-pub const MAX_WORDS: usize = 5;
+/// Longest place name in words: "San Fernando del Valle de Catamarca".
+pub const MAX_WORDS: usize = 6;
 
 /// Finds a zone by lowercase place name or abbreviation, like "new york" or "pst".
 pub fn find(name: &str) -> Option<TimeZone> {
@@ -325,6 +325,7 @@ mod tests {
         assert_eq!(latitude("tokyo"), Some(35.69));
         // Listed with coordinates: cities.txt drops names that are English words.
         assert_eq!(latitude("bath"), Some(51.38));
+        assert_eq!(latitude("san fernando del valle de catamarca"), Some(-28.47));
         // A zone's old name keeps the same time as the city's zone.
         assert_eq!(latitude("calcutta"), Some(22.56));
         assert_eq!(latitude("istanbul"), Some(41.01));

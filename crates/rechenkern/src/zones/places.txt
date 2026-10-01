@@ -533,6 +533,7 @@ split = Europe/Zagreb 43.51 16.44
 st louis = America/Chicago 38.63 -90.20
 st petersburg = Europe/Moscow
 saint louis = America/Chicago 38.63 -90.20
+san fernando del valle de catamarca = America/Argentina/Catamarca -28.47 -65.79
 stuttgart = Europe/Berlin
 surabaya = Asia/Jakarta
 taraz = Asia/Almaty
