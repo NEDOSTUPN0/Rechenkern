@@ -32,6 +32,7 @@ days until christmas                            93 days
 workdays until christmas                        67 workdays
 time in Tokyo when it is 9am in London          17:00 JST
 6pm Sydney in Chicago                           03:00 CDT
+sunset in London                                18:57 BST
 255 in binary                                   0b11111111
 time in pariss                                  unknown place "pariss", did you mean "Paris"?
 ```
@@ -106,6 +107,7 @@ build). The Soulver app may understand more than the engine alone.
 | Arithmetic, functions, number bases, rounding    |     ✓      |        ✓         |
 | Units, currencies, percentages, rates            |     ✓      |        ✓         |
 | Dates, clock times, time zones, workdays         |     ✓      |        ✓         |
+| Sunrise, sunset, daylight, moon phase            |     ✓      |        ✓         |
 | Compound interest, rule of three                 |     ✓      |        ✓         |
 | Sheets with variables                            |     ✓      |        ✓         |
 | Cities known for time zones                      |  ~57,000   |       ~650       |

@@ -12,6 +12,7 @@
 //! ```
 
 mod ast;
+mod astro;
 mod calculator;
 mod config;
 pub mod currency;

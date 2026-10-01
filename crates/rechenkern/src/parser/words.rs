@@ -5,7 +5,7 @@ use std::sync::OnceLock;
 
 use jiff::civil::Weekday;
 
-use crate::ast::{Format, Func, Holiday, Which};
+use crate::ast::{Format, Func, Holiday, Sky, Which};
 use crate::hash::TableMap;
 use crate::number::Number;
 use crate::units::registry;
@@ -327,6 +327,24 @@ pub static DATE_PARTS: Phrases<Format> = Phrases::new(&[
     ("day of week", Format::Weekday),
     ("day of the week", Format::Weekday),
     ("weekday", Format::Weekday),
+]);
+
+/// The sun and the moon. "sunlight" and "daylight" alone need a place after them.
+pub static SKY: Phrases<Sky> = Phrases::new(&[
+    ("sunrise", Sky::Sunrise),
+    ("sunset", Sky::Sunset),
+    ("hours of sunlight", Sky::Daylight),
+    ("hours of daylight", Sky::Daylight),
+    ("sunlight hours", Sky::Daylight),
+    ("daylight hours", Sky::Daylight),
+    ("sunlight", Sky::Daylight),
+    ("daylight", Sky::Daylight),
+    ("moon phase", Sky::MoonPhase),
+    ("moonphase", Sky::MoonPhase),
+    ("phase of the moon", Sky::MoonPhase),
+    ("lunar phase", Sky::MoonPhase),
+    ("lunar day", Sky::LunarDay),
+    ("moon day", Sky::LunarDay),
 ]);
 
 pub static HOLIDAYS: Phrases<Holiday> = Phrases::new(&[

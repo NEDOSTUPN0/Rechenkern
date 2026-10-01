@@ -131,7 +131,7 @@ impl Parser<'_> {
     }
 
     /// A date word follows: tomorrow, a weekday, "on March 3"...
-    fn date_follows(&self) -> bool {
+    pub(super) fn date_follows(&self) -> bool {
         let Some(w) = self.lower(self.pos) else { return false };
         matches!(w.as_str(), "today" | "tomorrow" | "yesterday" | "on" | "next" | "last" | "this")
             || words::weekday(&w).is_some()
@@ -140,7 +140,7 @@ impl Parser<'_> {
     }
 
     /// Parses the date after a clock time.
-    fn date_word(&mut self) -> Result<Option<Expr>> {
+    pub(super) fn date_word(&mut self) -> Result<Option<Expr>> {
         self.eat_word("on");
         if let Some(Tok::Date { parts, sep }) = self.cur().map(|t| &t.tok) {
             self.pos += 1;

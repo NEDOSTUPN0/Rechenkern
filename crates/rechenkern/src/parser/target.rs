@@ -1,7 +1,7 @@
 //! Conversions (`in km`, `as hex`, `to Tokyo`) and rounding (`to 2 dp`).
 
 use super::{Parser, words};
-use crate::ast::{Direction, Expr, Format, Func, Rounding, Target, TimeExpr};
+use crate::ast::{Direction, Expr, Format, Func, Rounding, Sky, Target, TimeExpr};
 use crate::error::{Result, bail};
 use crate::lexer::{Tok, Token};
 use crate::number::Number;
@@ -82,7 +82,7 @@ impl Parser<'_> {
     }
 
     /// Fails with a helpful message if words that aren't a known place follow.
-    fn unknown_place(&self) -> Result<()> {
+    pub(super) fn unknown_place(&self) -> Result<()> {
         let mut i = self.pos;
         while self.lower(i).is_some_and(|w| matches!(w.as_str(), "a" | "an" | "the")) {
             i += 1;
@@ -333,6 +333,7 @@ impl Parser<'_> {
 fn is_moment(expr: &Expr) -> bool {
     match expr {
         Expr::Time(_) | Expr::InZone(..) => true,
+        Expr::Sky { what, .. } => matches!(what, Sky::Sunrise | Sky::Sunset),
         Expr::Convert(inner, Target::Zone(_)) => is_moment(inner),
         _ => false,
     }

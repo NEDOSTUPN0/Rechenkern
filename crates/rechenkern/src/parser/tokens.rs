@@ -6,7 +6,7 @@ use super::{Parser, words};
 use crate::ast::Func;
 use crate::lexer::{Tok, Token};
 use crate::units::{Unit, registry};
-use crate::zones;
+use crate::zones::{self, Location};
 
 impl<'a> Parser<'a> {
     pub(super) fn cur(&self) -> Option<&'a Token> {
@@ -174,6 +174,8 @@ impl<'a> Parser<'a> {
             || self.var_at(i).is_some()
             || self.place_time_at(i).is_some()
             || self.place_converted_at(i).is_some()
+            || self.sky_at(i).is_some()
+            || self.place_sky_at(i).is_some()
     }
 
     /// A unit spelled at token `i`: its value and length in tokens.
@@ -233,16 +235,27 @@ impl<'a> Parser<'a> {
     }
 
     fn find_place(&self, i: usize) -> Option<(TimeZone, usize)> {
+        self.place_name_at(i).map(|(_, zone, n)| (zone, n))
+    }
+
+    /// The longest place name at token `i` (lowercase), its zone and its length in tokens.
+    fn place_name_at(&self, i: usize) -> Option<(String, TimeZone, usize)> {
         let (words, ends) = self.name_words(i);
-        let text = words.join(" ");
-        let mut cut = text.len();
+        let mut text = words.join(" ");
         for n in (1..=words.len()).rev() {
-            if let Some(zone) = zones::find(&text[..cut]) {
-                return Some((zone, ends[n - 1] - i));
+            if let Some(zone) = zones::find(&text) {
+                return Some((text, zone, ends[n - 1] - i));
             }
-            cut = cut.saturating_sub(words[n - 1].len() + 1);
+            text.truncate(text.len().saturating_sub(words[n - 1].len() + 1));
         }
         None
+    }
+
+    /// Where the place at token `i` is, for the sun, and its length in tokens.
+    /// A region has a zone but no single place: "Texas" gives `(None, 1)`.
+    pub(super) fn location_at(&self, i: usize) -> Option<(Option<Location>, usize)> {
+        let (name, _, n) = self.place_name_at(i)?;
+        Some((zones::locate(&name), n))
     }
 
     /// Up to `MAX_WORDS` lowercase words from token `i`, and the token index after each.

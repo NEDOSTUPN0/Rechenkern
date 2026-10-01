@@ -571,6 +571,47 @@ fn dates() {
 }
 
 #[test]
+fn sun_and_moon() {
+    check(&[
+        // Today at the place, to the minute; PyEphem agrees within seconds.
+        ("sunrise in Tokyo", "Thu, 24 Sep 2026 05:30 JST"),
+        ("Tokyo sunset", "Thu, 24 Sep 2026 17:36 JST"),
+        ("sunrise time in Tokyo", "Thu, 24 Sep 2026 05:30 JST"),
+        ("sunrise in London", "06:48 BST"),
+        ("sunset in London", "18:57 BST"),
+        ("hours of daylight in London", "12 hours 9 minutes"),
+        ("London daylight hours", "12 hours 9 minutes"),
+        ("sunset in London - sunrise in London", "12 hours 9 minutes"),
+        ("daylight hours in Sydney in hours", "12.16666667 hours"),
+        ("sunrise at JFK", "06:45 EDT"),
+        // Without a place, here; "tomorrow" is tomorrow at the place.
+        ("sunrise", "06:45"),
+        ("time until sunset", "4 hours 21 minutes"),
+        ("sunrise in Paris tomorrow", "Thu, 24 Sep 2026 07:40 CEST"),
+        ("sunrise in Tokyo tomorrow", "Fri, 25 Sep 2026 05:31 JST"),
+        ("sunrise in Tokyo in 2 days", "Sat, 26 Sep 2026 05:32 JST"),
+        ("sunrise in Tokyo on Oct 5", "Mon, 5 Oct 2026 05:39 JST"),
+        ("sunrise in Tokyo in New York", "16:30 EDT"),
+        ("hours of daylight in Tromso on June 21", "24 hours"),
+        ("hours of daylight in Tromso on Dec 21", "0 hours"),
+        ("sunrise in Tromso on June 21", "<error: polar day: the sun doesn't set there on Sun, 21 Jun 2026>"),
+        ("sunrise in Texas", "<error: don't know where exactly \"Texas\" is: name a city>"),
+        ("hours of sunlight in Qwertyville", "<error: unknown place \"Qwertyville\">"),
+        // The moon's phases from their exact times; a main phase lasts an eighth of the month.
+        ("moon phase", "Waxing Gibbous"),
+        ("phase of the moon on Sep 26", "Full Moon"),
+        ("moon phase on Oct 5", "Waning Crescent"),
+        ("lunar day", "13"),
+        ("lunar day on Oct 5", "25"),
+        ("moon day on Jan 1, 2027", "24"),
+        // Words of the sun in text.
+        ("Daylight saving starts Mar 8", "Sun, 8 Mar 2026"),
+        ("Sunset Boulevard 123", "123"),
+        ("$20 for sunset cruise", "$20.00"),
+    ]);
+}
+
+#[test]
 fn clock_times() {
     check(&[
         ("3pm", "15:00"),

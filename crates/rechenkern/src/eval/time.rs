@@ -154,11 +154,11 @@ fn days(n: i64) -> Span {
 }
 
 impl Env<'_> {
-    fn today(&self) -> Date {
+    pub(super) fn today(&self) -> Date {
         self.now.get().date()
     }
 
-    fn local_zone(&self) -> TimeZone {
+    pub(super) fn local_zone(&self) -> TimeZone {
         self.now.get().time_zone().clone()
     }
 

@@ -5,6 +5,7 @@
 
 mod phrases;
 mod primary;
+mod sky;
 mod target;
 mod time;
 mod tokens;
@@ -532,7 +533,7 @@ impl<'a> Parser<'a> {
 /// units, then plain numbers, then dates (as SoulverCore picks them).
 fn text_weight(expr: &Expr) -> u8 {
     let has = |f: fn(&Expr) -> bool| expr.contains(&f);
-    if has(|e| matches!(e, Expr::Time(_))) {
+    if has(|e| matches!(e, Expr::Time(_) | Expr::Sky { .. })) {
         0
     } else if has(|e| matches!(e, Expr::Binary(Op::Add | Op::Sub | Op::Mul | Op::Div, ..) | Expr::Composite(_))) {
         4

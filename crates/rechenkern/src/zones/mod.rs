@@ -8,8 +8,10 @@ use jiff::tz::{Offset, TimeZone};
 use crate::hash::TableMap;
 
 const PLACES: &str = include_str!("places.txt");
-/// About 57k city names from GeoNames, sorted for binary search.
+/// About 57k city names from GeoNames with their zones and coordinates, sorted for binary search.
 const CITIES: &str = include_str!("cities.txt");
+/// Where each zone's principal place is, from the tz database.
+const ZONE_COORDINATES: &str = include_str!("zone_coordinates.txt");
 
 /// Zone ids whose last segment is not a useful place name.
 const SKIPPED_PREFIXES: &[&str] = &[
@@ -27,12 +29,31 @@ const SKIPPED_PREFIXES: &[&str] = &[
     "right/",
 ];
 
-/// Lowercase place name -> IANA zone id.
-static INDEX: LazyLock<TableMap<String, String>> = LazyLock::new(|| {
+/// A place from `places.txt` or the zone database.
+struct Listed {
+    /// IANA zone id, or a fixed offset in POSIX form.
+    zone: String,
+    /// Latitude and longitude of a listed city, if `cities.txt` doesn't have them.
+    coordinates: Option<(f64, f64)>,
+}
+
+impl Listed {
+    /// Reads "Europe/London" or "Europe/London 51.38 -2.36".
+    fn parse(text: &str) -> Listed {
+        let mut fields = text.split_whitespace();
+        let zone = fields.next().unwrap_or_default().to_string();
+        let mut number = || fields.next()?.parse::<f64>().ok();
+        let coordinates = number().zip(number());
+        Listed { zone, coordinates }
+    }
+}
+
+/// Lowercase place name -> its zone.
+static INDEX: LazyLock<TableMap<String, Listed>> = LazyLock::new(|| {
     let mut index = TableMap::default();
     for line in PLACES.lines().map(str::trim).filter(|l| !l.is_empty() && !l.starts_with('#')) {
-        if let Some((name, zone)) = line.split_once('=') {
-            index.insert(name.trim().to_string(), zone.trim().to_string());
+        if let Some((name, rest)) = line.split_once('=') {
+            index.insert(name.trim().to_string(), Listed::parse(rest));
         }
     }
     // Cities from the zone database itself: "Asia/Almaty" -> "almaty". The
@@ -44,12 +65,12 @@ static INDEX: LazyLock<TableMap<String, String>> = LazyLock::new(|| {
             continue;
         }
         let city = id.rsplit('/').next().unwrap_or(id).replace('_', " ").to_lowercase();
-        index.entry(city).or_insert_with(|| id.to_string());
+        index.entry(city).or_insert_with(|| Listed { zone: id.to_string(), coordinates: None });
     }
     index
 });
 
-/// The `name\tzone` lines of `cities.txt`, without the header.
+/// The `name\tzone\tlatitude\tlongitude` lines of `cities.txt`, without the header.
 fn city_lines() -> &'static str {
     let mut data = CITIES;
     while data.starts_with('#') {
@@ -58,7 +79,7 @@ fn city_lines() -> &'static str {
     data
 }
 
-/// All cities as (name, zone id).
+/// All cities as their name and the rest of their line.
 fn cities() -> impl Iterator<Item = (&'static str, &'static str)> {
     // Scanning bytes is much faster here than `lines()` and `split_once()`.
     let mut rest = city_lines();
@@ -75,20 +96,51 @@ fn cities() -> impl Iterator<Item = (&'static str, &'static str)> {
     })
 }
 
+/// A city: its zone id and where it is.
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct City {
+    zone: &'static str,
+    latitude: f64,
+    longitude: f64,
+}
+
+impl City {
+    /// Reads "Asia/Tokyo\t35.69\t139.69".
+    fn parse(line_rest: &'static str) -> Option<City> {
+        let mut fields = line_rest.split('\t');
+        let zone = fields.next()?;
+        let latitude = fields.next()?.parse().ok()?;
+        let longitude = fields.next()?.parse().ok()?;
+        Some(City { zone, latitude, longitude })
+    }
+}
+
 /// Binary search right in the sorted text: no index to build at startup.
-fn city(name: &str) -> Option<&'static str> {
+fn city(name: &str) -> Option<City> {
     let data = city_lines();
     let bytes = data.as_bytes();
-    // `lo` and `hi` always sit at line starts.
+    // Lines starting before `lo` sort before `name`, lines starting at `hi` or later after it.
     let (mut lo, mut hi) = (0, data.len());
     while lo < hi {
-        let mid = (lo + hi) / 2;
-        let start = bytes[lo..mid].iter().rposition(|&b| b == b'\n').map_or(lo, |p| lo + p + 1);
-        let end = bytes[start..hi].iter().position(|&b| b == b'\n').map_or(hi, |p| start + p);
-        let (city, zone) = data[start..end].split_once('\t')?;
-        match city.cmp(name) {
-            std::cmp::Ordering::Equal => return Some(zone),
-            std::cmp::Ordering::Less => lo = end + 1,
+        let mid = lo + (hi - lo) / 2;
+        // The first line starting at `mid` or later; only its name is read.
+        let start = match mid {
+            0 => 0,
+            _ => match bytes[mid - 1..hi].iter().position(|&b| b == b'\n') {
+                Some(p) if mid + p < hi => mid + p,
+                _ => {
+                    hi = mid;
+                    continue;
+                }
+            },
+        };
+        let tab = start + bytes[start..].iter().position(|&b| b == b'\t')?;
+        match data[start..tab].cmp(name) {
+            std::cmp::Ordering::Equal => {
+                let end = tab + bytes[tab..].iter().position(|&b| b == b'\n').unwrap_or(data.len() - tab);
+                return City::parse(&data[tab + 1..end]);
+            }
+            std::cmp::Ordering::Less => lo = start + 1,
             std::cmp::Ordering::Greater => hi = start,
         }
     }
@@ -100,14 +152,64 @@ pub const MAX_WORDS: usize = 5;
 
 /// Finds a zone by lowercase place name or abbreviation, like "new york" or "pst".
 pub fn find(name: &str) -> Option<TimeZone> {
-    if let Some(zone) = INDEX.get(name).and_then(|id| listed(id)) {
+    if let Some(zone) = INDEX.get(name).and_then(|l| listed(&l.zone)) {
         return Some(zone);
     }
     // Full ids like "asia/tokyo" typed by the user.
     if name.contains('/') {
         return TimeZone::get(name).ok();
     }
-    city(name).and_then(|id| TimeZone::get(id).ok())
+    city(name).and_then(|c| TimeZone::get(c.zone).ok())
+}
+
+/// A place on Earth, for the sun: `sunrise in Tokyo`.
+#[derive(Clone, Debug)]
+pub struct Location {
+    pub zone: TimeZone,
+    /// Degrees north.
+    pub latitude: f64,
+    /// Degrees east.
+    pub longitude: f64,
+}
+
+/// Where a city or an airport is. Regions have no single place: "Texas" is
+/// `None`, but "New York" is the city, which has the state's zone.
+pub fn locate(name: &str) -> Option<Location> {
+    let zone = find(name)?;
+    let listed = INDEX.get(name).and_then(|l| l.coordinates);
+    let city = || city(name).filter(|c| same_time(&zone, c.zone)).map(|c| (c.latitude, c.longitude));
+    // A zone's own city: "Zurich" for Europe/Zurich.
+    let zone_city = || {
+        let id = zone.iana_name()?;
+        (id.rsplit('/').next()?.replace('_', " ").to_lowercase() == name).then(|| zone_coordinates(id))?
+    };
+    let (latitude, longitude) = listed.or_else(city).or_else(zone_city)?;
+    Some(Location { zone, latitude, longitude })
+}
+
+/// The principal place of a zone: New York for America/New_York.
+pub fn zone_location(zone: &TimeZone) -> Option<Location> {
+    let (latitude, longitude) = zone_coordinates(zone.iana_name()?)?;
+    Some(Location { zone: zone.clone(), latitude, longitude })
+}
+
+fn zone_coordinates(id: &str) -> Option<(f64, f64)> {
+    let line = ZONE_COORDINATES.lines().find(|l| l.split('\t').next() == Some(id))?;
+    let mut fields = line.split('\t').skip(1).map(|f| f.parse().ok());
+    Some((fields.next()??, fields.next()??))
+}
+
+/// The zones keep the same time, as a zone and its old name do: Asia/Calcutta and Asia/Kolkata.
+fn same_time(zone: &TimeZone, id: &str) -> bool {
+    if zone.iana_name() == Some(id) {
+        return true;
+    }
+    let Ok(other) = TimeZone::get(id) else { return false };
+    // Mid-month in each season of 2026, to catch daylight saving time.
+    [1_768_435_200, 1_776_211_200, 1_784_073_600, 1_792_022_400]
+        .into_iter()
+        .filter_map(|s| jiff::Timestamp::from_second(s).ok())
+        .all(|t| zone.to_offset(t) == other.to_offset(t))
 }
 
 /// A zone from `places.txt`: an IANA id or a fixed offset in POSIX form ("EDT4").
@@ -211,10 +313,42 @@ mod tests {
         assert_eq!(find("sao jose dos campos").unwrap().iana_name(), Some("America/Sao_Paulo"));
         let names: Vec<&str> = cities().map(|(city, _)| city).collect();
         assert!(names.windows(2).all(|w| w[0] < w[1]), "cities.txt must be sorted");
-        // Every name is found by the binary search.
-        assert!(cities().all(|(name, zone)| city(name) == Some(zone)));
+        // Every name is found by the binary search, and every line reads.
+        assert!(cities().all(|(name, rest)| City::parse(rest).is_some() && city(name) == City::parse(rest)));
         assert_eq!(city("zzzzzz"), None);
         assert_eq!(city("aaa"), None);
+    }
+
+    #[test]
+    fn locates_cities_not_regions() {
+        let latitude = |name: &str| locate(name).map(|l| l.latitude);
+        assert_eq!(latitude("tokyo"), Some(35.69));
+        // Listed with coordinates: cities.txt drops names that are English words.
+        assert_eq!(latitude("bath"), Some(51.38));
+        // A zone's old name keeps the same time as the city's zone.
+        assert_eq!(latitude("calcutta"), Some(22.56));
+        assert_eq!(latitude("istanbul"), Some(41.01));
+        // A zone's own city, from the tz database.
+        assert_eq!(latitude("zurich"), Some(47.38));
+        // Regions and zone names are no single place; the state of Washington
+        // is not the city, which keeps other time.
+        assert_eq!(latitude("texas"), None);
+        assert_eq!(latitude("pst"), None);
+        assert_eq!(latitude("washington"), None);
+        let new_york = zone_location(&TimeZone::get("America/New_York").unwrap()).unwrap();
+        assert_eq!((new_york.latitude, new_york.longitude), (40.71, -74.01));
+    }
+
+    #[test]
+    fn coordinates_are_on_earth() {
+        let valid = |(lat, lon): (f64, f64)| (-90.0..=90.0).contains(&lat) && (-180.0..=180.0).contains(&lon);
+        for line in ZONE_COORDINATES.lines().filter(|l| !l.starts_with('#')) {
+            let id = line.split('\t').next().unwrap();
+            assert!(zone_coordinates(id).is_some_and(valid), "{line}");
+        }
+        for (name, l) in INDEX.iter() {
+            assert!(l.coordinates.is_none_or(valid), "{name}");
+        }
     }
 
     #[test]
@@ -225,7 +359,7 @@ mod tests {
 
     #[test]
     fn city_zones_exist() {
-        let mut ids: Vec<&str> = cities().map(|(_, id)| id).collect();
+        let mut ids: Vec<&str> = cities().filter_map(|(_, rest)| Some(City::parse(rest)?.zone)).collect();
         ids.sort_unstable();
         ids.dedup();
         for id in ids {
@@ -235,8 +369,8 @@ mod tests {
 
     #[test]
     fn all_listed_zones_exist() {
-        for (name, id) in INDEX.iter() {
-            assert!(listed(id).is_some(), "{name} = {id}");
+        for (name, l) in INDEX.iter() {
+            assert!(listed(&l.zone).is_some(), "{name} = {}", l.zone);
         }
     }
 }

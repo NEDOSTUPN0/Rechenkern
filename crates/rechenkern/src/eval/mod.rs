@@ -2,6 +2,7 @@
 
 mod arith;
 mod functions;
+mod sky;
 mod time;
 
 pub(crate) use time::get as span_field;
@@ -118,6 +119,7 @@ impl Env<'_> {
             Expr::Range(a, b) => self.range(self.endpoint(a)?, self.endpoint(b)?)?,
             Expr::Period(first, length) => self.period(first, length)?,
             Expr::ZoneDiff(a, b) => self.zone_difference(a, b)?,
+            Expr::Sky { what, place, on } => self.sky(*what, place.as_ref(), on.as_deref())?,
             Expr::Convert(..) => self.answer(expr)?.0,
             Expr::Round(inner, rounding) => self.round(self.eval(inner)?, *rounding)?,
             Expr::If { .. } => match self.branch(expr)? {

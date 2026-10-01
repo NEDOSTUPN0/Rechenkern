@@ -5,6 +5,7 @@ use jiff::tz::TimeZone;
 
 use crate::number::Number;
 use crate::units::Unit;
+use crate::zones::Location;
 
 #[derive(Clone, Debug)]
 pub enum Stmt {
@@ -51,6 +52,13 @@ pub enum Expr {
     Period(Box<Expr>, Box<Expr>),
     /// Difference between the UTC offsets of two zones.
     ZoneDiff(TimeZone, TimeZone),
+    /// The sun or the moon: `sunrise in Tokyo`, `moon phase on May 1`. Without
+    /// a place the sun is the local zone's city's; without a date it is today.
+    Sky {
+        what: Sky,
+        place: Option<Location>,
+        on: Option<Box<Expr>>,
+    },
     Convert(Box<Expr>, Target),
     Round(Box<Expr>, Rounding),
     /// `a if cond else b`; a missing branch means no answer.
@@ -284,6 +292,23 @@ pub enum TimeExpr {
     },
     /// ISO 8601 timestamp text.
     Iso(String),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Sky {
+    Sunrise,
+    Sunset,
+    /// Hours from sunrise to sunset.
+    Daylight,
+    MoonPhase,
+    /// Day of the lunar month, 1 on the day of the new moon.
+    LunarDay,
+}
+
+impl Sky {
+    pub fn is_sun(self) -> bool {
+        matches!(self, Sky::Sunrise | Sky::Sunset | Sky::Daylight)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
