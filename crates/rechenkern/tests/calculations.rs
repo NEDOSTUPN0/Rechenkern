@@ -95,6 +95,8 @@ fn arithmetic() {
         ("seven times six", "42"),
         ("1/0", "<error: division by zero>"),
         ("2^99999", "<error: result is too large>"),
+        // Tiny products keep their digits.
+        ("1.234567e-25 * 1.1", "1.3580237e-25"),
     ]);
 }
 

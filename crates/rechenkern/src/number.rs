@@ -292,8 +292,19 @@ impl Sub for Number {
 impl Mul for Number {
     type Output = Number;
     fn mul(self, rhs: Number) -> Number {
-        self.binary(rhs, |a, b| a.checked_mul(b), |a, b| a * b)
+        self.binary(rhs, |a, b| a.checked_mul(b).filter(|r| keeps_digits(*r, a, b)), |a, b| a * b)
     }
+}
+
+/// A product or quotient below 1e-12 keeps too few digits as a decimal, which
+/// has 28 decimal places at most: such results are computed as floats.
+fn keeps_digits(result: Decimal, a: Decimal, b: Decimal) -> bool {
+    const TINY: Decimal = Decimal::from_parts(1, 0, 0, false, 12);
+    if result.is_zero() {
+        return a.is_zero() || b.is_zero();
+    }
+    // Fewer than 12 decimal places can't be that small.
+    result.scale() < 12 || result.abs() >= TINY
 }
 
 /// Division; dividing by zero yields a non-finite float, so check first.
@@ -303,7 +314,7 @@ impl Div for Number {
         if rhs.is_zero() {
             return Float(self.to_f64() / 0.0);
         }
-        self.binary(rhs, |a, b| a.checked_div(b), |a, b| a / b)
+        self.binary(rhs, |a, b| a.checked_div(b).filter(|r| keeps_digits(*r, a, b)), |a, b| a / b)
     }
 }
 
