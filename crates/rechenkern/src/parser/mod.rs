@@ -392,6 +392,8 @@ impl<'a> Parser<'a> {
                 "of" => (Op::Of, 1),
                 "out" if next_is(self, "of") => (Op::OutOf, 2),
                 "on" => (Op::On, 1),
+                // "20% off of 50" is said too.
+                "off" if next_is(self, "of") => (Op::Off, 2),
                 "off" => (Op::Off, 1),
                 "at" => (Op::At, 1),
                 "permutation" | "permutations" if next_is(self, "of") => (Op::Perm, 2),

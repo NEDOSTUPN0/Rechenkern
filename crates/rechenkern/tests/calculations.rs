@@ -141,6 +141,9 @@ fn bases_and_bits() {
         ("1 << 4", "16"),
         ("5 xor 3", "6"),
         ("hex(99)", "0x63"),
+        ("255 in base 16", "0xFF"),
+        ("255 as base 2", "0b11111111"),
+        ("255 in %", "25,500%"),
     ]);
 }
 
@@ -246,6 +249,7 @@ fn percentages() {
         ("10% on 200", "220"),
         ("200 - 10%", "180"),
         ("10% off 200", "180"),
+        ("20% off of 50", "40"),
         ("20 is 10% of what", "200"),
         ("180 is 10% off what", "200"),
         ("220 is 10% on what", "200"),
@@ -613,6 +617,7 @@ fn sun_and_moon() {
         ("sunrise in Tokyo in 2 days", "Sat, 26 Sep 2026 05:32 JST"),
         ("sunrise in Tokyo on Oct 5", "Mon, 5 Oct 2026 05:39 JST"),
         ("sunrise in Tokyo in New York", "16:30 EDT"),
+        ("daylight on March 21, 2027", "12 hours 11 minutes"),
         ("hours of daylight in Tromso on June 21", "24 hours"),
         ("hours of daylight in Tromso on Dec 21", "0 hours"),
         ("sunrise in Tromso on June 21", "<error: polar day: the sun doesn't set there on Sun, 21 Jun 2026>"),
@@ -681,6 +686,7 @@ fn time_zones() {
         // Abbreviations only where they read back: Belize's "CST" would be Chicago's.
         ("3pm Belize", "15:00 UTC-6"),
         ("3pm Kampala", "15:00 UTC+3"),
+        ("today as iso 8601", "2026-09-23T00:00:00-04:00"),
         ("3pm WEST in UTC", "14:00 UTC"),
         ("Jan 10 3pm EDT in UTC", "Sat, 10 Jan 2026 19:00 UTC"),
         ("Jan 10 3pm EST in UTC", "Sat, 10 Jan 2026 20:00 UTC"),

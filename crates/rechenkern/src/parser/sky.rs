@@ -9,9 +9,13 @@ impl Parser<'_> {
     /// A sun or moon phrase at token `i` and its length in tokens.
     pub(super) fn sky_at(&self, i: usize) -> Option<(Sky, usize)> {
         let (what, n) = self.phrase_at(i, &words::SKY)?;
-        // "daylight" alone needs a place: "daylight saving time" is not about the sun.
+        // "daylight" alone needs a place or a date: "daylight saving time" is not about the sun.
         if n == 1 && what == Sky::Daylight && self.sky_place_at(i + 1).is_none() {
-            return None;
+            let mut p = self.clone();
+            p.pos = i + 1;
+            if !p.date_follows() {
+                return None;
+            }
         }
         Some((what, n))
     }

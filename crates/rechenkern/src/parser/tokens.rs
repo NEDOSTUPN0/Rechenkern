@@ -108,11 +108,16 @@ impl<'a> Parser<'a> {
         (text, ends)
     }
 
-    /// Length in words of `phrase` if the tokens from `i` spell it.
+    /// Length in tokens of `phrase` if the tokens from `i` spell it; numbers
+    /// count as written: "base 16", "iso 8601".
     fn phrase_len_at(&self, i: usize, phrase: &str) -> Option<usize> {
         let (mut rest, mut n) = (phrase, 0);
         loop {
-            let word = self.toks.get(i + n)?.word()?;
+            let tok = self.toks.get(i + n)?;
+            let word = match &tok.tok {
+                Tok::Num(_) => &self.src[tok.start..tok.end],
+                _ => tok.word()?,
+            };
             if !rest.get(..word.len())?.eq_ignore_ascii_case(word) {
                 return None;
             }

@@ -132,7 +132,7 @@ impl Parser<'_> {
         match self.toks.get(self.pos + 1) {
             None => true,
             Some(t) => match &t.tok {
-                Tok::Sym(s) => *s != "(",
+                Tok::Sym(s) => !matches!(*s, "(" | "%"),
                 Tok::Word(w) => {
                     matches!(
                         w.to_lowercase().as_str(),
