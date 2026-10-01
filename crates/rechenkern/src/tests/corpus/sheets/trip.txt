@@ -1,0 +1,10 @@
+Flights $1,240
+Hotel 6 nights * $145/night
+Food $45 a day for a week
+sum
+sum in EUR
+average
+
+Taxi $35
+Museum €20
+total

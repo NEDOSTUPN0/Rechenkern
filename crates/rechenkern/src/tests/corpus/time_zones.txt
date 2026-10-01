@@ -1,0 +1,34 @@
+time in Tokyo
+Tokyo time
+3pm in Tokyo
+3pm Tokyo
+3pm Tokyo in London
+9am in New York to Tokyo
+PST to EST
+time difference Tokyo
+time in Tokyo when it is 9am in London
+time in UTC+5:30
+now in GMT-3
+time in pariss
+sunrise in Tokyo
+sunrise in Texas
+// Places that need a closer look
+time in Washington
+time in San Juan
+time in Pasadena
+time in Nara
+time in Parma
+time in Queenstown
+time in San Sebastián
+// Not supported yet
+diff Tokyo London
+time in Tokyo when 9am in London
+time in 3 hours in Tokyo
+time in Tokyo in 3 hours
+time in Bruges
+time in Santorini
+time in American Samoa
+time in Reunion
+time in qld
+coordinates of Tokyo
+distance between Tokyo and London

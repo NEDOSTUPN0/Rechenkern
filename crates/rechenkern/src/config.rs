@@ -90,6 +90,10 @@ impl<'a> Now<'a> {
     }
 
     pub fn get(&self) -> &Zoned {
-        self.time.get_or_init(|| self.config.now())
+        self.time.get_or_init(|| {
+            #[cfg(test)]
+            crate::tests::CLOCK_READS.with(|reads| reads.set(reads.get() + 1));
+            self.config.now()
+        })
     }
 }

@@ -1,0 +1,45 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+5 km in miles                                → 3.106855961 mi
+5'11" in cm                                  → 180.34 cm
+180 cm in feet and inches                    → 5 ft 10.87 in
+3 cups in ml                                 → 709.7647095 mL
+1 1/2 cups in ml                             → 354.8823548 mL
+2 3/4 cups in tbsp                           → 44 tbsp
+100 °F in °C                                 → 37.77777778 °C
+30 ℃ in ℉                                    → 30 in
+1 m³ in L                                    → 1,000 L
+10 m² in sq ft                               → 107.6391042 ft²
+60 mph in km/h                               → 96.56064 km/h
+30 mpg in L/100km                            → 7.840486111 L/100km
+8 L/100km in mpg                             → 29.40182292 mpg
+1 GB in MB                                   → 1,000 MB
+1 GiB in MB                                  → 1,073.741824 MB
+100 Mbps in MB/s                             → 12.5 MB/s
+time to upload 3 GB at 10 MB/s               → 5 minutes
+1 acre in m2                                 → 4,046.856422 m²
+1 light year in km                           → 9,460,730,472,581 km
+1 kWh in J                                   → 3,600,000 J
+seconds in a day                             → 86,400 seconds
+hours in a week                              → 168 hours
+1 decade in years                            → 10 years
+1 fortnight in days                          → 14 days
+1 AU in km                                   → 149,597,870.7 km
+3K                                           → 3 K
+3 kelvin                                     → 3 K
+
+// Not supported yet
+100 farenheit in celcius                     → 100
+1 rad/s in rpm                               → <error: can't convert rad/s to rpm>
+12 V * 2 A                                   → 24 V·A
+5 A * 10 Ω                                   → 50 A·Ω
+10 kg * 9.8 m/s^2                            → 98 kg·m/s²
+12pt in px                                   → 12 pt
+2 rem in px                                  → 2
+1 Kib in bits                                → 1 bit
+1 cup of flour in grams                      → 1 cup
+100 hp at 3000 rpm                           → 300,000 hp·rpm
+5 km cast to miles                           → 3.106855961 mi
+2000 mAh * 3.7 V                             → 7,400 mA·h·V
+1 quarter in months                          → 0.25 months

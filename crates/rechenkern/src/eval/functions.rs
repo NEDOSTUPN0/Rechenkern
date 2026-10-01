@@ -91,7 +91,11 @@ fn is_prime(n: i64) -> bool {
 }
 
 /// Small xorshift generator seeded from the clock; good enough for dice.
+/// The crate's own tests always get 0.5, so their answers stay the same.
 fn random() -> f64 {
+    if cfg!(test) {
+        return 0.5;
+    }
     use std::hash::{BuildHasher, RandomState};
     let mut x = RandomState::new().hash_one(std::time::SystemTime::now()) | 1;
     x ^= x << 13;

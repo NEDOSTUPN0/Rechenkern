@@ -241,6 +241,15 @@ impl Registry {
         self.exact.get(&code).filter(|u| u.is_money()).cloned()
     }
 
+    /// Every spelling of every unit, sorted.
+    #[cfg(test)]
+    pub(crate) fn spellings(&self) -> Vec<&str> {
+        let mut all: Vec<&str> = self.exact.keys().chain(self.folded.keys()).map(String::as_str).collect();
+        all.sort_unstable();
+        all.dedup();
+        all
+    }
+
     pub fn max_words(&self) -> usize {
         self.max_words
     }

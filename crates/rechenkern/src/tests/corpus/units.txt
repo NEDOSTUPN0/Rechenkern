@@ -1,0 +1,41 @@
+5 km in miles
+5'11" in cm
+180 cm in feet and inches
+3 cups in ml
+1 1/2 cups in ml
+2 3/4 cups in tbsp
+100 °F in °C
+30 ℃ in ℉
+1 m³ in L
+10 m² in sq ft
+60 mph in km/h
+30 mpg in L/100km
+8 L/100km in mpg
+1 GB in MB
+1 GiB in MB
+100 Mbps in MB/s
+time to upload 3 GB at 10 MB/s
+1 acre in m2
+1 light year in km
+1 kWh in J
+seconds in a day
+hours in a week
+1 decade in years
+1 fortnight in days
+1 AU in km
+3K
+3 kelvin
+// Not supported yet
+100 farenheit in celcius
+1 rad/s in rpm
+12 V * 2 A
+5 A * 10 Ω
+10 kg * 9.8 m/s^2
+12pt in px
+2 rem in px
+1 Kib in bits
+1 cup of flour in grams
+100 hp at 3000 rpm
+5 km cast to miles
+2000 mAh * 3.7 V
+1 quarter in months

@@ -106,6 +106,20 @@ fn cities() -> impl Iterator<Item = (&'static str, &'static str)> {
     })
 }
 
+/// Names of listed places and IANA zone cities, sorted.
+#[cfg(test)]
+pub(crate) fn place_names() -> Vec<&'static str> {
+    let mut names: Vec<&str> = INDEX.keys().map(String::as_str).collect();
+    names.sort_unstable();
+    names
+}
+
+/// Names of the cities in `cities.txt`, sorted.
+#[cfg(test)]
+pub(crate) fn city_names() -> impl Iterator<Item = &'static str> {
+    cities().map(|(name, _)| name)
+}
+
 /// A city: its zone id and where it is.
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct City {

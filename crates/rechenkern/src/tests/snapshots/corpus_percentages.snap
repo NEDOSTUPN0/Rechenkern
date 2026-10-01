@@ -1,0 +1,40 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+20% of 150                                   → 30
+15% off $80                                  → $68.00
+$80 + 15%                                    → $92.00
+$80 - 15%                                    → $68.00
+what is 15% of 80                            → 12
+12 is what % of 48                           → 25%
+12 is what percent of 48                     → 25%
+12 as a % of 48                              → 25%
+12 is 25% of what                            → 48
+25% of what is 12                            → 48
+% change from 40 to 50                       → 25%
+percent increase from 40 to 50               → 25%
+% decrease from 50 to 40                     → -20%
+40 to 50 is what %                           → 25%
+what % of 200 is 30                          → 15%
+what % is 25 of 100                          → 25%
+if 30 is 20%, what is 50%                    → 75
+30 is 20% what is 60                         → 40%
+10 is what % with 20                         → 33.33333333%
+15 as % after adding 3                       → 25%
+10 is what discount off 20                   → 50%
+20 is % on 10                                → 100%
+20% off what is 30                           → 37.5
+4 out of 10                                  → 40%
+0.35 as %                                    → 35%
+35% as decimal                               → 0.35
+1/8 as %                                     → 12.5%
+50% of 50%                                   → 25%
+200% of 3                                    → 6
+-5% of 100                                   → -5
+5 is what multiplier on 1                    → 4x
+
+// Not like SoulverCore yet
+10 on 20                                     → 30
+10 off 20                                    → 10
+10 of 20                                     → 200
+20% off of 50                                → 40

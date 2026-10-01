@@ -1,0 +1,72 @@
+today
+tomorrow + 3 days
+next friday
+last monday
+in 2 weeks
+3 days ago
+2 weeks from now
+March 12
+12 March 2027
+2026/09/23
+09/23/2026
+23.09.2026
+2026-09-23T10:00:00Z
+Jan 31 + 1 month
+days until christmas
+weeks until new year
+days since March 1
+days between March 3 and May 30
+whole weeks between March 3 and May 30
+March 3 through March 10
+days left in 2026
+days left in March
+Q3 2026
+next quarter
+Q3 in days
+time until 5pm
+9am to 5pm
+9am to 5pm in minutes
+10pm to 2am
+now to midnight
+noon to 5:30pm
+1 year - 2 months
+1 day - 2 hours
+3.5 hours in hours and minutes
+2 hours at 1.5x
+unix time
+1700000000 as date
+now as iso
+week of year
+day of the week on March 9, 2024
+// Workdays
+workdays until christmas
+this quarter in workdays
+10 days in workdays
+40 hours in workdays
+today + 5 workdays
+1 workday + 4 hours
+2 workdays in days
+// Sun and moon
+sunrise
+sunset in Paris tomorrow
+hours of daylight in Reykjavik on Dec 21
+moon phase on Oct 10
+lunar day on Oct 11
+// Not supported yet
+days between March 3 to May 30
+days left in this month
+days left in the year
+days in next month
+days until March
+start of next month
+end of Q3
+year %
+week number March 5, 2026
+3 days ago at 5pm
+friday in 3 weeks
+3.5 hours as hms
+10 km in 50 minutes
+midday
+previous monday
+NYE
+start of Ramadan

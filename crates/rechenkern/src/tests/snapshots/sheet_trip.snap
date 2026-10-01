@@ -1,0 +1,13 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+Flights $1,240                               → $1,240.00
+Hotel 6 nights * $145/night                  → $870.00
+Food $45 a day for a week                    → $315.00
+sum                                          → $2,425.00
+sum in EUR                                   → €0.00
+average                                      → €0.00
+                                             → 
+Taxi $35                                     → $35.00
+Museum €20                                   → €20.00
+total                                        → €51.50

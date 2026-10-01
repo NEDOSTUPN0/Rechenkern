@@ -22,6 +22,12 @@ impl<T> Phrases<T> {
         Phrases { entries, by_first_word: OnceLock::new() }
     }
 
+    /// All phrases, in table order.
+    #[cfg(test)]
+    pub fn phrases(&self) -> impl Iterator<Item = &'static str> {
+        self.entries.iter().map(|(phrase, _)| *phrase)
+    }
+
     /// Entries whose first word is `word` (ASCII case ignored), in table order.
     pub fn starting_with(&self, word: &str) -> impl Iterator<Item = &(&'static str, T)> {
         let index = self.by_first_word.get_or_init(|| {

@@ -9,7 +9,7 @@ mod sky;
 mod target;
 mod time;
 mod tokens;
-mod words;
+pub(crate) mod words;
 
 use std::cell::{Cell, OnceCell};
 use std::rc::Rc;

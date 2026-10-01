@@ -1,0 +1,2557 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+
+// Listed places and zone cities
+time in abidjan                              → 18:30 GMT
+sunrise in abidjan                           → 06:05 GMT
+time in abu dhabi                            → 22:30 UTC+4
+sunrise in abu dhabi                         → 06:11 UTC+4
+time in abuja                                → 19:30 UTC+1
+sunrise in abuja                             → 06:19 UTC+1
+time in accra                                → 18:30 GMT
+sunrise in accra                             → 05:50 GMT
+time in acdt                                 → Thu, 24 Sep 2026 05:00 ACDT
+sunrise in acdt                              → <error: don't know where exactly "acdt" is: name a city>
+time in acst                                 → Thu, 24 Sep 2026 04:00 ACST
+sunrise in acst                              → <error: don't know where exactly "acst" is: name a city>
+time in act                                  → Thu, 24 Sep 2026 04:30 AEST
+sunrise in act                               → <error: don't know where exactly "act" is: name a city>
+time in adak                                 → 09:30 UTC-9
+sunrise in adak                              → 08:35 UTC-9
+time in addis ababa                          → 21:30 UTC+3
+sunrise in addis ababa                       → 06:14 UTC+3
+time in adelaide                             → Thu, 24 Sep 2026 04:00 ACST
+sunrise in adelaide                          → Thu, 24 Sep 2026 06:03 ACST
+time in aden                                 → 21:30 UTC+3
+sunrise in aden                              → 05:49 UTC+3
+time in adt                                  → 15:30 ADT
+sunrise in adt                               → <error: don't know where exactly "adt" is: name a city>
+time in aedt                                 → Thu, 24 Sep 2026 05:30 AEDT
+sunrise in aedt                              → <error: don't know where exactly "aedt" is: name a city>
+time in aest                                 → Thu, 24 Sep 2026 04:30 AEST
+sunrise in aest                              → <error: don't know where exactly "aest" is: name a city>
+time in afghanistan                          → 23:00 UTC+4:30
+sunrise in afghanistan                       → <error: don't know where exactly "afghanistan" is: name a city>
+time in ahmedabad                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in ahmedabad                         → Thu, 24 Sep 2026 06:29 IST
+time in akdt                                 → 10:30 AKDT
+sunrise in akdt                              → <error: don't know where exactly "akdt" is: name a city>
+time in akl                                  → Thu, 24 Sep 2026 06:30 NZST
+sunrise in akl                               → Thu, 24 Sep 2026 06:08 NZST
+time in akst                                 → 10:30 AKDT
+sunrise in akst                              → <error: don't know where exactly "akst" is: name a city>
+time in aktau                                → 23:30 UTC+5
+sunrise in aktau                             → 07:23 UTC+5
+time in aktobe                               → 23:30 UTC+5
+sunrise in aktobe                            → 06:59 UTC+5
+time in ala                                  → 23:30 UTC+5
+sunrise in ala                               → 05:40 UTC+5
+time in alabama                              → 13:30 CDT
+sunrise in alabama                           → <error: don't know where exactly "alabama" is: name a city>
+time in alaska                               → 10:30 AKDT
+sunrise in alaska                            → <error: don't know where exactly "alaska" is: name a city>
+time in alaska time                          → 10:30 AKDT
+sunrise in alaska time                       → <error: don't know where exactly "alaska time" is: name a city>
+time in albania                              → 20:30 CEST
+sunrise in albania                           → <error: don't know where exactly "albania" is: name a city>
+time in alberta                              → 12:30 MDT
+sunrise in alberta                           → <error: don't know where exactly "alberta" is: name a city>
+time in alexandria                           → 21:30 EEST
+sunrise in alexandria                        → 06:49 EEST
+time in algeria                              → 19:30 UTC+1
+sunrise in algeria                           → <error: don't know where exactly "algeria" is: name a city>
+time in algiers                              → 19:30 UTC+1
+sunrise in algiers                           → 06:36 UTC+1
+time in almaty                               → 23:30 UTC+5
+sunrise in almaty                            → 05:40 UTC+5
+time in almt                                 → 23:30 UTC+5
+sunrise in almt                              → <error: don't know where exactly "almt" is: name a city>
+time in america                              → 14:30 EDT
+sunrise in america                           → <error: don't know where exactly "america" is: name a city>
+time in amman                                → 21:30 UTC+3
+sunrise in amman                             → 06:25 UTC+3
+time in ams                                  → 20:30 CEST
+sunrise in ams                               → 07:28 CEST
+time in amsterdam                            → 20:30 CEST
+sunrise in amsterdam                         → 07:28 CEST
+time in anadyr                               → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in anadyr                            → Thu, 24 Sep 2026 05:57 UTC+12
+time in anchorage                            → 10:30 AKDT
+sunrise in anchorage                         → 07:47 AKDT
+time in andorra                              → 20:30 CEST
+sunrise in andorra                           → 07:42 CEST
+time in angola                               → 19:30 UTC+1
+sunrise in angola                            → <error: don't know where exactly "angola" is: name a city>
+time in anguilla                             → 14:30 UTC-4
+sunrise in anguilla                          → 06:01 UTC-4
+time in ankara                               → 21:30 UTC+3
+sunrise in ankara                            → 06:37 UTC+3
+time in antalya                              → 21:30 UTC+3
+sunrise in antalya                           → 06:46 UTC+3
+time in antananarivo                         → 21:30 UTC+3
+sunrise in antananarivo                      → 05:39 UTC+3
+time in antigua                              → 14:30 UTC-4
+sunrise in antigua                           → 05:56 UTC-4
+time in antwerp                              → 20:30 CEST
+sunrise in antwerp                           → 07:30 CEST
+time in apia                                 → Thu, 24 Sep 2026 07:30 UTC+13
+sunrise in apia                              → Thu, 24 Sep 2026 06:16 UTC+13
+time in aqtau                                → 23:30 UTC+5
+sunrise in aqtau                             → 07:27 UTC+5
+time in aqtobe                               → 23:30 UTC+5
+sunrise in aqtobe                            → 06:59 UTC+5
+time in araguaina                            → 15:30 UTC-3
+sunrise in araguaina                         → 06:02 UTC-3
+time in argentina                            → 15:30 UTC-3
+sunrise in argentina                         → <error: don't know where exactly "argentina" is: name a city>
+time in arizona                              → 11:30 UTC-7
+sunrise in arizona                           → <error: don't know where exactly "arizona" is: name a city>
+time in arkansas                             → 13:30 CDT
+sunrise in arkansas                          → <error: don't know where exactly "arkansas" is: name a city>
+time in armenia                              → 22:30 UTC+4
+sunrise in armenia                           → <error: don't know where exactly "armenia" is: name a city>
+time in aruba                                → 14:30 UTC-4
+sunrise in aruba                             → 06:29 UTC-4
+time in ashgabat                             → 23:30 UTC+5
+sunrise in ashgabat                          → 06:55 UTC+5
+time in ashkhabad                            → 23:30 UTC+5
+sunrise in ashkhabad                         → 06:55 UTC+5
+time in asmara                               → 21:30 UTC+3
+sunrise in asmara                            → 06:13 UTC+3
+time in asmera                               → 21:30 UTC+3
+sunrise in asmera                            → 06:13 UTC+3
+time in ast                                  → 15:30 ADT
+sunrise in ast                               → <error: don't know where exactly "ast" is: name a city>
+time in astana                               → 23:30 UTC+5
+sunrise in astana                            → 06:02 UTC+5
+time in astrakhan                            → 22:30 UTC+4
+sunrise in astrakhan                         → 06:36 UTC+4
+time in asuncion                             → 15:30 UTC-3
+sunrise in asuncion                          → 06:39 UTC-3
+time in athens                               → 21:30 EEST
+sunrise in athens                            → 07:14 EEST
+time in atikokan                             → 13:30 UTC-5
+sunrise in atikokan                          → 06:55 UTC-5
+time in atka                                 → 09:30 UTC-9
+sunrise in atka                              → <error: don't know where exactly "atka" is: name a city>
+time in atl                                  → 14:30 EDT
+sunrise in atl                               → 07:26 EDT
+time in atlanta                              → 14:30 EDT
+sunrise in atlanta                           → 07:26 EDT
+time in atlantic time                        → 15:30 ADT
+sunrise in atlantic time                     → <error: don't know where exactly "atlantic time" is: name a city>
+time in atyrau                               → 23:30 UTC+5
+sunrise in atyrau                            → 07:20 UTC+5
+time in auckland                             → Thu, 24 Sep 2026 06:30 NZST
+sunrise in auckland                          → Thu, 24 Sep 2026 06:08 NZST
+time in austin                               → 13:30 CDT
+sunrise in austin                            → 07:20 CDT
+time in australia                            → Thu, 24 Sep 2026 04:30 AEST
+sunrise in australia                         → <error: don't know where exactly "australia" is: name a city>
+time in austria                              → 20:30 CEST
+sunrise in austria                           → <error: don't know where exactly "austria" is: name a city>
+time in awst                                 → Thu, 24 Sep 2026 02:30 AWST
+sunrise in awst                              → <error: don't know where exactly "awst" is: name a city>
+time in azerbaijan                           → 22:30 UTC+4
+sunrise in azerbaijan                        → <error: don't know where exactly "azerbaijan" is: name a city>
+time in azores                               → 18:30 UTC
+sunrise in azores                            → 07:31 UTC
+time in baghdad                              → 21:30 UTC+3
+sunrise in baghdad                           → 05:51 UTC+3
+time in bahamas                              → 14:30 EDT
+sunrise in bahamas                           → <error: don't know where exactly "bahamas" is: name a city>
+time in bahia                                → 15:30 UTC-3
+sunrise in bahia                             → 05:23 UTC-3
+time in bahia banderas                       → 12:30 UTC-6
+sunrise in bahia banderas                    → 06:50 UTC-6
+time in bahrain                              → 21:30 UTC+3
+sunrise in bahrain                           → 05:27 UTC+3
+time in baku                                 → 22:30 UTC+4
+sunrise in baku                              → 06:29 UTC+4
+time in bali                                 → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in bali                              → Thu, 24 Sep 2026 06:08 UTC+8
+time in baltimore                            → 14:30 EDT
+sunrise in baltimore                         → 06:55 EDT
+time in bamako                               → 18:30 GMT
+sunrise in bamako                            → 06:21 GMT
+time in bangalore                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in bangalore                         → Thu, 24 Sep 2026 06:09 IST
+time in bangkok                              → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in bangkok                           → Thu, 24 Sep 2026 06:07 UTC+7
+time in bangladesh                           → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in bangladesh                        → <error: don't know where exactly "bangladesh" is: name a city>
+time in bangui                               → 19:30 UTC+1
+sunrise in bangui                            → 05:35 UTC+1
+time in banjul                               → 18:30 GMT
+sunrise in banjul                            → 06:55 GMT
+time in barbados                             → 14:30 UTC-4
+sunrise in barbados                          → 05:48 UTC-4
+time in barcelona                            → 20:30 CEST
+sunrise in barcelona                         → 07:40 CEST
+time in barnaul                              → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in barnaul                           → Thu, 24 Sep 2026 07:14 UTC+7
+time in basel                                → 20:30 CEST
+sunrise in basel                             → 07:18 CEST
+time in bath                                 → 19:30 BST
+sunrise in bath                              → 06:57 BST
+time in bcn                                  → 20:30 CEST
+sunrise in bcn                               → 07:40 CEST
+time in beijing                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in beijing                           → Thu, 24 Sep 2026 06:03 UTC+8
+time in beirut                               → 21:30 EEST
+sunrise in beirut                            → 06:27 EEST
+time in belarus                              → 21:30 UTC+3
+sunrise in belarus                           → <error: don't know where exactly "belarus" is: name a city>
+time in belem                                → 15:30 UTC-3
+sunrise in belem                             → 06:03 UTC-3
+time in belfast                              → 19:30 BST
+sunrise in belfast                           → 07:11 BST
+time in belgium                              → 20:30 CEST
+sunrise in belgium                           → <error: don't know where exactly "belgium" is: name a city>
+time in belgrade                             → 20:30 CEST
+sunrise in belgrade                          → 06:26 CEST
+time in belize                               → 12:30 UTC-6
+sunrise in belize                            → 05:42 UTC-6
+time in bengaluru                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in bengaluru                         → Thu, 24 Sep 2026 06:09 IST
+time in benin                                → 19:30 UTC+1
+sunrise in benin                             → 06:27 UTC+1
+time in berlin                               → 20:30 CEST
+sunrise in berlin                            → 06:54 CEST
+time in bermuda                              → 15:30 ADT
+sunrise in bermuda                           → 07:08 ADT
+time in bern                                 → 20:30 CEST
+sunrise in bern                              → 07:18 CEST
+time in bhutan                               → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in bhutan                            → <error: don't know where exactly "bhutan" is: name a city>
+time in birmingham                           → 19:30 BST
+sunrise in birmingham                        → 06:55 BST
+time in bishkek                              → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in bishkek                           → Thu, 24 Sep 2026 06:51 UTC+6
+time in bissau                               → 18:30 GMT
+sunrise in bissau                            → 06:52 GMT
+time in bkk                                  → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in bkk                               → Thu, 24 Sep 2026 06:07 UTC+7
+time in blanc sablon                         → 14:30 UTC-4
+sunrise in blanc sablon                      → 05:36 UTC-4
+time in blantyre                             → 20:30 UTC+2
+sunrise in blantyre                          → 05:29 UTC+2
+time in boa vista                            → 14:30 UTC-4
+sunrise in boa vista                         → 05:52 UTC-4
+time in bogota                               → 13:30 UTC-5
+sunrise in bogota                            → 05:45 UTC-5
+time in boise                                → 12:30 MDT
+sunrise in boise                             → 07:33 MDT
+time in bolivia                              → 14:30 UTC-4
+sunrise in bolivia                           → <error: don't know where exactly "bolivia" is: name a city>
+time in bom                                  → Thu, 24 Sep 2026 00:00 IST
+sunrise in bom                               → Thu, 24 Sep 2026 06:28 IST
+time in bombay                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in bombay                            → Thu, 24 Sep 2026 06:28 IST
+time in bordeaux                             → 20:30 CEST
+sunrise in bordeaux                          → 07:50 CEST
+time in bos                                  → 14:30 EDT
+sunrise in bos                               → 06:33 EDT
+time in bosnia                               → 20:30 CEST
+sunrise in bosnia                            → <error: don't know where exactly "bosnia" is: name a city>
+time in bosnia and herzegovina               → 20:30 CEST
+sunrise in bosnia and herzegovina            → <error: don't know where exactly "bosnia and herzegovina" is: name a city>
+time in boston                               → 14:30 EDT
+sunrise in boston                            → 06:33 EDT
+time in botswana                             → 20:30 UTC+2
+sunrise in botswana                          → <error: don't know where exactly "botswana" is: name a city>
+time in bougainville                         → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in bougainville                      → Thu, 24 Sep 2026 06:27 UTC+11
+time in brasilia                             → 15:30 UTC-3
+sunrise in brasilia                          → 06:01 UTC-3
+time in bratislava                           → 20:30 CEST
+sunrise in bratislava                        → 06:39 CEST
+time in brazil                               → 15:30 UTC-3
+sunrise in brazil                            → <error: don't know where exactly "brazil" is: name a city>
+time in brazzaville                          → 19:30 UTC+1
+sunrise in brazzaville                       → 05:48 UTC+1
+time in brisbane                             → Thu, 24 Sep 2026 04:30 AEST
+sunrise in brisbane                          → Thu, 24 Sep 2026 05:36 AEST
+time in bristol                              → 19:30 BST
+sunrise in bristol                           → 06:58 BST
+time in britain                              → 19:30 BST
+sunrise in britain                           → <error: don't know where exactly "britain" is: name a city>
+time in british columbia                     → 11:30 PDT
+sunrise in british columbia                  → <error: don't know where exactly "british columbia" is: name a city>
+time in broken hill                          → Thu, 24 Sep 2026 04:00 ACST
+sunrise in broken hill                       → Thu, 24 Sep 2026 05:52 ACST
+time in brooklyn                             → 14:30 EDT
+sunrise in brooklyn                          → 06:44 EDT
+time in brt                                  → 15:30 UTC-3
+sunrise in brt                               → <error: don't know where exactly "brt" is: name a city>
+time in brunei                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in brunei                            → Thu, 24 Sep 2026 06:09 UTC+8
+time in brussels                             → 20:30 CEST
+sunrise in brussels                          → 07:30 CEST
+time in bst                                  → 19:30 BST
+sunrise in bst                               → <error: don't know where exactly "bst" is: name a city>
+time in bucharest                            → 21:30 EEST
+sunrise in bucharest                         → 07:04 EEST
+time in budapest                             → 20:30 CEST
+sunrise in budapest                          → 06:32 CEST
+time in buenos aires                         → 15:30 UTC-3
+sunrise in buenos aires                      → 06:41 UTC-3
+time in bujumbura                            → 20:30 UTC+2
+sunrise in bujumbura                         → 05:52 UTC+2
+time in bulgaria                             → 21:30 EEST
+sunrise in bulgaria                          → <error: don't know where exactly "bulgaria" is: name a city>
+time in burkina faso                         → 18:30 GMT
+sunrise in burkina faso                      → <error: don't know where exactly "burkina faso" is: name a city>
+time in burma                                → Thu, 24 Sep 2026 01:00 UTC+6:30
+sunrise in burma                             → <error: don't know where exactly "burma" is: name a city>
+time in burundi                              → 20:30 UTC+2
+sunrise in burundi                           → <error: don't know where exactly "burundi" is: name a city>
+time in busan                                → Thu, 24 Sep 2026 03:30 KST
+sunrise in busan                             → Thu, 24 Sep 2026 06:13 KST
+time in busingen                             → 20:30 CEST
+sunrise in busingen                          → 07:13 CEST
+time in cairo                                → 21:30 EEST
+sunrise in cairo                             → 06:44 EEST
+time in calcutta                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in calcutta                          → Thu, 24 Sep 2026 05:26 IST
+time in calgary                              → 12:30 MDT
+sunrise in calgary                           → 07:24 MDT
+time in california                           → 11:30 PDT
+sunrise in california                        → <error: don't know where exactly "california" is: name a city>
+time in cambodia                             → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in cambodia                          → <error: don't know where exactly "cambodia" is: name a city>
+time in cambridge bay                        → 12:30 MDT
+sunrise in cambridge bay                     → 06:45 MDT
+time in cameroon                             → 19:30 UTC+1
+sunrise in cameroon                          → <error: don't know where exactly "cameroon" is: name a city>
+time in campo grande                         → 14:30 UTC-4
+sunrise in campo grande                      → 05:27 UTC-4
+time in canada                               → 14:30 EDT
+sunrise in canada                            → <error: don't know where exactly "canada" is: name a city>
+time in canary                               → 19:30 WEST
+sunrise in canary                            → 07:51 WEST
+time in canberra                             → Thu, 24 Sep 2026 04:30 AEST
+sunrise in canberra                          → Thu, 24 Sep 2026 05:51 AEST
+time in cancun                               → 13:30 UTC-5
+sunrise in cancun                            → 06:37 UTC-5
+time in cape town                            → 20:30 SAST
+sunrise in cape town                         → 06:35 SAST
+time in cape verde                           → 17:30 UTC-1
+sunrise in cape verde                        → 06:23 UTC-1
+time in caracas                              → 14:30 UTC-4
+sunrise in caracas                           → 06:17 UTC-4
+time in cardiff                              → 19:30 BST
+sunrise in cardiff                           → 07:00 BST
+time in casablanca                           → 18:30 UTC
+sunrise in casablanca                        → 06:19 UTC
+time in catamarca                            → 15:30 UTC-3
+sunrise in catamarca                         → 07:11 UTC-3
+time in cayenne                              → 15:30 UTC-3
+sunrise in cayenne                           → 06:18 UTC-3
+time in cayman                               → 13:30 UTC-5
+sunrise in cayman                            → 06:15 UTC-5
+time in cdg                                  → 20:30 CEST
+sunrise in cdg                               → 07:38 CEST
+time in cdt                                  → 13:30 CDT
+sunrise in cdt                               → <error: don't know where exactly "cdt" is: name a city>
+time in central                              → 13:30 CDT
+sunrise in central                           → <error: don't know where exactly "central" is: name a city>
+time in central african republic             → 19:30 UTC+1
+sunrise in central african republic          → <error: don't know where exactly "central african republic" is: name a city>
+time in central time                         → 13:30 CDT
+sunrise in central time                      → <error: don't know where exactly "central time" is: name a city>
+time in cest                                 → 20:30 CEST
+sunrise in cest                              → <error: don't know where exactly "cest" is: name a city>
+time in cet                                  → 20:30 CEST
+sunrise in cet                               → <error: don't know where exactly "cet" is: name a city>
+time in ceuta                                → 20:30 CEST
+sunrise in ceuta                             → 08:10 CEST
+time in chad                                 → 19:30 UTC+1
+sunrise in chad                              → <error: don't know where exactly "chad" is: name a city>
+time in chagos                               → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in chagos                            → Thu, 24 Sep 2026 06:59 UTC+6
+time in charlotte                            → 14:30 EDT
+sunrise in charlotte                         → 07:12 EDT
+time in chatham                              → Thu, 24 Sep 2026 07:15 UTC+12:45
+sunrise in chatham                           → Thu, 24 Sep 2026 06:18 UTC+12:45
+time in chengdu                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in chengdu                           → Thu, 24 Sep 2026 06:53 UTC+8
+time in chennai                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in chennai                           → Thu, 24 Sep 2026 05:58 IST
+time in chiang mai                           → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in chiang mai                        → Thu, 24 Sep 2026 06:13 UTC+7
+time in chicago                              → 13:30 CDT
+sunrise in chicago                           → 06:39 CDT
+time in chihuahua                            → 12:30 UTC-6
+sunrise in chihuahua                         → 06:53 UTC-6
+time in chile                                → 15:30 UTC-3
+sunrise in chile                             → <error: don't know where exactly "chile" is: name a city>
+time in china                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in china                             → <error: don't know where exactly "china" is: name a city>
+time in chisinau                             → 21:30 EEST
+sunrise in chisinau                          → 06:52 EEST
+time in chita                                → Thu, 24 Sep 2026 03:30 UTC+9
+sunrise in chita                             → Thu, 24 Sep 2026 07:15 UTC+9
+time in choibalsan                           → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in choibalsan                        → Thu, 24 Sep 2026 06:11 UTC+8
+time in chongqing                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in chongqing                         → Thu, 24 Sep 2026 06:43 UTC+8
+time in christmas                            → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in christmas                         → Thu, 24 Sep 2026 05:46 UTC+7
+time in chungking                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in chungking                         → Thu, 24 Sep 2026 06:43 UTC+8
+time in chuuk                                → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in chuuk                             → Thu, 24 Sep 2026 05:42 UTC+10
+time in ciudad juarez                        → 12:30 MDT
+sunrise in ciudad juarez                     → 06:55 MDT
+time in cleveland                            → 14:30 EDT
+sunrise in cleveland                         → 07:15 EDT
+time in cocos                                → Thu, 24 Sep 2026 01:00 UTC+6:30
+sunrise in cocos                             → Thu, 24 Sep 2026 05:51 UTC+6:30
+time in cologne                              → 20:30 CEST
+sunrise in cologne                           → 07:20 CEST
+time in colombia                             → 13:30 UTC-5
+sunrise in colombia                          → <error: don't know where exactly "colombia" is: name a city>
+time in colombo                              → Thu, 24 Sep 2026 00:00 UTC+5:30
+sunrise in colombo                           → Thu, 24 Sep 2026 06:00 UTC+5:30
+time in colorado                             → 12:30 MDT
+sunrise in colorado                          → <error: don't know where exactly "colorado" is: name a city>
+time in columbus                             → 14:30 EDT
+sunrise in columbus                          → 07:21 EDT
+time in comodrivadavia                       → 15:30 UTC-3
+sunrise in comodrivadavia                    → <error: don't know where exactly "comodrivadavia" is: name a city>
+time in comoro                               → 21:30 UTC+3
+sunrise in comoro                            → 05:56 UTC+3
+time in comoros                              → 21:30 UTC+3
+sunrise in comoros                           → <error: don't know where exactly "comoros" is: name a city>
+time in conakry                              → 18:30 GMT
+sunrise in conakry                           → 06:44 GMT
+time in congo                                → 19:30 UTC+1
+sunrise in congo                             → <error: don't know where exactly "congo" is: name a city>
+time in connecticut                          → 14:30 EDT
+sunrise in connecticut                       → <error: don't know where exactly "connecticut" is: name a city>
+time in copenhagen                           → 20:30 CEST
+sunrise in copenhagen                        → 06:57 CEST
+time in coral harbour                        → 13:30 UTC-5
+sunrise in coral harbour                     → <error: don't know where exactly "coral harbour" is: name a city>
+time in cordoba                              → 15:30 UTC-3
+sunrise in cordoba                           → 07:05 UTC-3
+time in cork                                 → 19:30 UTC+1
+sunrise in cork                              → 07:21 UTC+1
+time in costa rica                           → 12:30 UTC-6
+sunrise in costa rica                        → 05:25 UTC-6
+time in cote d'ivoire                        → 18:30 GMT
+sunrise in cote d'ivoire                     → <error: don't know where exactly "cote d'ivoire" is: name a city>
+time in coyhaique                            → 15:30 UTC-3
+sunrise in coyhaique                         → 07:35 UTC-3
+time in creston                              → 11:30 UTC-7
+sunrise in creston                           → 06:34 UTC-7
+time in croatia                              → 20:30 CEST
+sunrise in croatia                           → <error: don't know where exactly "croatia" is: name a city>
+time in cst                                  → 13:30 CDT
+sunrise in cst                               → <error: don't know where exactly "cst" is: name a city>
+time in cuba                                 → 14:30 UTC-4
+sunrise in cuba                              → <error: don't know where exactly "cuba" is: name a city>
+time in cuiaba                               → 14:30 UTC-4
+sunrise in cuiaba                            → 05:33 UTC-4
+time in cupertino                            → 11:30 PDT
+sunrise in cupertino                         → 06:57 PDT
+time in curacao                              → 14:30 UTC-4
+sunrise in curacao                           → 06:25 UTC-4
+time in currie                               → Thu, 24 Sep 2026 04:30 AEST
+sunrise in currie                            → <error: don't know where exactly "currie" is: name a city>
+time in cyprus                               → 21:30 EEST
+sunrise in cyprus                            → <error: don't know where exactly "cyprus" is: name a city>
+time in czech republic                       → 20:30 CEST
+sunrise in czech republic                    → <error: don't know where exactly "czech republic" is: name a city>
+time in czechia                              → 20:30 CEST
+sunrise in czechia                           → <error: don't know where exactly "czechia" is: name a city>
+time in dacca                                → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in dacca                             → Thu, 24 Sep 2026 05:48 UTC+6
+time in dakar                                → 18:30 GMT
+sunrise in dakar                             → 06:59 GMT
+time in dallas                               → 13:30 CDT
+sunrise in dallas                            → 07:16 CDT
+time in damascus                             → 21:30 UTC+3
+sunrise in damascus                          → 06:23 UTC+3
+time in danmarkshavn                         → 18:30 GMT
+sunrise in danmarkshavn                      → 06:54 GMT
+time in dar es salaam                        → 21:30 UTC+3
+sunrise in dar es salaam                     → 06:12 UTC+3
+time in darwin                               → Thu, 24 Sep 2026 04:00 ACST
+sunrise in darwin                            → Thu, 24 Sep 2026 06:35 ACST
+time in dawson                               → 11:30 UTC-7
+sunrise in dawson                            → 08:04 UTC-7
+time in dawson creek                         → 11:30 UTC-7
+sunrise in dawson creek                      → 06:49 UTC-7
+time in dc                                   → 14:30 EDT
+sunrise in dc                                → <error: don't know where exactly "dc" is: name a city>
+time in del                                  → Thu, 24 Sep 2026 00:00 IST
+sunrise in del                               → Thu, 24 Sep 2026 06:10 IST
+time in delaware                             → 14:30 EDT
+sunrise in delaware                          → 07:21 EDT
+time in delhi                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in delhi                             → Thu, 24 Sep 2026 06:10 IST
+time in democratic republic of the congo     → 19:30 UTC+1
+sunrise in democratic republic of the congo  → <error: don't know where exactly "democratic republic of the congo" is: name a city>
+time in den                                  → 12:30 MDT
+sunrise in den                               → 06:49 MDT
+time in denmark                              → 20:30 CEST
+sunrise in denmark                           → <error: don't know where exactly "denmark" is: name a city>
+time in denver                               → 12:30 MDT
+sunrise in denver                            → 06:49 MDT
+time in detroit                              → 14:30 EDT
+sunrise in detroit                           → 07:21 EDT
+time in dfw                                  → 13:30 CDT
+sunrise in dfw                               → 07:16 CDT
+time in dhaka                                → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in dhaka                             → Thu, 24 Sep 2026 05:48 UTC+6
+time in dili                                 → Thu, 24 Sep 2026 03:30 UTC+9
+sunrise in dili                              → Thu, 24 Sep 2026 06:26 UTC+9
+time in djibouti                             → 21:30 UTC+3
+sunrise in djibouti                          → 05:57 UTC+3
+time in dme                                  → 21:30 MSK
+sunrise in dme                               → 06:16 MSK
+time in dnipro                               → 21:30 EEST
+sunrise in dnipro                            → 06:28 EEST
+time in doh                                  → 21:30 UTC+3
+sunrise in doh                               → 05:23 UTC+3
+time in dominica                             → 14:30 UTC-4
+sunrise in dominica                          → 05:55 UTC-4
+time in dominican republic                   → 14:30 UTC-4
+sunrise in dominican republic                → <error: don't know where exactly "dominican republic" is: name a city>
+time in douala                               → 19:30 UTC+1
+sunrise in douala                            → 06:10 UTC+1
+time in dr congo                             → 19:30 UTC+1
+sunrise in dr congo                          → <error: don't know where exactly "dr congo" is: name a city>
+time in drc                                  → 19:30 UTC+1
+sunrise in drc                               → <error: don't know where exactly "drc" is: name a city>
+time in dresden                              → 20:30 CEST
+sunrise in dresden                           → 06:53 CEST
+time in dubai                                → 22:30 UTC+4
+sunrise in dubai                             → 06:08 UTC+4
+time in dublin                               → 19:30 UTC+1
+sunrise in dublin                            → 07:12 UTC+1
+time in durban                               → 20:30 SAST
+sunrise in durban                            → 05:44 SAST
+time in dushanbe                             → 23:30 UTC+5
+sunrise in dushanbe                          → 06:13 UTC+5
+time in dusseldorf                           → 20:30 CEST
+sunrise in dusseldorf                        → 07:20 CEST
+time in dxb                                  → 22:30 UTC+4
+sunrise in dxb                               → 06:08 UTC+4
+time in düsseldorf                           → 20:30 CEST
+sunrise in düsseldorf                        → 07:20 CEST
+time in east timor                           → Thu, 24 Sep 2026 03:30 UTC+9
+sunrise in east timor                        → <error: don't know where exactly "east timor" is: name a city>
+time in easter                               → 13:30 UTC-5
+sunrise in easter                            → 08:06 UTC-5
+time in eastern                              → 14:30 EDT
+sunrise in eastern                           → <error: don't know where exactly "eastern" is: name a city>
+time in eastern time                         → 14:30 EDT
+sunrise in eastern time                      → <error: don't know where exactly "eastern time" is: name a city>
+time in ecuador                              → 13:30 UTC-5
+sunrise in ecuador                           → <error: don't know where exactly "ecuador" is: name a city>
+time in edinburgh                            → 19:30 BST
+sunrise in edinburgh                         → 07:00 BST
+time in edmonton                             → 12:30 MDT
+sunrise in edmonton                          → 07:22 MDT
+time in edt                                  → 14:30 EDT
+sunrise in edt                               → <error: don't know where exactly "edt" is: name a city>
+time in eest                                 → 21:30 EEST
+sunrise in eest                              → <error: don't know where exactly "eest" is: name a city>
+time in eet                                  → 21:30 EEST
+sunrise in eet                               → <error: don't know where exactly "eet" is: name a city>
+time in efate                                → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in efate                             → Thu, 24 Sep 2026 05:35 UTC+11
+time in egypt                                → 21:30 EEST
+sunrise in egypt                             → <error: don't know where exactly "egypt" is: name a city>
+time in eirunepe                             → 13:30 UTC-5
+sunrise in eirunepe                          → 05:28 UTC-5
+time in el aaiun                             → 18:30 UTC
+sunrise in el aaiun                          → 06:42 UTC
+time in el paso                              → 12:30 MDT
+sunrise in el paso                           → 06:55 MDT
+time in el salvador                          → 12:30 UTC-6
+sunrise in el salvador                       → 05:46 UTC-6
+time in enderbury                            → Thu, 24 Sep 2026 07:30 UTC+13
+sunrise in enderbury                         → <error: don't know where exactly "enderbury" is: name a city>
+time in england                              → 19:30 BST
+sunrise in england                           → <error: don't know where exactly "england" is: name a city>
+time in ensenada                             → 11:30 PDT
+sunrise in ensenada                          → 06:35 PDT
+time in equatorial guinea                    → 19:30 UTC+1
+sunrise in equatorial guinea                 → <error: don't know where exactly "equatorial guinea" is: name a city>
+time in eritrea                              → 21:30 UTC+3
+sunrise in eritrea                           → <error: don't know where exactly "eritrea" is: name a city>
+time in est                                  → 14:30 EDT
+sunrise in est                               → <error: don't know where exactly "est" is: name a city>
+time in estonia                              → 21:30 EEST
+sunrise in estonia                           → <error: don't know where exactly "estonia" is: name a city>
+time in eswatini                             → 20:30 SAST
+sunrise in eswatini                          → <error: don't know where exactly "eswatini" is: name a city>
+time in ethiopia                             → 21:30 UTC+3
+sunrise in ethiopia                          → <error: don't know where exactly "ethiopia" is: name a city>
+time in eucla                                → Thu, 24 Sep 2026 03:15 UTC+8:45
+sunrise in eucla                             → Thu, 24 Sep 2026 05:57 UTC+8:45
+time in ewr                                  → 14:30 EDT
+sunrise in ewr                               → 06:45 EDT
+time in faeroe                               → 19:30 WEST
+sunrise in faeroe                            → <error: don't know where exactly "faeroe" is: name a city>
+time in fakaofo                              → Thu, 24 Sep 2026 07:30 UTC+13
+sunrise in fakaofo                           → Thu, 24 Sep 2026 06:14 UTC+13
+time in famagusta                            → 21:30 EEST
+sunrise in famagusta                         → 06:33 EEST
+time in faroe                                → 19:30 WEST
+sunrise in faroe                             → 07:13 WEST
+time in faroe islands                        → 19:30 WEST
+sunrise in faroe islands                     → <error: don't know where exactly "faroe islands" is: name a city>
+time in fco                                  → 20:30 CEST
+sunrise in fco                               → 06:58 CEST
+time in fiji                                 → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in fiji                              → Thu, 24 Sep 2026 05:55 UTC+12
+time in finland                              → 21:30 EEST
+sunrise in finland                           → <error: don't know where exactly "finland" is: name a city>
+time in florence                             → 20:30 CEST
+sunrise in florence                          → 07:03 CEST
+time in florida                              → 14:30 EDT
+sunrise in florida                           → 07:02 EDT
+time in fort nelson                          → 11:30 UTC-7
+sunrise in fort nelson                       → 06:58 UTC-7
+time in fort wayne                           → 14:30 EDT
+sunrise in fort wayne                        → 07:29 EDT
+time in fortaleza                            → 15:30 UTC-3
+sunrise in fortaleza                         → 05:23 UTC-3
+time in fra                                  → 20:30 CEST
+sunrise in fra                               → 07:13 CEST
+time in france                               → 20:30 CEST
+sunrise in france                            → <error: don't know where exactly "france" is: name a city>
+time in frankfurt                            → 20:30 CEST
+sunrise in frankfurt                         → 07:13 CEST
+time in freetown                             → 18:30 GMT
+sunrise in freetown                          → 06:42 GMT
+time in funafuti                             → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in funafuti                          → Thu, 24 Sep 2026 05:52 UTC+12
+time in gabon                                → 19:30 UTC+1
+sunrise in gabon                             → <error: don't know where exactly "gabon" is: name a city>
+time in gaborone                             → 20:30 UTC+2
+sunrise in gaborone                          → 06:05 UTC+2
+time in galapagos                            → 12:30 UTC-6
+sunrise in galapagos                         → 05:47 UTC-6
+time in gambia                               → 18:30 GMT
+sunrise in gambia                            → <error: don't know where exactly "gambia" is: name a city>
+time in gambier                              → 09:30 UTC-9
+sunrise in gambier                           → 05:48 UTC-9
+time in gaza                                 → 21:30 EEST
+sunrise in gaza                              → 06:31 EEST
+time in geneva                               → 20:30 CEST
+sunrise in geneva                            → 07:23 CEST
+time in georgia                              → 22:30 UTC+4
+sunrise in georgia                           → <error: don't know where exactly "georgia" is: name a city>
+time in germany                              → 20:30 CEST
+sunrise in germany                           → <error: don't know where exactly "germany" is: name a city>
+time in ghana                                → 18:30 GMT
+sunrise in ghana                             → <error: don't know where exactly "ghana" is: name a city>
+time in gibraltar                            → 20:30 CEST
+sunrise in gibraltar                         → 08:10 CEST
+time in glace bay                            → 15:30 ADT
+sunrise in glace bay                         → 06:48 ADT
+time in glasgow                              → 19:30 BST
+sunrise in glasgow                           → 07:04 BST
+time in gmt                                  → 18:30 GMT
+sunrise in gmt                               → <error: don't know where exactly "gmt" is: name a city>
+time in goa                                  → Thu, 24 Sep 2026 00:00 IST
+sunrise in goa                               → Thu, 24 Sep 2026 06:24 IST
+time in godthab                              → 17:30 UTC-1
+sunrise in godthab                           → <error: don't know where exactly "godthab" is: name a city>
+time in gold coast                           → Thu, 24 Sep 2026 04:30 AEST
+sunrise in gold coast                        → Thu, 24 Sep 2026 05:34 AEST
+time in goose bay                            → 15:30 ADT
+sunrise in goose bay                         → 06:49 ADT
+time in grand turk                           → 14:30 EDT
+sunrise in grand turk                        → 06:34 EDT
+time in great britain                        → 19:30 BST
+sunrise in great britain                     → <error: don't know where exactly "great britain" is: name a city>
+time in greece                               → 21:30 EEST
+sunrise in greece                            → <error: don't know where exactly "greece" is: name a city>
+time in greenland                            → 17:30 UTC-1
+sunrise in greenland                         → <error: don't know where exactly "greenland" is: name a city>
+time in grenada                              → 14:30 UTC-4
+sunrise in grenada                           → 05:56 UTC-4
+time in gst                                  → 22:30 UTC+4
+sunrise in gst                               → <error: don't know where exactly "gst" is: name a city>
+time in guadalajara                          → 12:30 UTC-6
+sunrise in guadalajara                       → 06:43 UTC-6
+time in guadalcanal                          → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in guadalcanal                       → Thu, 24 Sep 2026 06:08 UTC+11
+time in guadeloupe                           → 14:30 UTC-4
+sunrise in guadeloupe                        → 05:55 UTC-4
+time in guam                                 → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in guam                              → Thu, 24 Sep 2026 06:10 UTC+10
+time in guangzhou                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in guangzhou                         → Thu, 24 Sep 2026 06:16 UTC+8
+time in guatemala                            → 12:30 UTC-6
+sunrise in guatemala                         → 05:51 UTC-6
+time in guayaquil                            → 13:30 UTC-5
+sunrise in guayaquil                         → 06:09 UTC-5
+time in guernsey                             → 19:30 BST
+sunrise in guernsey                          → 06:58 BST
+time in guinea                               → 18:30 GMT
+sunrise in guinea                            → <error: don't know where exactly "guinea" is: name a city>
+time in guinea bissau                        → 18:30 GMT
+sunrise in guinea bissau                     → <error: don't know where exactly "guinea bissau" is: name a city>
+time in guyana                               → 14:30 UTC-4
+sunrise in guyana                            → 05:42 UTC-4
+time in haifa                                → 21:30 UTC+3
+sunrise in haifa                             → 06:29 UTC+3
+time in haiti                                → 14:30 EDT
+sunrise in haiti                             → <error: don't know where exactly "haiti" is: name a city>
+time in halifax                              → 15:30 ADT
+sunrise in halifax                           → 07:03 ADT
+time in hamburg                              → 20:30 CEST
+sunrise in hamburg                           → 07:07 CEST
+time in hangzhou                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in hangzhou                          → Thu, 24 Sep 2026 05:49 UTC+8
+time in hanoi                                → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in hanoi                             → Thu, 24 Sep 2026 05:46 UTC+7
+time in harare                               → 20:30 UTC+2
+sunrise in harare                            → 05:45 UTC+2
+time in harbin                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in harbin                            → Thu, 24 Sep 2026 05:22 UTC+8
+time in havana                               → 14:30 UTC-4
+sunrise in havana                            → 07:19 UTC-4
+time in hawaii                               → 08:30 HST
+sunrise in hawaii                            → <error: don't know where exactly "hawaii" is: name a city>
+time in hawaii time                          → 08:30 HST
+sunrise in hawaii time                       → <error: don't know where exactly "hawaii time" is: name a city>
+time in hebron                               → 21:30 EEST
+sunrise in hebron                            → 06:28 EEST
+time in helsinki                             → 21:30 EEST
+sunrise in helsinki                          → 07:06 EEST
+time in hermosillo                           → 11:30 UTC-7
+sunrise in hermosillo                        → 06:13 UTC-7
+time in hkg                                  → Thu, 24 Sep 2026 02:30 HKT
+sunrise in hkg                               → Thu, 24 Sep 2026 06:13 HKT
+time in hkt                                  → Thu, 24 Sep 2026 02:30 HKT
+sunrise in hkt                               → <error: don't know where exactly "hkt" is: name a city>
+time in hnd                                  → Thu, 24 Sep 2026 03:30 JST
+sunrise in hnd                               → Thu, 24 Sep 2026 05:30 JST
+time in ho chi minh                          → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in ho chi minh                       → Thu, 24 Sep 2026 05:43 UTC+7
+time in hobart                               → Thu, 24 Sep 2026 04:30 AEST
+sunrise in hobart                            → Thu, 24 Sep 2026 05:57 AEST
+time in holland                              → 20:30 CEST
+sunrise in holland                           → <error: don't know where exactly "holland" is: name a city>
+time in honduras                             → 12:30 UTC-6
+sunrise in honduras                          → <error: don't know where exactly "honduras" is: name a city>
+time in hong kong                            → Thu, 24 Sep 2026 02:30 HKT
+sunrise in hong kong                         → Thu, 24 Sep 2026 06:13 HKT
+time in honolulu                             → 08:30 HST
+sunrise in honolulu                          → 06:21 HST
+time in houston                              → 13:30 CDT
+sunrise in houston                           → 07:10 CDT
+time in hovd                                 → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in hovd                              → Thu, 24 Sep 2026 06:42 UTC+7
+time in hst                                  → 08:30 HST
+sunrise in hst                               → <error: don't know where exactly "hst" is: name a city>
+time in hungary                              → 20:30 CEST
+sunrise in hungary                           → <error: don't know where exactly "hungary" is: name a city>
+time in hyderabad                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in hyderabad                         → Thu, 24 Sep 2026 06:05 IST
+time in iad                                  → 14:30 EDT
+sunrise in iad                               → 06:57 EDT
+time in iceland                              → 18:30 GMT
+sunrise in iceland                           → <error: don't know where exactly "iceland" is: name a city>
+time in icn                                  → Thu, 24 Sep 2026 03:30 KST
+sunrise in icn                               → Thu, 24 Sep 2026 06:22 KST
+time in ict                                  → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in ict                               → <error: don't know where exactly "ict" is: name a city>
+time in idaho                                → 12:30 MDT
+sunrise in idaho                             → <error: don't know where exactly "idaho" is: name a city>
+time in illinois                             → 13:30 CDT
+sunrise in illinois                          → <error: don't know where exactly "illinois" is: name a city>
+time in incheon                              → Thu, 24 Sep 2026 03:30 KST
+sunrise in incheon                           → Thu, 24 Sep 2026 06:22 KST
+time in india                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in india                             → <error: don't know where exactly "india" is: name a city>
+time in indiana                              → 14:30 EDT
+sunrise in indiana                           → <error: don't know where exactly "indiana" is: name a city>
+time in indianapolis                         → 14:30 EDT
+sunrise in indianapolis                      → 07:33 EDT
+time in indonesia                            → Thu, 24 Sep 2026 01:30 WIB
+sunrise in indonesia                         → <error: don't know where exactly "indonesia" is: name a city>
+time in inuvik                               → 12:30 MDT
+sunrise in inuvik                            → 08:41 MDT
+time in iowa                                 → 13:30 CDT
+sunrise in iowa                              → <error: don't know where exactly "iowa" is: name a city>
+time in iqaluit                              → 14:30 EDT
+sunrise in iqaluit                           → 06:20 EDT
+time in iran                                 → 22:00 UTC+3:30
+sunrise in iran                              → <error: don't know where exactly "iran" is: name a city>
+time in iraq                                 → 21:30 UTC+3
+sunrise in iraq                              → <error: don't know where exactly "iraq" is: name a city>
+time in ireland                              → 19:30 UTC+1
+sunrise in ireland                           → <error: don't know where exactly "ireland" is: name a city>
+time in irkutsk                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in irkutsk                           → Thu, 24 Sep 2026 06:52 UTC+8
+time in irst                                 → 22:00 UTC+3:30
+sunrise in irst                              → <error: don't know where exactly "irst" is: name a city>
+time in islamabad                            → 23:30 PKT
+sunrise in islamabad                         → 05:56 PKT
+time in isle of man                          → 19:30 BST
+sunrise in isle of man                       → 07:05 BST
+time in israel                               → 21:30 UTC+3
+sunrise in israel                            → <error: don't know where exactly "israel" is: name a city>
+time in ist                                  → Thu, 24 Sep 2026 00:00 IST
+sunrise in ist                               → <error: don't know where exactly "ist" is: name a city>
+time in istanbul                             → 21:30 UTC+3
+sunrise in istanbul                          → 06:52 UTC+3
+time in italy                                → 20:30 CEST
+sunrise in italy                             → <error: don't know where exactly "italy" is: name a city>
+time in ivory coast                          → 18:30 GMT
+sunrise in ivory coast                       → <error: don't know where exactly "ivory coast" is: name a city>
+time in izmir                                → 21:30 UTC+3
+sunrise in izmir                             → 07:00 UTC+3
+time in jaipur                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in jaipur                            → Thu, 24 Sep 2026 06:16 IST
+time in jakarta                              → Thu, 24 Sep 2026 01:30 WIB
+sunrise in jakarta                           → Thu, 24 Sep 2026 05:41 WIB
+time in jamaica                              → 13:30 UTC-5
+sunrise in jamaica                           → 05:56 UTC-5
+time in jan mayen                            → 20:30 CEST
+sunrise in jan mayen                         → <error: don't know where exactly "jan mayen" is: name a city>
+time in japan                                → Thu, 24 Sep 2026 03:30 JST
+sunrise in japan                             → <error: don't know where exactly "japan" is: name a city>
+time in jayapura                             → Thu, 24 Sep 2026 03:30 UTC+9
+sunrise in jayapura                          → Thu, 24 Sep 2026 05:26 UTC+9
+time in jeddah                               → 21:30 UTC+3
+sunrise in jeddah                            → 06:12 UTC+3
+time in jersey                               → 19:30 BST
+sunrise in jersey                            → 06:56 BST
+time in jerusalem                            → 21:30 UTC+3
+sunrise in jerusalem                         → 06:28 UTC+3
+time in jfk                                  → 14:30 EDT
+sunrise in jfk                               → 06:45 EDT
+time in johannesburg                         → 20:30 SAST
+sunrise in johannesburg                      → 05:57 SAST
+time in johnston                             → 08:30 HST
+sunrise in johnston                          → <error: don't know where exactly "johnston" is: name a city>
+time in jordan                               → 21:30 UTC+3
+sunrise in jordan                            → <error: don't know where exactly "jordan" is: name a city>
+time in jst                                  → Thu, 24 Sep 2026 03:30 JST
+sunrise in jst                               → <error: don't know where exactly "jst" is: name a city>
+time in juba                                 → 20:30 UTC+2
+sunrise in juba                              → 05:43 UTC+2
+time in jujuy                                → 15:30 UTC-3
+sunrise in jujuy                             → 07:10 UTC-3
+time in juneau                               → 10:30 AKDT
+sunrise in juneau                            → 06:45 AKDT
+time in kabul                                → 23:00 UTC+4:30
+sunrise in kabul                             → 05:42 UTC+4:30
+time in kaliningrad                          → 20:30 UTC+2
+sunrise in kaliningrad                       → 06:25 UTC+2
+time in kamchatka                            → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in kamchatka                         → Thu, 24 Sep 2026 07:14 UTC+12
+time in kampala                              → 21:30 UTC+3
+sunrise in kampala                           → 06:39 UTC+3
+time in kansas                               → 13:30 CDT
+sunrise in kansas                            → <error: don't know where exactly "kansas" is: name a city>
+time in kansas city                          → 13:30 CDT
+sunrise in kansas city                       → 07:07 CDT
+time in kanton                               → Thu, 24 Sep 2026 07:30 UTC+13
+sunrise in kanton                            → Thu, 24 Sep 2026 06:16 UTC+13
+time in karachi                              → 23:30 PKT
+sunrise in karachi                           → 06:21 PKT
+time in karaganda                            → 23:30 UTC+5
+sunrise in karaganda                         → 05:55 UTC+5
+time in karagandy                            → 23:30 UTC+5
+sunrise in karagandy                         → 05:55 UTC+5
+time in kashgar                              → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in kashgar                           → Thu, 24 Sep 2026 06:45 UTC+6
+time in kathmandu                            → Thu, 24 Sep 2026 00:15 UTC+5:45
+sunrise in kathmandu                         → Thu, 24 Sep 2026 05:53 UTC+5:45
+time in katmandu                             → Thu, 24 Sep 2026 00:15 UTC+5:45
+sunrise in katmandu                          → Thu, 24 Sep 2026 05:53 UTC+5:45
+time in kazakhstan                           → 23:30 UTC+5
+sunrise in kazakhstan                        → <error: don't know where exactly "kazakhstan" is: name a city>
+time in kazan                                → 21:30 MSK
+sunrise in kazan                             → 05:30 MSK
+time in kentucky                             → 14:30 EDT
+sunrise in kentucky                          → <error: don't know where exactly "kentucky" is: name a city>
+time in kenya                                → 21:30 UTC+3
+sunrise in kenya                             → <error: don't know where exactly "kenya" is: name a city>
+time in kerguelen                            → 23:30 UTC+5
+sunrise in kerguelen                         → 06:06 UTC+5
+time in khandyga                             → Thu, 24 Sep 2026 03:30 UTC+9
+sunrise in khandyga                          → Thu, 24 Sep 2026 05:45 UTC+9
+time in kharkiv                              → 21:30 EEST
+sunrise in kharkiv                           → 06:23 EEST
+time in khartoum                             → 20:30 UTC+2
+sunrise in khartoum                          → 05:39 UTC+2
+time in kiev                                 → 21:30 EEST
+sunrise in kiev                              → 06:45 EEST
+time in kigali                               → 20:30 UTC+2
+sunrise in kigali                            → 05:49 UTC+2
+time in kinshasa                             → 19:30 UTC+1
+sunrise in kinshasa                          → 05:48 UTC+1
+time in kiribati                             → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in kiribati                          → <error: don't know where exactly "kiribati" is: name a city>
+time in kiritimati                           → Thu, 24 Sep 2026 08:30 UTC+14
+sunrise in kiritimati                        → Thu, 24 Sep 2026 06:18 UTC+14
+time in kirov                                → 21:30 MSK
+sunrise in kirov                             → 05:28 MSK
+time in knox in                              → 13:30 CDT
+sunrise in knox in                           → <error: don't know where exactly "knox in" is: name a city>
+time in kolkata                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in kolkata                           → Thu, 24 Sep 2026 05:26 IST
+time in korea                                → Thu, 24 Sep 2026 03:30 KST
+sunrise in korea                             → <error: don't know where exactly "korea" is: name a city>
+time in kosovo                               → 20:30 CEST
+sunrise in kosovo                            → <error: don't know where exactly "kosovo" is: name a city>
+time in kosrae                               → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in kosrae                            → Thu, 24 Sep 2026 05:57 UTC+11
+time in kostanay                             → 23:30 UTC+5
+sunrise in kostanay                          → 06:33 UTC+5
+time in krakow                               → 20:30 CEST
+sunrise in krakow                            → 06:28 CEST
+time in kralendijk                           → 14:30 UTC-4
+sunrise in kralendijk                        → 06:22 UTC-4
+time in krasnoyarsk                          → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in krasnoyarsk                       → Thu, 24 Sep 2026 06:37 UTC+7
+time in kst                                  → Thu, 24 Sep 2026 03:30 KST
+sunrise in kst                               → <error: don't know where exactly "kst" is: name a city>
+time in kuala lumpur                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in kuala lumpur                      → Thu, 24 Sep 2026 07:02 UTC+8
+time in kuching                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in kuching                           → Thu, 24 Sep 2026 06:28 UTC+8
+time in kuwait                               → 21:30 UTC+3
+sunrise in kuwait                            → 05:37 UTC+3
+time in kwajalein                            → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in kwajalein                         → Thu, 24 Sep 2026 06:40 UTC+12
+time in kyiv                                 → 21:30 EEST
+sunrise in kyiv                              → 06:45 EEST
+time in kyoto                                → Thu, 24 Sep 2026 03:30 JST
+sunrise in kyoto                             → Thu, 24 Sep 2026 05:46 JST
+time in kyrgyzstan                           → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in kyrgyzstan                        → <error: don't know where exactly "kyrgyzstan" is: name a city>
+time in kyzylorda                            → 23:30 UTC+5
+sunrise in kyzylorda                         → 06:26 UTC+5
+time in la paz                               → 14:30 UTC-4
+sunrise in la paz                            → 06:21 UTC-4
+time in la rioja                             → 15:30 UTC-3
+sunrise in la rioja                          → 07:16 UTC-3
+time in lagos                                → 19:30 UTC+1
+sunrise in lagos                             → 06:36 UTC+1
+time in lahore                               → 23:30 PKT
+sunrise in lahore                            → 05:51 PKT
+time in laos                                 → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in laos                              → <error: don't know where exactly "laos" is: name a city>
+time in las vegas                            → 11:30 PDT
+sunrise in las vegas                         → 06:29 PDT
+time in latvia                               → 21:30 EEST
+sunrise in latvia                            → <error: don't know where exactly "latvia" is: name a city>
+time in lax                                  → 11:30 PDT
+sunrise in lax                               → 06:42 PDT
+time in lebanon                              → 21:30 EEST
+sunrise in lebanon                           → <error: don't know where exactly "lebanon" is: name a city>
+time in led                                  → 21:30 MSK
+sunrise in led                               → 06:45 MSK
+time in leeds                                → 19:30 BST
+sunrise in leeds                             → 06:54 BST
+time in leipzig                              → 20:30 CEST
+sunrise in leipzig                           → 06:58 CEST
+time in lesotho                              → 20:30 SAST
+sunrise in lesotho                           → <error: don't know where exactly "lesotho" is: name a city>
+time in lga                                  → 14:30 EDT
+sunrise in lga                               → 06:45 EDT
+time in lgw                                  → 19:30 BST
+sunrise in lgw                               → 06:48 BST
+time in lhi                                  → Thu, 24 Sep 2026 05:00 UTC+10:30
+sunrise in lhi                               → <error: don't know where exactly "lhi" is: name a city>
+time in lhr                                  → 19:30 BST
+sunrise in lhr                               → 06:48 BST
+time in liberia                              → 18:30 GMT
+sunrise in liberia                           → <error: don't know where exactly "liberia" is: name a city>
+time in libreville                           → 19:30 UTC+1
+sunrise in libreville                        → 06:11 UTC+1
+time in libya                                → 20:30 UTC+2
+sunrise in libya                             → <error: don't know where exactly "libya" is: name a city>
+time in liechtenstein                        → 20:30 CEST
+sunrise in liechtenstein                     → <error: don't know where exactly "liechtenstein" is: name a city>
+time in lima                                 → 13:30 UTC-5
+sunrise in lima                              → 05:57 UTC-5
+time in lindeman                             → Thu, 24 Sep 2026 04:30 AEST
+sunrise in lindeman                          → Thu, 24 Sep 2026 05:52 AEST
+time in lisbon                               → 19:30 WEST
+sunrise in lisbon                            → 07:25 WEST
+time in lithuania                            → 21:30 EEST
+sunrise in lithuania                         → <error: don't know where exactly "lithuania" is: name a city>
+time in liverpool                            → 19:30 BST
+sunrise in liverpool                         → 06:59 BST
+time in ljubljana                            → 20:30 CEST
+sunrise in ljubljana                         → 06:50 CEST
+time in lome                                 → 18:30 GMT
+sunrise in lome                              → 05:44 GMT
+time in london                               → 19:30 BST
+sunrise in london                            → 06:48 BST
+time in longyearbyen                         → 20:30 CEST
+sunrise in longyearbyen                      → 06:35 CEST
+time in lord howe                            → Thu, 24 Sep 2026 05:00 UTC+10:30
+sunrise in lord howe                         → Thu, 24 Sep 2026 05:41 UTC+10:30
+time in los angeles                          → 11:30 PDT
+sunrise in los angeles                       → 06:42 PDT
+time in louisiana                            → 13:30 CDT
+sunrise in louisiana                         → <error: don't know where exactly "louisiana" is: name a city>
+time in louisville                           → 14:30 EDT
+sunrise in louisville                        → 07:32 EDT
+time in lower princes                        → 14:30 UTC-4
+sunrise in lower princes                     → 06:01 UTC-4
+time in luanda                               → 19:30 UTC+1
+sunrise in luanda                            → 05:56 UTC+1
+time in lubumbashi                           → 20:30 UTC+2
+sunrise in lubumbashi                        → 05:59 UTC+2
+time in lusaka                               → 20:30 UTC+2
+sunrise in lusaka                            → 05:56 UTC+2
+time in luxembourg                           → 20:30 CEST
+sunrise in luxembourg                        → 07:23 CEST
+time in lviv                                 → 21:30 EEST
+sunrise in lviv                              → 07:12 EEST
+time in lyon                                 → 20:30 CEST
+sunrise in lyon                              → 07:29 CEST
+time in macao                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in macao                             → Thu, 24 Sep 2026 06:15 UTC+8
+time in macau                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in macau                             → Thu, 24 Sep 2026 06:15 UTC+8
+time in macedonia                            → 20:30 CEST
+sunrise in macedonia                         → <error: don't know where exactly "macedonia" is: name a city>
+time in maceio                               → 15:30 UTC-3
+sunrise in maceio                            → 05:12 UTC-3
+time in madagascar                           → 21:30 UTC+3
+sunrise in madagascar                        → <error: don't know where exactly "madagascar" is: name a city>
+time in madeira                              → 19:30 WEST
+sunrise in madeira                           → 07:56 WEST
+time in madras                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in madras                            → Thu, 24 Sep 2026 05:58 IST
+time in madrid                               → 20:30 CEST
+sunrise in madrid                            → 08:03 CEST
+time in magadan                              → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in magadan                           → Thu, 24 Sep 2026 06:45 UTC+11
+time in mahe                                 → 22:30 UTC+4
+sunrise in mahe                              → 06:07 UTC+4
+time in maine                                → 14:30 EDT
+sunrise in maine                             → <error: don't know where exactly "maine" is: name a city>
+time in majuro                               → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in majuro                            → Thu, 24 Sep 2026 06:24 UTC+12
+time in makassar                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in makassar                          → Thu, 24 Sep 2026 05:51 UTC+8
+time in malabo                               → 19:30 UTC+1
+sunrise in malabo                            → 06:14 UTC+1
+time in malawi                               → 20:30 UTC+2
+sunrise in malawi                            → <error: don't know where exactly "malawi" is: name a city>
+time in malaysia                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in malaysia                          → <error: don't know where exactly "malaysia" is: name a city>
+time in maldives                             → 23:30 UTC+5
+sunrise in maldives                          → 05:55 UTC+5
+time in mali                                 → 18:30 GMT
+sunrise in mali                              → <error: don't know where exactly "mali" is: name a city>
+time in malta                                → 20:30 CEST
+sunrise in malta                             → 06:51 CEST
+time in managua                              → 12:30 UTC-6
+sunrise in managua                           → 05:34 UTC-6
+time in manaus                               → 14:30 UTC-4
+sunrise in manaus                            → 05:49 UTC-4
+time in manchester                           → 19:30 BST
+sunrise in manchester                        → 06:56 BST
+time in manhattan                            → 14:30 EDT
+sunrise in manhattan                         → 06:45 EDT
+time in manila                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in manila                            → Thu, 24 Sep 2026 05:45 UTC+8
+time in manitoba                             → 13:30 CDT
+sunrise in manitoba                          → <error: don't know where exactly "manitoba" is: name a city>
+time in maputo                               → 20:30 UTC+2
+sunrise in maputo                            → 05:38 UTC+2
+time in mariehamn                            → 21:30 EEST
+sunrise in mariehamn                         → 07:27 EEST
+time in marigot                              → 14:30 UTC-4
+sunrise in marigot                           → 06:01 UTC-4
+time in marquesas                            → 09:00 UTC-9:30
+sunrise in marquesas                         → 05:37 UTC-9:30
+time in marrakech                            → 18:30 UTC
+sunrise in marrakech                         → 06:21 UTC
+time in marseille                            → 20:30 CEST
+sunrise in marseille                         → 07:27 CEST
+time in marshall islands                     → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in marshall islands                  → <error: don't know where exactly "marshall islands" is: name a city>
+time in martinique                           → 14:30 UTC-4
+sunrise in martinique                        → 05:53 UTC-4
+time in maryland                             → 14:30 EDT
+sunrise in maryland                          → <error: don't know where exactly "maryland" is: name a city>
+time in maseru                               → 20:30 SAST
+sunrise in maseru                            → 05:59 SAST
+time in massachusetts                        → 14:30 EDT
+sunrise in massachusetts                     → <error: don't know where exactly "massachusetts" is: name a city>
+time in matamoros                            → 13:30 CDT
+sunrise in matamoros                         → 07:19 CDT
+time in mauritania                           → 18:30 GMT
+sunrise in mauritania                        → <error: don't know where exactly "mauritania" is: name a city>
+time in mauritius                            → 22:30 UTC+4
+sunrise in mauritius                         → 05:59 UTC+4
+time in mayotte                              → 21:30 UTC+3
+sunrise in mayotte                           → 05:48 UTC+3
+time in mazatlan                             → 11:30 UTC-7
+sunrise in mazatlan                          → 05:55 UTC-7
+time in mbabane                              → 20:30 SAST
+sunrise in mbabane                           → 05:44 SAST
+time in mdt                                  → 12:30 MDT
+sunrise in mdt                               → <error: don't know where exactly "mdt" is: name a city>
+time in mecca                                → 21:30 UTC+3
+sunrise in mecca                             → 06:10 UTC+3
+time in medellin                             → 13:30 UTC-5
+sunrise in medellin                          → 05:51 UTC-5
+time in melbourne                            → Thu, 24 Sep 2026 04:30 AEST
+sunrise in melbourne                         → Thu, 24 Sep 2026 06:07 AEST
+time in memphis                              → 13:30 CDT
+sunrise in memphis                           → 06:49 CDT
+time in mendoza                              → 15:30 UTC-3
+sunrise in mendoza                           → 07:23 UTC-3
+time in menominee                            → 13:30 CDT
+sunrise in menominee                         → 06:39 CDT
+time in merida                               → 12:30 UTC-6
+sunrise in merida                            → 05:48 UTC-6
+time in metlakatla                           → 10:30 AKDT
+sunrise in metlakatla                        → 06:34 AKDT
+time in mex                                  → 12:30 UTC-6
+sunrise in mex                               → 06:26 UTC-6
+time in mexico                               → 12:30 UTC-6
+sunrise in mexico                            → 06:26 UTC-6
+time in mexico city                          → 12:30 UTC-6
+sunrise in mexico city                       → 06:26 UTC-6
+time in mia                                  → 14:30 EDT
+sunrise in mia                               → 07:10 EDT
+time in miami                                → 14:30 EDT
+sunrise in miami                             → 07:10 EDT
+time in michigan                             → 14:30 EDT
+sunrise in michigan                          → <error: don't know where exactly "michigan" is: name a city>
+time in micronesia                           → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in micronesia                        → <error: don't know where exactly "micronesia" is: name a city>
+time in midway                               → 07:30 UTC-11
+sunrise in midway                            → 06:39 UTC-11
+time in milan                                → 20:30 CEST
+sunrise in milan                             → 07:11 CEST
+time in milwaukee                            → 13:30 CDT
+sunrise in milwaukee                         → 06:40 CDT
+time in minneapolis                          → 13:30 CDT
+sunrise in minneapolis                       → 07:01 CDT
+time in minnesota                            → 13:30 CDT
+sunrise in minnesota                         → <error: don't know where exactly "minnesota" is: name a city>
+time in minsk                                → 21:30 UTC+3
+sunrise in minsk                             → 06:57 UTC+3
+time in miquelon                             → 16:30 UTC-2
+sunrise in miquelon                          → 07:34 UTC-2
+time in mississippi                          → 13:30 CDT
+sunrise in mississippi                       → <error: don't know where exactly "mississippi" is: name a city>
+time in missouri                             → 13:30 CDT
+sunrise in missouri                          → <error: don't know where exactly "missouri" is: name a city>
+time in mobile                               → 13:30 CDT
+sunrise in mobile                            → 06:41 CDT
+time in mogadishu                            → 21:30 UTC+3
+sunrise in mogadishu                         → 05:48 UTC+3
+time in moldova                              → 21:30 EEST
+sunrise in moldova                           → <error: don't know where exactly "moldova" is: name a city>
+time in monaco                               → 20:30 CEST
+sunrise in monaco                            → 07:19 CEST
+time in moncton                              → 15:30 ADT
+sunrise in moncton                           → 07:07 ADT
+time in mongolia                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in mongolia                          → <error: don't know where exactly "mongolia" is: name a city>
+time in monrovia                             → 18:30 GMT
+sunrise in monrovia                          → 06:32 GMT
+time in montana                              → 12:30 MDT
+sunrise in montana                           → <error: don't know where exactly "montana" is: name a city>
+time in montenegro                           → 20:30 CEST
+sunrise in montenegro                        → <error: don't know where exactly "montenegro" is: name a city>
+time in monterrey                            → 12:30 UTC-6
+sunrise in monterrey                         → 06:30 UTC-6
+time in montevideo                           → 15:30 UTC-3
+sunrise in montevideo                        → 06:33 UTC-3
+time in montreal                             → 14:30 EDT
+sunrise in montreal                          → 06:43 EDT
+time in montserrat                           → 14:30 UTC-4
+sunrise in montserrat                        → 05:58 UTC-4
+time in morocco                              → 18:30 UTC
+sunrise in morocco                           → <error: don't know where exactly "morocco" is: name a city>
+time in moscow                               → 21:30 MSK
+sunrise in moscow                            → 06:16 MSK
+time in mountain                             → 12:30 MDT
+sunrise in mountain                          → <error: don't know where exactly "mountain" is: name a city>
+time in mountain time                        → 12:30 MDT
+sunrise in mountain time                     → <error: don't know where exactly "mountain time" is: name a city>
+time in mountain view                        → 11:30 PDT
+sunrise in mountain view                     → 06:57 PDT
+time in mozambique                           → 20:30 UTC+2
+sunrise in mozambique                        → 05:06 UTC+2
+time in msk                                  → 21:30 MSK
+sunrise in msk                               → <error: don't know where exactly "msk" is: name a city>
+time in mst                                  → 12:30 MDT
+sunrise in mst                               → <error: don't know where exactly "mst" is: name a city>
+time in muc                                  → 20:30 CEST
+sunrise in muc                               → 07:02 CEST
+time in mumbai                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in mumbai                            → Thu, 24 Sep 2026 06:28 IST
+time in munich                               → 20:30 CEST
+sunrise in munich                            → 07:02 CEST
+time in muscat                               → 22:30 UTC+4
+sunrise in muscat                            → 05:55 UTC+4
+time in myanmar                              → Thu, 24 Sep 2026 01:00 UTC+6:30
+sunrise in myanmar                           → <error: don't know where exactly "myanmar" is: name a city>
+time in nagoya                               → Thu, 24 Sep 2026 03:30 JST
+sunrise in nagoya                            → Thu, 24 Sep 2026 05:41 JST
+time in nairobi                              → 21:30 UTC+3
+sunrise in nairobi                           → 06:22 UTC+3
+time in namibia                              → 20:30 UTC+2
+sunrise in namibia                           → <error: don't know where exactly "namibia" is: name a city>
+time in naples                               → 20:30 CEST
+sunrise in naples                            → 06:51 CEST
+time in nashville                            → 13:30 CDT
+sunrise in nashville                         → 06:36 CDT
+time in nassau                               → 14:30 EDT
+sunrise in nassau                            → 06:58 EDT
+time in nauru                                → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in nauru                             → Thu, 24 Sep 2026 06:41 UTC+12
+time in ndjamena                             → 19:30 UTC+1
+sunrise in ndjamena                          → 05:49 UTC+1
+time in ndt                                  → 16:00 NDT
+sunrise in ndt                               → <error: don't know where exactly "ndt" is: name a city>
+time in nebraska                             → 13:30 CDT
+sunrise in nebraska                          → <error: don't know where exactly "nebraska" is: name a city>
+time in nepal                                → Thu, 24 Sep 2026 00:15 UTC+5:45
+sunrise in nepal                             → <error: don't know where exactly "nepal" is: name a city>
+time in netherlands                          → 20:30 CEST
+sunrise in netherlands                       → <error: don't know where exactly "netherlands" is: name a city>
+time in nevada                               → 11:30 PDT
+sunrise in nevada                            → <error: don't know where exactly "nevada" is: name a city>
+time in new brunswick                        → 15:30 ADT
+sunrise in new brunswick                     → <error: don't know where exactly "new brunswick" is: name a city>
+time in new delhi                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in new delhi                         → Thu, 24 Sep 2026 06:10 IST
+time in new hampshire                        → 14:30 EDT
+sunrise in new hampshire                     → <error: don't know where exactly "new hampshire" is: name a city>
+time in new jersey                           → 14:30 EDT
+sunrise in new jersey                        → <error: don't know where exactly "new jersey" is: name a city>
+time in new mexico                           → 12:30 MDT
+sunrise in new mexico                        → <error: don't know where exactly "new mexico" is: name a city>
+time in new orleans                          → 13:30 CDT
+sunrise in new orleans                       → 06:49 CDT
+time in new south wales                      → Thu, 24 Sep 2026 04:30 AEST
+sunrise in new south wales                   → <error: don't know where exactly "new south wales" is: name a city>
+time in new york                             → 14:30 EDT
+sunrise in new york                          → 06:45 EDT
+time in new zealand                          → Thu, 24 Sep 2026 06:30 NZST
+sunrise in new zealand                       → <error: don't know where exactly "new zealand" is: name a city>
+time in newark                               → 14:30 EDT
+sunrise in newark                            → 06:45 EDT
+time in newfoundland                         → 16:00 NDT
+sunrise in newfoundland                      → <error: don't know where exactly "newfoundland" is: name a city>
+time in niamey                               → 19:30 UTC+1
+sunrise in niamey                            → 06:41 UTC+1
+time in nicaragua                            → 12:30 UTC-6
+sunrise in nicaragua                         → <error: don't know where exactly "nicaragua" is: name a city>
+time in nice                                 → 20:30 CEST
+sunrise in nice                              → 07:19 CEST
+time in nicosia                              → 21:30 EEST
+sunrise in nicosia                           → 06:35 EEST
+time in niger                                → 19:30 UTC+1
+sunrise in niger                             → <error: don't know where exactly "niger" is: name a city>
+time in nigeria                              → 19:30 UTC+1
+sunrise in nigeria                           → <error: don't know where exactly "nigeria" is: name a city>
+time in nipigon                              → 14:30 EDT
+sunrise in nipigon                           → <error: don't know where exactly "nipigon" is: name a city>
+time in niue                                 → 07:30 UTC-11
+sunrise in niue                              → 06:08 UTC-11
+time in nizhny novgorod                      → 21:30 MSK
+sunrise in nizhny novgorod                   → 05:51 MSK
+time in nome                                 → 10:30 AKDT
+sunrise in nome                              → 08:48 AKDT
+time in norfolk                              → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in norfolk                           → Thu, 24 Sep 2026 05:36 UTC+11
+time in noronha                              → 16:30 UTC-2
+sunrise in noronha                           → 05:59 UTC-2
+time in north                                → Thu, 24 Sep 2026 04:00 ACST
+sunrise in north                             → <error: don't know where exactly "north" is: name a city>
+time in north carolina                       → 14:30 EDT
+sunrise in north carolina                    → <error: don't know where exactly "north carolina" is: name a city>
+time in north dakota                         → 13:30 CDT
+sunrise in north dakota                      → <error: don't know where exactly "north dakota" is: name a city>
+time in north korea                          → Thu, 24 Sep 2026 03:30 KST
+sunrise in north korea                       → <error: don't know where exactly "north korea" is: name a city>
+time in north macedonia                      → 20:30 CEST
+sunrise in north macedonia                   → <error: don't know where exactly "north macedonia" is: name a city>
+time in northern ireland                     → 19:30 BST
+sunrise in northern ireland                  → <error: don't know where exactly "northern ireland" is: name a city>
+time in northern territory                   → Thu, 24 Sep 2026 04:00 ACST
+sunrise in northern territory                → <error: don't know where exactly "northern territory" is: name a city>
+time in norway                               → 20:30 CEST
+sunrise in norway                            → <error: don't know where exactly "norway" is: name a city>
+time in nouakchott                           → 18:30 GMT
+sunrise in nouakchott                        → 06:53 GMT
+time in noumea                               → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in noumea                            → Thu, 24 Sep 2026 05:42 UTC+11
+time in nova scotia                          → 15:30 ADT
+sunrise in nova scotia                       → <error: don't know where exactly "nova scotia" is: name a city>
+time in novokuznetsk                         → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in novokuznetsk                      → Thu, 24 Sep 2026 07:00 UTC+7
+time in novosibirsk                          → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in novosibirsk                       → Thu, 24 Sep 2026 07:17 UTC+7
+time in nqz                                  → 23:30 UTC+5
+sunrise in nqz                               → 06:02 UTC+5
+time in nrt                                  → Thu, 24 Sep 2026 03:30 JST
+sunrise in nrt                               → Thu, 24 Sep 2026 05:28 JST
+time in nst                                  → 16:00 NDT
+sunrise in nst                               → <error: don't know where exactly "nst" is: name a city>
+time in nsw                                  → Thu, 24 Sep 2026 04:30 AEST
+sunrise in nsw                               → <error: don't know where exactly "nsw" is: name a city>
+time in nunavut                              → 14:30 EDT
+sunrise in nunavut                           → <error: don't know where exactly "nunavut" is: name a city>
+time in nur sultan                           → 23:30 UTC+5
+sunrise in nur sultan                        → 06:02 UTC+5
+time in nuuk                                 → 17:30 UTC-1
+sunrise in nuuk                              → 08:13 UTC-1
+time in nyc                                  → 14:30 EDT
+sunrise in nyc                               → 06:44 EDT
+time in nzdt                                 → Thu, 24 Sep 2026 07:30 NZDT
+sunrise in nzdt                              → <error: don't know where exactly "nzdt" is: name a city>
+time in nzst                                 → Thu, 24 Sep 2026 06:30 NZST
+sunrise in nzst                              → <error: don't know where exactly "nzst" is: name a city>
+time in odesa                                → 21:30 EEST
+sunrise in odesa                             → 06:45 EEST
+time in odessa                               → 21:30 EEST
+sunrise in odessa                            → 06:45 EEST
+time in ohio                                 → 14:30 EDT
+sunrise in ohio                              → <error: don't know where exactly "ohio" is: name a city>
+time in ojinaga                              → 13:30 CDT
+sunrise in ojinaga                           → 07:47 CDT
+time in oklahoma                             → 13:30 CDT
+sunrise in oklahoma                          → 07:19 CDT
+time in oklahoma city                        → 13:30 CDT
+sunrise in oklahoma city                     → 07:19 CDT
+time in oman                                 → 22:30 UTC+4
+sunrise in oman                              → <error: don't know where exactly "oman" is: name a city>
+time in omsk                                 → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in omsk                              → Thu, 24 Sep 2026 06:55 UTC+6
+time in ontario                              → 14:30 EDT
+sunrise in ontario                           → <error: don't know where exactly "ontario" is: name a city>
+time in oral                                 → 23:30 UTC+5
+sunrise in oral                              → 07:22 UTC+5
+time in ord                                  → 13:30 CDT
+sunrise in ord                               → 06:39 CDT
+time in oregon                               → 11:30 PDT
+sunrise in oregon                            → <error: don't know where exactly "oregon" is: name a city>
+time in orlando                              → 14:30 EDT
+sunrise in orlando                           → 07:15 EDT
+time in osaka                                → Thu, 24 Sep 2026 03:30 JST
+sunrise in osaka                             → Thu, 24 Sep 2026 05:47 JST
+time in oskemen                              → 23:30 UTC+5
+sunrise in oskemen                           → 05:17 UTC+5
+time in oslo                                 → 20:30 CEST
+sunrise in oslo                              → 07:03 CEST
+time in ottawa                               → 14:30 EDT
+sunrise in ottawa                            → 06:51 EDT
+time in ouagadougou                          → 18:30 GMT
+sunrise in ouagadougou                       → 05:55 GMT
+time in pacific                              → 11:30 PDT
+sunrise in pacific                           → <error: don't know where exactly "pacific" is: name a city>
+time in pacific time                         → 11:30 PDT
+sunrise in pacific time                      → <error: don't know where exactly "pacific time" is: name a city>
+time in pago pago                            → 07:30 UTC-11
+sunrise in pago pago                         → 06:11 UTC-11
+time in pakistan                             → 23:30 PKT
+sunrise in pakistan                          → <error: don't know where exactly "pakistan" is: name a city>
+time in palau                                → Thu, 24 Sep 2026 03:30 UTC+9
+sunrise in palau                             → Thu, 24 Sep 2026 05:51 UTC+9
+time in palestine                            → 21:30 EEST
+sunrise in palestine                         → <error: don't know where exactly "palestine" is: name a city>
+time in palo alto                            → 11:30 PDT
+sunrise in palo alto                         → 06:57 PDT
+time in panama                               → 13:30 UTC-5
+sunrise in panama                            → 06:07 UTC-5
+time in pangnirtung                          → 14:30 EDT
+sunrise in pangnirtung                       → <error: don't know where exactly "pangnirtung" is: name a city>
+time in papua new guinea                     → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in papua new guinea                  → <error: don't know where exactly "papua new guinea" is: name a city>
+time in paraguay                             → 15:30 UTC-3
+sunrise in paraguay                          → 06:39 UTC-3
+time in paramaribo                           → 15:30 UTC-3
+sunrise in paramaribo                        → 06:30 UTC-3
+time in paris                                → 20:30 CEST
+sunrise in paris                             → 07:38 CEST
+time in pattaya                              → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in pattaya                           → Thu, 24 Sep 2026 06:06 UTC+7
+time in pavlodar                             → 23:30 UTC+5
+sunrise in pavlodar                          → 05:39 UTC+5
+time in pdt                                  → 11:30 PDT
+sunrise in pdt                               → <error: don't know where exactly "pdt" is: name a city>
+time in pek                                  → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in pek                               → Thu, 24 Sep 2026 06:03 UTC+8
+time in penang                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in penang                            → Thu, 24 Sep 2026 07:08 UTC+8
+time in pennsylvania                         → 14:30 EDT
+sunrise in pennsylvania                      → <error: don't know where exactly "pennsylvania" is: name a city>
+time in perth                                → Thu, 24 Sep 2026 02:30 AWST
+sunrise in perth                             → Thu, 24 Sep 2026 06:04 AWST
+time in peru                                 → 13:30 UTC-5
+sunrise in peru                              → <error: don't know where exactly "peru" is: name a city>
+time in philadelphia                         → 14:30 EDT
+sunrise in philadelphia                      → 06:49 EDT
+time in philippines                          → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in philippines                       → <error: don't know where exactly "philippines" is: name a city>
+time in phnom penh                           → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in phnom penh                        → Thu, 24 Sep 2026 05:49 UTC+7
+time in phoenix                              → 11:30 UTC-7
+sunrise in phoenix                           → 06:17 UTC-7
+time in pht                                  → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in pht                               → <error: don't know where exactly "pht" is: name a city>
+time in phuket                               → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in phuket                            → Thu, 24 Sep 2026 06:15 UTC+7
+time in pitcairn                             → 10:30 UTC-8
+sunrise in pitcairn                          → 06:29 UTC-8
+time in pittsburgh                           → 14:30 EDT
+sunrise in pittsburgh                        → 07:09 EDT
+time in pkt                                  → 23:30 PKT
+sunrise in pkt                               → <error: don't know where exactly "pkt" is: name a city>
+time in podgorica                            → 20:30 CEST
+sunrise in podgorica                         → 06:31 CEST
+time in pohnpei                              → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in pohnpei                           → Thu, 24 Sep 2026 06:16 UTC+11
+time in poland                               → 20:30 CEST
+sunrise in poland                            → <error: don't know where exactly "poland" is: name a city>
+time in ponape                               → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in ponape                            → <error: don't know where exactly "ponape" is: name a city>
+time in pontianak                            → Thu, 24 Sep 2026 01:30 WIB
+sunrise in pontianak                         → Thu, 24 Sep 2026 05:32 WIB
+time in port au prince                       → 14:30 EDT
+sunrise in port au prince                    → 06:38 EDT
+time in port moresby                         → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in port moresby                      → Thu, 24 Sep 2026 06:00 UTC+10
+time in port of spain                        → 14:30 UTC-4
+sunrise in port of spain                     → 05:55 UTC-4
+time in portland                             → 11:30 PDT
+sunrise in portland                          → 06:59 PDT
+time in porto                                → 19:30 WEST
+sunrise in porto                             → 07:23 WEST
+time in porto acre                           → 13:30 UTC-5
+sunrise in porto acre                        → 05:19 UTC-5
+time in porto novo                           → 19:30 UTC+1
+sunrise in porto novo                        → 06:39 UTC+1
+time in porto velho                          → 14:30 UTC-4
+sunrise in porto velho                       → 06:05 UTC-4
+time in portugal                             → 19:30 WEST
+sunrise in portugal                          → <error: don't know where exactly "portugal" is: name a city>
+time in prague                               → 20:30 CEST
+sunrise in prague                            → 06:50 CEST
+time in pretoria                             → 20:30 SAST
+sunrise in pretoria                          → 05:56 SAST
+time in prince edward island                 → 15:30 ADT
+sunrise in prince edward island              → <error: don't know where exactly "prince edward island" is: name a city>
+time in pst                                  → 11:30 PDT
+sunrise in pst                               → <error: don't know where exactly "pst" is: name a city>
+time in puerto rico                          → 14:30 UTC-4
+sunrise in puerto rico                       → 06:14 UTC-4
+time in pune                                 → Thu, 24 Sep 2026 00:00 IST
+sunrise in pune                              → Thu, 24 Sep 2026 06:24 IST
+time in punta arenas                         → 15:30 UTC-3
+sunrise in punta arenas                      → 07:30 UTC-3
+time in pvg                                  → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in pvg                               → Thu, 24 Sep 2026 05:43 UTC+8
+time in pyongyang                            → Thu, 24 Sep 2026 03:30 KST
+sunrise in pyongyang                         → Thu, 24 Sep 2026 06:26 KST
+time in qatar                                → 21:30 UTC+3
+sunrise in qatar                             → 05:23 UTC+3
+time in qostanay                             → 23:30 UTC+5
+sunrise in qostanay                          → 06:33 UTC+5
+time in quebec                               → 14:30 EDT
+sunrise in quebec                            → 06:33 EDT
+time in quebec city                          → 14:30 EDT
+sunrise in quebec city                       → 06:33 EDT
+time in queensland                           → Thu, 24 Sep 2026 04:30 AEST
+sunrise in queensland                        → <error: don't know where exactly "queensland" is: name a city>
+time in qyzylorda                            → 23:30 UTC+5
+sunrise in qyzylorda                         → 06:26 UTC+5
+time in rabat                                → 18:30 UTC
+sunrise in rabat                             → 06:16 UTC
+time in rainy river                          → 13:30 CDT
+sunrise in rainy river                       → <error: don't know where exactly "rainy river" is: name a city>
+time in raleigh                              → 14:30 EDT
+sunrise in raleigh                           → 07:03 EDT
+time in rangoon                              → Thu, 24 Sep 2026 01:00 UTC+6:30
+sunrise in rangoon                           → Thu, 24 Sep 2026 05:55 UTC+6:30
+time in rankin inlet                         → 13:30 CDT
+sunrise in rankin inlet                      → 06:55 CDT
+time in rarotonga                            → 08:30 UTC-10
+sunrise in rarotonga                         → 06:27 UTC-10
+time in recife                               → 15:30 UTC-3
+sunrise in recife                            → 05:09 UTC-3
+time in regina                               → 12:30 UTC-6
+sunrise in regina                            → 06:47 UTC-6
+time in resolute                             → 13:30 CDT
+sunrise in resolute                          → 07:02 CDT
+time in reunion                              → 22:30 UTC+4
+sunrise in reunion                           → 06:07 UTC+4
+time in reykjavik                            → 18:30 GMT
+sunrise in reykjavik                         → 07:13 GMT
+time in rhode island                         → 14:30 EDT
+sunrise in rhode island                      → <error: don't know where exactly "rhode island" is: name a city>
+time in riga                                 → 21:30 EEST
+sunrise in riga                              → 07:10 EEST
+time in rio                                  → 15:30 UTC-3
+sunrise in rio                               → 05:41 UTC-3
+time in rio branco                           → 13:30 UTC-5
+sunrise in rio branco                        → 05:20 UTC-5
+time in rio de janeiro                       → 15:30 UTC-3
+sunrise in rio de janeiro                    → 05:41 UTC-3
+time in rio gallegos                         → 15:30 UTC-3
+sunrise in rio gallegos                      → 07:23 UTC-3
+time in riyadh                               → 21:30 UTC+3
+sunrise in riyadh                            → 05:42 UTC+3
+time in romania                              → 21:30 EEST
+sunrise in romania                           → <error: don't know where exactly "romania" is: name a city>
+time in rome                                 → 20:30 CEST
+sunrise in rome                              → 06:58 CEST
+time in rosario                              → 15:30 UTC-3
+sunrise in rosario                           → 06:51 UTC-3
+time in rotterdam                            → 20:30 CEST
+sunrise in rotterdam                         → 07:30 CEST
+time in russia                               → 21:30 MSK
+sunrise in russia                            → <error: don't know where exactly "russia" is: name a city>
+time in rwanda                               → 20:30 UTC+2
+sunrise in rwanda                            → <error: don't know where exactly "rwanda" is: name a city>
+time in sacramento                           → 11:30 PDT
+sunrise in sacramento                        → 06:55 PDT
+time in saigon                               → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in saigon                            → Thu, 24 Sep 2026 05:43 UTC+7
+time in saint louis                          → 13:30 CDT
+sunrise in saint louis                       → 06:50 CDT
+time in saint lucia                          → 14:30 UTC-4
+sunrise in saint lucia                       → <error: don't know where exactly "saint lucia" is: name a city>
+time in saint petersburg                     → 21:30 MSK
+sunrise in saint petersburg                  → 06:45 MSK
+time in saipan                               → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in saipan                            → Thu, 24 Sep 2026 06:06 UTC+10
+time in sakhalin                             → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in sakhalin                          → Thu, 24 Sep 2026 07:18 UTC+11
+time in salt lake city                       → 12:30 MDT
+sunrise in salt lake city                    → 07:16 MDT
+time in salta                                → 15:30 UTC-3
+sunrise in salta                             → 07:10 UTC-3
+time in samara                               → 22:30 UTC+4
+sunrise in samara                            → 06:27 UTC+4
+time in samarkand                            → 23:30 UTC+5
+sunrise in samarkand                         → 06:20 UTC+5
+time in samoa                                → Thu, 24 Sep 2026 07:30 UTC+13
+sunrise in samoa                             → <error: don't know where exactly "samoa" is: name a city>
+time in san antonio                          → 13:30 CDT
+sunrise in san antonio                       → 07:23 CDT
+time in san diego                            → 11:30 PDT
+sunrise in san diego                         → 06:38 PDT
+time in san fernando del valle de catamarca  → 15:30 UTC-3
+sunrise in san fernando del valle de catamarca → 07:11 UTC-3
+time in san francisco                        → 11:30 PDT
+sunrise in san francisco                     → 06:59 PDT
+time in san jose                             → 11:30 PDT
+sunrise in san jose                          → 06:56 PDT
+time in san juan                             → 15:30 UTC-3
+sunrise in san juan                          → 07:22 UTC-3
+time in san luis                             → 15:30 UTC-3
+sunrise in san luis                          → 05:46 UTC-3
+time in san marino                           → 20:30 CEST
+sunrise in san marino                        → 06:58 CEST
+time in santa isabel                         → 11:30 PDT
+sunrise in santa isabel                      → <error: don't know where exactly "santa isabel" is: name a city>
+time in santarem                             → 15:30 UTC-3
+sunrise in santarem                          → 06:28 UTC-3
+time in santiago                             → 15:30 UTC-3
+sunrise in santiago                          → 07:31 UTC-3
+time in santo domingo                        → 14:30 UTC-4
+sunrise in santo domingo                     → 06:29 UTC-4
+time in sao paulo                            → 15:30 UTC-3
+sunrise in sao paulo                         → 05:55 UTC-3
+time in sao tome                             → 18:30 GMT
+sunrise in sao tome                          → 05:22 GMT
+time in sapporo                              → Thu, 24 Sep 2026 03:30 JST
+sunrise in sapporo                           → Thu, 24 Sep 2026 05:24 JST
+time in sarajevo                             → 20:30 CEST
+sunrise in sarajevo                          → 06:35 CEST
+time in saratov                              → 22:30 UTC+4
+sunrise in saratov                           → 06:43 UTC+4
+time in saskatchewan                         → 12:30 UTC-6
+sunrise in saskatchewan                      → <error: don't know where exactly "saskatchewan" is: name a city>
+time in sast                                 → 20:30 SAST
+sunrise in sast                              → <error: don't know where exactly "sast" is: name a city>
+time in saudi arabia                         → 21:30 UTC+3
+sunrise in saudi arabia                      → <error: don't know where exactly "saudi arabia" is: name a city>
+time in scoresbysund                         → 17:30 UTC-1
+sunrise in scoresbysund                      → 06:12 UTC-1
+time in scotland                             → 19:30 BST
+sunrise in scotland                          → <error: don't know where exactly "scotland" is: name a city>
+time in sea                                  → 11:30 PDT
+sunrise in sea                               → 06:58 PDT
+time in seattle                              → 11:30 PDT
+sunrise in seattle                           → 06:58 PDT
+time in semey                                → 23:30 UTC+5
+sunrise in semey                             → 05:26 UTC+5
+time in senegal                              → 18:30 GMT
+sunrise in senegal                           → <error: don't know where exactly "senegal" is: name a city>
+time in seoul                                → Thu, 24 Sep 2026 03:30 KST
+sunrise in seoul                             → Thu, 24 Sep 2026 06:21 KST
+time in serbia                               → 20:30 CEST
+sunrise in serbia                            → <error: don't know where exactly "serbia" is: name a city>
+time in seville                              → 20:30 CEST
+sunrise in seville                           → 08:12 CEST
+time in seychelles                           → 22:30 UTC+4
+sunrise in seychelles                        → <error: don't know where exactly "seychelles" is: name a city>
+time in sfo                                  → 11:30 PDT
+sunrise in sfo                               → 06:59 PDT
+time in sgt                                  → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in sgt                               → <error: don't know where exactly "sgt" is: name a city>
+time in shanghai                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in shanghai                          → Thu, 24 Sep 2026 05:43 UTC+8
+time in shenzhen                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in shenzhen                          → Thu, 24 Sep 2026 06:13 UTC+8
+time in shiprock                             → 12:30 MDT
+sunrise in shiprock                          → <error: don't know where exactly "shiprock" is: name a city>
+time in shymkent                             → 23:30 UTC+5
+sunrise in shymkent                          → 06:10 UTC+5
+time in sierra leone                         → 18:30 GMT
+sunrise in sierra leone                      → <error: don't know where exactly "sierra leone" is: name a city>
+time in silicon valley                       → 11:30 PDT
+sunrise in silicon valley                    → 06:56 PDT
+time in simferopol                           → 21:30 MSK
+sunrise in simferopol                        → 06:32 MSK
+time in sin                                  → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in sin                               → Thu, 24 Sep 2026 06:54 UTC+8
+time in singapore                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in singapore                         → Thu, 24 Sep 2026 06:54 UTC+8
+time in sitka                                → 10:30 AKDT
+sunrise in sitka                             → 06:49 AKDT
+time in skopje                               → 20:30 CEST
+sunrise in skopje                            → 06:23 CEST
+time in slovakia                             → 20:30 CEST
+sunrise in slovakia                          → <error: don't know where exactly "slovakia" is: name a city>
+time in slovenia                             → 20:30 CEST
+sunrise in slovenia                          → <error: don't know where exactly "slovenia" is: name a city>
+time in sochi                                → 21:30 MSK
+sunrise in sochi                             → 06:09 MSK
+time in sofia                                → 21:30 EEST
+sunrise in sofia                             → 07:15 EEST
+time in solomon islands                      → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in solomon islands                   → <error: don't know where exactly "solomon islands" is: name a city>
+time in somalia                              → 21:30 UTC+3
+sunrise in somalia                           → <error: don't know where exactly "somalia" is: name a city>
+time in south                                → Thu, 24 Sep 2026 04:00 ACST
+sunrise in south                             → <error: don't know where exactly "south" is: name a city>
+time in south africa                         → 20:30 SAST
+sunrise in south africa                      → <error: don't know where exactly "south africa" is: name a city>
+time in south australia                      → Thu, 24 Sep 2026 04:00 ACST
+sunrise in south australia                   → <error: don't know where exactly "south australia" is: name a city>
+time in south carolina                       → 14:30 EDT
+sunrise in south carolina                    → <error: don't know where exactly "south carolina" is: name a city>
+time in south dakota                         → 13:30 CDT
+sunrise in south dakota                      → <error: don't know where exactly "south dakota" is: name a city>
+time in south georgia                        → 16:30 UTC-2
+sunrise in south georgia                     → 06:12 UTC-2
+time in south korea                          → Thu, 24 Sep 2026 03:30 KST
+sunrise in south korea                       → <error: don't know where exactly "south korea" is: name a city>
+time in south sudan                          → 20:30 UTC+2
+sunrise in south sudan                       → <error: don't know where exactly "south sudan" is: name a city>
+time in spain                                → 20:30 CEST
+sunrise in spain                             → <error: don't know where exactly "spain" is: name a city>
+time in split                                → 20:30 CEST
+sunrise in split                             → 06:42 CEST
+time in srednekolymsk                        → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in srednekolymsk                     → Thu, 24 Sep 2026 06:32 UTC+11
+time in sri lanka                            → Thu, 24 Sep 2026 00:00 UTC+5:30
+sunrise in sri lanka                         → <error: don't know where exactly "sri lanka" is: name a city>
+time in st barthelemy                        → 14:30 UTC-4
+sunrise in st barthelemy                     → 06:01 UTC-4
+time in st helena                            → 18:30 GMT
+sunrise in st helena                         → 06:12 GMT
+time in st johns                             → 16:00 NDT
+sunrise in st johns                          → 06:49 NDT
+time in st kitts                             → 14:30 UTC-4
+sunrise in st kitts                          → 06:00 UTC-4
+time in st louis                             → 13:30 CDT
+sunrise in st louis                          → 06:50 CDT
+time in st lucia                             → 14:30 UTC-4
+sunrise in st lucia                          → 05:53 UTC-4
+time in st petersburg                        → 21:30 MSK
+sunrise in st petersburg                     → 06:45 MSK
+time in st thomas                            → 14:30 UTC-4
+sunrise in st thomas                         → 06:09 UTC-4
+time in st vincent                           → 14:30 UTC-4
+sunrise in st vincent                        → 05:54 UTC-4
+time in stanley                              → 15:30 UTC-3
+sunrise in stanley                           → 06:38 UTC-3
+time in stockholm                            → 20:30 CEST
+sunrise in stockholm                         → 06:34 CEST
+time in stuttgart                            → 20:30 CEST
+sunrise in stuttgart                         → 07:11 CEST
+time in sudan                                → 20:30 UTC+2
+sunrise in sudan                             → <error: don't know where exactly "sudan" is: name a city>
+time in surabaya                             → Thu, 24 Sep 2026 01:30 WIB
+sunrise in surabaya                          → Thu, 24 Sep 2026 05:18 WIB
+time in suriname                             → 15:30 UTC-3
+sunrise in suriname                          → <error: don't know where exactly "suriname" is: name a city>
+time in svo                                  → 21:30 MSK
+sunrise in svo                               → 06:16 MSK
+time in swaziland                            → 20:30 SAST
+sunrise in swaziland                         → <error: don't know where exactly "swaziland" is: name a city>
+time in sweden                               → 20:30 CEST
+sunrise in sweden                            → <error: don't know where exactly "sweden" is: name a city>
+time in swift current                        → 12:30 UTC-6
+sunrise in swift current                     → 06:59 UTC-6
+time in switzerland                          → 20:30 CEST
+sunrise in switzerland                       → <error: don't know where exactly "switzerland" is: name a city>
+time in syd                                  → Thu, 24 Sep 2026 04:30 AEST
+sunrise in syd                               → Thu, 24 Sep 2026 05:43 AEST
+time in sydney                               → Thu, 24 Sep 2026 04:30 AEST
+sunrise in sydney                            → Thu, 24 Sep 2026 05:43 AEST
+time in syria                                → 21:30 UTC+3
+sunrise in syria                             → <error: don't know where exactly "syria" is: name a city>
+time in tahiti                               → 08:30 UTC-10
+sunrise in tahiti                            → 05:47 UTC-10
+time in taipei                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in taipei                            → Thu, 24 Sep 2026 05:43 UTC+8
+time in taiwan                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in taiwan                            → <error: don't know where exactly "taiwan" is: name a city>
+time in tajikistan                           → 23:30 UTC+5
+sunrise in tajikistan                        → <error: don't know where exactly "tajikistan" is: name a city>
+time in tallinn                              → 21:30 EEST
+sunrise in tallinn                           → 07:07 EEST
+time in tampa                                → 14:30 EDT
+sunrise in tampa                             → 07:19 EDT
+time in tanzania                             → 21:30 UTC+3
+sunrise in tanzania                          → <error: don't know where exactly "tanzania" is: name a city>
+time in tarawa                               → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in tarawa                            → Thu, 24 Sep 2026 06:17 UTC+12
+time in taraz                                → 23:30 UTC+5
+sunrise in taraz                             → 06:03 UTC+5
+time in tashkent                             → 23:30 UTC+5
+sunrise in tashkent                          → 06:11 UTC+5
+time in tasmania                             → Thu, 24 Sep 2026 04:30 AEST
+sunrise in tasmania                          → <error: don't know where exactly "tasmania" is: name a city>
+time in tbilisi                              → 22:30 UTC+4
+sunrise in tbilisi                           → 06:49 UTC+4
+time in tegucigalpa                          → 12:30 UTC-6
+sunrise in tegucigalpa                       → 05:38 UTC-6
+time in tehran                               → 22:00 UTC+3:30
+sunrise in tehran                            → 05:53 UTC+3:30
+time in tel aviv                             → 21:30 UTC+3
+sunrise in tel aviv                          → 06:30 UTC+3
+time in tennessee                            → 13:30 CDT
+sunrise in tennessee                         → <error: don't know where exactly "tennessee" is: name a city>
+time in texas                                → 13:30 CDT
+sunrise in texas                             → <error: don't know where exactly "texas" is: name a city>
+time in thailand                             → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in thailand                          → <error: don't know where exactly "thailand" is: name a city>
+time in the hague                            → 20:30 CEST
+sunrise in the hague                         → 07:30 CEST
+time in thimbu                               → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in thimbu                            → <error: don't know where exactly "thimbu" is: name a city>
+time in thimphu                              → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in thimphu                           → Thu, 24 Sep 2026 05:51 UTC+6
+time in thule                                → 15:30 ADT
+sunrise in thule                             → 07:16 ADT
+time in thunder bay                          → 14:30 EDT
+sunrise in thunder bay                       → 07:45 EDT
+time in tijuana                              → 11:30 PDT
+sunrise in tijuana                           → 06:37 PDT
+time in timbuktu                             → 18:30 GMT
+sunrise in timbuktu                          → 06:01 GMT
+time in tirane                               → 20:30 CEST
+sunrise in tirane                            → 06:29 CEST
+time in tiraspol                             → 21:30 EEST
+sunrise in tiraspol                          → 06:49 EEST
+time in togo                                 → 18:30 GMT
+sunrise in togo                              → <error: don't know where exactly "togo" is: name a city>
+time in tokyo                                → Thu, 24 Sep 2026 03:30 JST
+sunrise in tokyo                             → Thu, 24 Sep 2026 05:30 JST
+time in tomsk                                → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in tomsk                             → Thu, 24 Sep 2026 07:09 UTC+7
+time in tonga                                → Thu, 24 Sep 2026 07:30 UTC+13
+sunrise in tonga                             → <error: don't know where exactly "tonga" is: name a city>
+time in tongatapu                            → Thu, 24 Sep 2026 07:30 UTC+13
+sunrise in tongatapu                         → Thu, 24 Sep 2026 06:29 UTC+13
+time in toronto                              → 14:30 EDT
+sunrise in toronto                           → 07:06 EDT
+time in tortola                              → 14:30 UTC-4
+sunrise in tortola                           → 06:08 UTC-4
+time in toulouse                             → 20:30 CEST
+sunrise in toulouse                          → 07:42 CEST
+time in trinidad                             → 14:30 UTC-4
+sunrise in trinidad                          → 06:08 UTC-4
+time in trinidad and tobago                  → 14:30 UTC-4
+sunrise in trinidad and tobago               → <error: don't know where exactly "trinidad and tobago" is: name a city>
+time in tripoli                              → 20:30 UTC+2
+sunrise in tripoli                           → 06:56 UTC+2
+time in truk                                 → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in truk                              → <error: don't know where exactly "truk" is: name a city>
+time in tucuman                              → 15:30 UTC-3
+sunrise in tucuman                           → 07:09 UTC-3
+time in tunis                                → 19:30 UTC+1
+sunrise in tunis                             → 06:08 UTC+1
+time in tunisia                              → 19:30 UTC+1
+sunrise in tunisia                           → <error: don't know where exactly "tunisia" is: name a city>
+time in turin                                → 20:30 CEST
+sunrise in turin                             → 07:17 CEST
+time in turkey                               → 21:30 UTC+3
+sunrise in turkey                            → <error: don't know where exactly "turkey" is: name a city>
+time in turkiye                              → 21:30 UTC+3
+sunrise in turkiye                           → <error: don't know where exactly "turkiye" is: name a city>
+time in turkmenistan                         → 23:30 UTC+5
+sunrise in turkmenistan                      → <error: don't know where exactly "turkmenistan" is: name a city>
+time in tuvalu                               → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in tuvalu                            → <error: don't know where exactly "tuvalu" is: name a city>
+time in türkiye                              → 21:30 UTC+3
+sunrise in türkiye                           → <error: don't know where exactly "türkiye" is: name a city>
+time in uae                                  → 22:30 UTC+4
+sunrise in uae                               → <error: don't know where exactly "uae" is: name a city>
+time in uganda                               → 21:30 UTC+3
+sunrise in uganda                            → <error: don't know where exactly "uganda" is: name a city>
+time in ujung pandang                        → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in ujung pandang                     → <error: don't know where exactly "ujung pandang" is: name a city>
+time in uk                                   → 19:30 BST
+sunrise in uk                                → <error: don't know where exactly "uk" is: name a city>
+time in ukraine                              → 21:30 EEST
+sunrise in ukraine                           → <error: don't know where exactly "ukraine" is: name a city>
+time in ulaanbaatar                          → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in ulaanbaatar                       → Thu, 24 Sep 2026 06:41 UTC+8
+time in ulan bator                           → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in ulan bator                        → Thu, 24 Sep 2026 06:41 UTC+8
+time in ulyanovsk                            → 22:30 UTC+4
+sunrise in ulyanovsk                         → 06:33 UTC+4
+time in united arab emirates                 → 22:30 UTC+4
+sunrise in united arab emirates              → <error: don't know where exactly "united arab emirates" is: name a city>
+time in united kingdom                       → 19:30 BST
+sunrise in united kingdom                    → <error: don't know where exactly "united kingdom" is: name a city>
+time in united states                        → 14:30 EDT
+sunrise in united states                     → <error: don't know where exactly "united states" is: name a city>
+time in united states of america             → 14:30 EDT
+sunrise in united states of america          → <error: don't know where exactly "united states of america" is: name a city>
+time in uralsk                               → 23:30 UTC+5
+sunrise in uralsk                            → 07:22 UTC+5
+time in uruguay                              → 15:30 UTC-3
+sunrise in uruguay                           → <error: don't know where exactly "uruguay" is: name a city>
+time in urumqi                               → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in urumqi                            → Thu, 24 Sep 2026 05:59 UTC+6
+time in us                                   → 14:30 EDT
+sunrise in us                                → <error: don't know where exactly "us" is: name a city>
+time in usa                                  → 14:30 EDT
+sunrise in usa                               → <error: don't know where exactly "usa" is: name a city>
+time in ushuaia                              → 15:30 UTC-3
+sunrise in ushuaia                           → 07:19 UTC-3
+time in ust nera                             → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in ust nera                          → Thu, 24 Sep 2026 06:14 UTC+10
+time in utah                                 → 12:30 MDT
+sunrise in utah                              → <error: don't know where exactly "utah" is: name a city>
+time in utc                                  → 18:30 UTC
+sunrise in utc                               → <error: don't know where exactly "utc" is: name a city>
+time in utrecht                              → 20:30 CEST
+sunrise in utrecht                           → 07:27 CEST
+time in uzbekistan                           → 23:30 UTC+5
+sunrise in uzbekistan                        → <error: don't know where exactly "uzbekistan" is: name a city>
+time in uzhgorod                             → 21:30 EEST
+sunrise in uzhgorod                          → <error: don't know where exactly "uzhgorod" is: name a city>
+time in vaduz                                → 20:30 CEST
+sunrise in vaduz                             → 07:10 CEST
+time in valencia                             → 20:30 CEST
+sunrise in valencia                          → 07:50 CEST
+time in vancouver                            → 11:30 PDT
+sunrise in vancouver                         → 07:01 PDT
+time in vanuatu                              → Thu, 24 Sep 2026 05:30 UTC+11
+sunrise in vanuatu                           → <error: don't know where exactly "vanuatu" is: name a city>
+time in vatican                              → 20:30 CEST
+sunrise in vatican                           → <error: don't know where exactly "vatican" is: name a city>
+time in venezuela                            → 14:30 UTC-4
+sunrise in venezuela                         → <error: don't know where exactly "venezuela" is: name a city>
+time in venice                               → 20:30 CEST
+sunrise in venice                            → 06:59 CEST
+time in vermont                              → 14:30 EDT
+sunrise in vermont                           → <error: don't know where exactly "vermont" is: name a city>
+time in victoria                             → Thu, 24 Sep 2026 04:30 AEST
+sunrise in victoria                          → <error: don't know where exactly "victoria" is: name a city>
+time in vienna                               → 20:30 CEST
+sunrise in vienna                            → 06:42 CEST
+time in vientiane                            → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in vientiane                         → Thu, 24 Sep 2026 05:59 UTC+7
+time in vietnam                              → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in vietnam                           → <error: don't know where exactly "vietnam" is: name a city>
+time in vilnius                              → 21:30 EEST
+sunrise in vilnius                           → 07:06 EEST
+time in virgin                               → 14:30 UTC-4
+sunrise in virgin                            → <error: don't know where exactly "virgin" is: name a city>
+time in virginia                             → 14:30 EDT
+sunrise in virginia                          → <error: don't know where exactly "virginia" is: name a city>
+time in vladivostok                          → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in vladivostok                       → Thu, 24 Sep 2026 07:01 UTC+10
+time in volgograd                            → 21:30 MSK
+sunrise in volgograd                         → 05:50 MSK
+time in wake                                 → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in wake                              → Thu, 24 Sep 2026 06:43 UTC+12
+time in wales                                → 19:30 BST
+sunrise in wales                             → <error: don't know where exactly "wales" is: name a city>
+time in wallis                               → Thu, 24 Sep 2026 06:30 UTC+12
+sunrise in wallis                            → Thu, 24 Sep 2026 05:33 UTC+12
+time in warsaw                               → 20:30 CEST
+sunrise in warsaw                            → 06:23 CEST
+time in washington                           → 11:30 PDT
+sunrise in washington                        → <error: don't know where exactly "washington" is: name a city>
+time in washington dc                        → 14:30 EDT
+sunrise in washington dc                     → 06:57 EDT
+time in wellington                           → Thu, 24 Sep 2026 06:30 NZST
+sunrise in wellington                        → Thu, 24 Sep 2026 06:08 NZST
+time in west                                 → 19:30 WEST
+sunrise in west                              → <error: don't know where exactly "west" is: name a city>
+time in west virginia                        → 14:30 EDT
+sunrise in west virginia                     → <error: don't know where exactly "west virginia" is: name a city>
+time in western australia                    → Thu, 24 Sep 2026 02:30 AWST
+sunrise in western australia                 → <error: don't know where exactly "western australia" is: name a city>
+time in wet                                  → 19:30 WEST
+sunrise in wet                               → <error: don't know where exactly "wet" is: name a city>
+time in whitehorse                           → 11:30 UTC-7
+sunrise in whitehorse                        → 07:47 UTC-7
+time in wib                                  → Thu, 24 Sep 2026 01:30 WIB
+sunrise in wib                               → <error: don't know where exactly "wib" is: name a city>
+time in windhoek                             → 20:30 UTC+2
+sunrise in windhoek                          → 06:40 UTC+2
+time in winnipeg                             → 13:30 CDT
+sunrise in winnipeg                          → 07:17 CDT
+time in wisconsin                            → 13:30 CDT
+sunrise in wisconsin                         → <error: don't know where exactly "wisconsin" is: name a city>
+time in wuhan                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in wuhan                             → Thu, 24 Sep 2026 06:12 UTC+8
+time in wyoming                              → 12:30 MDT
+sunrise in wyoming                           → <error: don't know where exactly "wyoming" is: name a city>
+time in xian                                 → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in xian                              → Thu, 24 Sep 2026 06:33 UTC+8
+time in yakutat                              → 10:30 AKDT
+sunrise in yakutat                           → 07:06 AKDT
+time in yakutsk                              → Thu, 24 Sep 2026 03:30 UTC+9
+sunrise in yakutsk                           → Thu, 24 Sep 2026 06:09 UTC+9
+time in yancowinna                           → Thu, 24 Sep 2026 04:00 ACST
+sunrise in yancowinna                        → <error: don't know where exactly "yancowinna" is: name a city>
+time in yangon                               → Thu, 24 Sep 2026 01:00 UTC+6:30
+sunrise in yangon                            → Thu, 24 Sep 2026 05:55 UTC+6:30
+time in yap                                  → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in yap                               → <error: don't know where exactly "yap" is: name a city>
+time in yekaterinburg                        → 23:30 UTC+5
+sunrise in yekaterinburg                     → 06:44 UTC+5
+time in yellowknife                          → 12:30 MDT
+sunrise in yellowknife                       → 07:24 MDT
+time in yemen                                → 21:30 UTC+3
+sunrise in yemen                             → <error: don't know where exactly "yemen" is: name a city>
+time in yerevan                              → 22:30 UTC+4
+sunrise in yerevan                           → 06:50 UTC+4
+time in yokohama                             → Thu, 24 Sep 2026 03:30 JST
+sunrise in yokohama                          → Thu, 24 Sep 2026 05:31 JST
+time in yukon                                → 11:30 UTC-7
+sunrise in yukon                             → <error: don't know where exactly "yukon" is: name a city>
+time in yvr                                  → 11:30 PDT
+sunrise in yvr                               → 07:01 PDT
+time in yyz                                  → 14:30 EDT
+sunrise in yyz                               → 07:06 EDT
+time in z                                    → 18:30 UTC
+sunrise in z                                 → <error: don't know where exactly "z" is: name a city>
+time in zagreb                               → 20:30 CEST
+sunrise in zagreb                            → 06:44 CEST
+time in zambia                               → 20:30 UTC+2
+sunrise in zambia                            → <error: don't know where exactly "zambia" is: name a city>
+time in zanzibar                             → 21:30 UTC+3
+sunrise in zanzibar                          → 06:12 UTC+3
+time in zaporozhye                           → 21:30 EEST
+sunrise in zaporozhye                        → 06:27 EEST
+time in zimbabwe                             → 20:30 UTC+2
+sunrise in zimbabwe                          → <error: don't know where exactly "zimbabwe" is: name a city>
+time in zrh                                  → 20:30 CEST
+sunrise in zrh                               → 07:14 CEST
+time in zulu                                 → 18:30 UTC
+sunrise in zulu                              → <error: don't know where exactly "zulu" is: name a city>
+time in zurich                               → 20:30 CEST
+sunrise in zurich                            → 07:14 CEST
+
+// Every 200th city
+time in 'abasan al kabirah                   → <error: unknown place "abasan al kabirah", did you mean "'abasan Al Kabirah"?>
+sunrise in 'abasan al kabirah                → <error: unknown place "abasan al kabirah", did you mean "'abasan Al Kabirah"?>
+time in abizhan khot                         → 18:30 GMT
+sunrise in abizhan khot                      → 06:05 GMT
+time in adachi city                          → Thu, 24 Sep 2026 03:30 JST
+sunrise in adachi city                       → Thu, 24 Sep 2026 05:30 JST
+time in agia paraskevi                       → 21:30 EEST
+sunrise in agia paraskevi                    → 07:13 EEST
+time in ain taoujdat                         → 18:30 UTC
+sunrise in ain taoujdat                      → 06:10 UTC
+time in akşehir                              → 21:30 UTC+3
+sunrise in akşehir                           → 06:43 UTC+3
+time in al mash'iliyah                       → 21:30 UTC+3
+sunrise in al mash'iliyah                    → 05:51 UTC+3
+time in alatyr'                              → <error: unknown place "alatyr", did you mean "Alatyr'"?>
+sunrise in alatyr'                           → <error: unknown place "alatyr", did you mean "Alatyr'"?>
+time in alief                                → 13:30 CDT
+sunrise in alief                             → 07:11 CDT
+time in alushta                              → 21:30 MSK
+sunrise in alushta                           → 06:30 MSK
+time in ammana                               → 21:30 UTC+3
+sunrise in ammana                            → 06:25 UTC+3
+time in anand                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in anand                             → Thu, 24 Sep 2026 06:27 IST
+time in annur                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in annur                             → Thu, 24 Sep 2026 06:11 IST
+time in apatzingán                           → 12:30 UTC-6
+sunrise in apatzingán                        → 06:39 UTC-6
+time in arbroath                             → 19:30 BST
+sunrise in arbroath                          → 06:57 BST
+time in artur nogueira                       → 15:30 UTC-3
+sunrise in artur nogueira                    → 05:57 UTC-3
+time in ashkhabadi                           → 23:30 UTC+5
+sunrise in ashkhabadi                        → 06:55 UTC+5
+time in atascadero                           → 11:30 PDT
+sunrise in atascadero                        → 06:52 PDT
+time in avtovo                               → 21:30 MSK
+sunrise in avtovo                            → 06:45 MSK
+time in aïn beïda                            → 19:30 UTC+1
+sunrise in aïn beïda                         → 06:19 UTC+1
+time in baddi                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in baddi                             → Thu, 24 Sep 2026 06:12 IST
+time in bailadores                           → 14:30 UTC-4
+sunrise in bailadores                        → 06:36 UTC-4
+time in bals                                 → 21:30 EEST
+sunrise in bals                              → 07:12 EEST
+time in bandariba                            → 14:30 UTC-4
+sunrise in bandariba                         → 06:24 UTC-4
+time in banī na‘īm                           → <error: unknown place "banī na īm", did you mean "Banī Na‘īm"?>
+sunrise in banī na‘īm                        → <error: unknown place "banī na īm", did you mean "Banī Na‘īm"?>
+time in barkā’                               → <error: unknown place "barkā">
+sunrise in barkā’                            → <error: unknown place "barkā">
+time in basti                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in basti                             → Thu, 24 Sep 2026 05:48 IST
+time in bañga                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in bañga                             → Thu, 24 Sep 2026 05:30 UTC+8
+time in beled hawo                           → 21:30 UTC+3
+sunrise in beled hawo                        → 06:02 UTC+3
+time in beni saf                             → 19:30 UTC+1
+sunrise in beni saf                          → 06:54 UTC+1
+time in bethnal green                        → 19:30 BST
+sunrise in bethnal green                     → 06:48 BST
+time in bhokardan                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in bhokardan                         → Thu, 24 Sep 2026 06:16 IST
+time in billai                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in billai                            → Thu, 24 Sep 2026 05:54 IST
+time in biyala                               → 21:30 EEST
+sunrise in biyala                            → 06:44 EEST
+time in boca do acre                         → 14:30 UTC-4
+sunrise in boca do acre                      → 06:19 UTC-4
+time in bontang                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in bontang                           → Thu, 24 Sep 2026 05:59 UTC+8
+time in boursa                               → 21:30 UTC+3
+sunrise in boursa                            → 06:52 UTC+3
+time in bretigny sur orge                    → 20:30 CEST
+sunrise in bretigny sur orge                 → 07:39 CEST
+time in bryukhovetskaya                      → 21:30 MSK
+sunrise in bryukhovetskaya                   → 06:12 MSK
+time in bugarama                             → 21:30 UTC+3
+sunrise in bugarama                          → 06:47 UTC+3
+time in burj al ‘arab al jadīdah             → <error: unknown place "burj al arab", did you mean "Burj Al 'arab"?>
+sunrise in burj al ‘arab al jadīdah          → <error: unknown place "burj al arab", did you mean "Burj Al 'arab"?>
+time in bydgoszcz                            → 20:30 CEST
+sunrise in bydgoszcz                         → 06:35 CEST
+time in bạc liêu                             → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in bạc liêu                          → Thu, 24 Sep 2026 05:46 UTC+7
+time in calcuta                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in calcuta                           → Thu, 24 Sep 2026 05:26 IST
+time in canberra                             → Thu, 24 Sep 2026 04:30 AEST
+sunrise in canberra                          → Thu, 24 Sep 2026 05:51 AEST
+time in caransebeş                           → 21:30 EEST
+sunrise in caransebeş                        → 07:19 EEST
+time in castaños                             → 12:30 UTC-6
+sunrise in castaños                          → 06:35 UTC-6
+time in celabinsk                            → 23:30 UTC+5
+sunrise in celabinsk                         → 06:41 UTC+5
+time in ch'u chiang                          → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in ch'u chiang                       → Thu, 24 Sep 2026 06:15 UTC+8
+time in changbai                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in changbai                          → Thu, 24 Sep 2026 05:16 UTC+8
+time in chatelineau                          → 20:30 CEST
+sunrise in chatelineau                       → 07:30 CEST
+time in cheranellūr                          → Thu, 24 Sep 2026 00:00 IST
+sunrise in cheranellūr                       → Thu, 24 Sep 2026 06:14 IST
+time in chidawa                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in chidawa                           → Thu, 24 Sep 2026 06:17 IST
+time in chisu xoa ka                         → Thu, 24 Sep 2026 03:30 JST
+sunrise in chisu xoa ka                      → Thu, 24 Sep 2026 05:36 JST
+time in chu zhou shi                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in chu zhou shi                      → Thu, 24 Sep 2026 05:56 UTC+8
+time in cianorte                             → 15:30 UTC-3
+sunrise in cianorte                          → 06:19 UTC-3
+time in ciudad benito juárez                 → 12:30 UTC-6
+sunrise in ciudad benito juárez              → 06:29 UTC-6
+time in coalinga                             → 11:30 PDT
+sunrise in coalinga                          → 06:50 PDT
+time in conception bay south                 → 16:00 NDT
+sunrise in conception bay south              → 06:50 NDT
+time in coswig                               → 20:30 CEST
+sunrise in coswig                            → 06:53 CEST
+time in cuilo                                → 19:30 UTC+1
+sunrise in cuilo                             → 05:31 UTC+1
+time in da ban                               → Thu, 24 Sep 2026 03:30 JST
+sunrise in da ban                            → Thu, 24 Sep 2026 05:47 JST
+time in daliang                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in daliang                           → Thu, 24 Sep 2026 06:16 UTC+8
+time in darchula                             → Thu, 24 Sep 2026 00:15 UTC+5:45
+sunrise in darchula                          → Thu, 24 Sep 2026 06:12 UTC+5:45
+time in dedougou                             → 18:30 GMT
+sunrise in dedougou                          → 06:03 GMT
+time in derry                                → 19:30 BST
+sunrise in derry                             → 07:16 BST
+time in dianópolis                           → 15:30 UTC-3
+sunrise in dianópolis                        → 05:56 UTC-3
+time in divnoye                              → 21:30 MSK
+sunrise in divnoye                           → 05:55 MSK
+time in dondaicha                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in dondaicha                         → Thu, 24 Sep 2026 06:21 IST
+time in drezda                               → 20:30 CEST
+sunrise in drezda                            → 06:53 CEST
+time in dung ing si                          → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in dung ing si                       → Thu, 24 Sep 2026 05:55 UTC+8
+time in dzhamshedpur                         → Thu, 24 Sep 2026 00:00 IST
+sunrise in dzhamshedpur                      → Thu, 24 Sep 2026 05:34 IST
+time in east independence                    → 13:30 CDT
+sunrise in east independence                 → 07:06 CDT
+time in ehl' makhalla ehl' kubra             → <error: unknown place "ehl makhalla ehl">
+sunrise in ehl' makhalla ehl' kubra          → <error: unknown place "ehl makhalla ehl">
+time in el mirage                            → 11:30 UTC-7
+sunrise in el mirage                         → 06:18 UTC-7
+time in emkhomazi                            → 20:30 SAST
+sunrise in emkhomazi                         → 05:45 SAST
+time in eruwa                                → 19:30 UTC+1
+sunrise in eruwa                             → 06:35 UTC+1
+time in eunápolis                            → 15:30 UTC-3
+sunrise in eunápolis                         → 05:27 UTC-3
+time in farīdkot                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in farīdkot                          → Thu, 24 Sep 2026 06:20 IST
+time in filadelfiye                          → 14:30 EDT
+sunrise in filadelfiye                       → 06:49 EDT
+time in fort st. john                        → <error: unknown place "fort", did you mean "Forst"?>
+sunrise in fort st. john                     → <error: unknown place "fort", did you mean "Forst"?>
+time in frita'una                            → 18:30 GMT
+sunrise in frita'una                         → 06:42 GMT
+time in fusō                                 → Thu, 24 Sep 2026 03:30 JST
+sunrise in fusō                              → Thu, 24 Sep 2026 05:41 JST
+time in gama                                 → 15:30 UTC-3
+sunrise in gama                              → 06:01 UTC-3
+time in gaurela                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in gaurela                           → Thu, 24 Sep 2026 05:52 IST
+time in gesundbrunnen                        → 20:30 CEST
+sunrise in gesundbrunnen                     → 06:54 CEST
+time in giv`at hananya                       → <error: unknown place "giv">
+sunrise in giv`at hananya                    → <error: unknown place "giv">
+time in goianesia                            → 15:30 UTC-3
+sunrise in goianesia                         → 06:05 UTC-3
+time in goth radhan                          → 23:30 PKT
+sunrise in goth radhan                       → 06:17 PKT
+time in grozny                               → 21:30 MSK
+sunrise in grozny                            → 05:45 MSK
+time in guayakiru                            → 13:30 UTC-5
+sunrise in guayakiru                         → 06:09 UTC-5
+time in guocun                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in guocun                            → Thu, 24 Sep 2026 06:37 UTC+8
+time in göd                                  → 20:30 CEST
+sunrise in göd                               → 06:31 CEST
+time in haidelabadeu                         → 23:30 PKT
+sunrise in haidelabadeu                      → 06:15 PKT
+time in hamtramck                            → 14:30 EDT
+sunrise in hamtramck                         → 07:21 EDT
+time in hardoī                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in hardoī                            → Thu, 24 Sep 2026 05:59 IST
+time in he bi shi                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in he bi shi                         → Thu, 24 Sep 2026 06:12 UTC+8
+time in herdecke                             → 20:30 CEST
+sunrise in herdecke                          → 07:18 CEST
+time in hinh gjai                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in hinh gjai                         → Thu, 24 Sep 2026 06:11 UTC+8
+time in hoima                                → 21:30 UTC+3
+sunrise in hoima                             → 06:44 UTC+3
+time in hough                                → 14:30 EDT
+sunrise in hough                             → 07:15 EDT
+time in huaiyang                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in huaiyang                          → Thu, 24 Sep 2026 06:11 UTC+8
+time in hunucmá                              → 12:30 UTC-6
+sunrise in hunucmá                           → 05:49 UTC-6
+time in hồng lĩnh                            → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in hồng lĩnh                         → Thu, 24 Sep 2026 05:46 UTC+7
+time in iga                                  → Thu, 24 Sep 2026 03:30 JST
+sunrise in iga                               → Thu, 24 Sep 2026 05:45 JST
+time in immokalee                            → 14:30 EDT
+sunrise in immokalee                         → 07:15 EDT
+time in ipixuna do para                      → 15:30 UTC-3
+sunrise in ipixuna do para                   → 05:59 UTC-3
+time in islip                                → 14:30 EDT
+sunrise in islip                             → 06:41 EDT
+time in iuzivka                              → 21:30 EEST
+sunrise in iuzivka                           → 06:17 EEST
+time in jaguaquara                           → 15:30 UTC-3
+sunrise in jaguaquara                        → 05:29 UTC-3
+time in jandiāla                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in jandiāla                          → Thu, 24 Sep 2026 06:17 IST
+time in jehol                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in jehol                             → Thu, 24 Sep 2026 05:57 UTC+8
+time in jialing                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in jialing                           → Thu, 24 Sep 2026 06:46 UTC+8
+time in jipijapa                             → 13:30 UTC-5
+sunrise in jipijapa                          → 06:11 UTC-5
+time in josé bonifácio                       → 15:30 UTC-3
+sunrise in josé bonifácio                    → 06:07 UTC-3
+time in jynhwa                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in jynhwa                            → Thu, 24 Sep 2026 05:51 UTC+8
+time in kadiri                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in kadiri                            → Thu, 24 Sep 2026 06:07 IST
+time in kakdwip                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in kakdwip                           → Thu, 24 Sep 2026 05:26 IST
+time in kalur kot                            → 23:30 PKT
+sunrise in kalur kot                         → 06:04 PKT
+time in kan shan                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in kan shan                          → Thu, 24 Sep 2026 05:45 UTC+8
+time in kaoueni                              → 21:30 UTC+3
+sunrise in kaoueni                           → 05:48 UTC+3
+time in karnal                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in karnal                            → Thu, 24 Sep 2026 06:11 IST
+time in kathhāra                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in kathhāra                          → Thu, 24 Sep 2026 05:36 IST
+time in ke la si nuo da er                   → 21:30 MSK
+sunrise in ke la si nuo da er                → 06:12 MSK
+time in kerki                                → 23:30 UTC+5
+sunrise in kerki                             → 06:28 UTC+5
+time in khanpur mahar                        → 23:30 PKT
+sunrise in khanpur mahar                     → 06:11 PKT
+time in khowai                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in khowai                            → Thu, 24 Sep 2026 05:13 IST
+time in kikvita                              → 19:30 UTC+1
+sunrise in kikvita                           → 05:34 UTC+1
+time in kirovas                              → 21:30 MSK
+sunrise in kirovas                           → 05:28 MSK
+time in klkwth                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in klkwth                            → Thu, 24 Sep 2026 05:26 IST
+time in koleudoba                            → 15:30 UTC-3
+sunrise in koleudoba                         → 07:05 UTC-3
+time in kopengagen                           → 20:30 CEST
+sunrise in kopengagen                        → 06:57 CEST
+time in kotikawatta                          → Thu, 24 Sep 2026 00:00 UTC+5:30
+sunrise in kotikawatta                       → Thu, 24 Sep 2026 05:59 UTC+5:30
+time in krasnoiarsk                          → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in krasnoiarsk                       → Thu, 24 Sep 2026 06:37 UTC+7
+time in kuang chou shih                      → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in kuang chou shih                   → Thu, 24 Sep 2026 06:16 UTC+8
+time in kumārapuram                          → Thu, 24 Sep 2026 00:00 IST
+sunrise in kumārapuram                       → Thu, 24 Sep 2026 06:13 IST
+time in kutiyana                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in kutiyana                          → Thu, 24 Sep 2026 06:39 IST
+time in kyaukme                              → Thu, 24 Sep 2026 01:00 UTC+6:30
+sunrise in kyaukme                           → Thu, 24 Sep 2026 05:51 UTC+6:30
+time in kōtari                               → Thu, 24 Sep 2026 03:30 JST
+sunrise in kōtari                            → Thu, 24 Sep 2026 05:46 JST
+time in la trinité                           → 14:30 UTC-4
+sunrise in la trinité                        → 05:53 UTC-4
+time in laixi                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in laixi                             → Thu, 24 Sep 2026 05:47 UTC+8
+time in langouo                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in langouo                           → Thu, 24 Sep 2026 06:54 UTC+8
+time in lauri                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in lauri                             → Thu, 24 Sep 2026 05:59 IST
+time in lejpcyg                              → 20:30 CEST
+sunrise in lejpcyg                           → 06:58 CEST
+time in liang zan                            → 21:30 MSK
+sunrise in liang zan                         → 06:08 MSK
+time in limuru                               → 21:30 UTC+3
+sunrise in limuru                            → 06:23 UTC+3
+time in liu pan shui                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in liu pan shui                      → Thu, 24 Sep 2026 06:50 UTC+8
+time in lojang                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in lojang                            → Thu, 24 Sep 2026 06:19 UTC+8
+time in los reyes de salgado                 → 12:30 UTC-6
+sunrise in los reyes de salgado              → 06:39 UTC-6
+time in ludvika                              → 20:30 CEST
+sunrise in ludvika                           → 06:46 CEST
+time in luoyang                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in luoyang                           → Thu, 24 Sep 2026 06:19 UTC+8
+time in lübeck                               → 20:30 CEST
+sunrise in lübeck                            → 07:05 CEST
+time in maddaloni                            → 20:30 CEST
+sunrise in maddaloni                         → 06:51 CEST
+time in mahbubabad                           → Thu, 24 Sep 2026 00:00 IST
+sunrise in mahbubabad                        → Thu, 24 Sep 2026 05:59 IST
+time in makinsk                              → 23:30 UTC+5
+sunrise in makinsk                           → 06:05 UTC+5
+time in mana'usa                             → 14:30 UTC-4
+sunrise in mana'usa                          → 05:49 UTC-4
+time in manilae                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in manilae                           → Thu, 24 Sep 2026 05:45 UTC+8
+time in marakaimpo                           → 14:30 UTC-4
+sunrise in marakaimpo                        → 06:36 UTC-4
+time in marsala                              → 20:30 CEST
+sunrise in marsala                           → 06:59 CEST
+time in mastic                               → 14:30 EDT
+sunrise in mastic                            → 06:40 EDT
+time in mayyanad                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in mayyanad                          → Thu, 24 Sep 2026 06:12 IST
+time in medvezh'yegorsk                      → 21:30 MSK
+sunrise in medvezh'yegorsk                   → 06:28 MSK
+time in mendī                                → 21:30 UTC+3
+sunrise in mendī                             → 06:29 UTC+3
+time in mezőkövesd                           → 20:30 CEST
+sunrise in mezőkövesd                        → 06:26 CEST
+time in milwalky                             → 13:30 CDT
+sunrise in milwalky                          → 06:40 CDT
+time in misisogeo                            → 14:30 EDT
+sunrise in misisogeo                         → 07:07 EDT
+time in moema                                → 15:30 UTC-3
+sunrise in moema                             → 05:55 UTC-3
+time in mons                                 → 20:30 CEST
+sunrise in mons                              → 07:32 CEST
+time in morganton                            → 14:30 EDT
+sunrise in morganton                         → 07:16 EDT
+time in mountain view                        → 11:30 PDT
+sunrise in mountain view                     → 06:57 PDT
+time in mukandpur                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in mukandpur                         → Thu, 24 Sep 2026 06:11 IST
+time in mustafakemalpaşa                     → 21:30 UTC+3
+sunrise in mustafakemalpaşa                  → 06:55 UTC+3
+time in myŏnggan dong                        → Thu, 24 Sep 2026 03:30 KST
+sunrise in myŏnggan dong                     → Thu, 24 Sep 2026 06:11 KST
+time in nachville                            → 13:30 CDT
+sunrise in nachville                         → 06:36 CDT
+time in nakwrw                               → 21:30 UTC+3
+sunrise in nakwrw                            → 06:25 UTC+3
+time in nandri                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in nandri                            → Thu, 24 Sep 2026 06:27 IST
+time in narnaul                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in narnaul                           → Thu, 24 Sep 2026 06:15 IST
+time in nayrubi                              → 21:30 UTC+3
+sunrise in nayrubi                           → 06:22 UTC+3
+time in nesvizh                              → 21:30 UTC+3
+sunrise in nesvizh                           → 07:01 UTC+3
+time in ngaoundal                            → 19:30 UTC+1
+sunrise in ngaoundal                         → 05:56 UTC+1
+time in nilüfer                              → 21:30 UTC+3
+sunrise in nilüfer                           → 06:53 UTC+3
+time in nobres                               → 14:30 UTC-4
+sunrise in nobres                            → 05:34 UTC-4
+time in nour soultan                         → 23:30 UTC+5
+sunrise in nour soultan                      → 06:02 UTC+5
+time in nowokusnezk                          → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in nowokusnezk                       → Thu, 24 Sep 2026 07:00 UTC+7
+time in nyamy                                → 19:30 UTC+1
+sunrise in nyamy                             → 06:41 UTC+1
+time in obispos                              → 14:30 UTC-4
+sunrise in obispos                           → 06:30 UTC-4
+time in okoa                                 → 19:30 UTC+1
+sunrise in okoa                              → 06:03 UTC+1
+time in oranas                               → 19:30 UTC+1
+sunrise in oranas                            → 06:51 UTC+1
+time in osu                                  → 18:30 GMT
+sunrise in osu                               → 05:50 GMT
+time in oytograk                             → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in oytograk                          → Thu, 24 Sep 2026 06:21 UTC+6
+time in pakwach                              → 21:30 UTC+3
+sunrise in pakwach                           → 06:43 UTC+3
+time in pandacaqui                           → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in pandacaqui                        → Thu, 24 Sep 2026 05:47 UTC+8
+time in parchim                              → 20:30 CEST
+sunrise in parchim                           → 07:00 CEST
+time in pat heung                            → Thu, 24 Sep 2026 02:30 HKT
+sunrise in pat heung                         → Thu, 24 Sep 2026 06:13 HKT
+time in peekskill                            → 14:30 EDT
+sunrise in peekskill                         → 06:44 EDT
+time in perris                               → 11:30 PDT
+sunrise in perris                            → 06:38 PDT
+time in phenjan                              → Thu, 24 Sep 2026 03:30 KST
+sunrise in phenjan                           → Thu, 24 Sep 2026 06:26 KST
+time in pihani                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in pihani                            → Thu, 24 Sep 2026 05:58 IST
+time in piranvādi                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in piranvādi                         → Thu, 24 Sep 2026 06:21 IST
+time in pnom pehn'                           → <error: unknown place "pnom pehn", did you mean "Pnom Pehn'"?>
+sunrise in pnom pehn'                        → <error: unknown place "pnom pehn", did you mean "Pnom Pehn'"?>
+time in pontbuiten                           → 15:30 UTC-3
+sunrise in pontbuiten                        → 06:30 UTC-3
+time in porto velo                           → 14:30 UTC-4
+sunrise in porto velo                        → 06:05 UTC-4
+time in prestena                             → 20:30 CEST
+sunrise in prestena                          → 06:24 CEST
+time in pueblo de los angeles                → 11:30 PDT
+sunrise in pueblo de los angeles             → 06:42 PDT
+time in purépero de echáiz                   → 12:30 UTC-6
+sunrise in purépero de echáiz                → 06:37 UTC-6
+time in pānihāti                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in pānihāti                          → Thu, 24 Sep 2026 05:26 IST
+time in qionghai shi                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in qionghai shi                      → Thu, 24 Sep 2026 06:27 UTC+8
+time in quipungo                             → 19:30 UTC+1
+sunrise in quipungo                          → 05:51 UTC+1
+time in raiganj                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in raiganj                           → Thu, 24 Sep 2026 05:27 IST
+time in ranzan                               → Thu, 24 Sep 2026 03:30 JST
+sunrise in ranzan                            → Thu, 24 Sep 2026 05:32 JST
+time in rehsifi                              → 15:30 UTC-3
+sunrise in rehsifi                           → 05:09 UTC-3
+time in ribeiropolis                         → 15:30 UTC-3
+sunrise in ribeiropolis                      → 05:19 UTC-3
+time in rivuiu                               → 21:30 EEST
+sunrise in rivuiu                            → 07:12 EEST
+time in rosh ha‘ayin                         → <error: unknown place "rosh", did you mean "Osh"?>
+sunrise in rosh ha‘ayin                      → <error: unknown place "rosh", did you mean "Osh"?>
+time in rusanivka                            → 21:30 EEST
+sunrise in rusanivka                         → 06:45 EEST
+time in sa da bandeira                       → 19:30 UTC+1
+sunrise in sa da bandeira                    → 05:55 UTC+1
+time in sai kung                             → Thu, 24 Sep 2026 02:30 HKT
+sunrise in sai kung                          → Thu, 24 Sep 2026 06:12 HKT
+time in sakhkhara                            → 23:30 PKT
+sunrise in sakhkhara                         → 06:13 PKT
+time in samarakada                           → 23:30 UTC+5
+sunrise in samarakada                        → 06:20 UTC+5
+time in san francisco tesistan               → 12:30 UTC-6
+sunrise in san francisco tesistan            → 06:43 UTC-6
+time in san miniato basso                    → 20:30 CEST
+sunrise in san miniato basso                 → 07:05 CEST
+time in sandbach                             → 19:30 BST
+sunrise in sandbach                          → 06:57 BST
+time in santa ana chiautempan                → 12:30 UTC-6
+sunrise in santa ana chiautempan             → 06:22 UTC-6
+time in santiago de veraguas                 → 13:30 UTC-5
+sunrise in santiago de veraguas              → 06:13 UTC-5
+time in sao joao do rio do peixe             → 15:30 UTC-3
+sunrise in sao joao do rio do peixe          → 05:23 UTC-3
+time in saraqib                              → 21:30 UTC+3
+sunrise in saraqib                           → 06:21 UTC+3
+time in savelugu                             → 18:30 GMT
+sunrise in savelugu                          → 05:52 GMT
+time in sector 2                             → <error: unknown place "sector", did you mean "Sector 1"?>
+sunrise in sector 2                          → <error: unknown place "sector", did you mean "Sector 1"?>
+time in seon yang si                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in seon yang si                      → Thu, 24 Sep 2026 05:35 UTC+8
+time in seyah cheshmeh                       → 22:00 UTC+3:30
+sunrise in seyah cheshmeh                    → 06:21 UTC+3:30
+time in shankou                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in shankou                           → Thu, 24 Sep 2026 06:30 UTC+8
+time in sheoganj                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in sheoganj                          → Thu, 24 Sep 2026 06:27 IST
+time in shirvan                              → 22:00 UTC+3:30
+sunrise in shirvan                           → 05:27 UTC+3:30
+time in shyangtan                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in shyangtan                         → Thu, 24 Sep 2026 06:18 UTC+8
+time in sidnejus                             → Thu, 24 Sep 2026 04:30 AEST
+sunrise in sidnejus                          → Thu, 24 Sep 2026 05:43 AEST
+time in sing gapoleu                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in sing gapoleu                      → Thu, 24 Sep 2026 06:54 UTC+8
+time in sitārganj                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in sitārganj                         → Thu, 24 Sep 2026 06:00 IST
+time in soacha                               → 13:30 UTC-5
+sunrise in soacha                            → 05:46 UTC-5
+time in songnan                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in songnan                           → Thu, 24 Sep 2026 05:43 UTC+8
+time in spandau                              → 20:30 CEST
+sunrise in spandau                           → 06:55 CEST
+time in staryy malgobek                      → 21:30 MSK
+sunrise in staryy malgobek                   → 05:50 MSK
+time in suan luang                           → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in suan luang                        → Thu, 24 Sep 2026 06:07 UTC+7
+time in sumy                                 → 21:30 EEST
+sunrise in sumy                              → 06:28 EEST
+time in svay rieng                           → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in svay rieng                        → Thu, 24 Sep 2026 05:46 UTC+7
+time in são desidério                        → 15:30 UTC-3
+sunrise in são desidério                     → 05:49 UTC-3
+time in słupsk                               → 20:30 CEST
+sunrise in słupsk                            → 06:39 CEST
+time in tahla                                → 18:30 UTC
+sunrise in tahla                             → 06:06 UTC
+time in takum                                → 19:30 UTC+1
+sunrise in takum                             → 06:09 UTC+1
+time in tang gu                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in tang gu                           → Thu, 24 Sep 2026 05:58 UTC+8
+time in tartu                                → 21:30 EEST
+sunrise in tartu                             → 07:00 EEST
+time in te la ke pa ke                       → 12:30 UTC-6
+sunrise in te la ke pa ke                    → 06:42 UTC-6
+time in tenosique                            → 12:30 UTC-6
+sunrise in tenosique                         → 05:55 UTC-6
+time in thanha ho'a                          → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in thanha ho'a                       → Thu, 24 Sep 2026 05:46 UTC+7
+time in thān                                 → Thu, 24 Sep 2026 00:00 IST
+sunrise in thān                              → Thu, 24 Sep 2026 06:34 IST
+time in tinde                                → 21:30 UTC+3
+sunrise in tinde                             → 06:36 UTC+3
+time in tlalnepantla                         → 12:30 UTC-6
+sunrise in tlalnepantla                      → 06:26 UTC-6
+time in tonj                                 → 20:30 UTC+2
+sunrise in tonj                              → 05:54 UTC+2
+time in traunreut                            → 20:30 CEST
+sunrise in traunreut                         → 06:57 CEST
+time in tsamkong                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in tsamkong                          → Thu, 24 Sep 2026 06:28 UTC+8
+time in tuenis                               → 19:30 UTC+1
+sunrise in tuenis                            → 06:08 UTC+1
+time in turmeric city                        → Thu, 24 Sep 2026 00:00 IST
+sunrise in turmeric city                     → Thu, 24 Sep 2026 06:21 IST
+time in tākestān                             → 22:00 UTC+3:30
+sunrise in tākestān                          → 06:00 UTC+3:30
+time in ujiie                                → Thu, 24 Sep 2026 03:30 JST
+sunrise in ujiie                             → Thu, 24 Sep 2026 05:29 JST
+time in unnamalaikadai                       → Thu, 24 Sep 2026 00:00 IST
+sunrise in unnamalaikadai                    → Thu, 24 Sep 2026 06:10 IST
+time in uttamapālaiyam                       → Thu, 24 Sep 2026 00:00 IST
+sunrise in uttamapālaiyam                    → Thu, 24 Sep 2026 06:10 IST
+time in valparaíso de goiás                  → 15:30 UTC-3
+sunrise in valparaíso de goiás               → 06:01 UTC-3
+time in vejle                                → 20:30 CEST
+sunrise in vejle                             → 07:09 CEST
+time in vicálvaro                            → 20:30 CEST
+sunrise in vicálvaro                         → 08:03 CEST
+time in villaguay                            → 15:30 UTC-3
+sunrise in villaguay                         → 06:44 UTC-3
+time in vitryani hory                        → 21:30 EEST
+sunrise in vitryani hory                     → 06:46 EEST
+time in vung tau                             → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in vung tau                          → Thu, 24 Sep 2026 05:41 UTC+7
+time in wallingford                          → 14:30 EDT
+sunrise in wallingford                       → 06:40 EDT
+time in wayaobu                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in wayaobu                           → Thu, 24 Sep 2026 06:31 UTC+8
+time in west elkridge                        → 14:30 EDT
+sunrise in west elkridge                     → 06:56 EDT
+time in wilmersdorf                          → 20:30 CEST
+sunrise in wilmersdorf                       → 06:54 CEST
+time in wu chin                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in wu chin                           → Thu, 24 Sep 2026 05:49 UTC+8
+time in xai xai                              → 20:30 UTC+2
+sunrise in xai xai                           → 05:34 UTC+2
+time in xingren                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in xingren                           → Thu, 24 Sep 2026 06:48 UTC+8
+time in yakubu                               → 19:30 UTC+1
+sunrise in yakubu                            → 06:10 UTC+1
+time in yasu                                 → Thu, 24 Sep 2026 03:30 JST
+sunrise in yasu                              → Thu, 24 Sep 2026 05:45 JST
+time in yi zi mi er                          → 21:30 UTC+3
+sunrise in yi zi mi er                       → 07:00 UTC+3
+time in youting                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in youting                           → Thu, 24 Sep 2026 06:46 UTC+8
+time in z'wngz'yng                           → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in z'wngz'yng                        → Thu, 24 Sep 2026 06:43 UTC+8
+time in zaventem                             → 20:30 CEST
+sunrise in zaventem                          → 07:30 CEST
+time in zhigou                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in zhigou                            → Thu, 24 Sep 2026 05:52 UTC+8
+time in zongsan                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in zongsan                           → Thu, 24 Sep 2026 06:16 UTC+8
+time in épernay                              → 20:30 CEST
+sunrise in épernay                           → 07:32 CEST
+time in śródmieście                          → 20:30 CEST
+sunrise in śródmieście                       → 06:23 CEST

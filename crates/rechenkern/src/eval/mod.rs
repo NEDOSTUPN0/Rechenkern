@@ -111,6 +111,8 @@ impl Env<'_> {
                 self.call(*func, args)?
             }
             Expr::Var(name) => {
+                #[cfg(test)]
+                crate::tests::SHEET_READS.with(|reads| reads.set(reads.get() + 1));
                 self.vars.get(name).cloned().ok_or_else(|| Error::new(format!("unknown variable {name}")))?
             }
             Expr::Line(line) => self.line(*line)?,
@@ -244,6 +246,8 @@ impl Env<'_> {
     }
 
     fn line(&self, line: LineRef) -> Result<Value> {
+        #[cfg(test)]
+        crate::tests::SHEET_READS.with(|reads| reads.set(reads.get() + 1));
         match line {
             LineRef::Previous => {
                 self.lines.iter().rev().find_map(|l| l.value.clone()).ok_or_else(|| Error::new("no previous answer"))

@@ -1,0 +1,41 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+$10 in EUR                                   → €9.00
+10 usd to eur                                → €9.00
+€50 in $                                     → $55.56
+£20 + €20                                    → €42.50
+$200 + €200                                  → €380.00
+$100 in EUR, GBP, JPY                        → €90.00, £80.00, ¥15,000
+100 JPY in USD                               → $0.67
+1 BTC in USD                                 → $100,000.00
+0.001 BTC in sats                            → 0.001 BTC
+50 cents in dollars                          → $0.50
+$10 in cents                                 → $10.00
+5 bucks                                      → $5.00
+20 quid in USD                               → $25.00
+$5k in EUR                                   → €4,500.00
+$2.5M                                        → $2,500,000.00
+$1,000 after 3 years at 7%                   → $1,225.04
+$1,000 after 3 years at 7% compounding monthly → $1,232.93
+$1,000 after 3 years at 10% per month        → $30,912.68
+monthly repayment on $300,000 for 30 years at 6% → $1,798.65
+total interest on $10,000 for 5 years at 5%  → $1,322.74
+$100 at 10% for 5 years                      → $161.05
+$1,000/month in per week                     → $229.98/week
+$1,000/month is what per year                → $12,000.00/year
+$500/month / 30 days                         → $16.67/day
+$24 a day for a year                         → $8,765.82
+$15/hour * 40 hours                          → $600.00
+$500 at $20/hour                             → 25 hours
+$120/night * 4 nights                        → $480.00
+$100 split 4 ways                            → $25.00
+$30 × 4 days                                 → $120.00
+
+// Not supported yet
+exchange rate from USD to EUR                → <error: can't make a range from money to money>
+$100 from 1990 is worth what today           → <error: expected a length of time before "from">
+investment required for $1,000/month at 5%   → <error: expected a value at the end>
+income tax on $100,000 in US                 → <error: money has no time zone>
+zł10                                         → <none>
+kr 10                                        → 10

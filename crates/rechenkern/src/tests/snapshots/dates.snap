@@ -1,0 +1,346 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+
+// Months
+january 5                                    → Mon, 5 Jan 2026
+5 january 2027                               → Tue, 5 Jan 2027
+days in january                              → 31 days
+jan 5                                        → Mon, 5 Jan 2026
+5 jan 2027                                   → Tue, 5 Jan 2027
+days in jan                                  → 31 days
+february 5                                   → Thu, 5 Feb 2026
+5 february 2027                              → Fri, 5 Feb 2027
+days in february                             → 28 days
+feb 5                                        → Thu, 5 Feb 2026
+5 feb 2027                                   → Fri, 5 Feb 2027
+days in feb                                  → 28 days
+march 5                                      → Thu, 5 Mar 2026
+5 march 2027                                 → Fri, 5 Mar 2027
+days in march                                → 31 days
+mar 5                                        → Thu, 5 Mar 2026
+5 mar 2027                                   → Fri, 5 Mar 2027
+days in mar                                  → 31 days
+april 5                                      → Sun, 5 Apr 2026
+5 april 2027                                 → Mon, 5 Apr 2027
+days in april                                → 30 days
+apr 5                                        → Sun, 5 Apr 2026
+5 apr 2027                                   → Mon, 5 Apr 2027
+days in apr                                  → 30 days
+may 5                                        → Tue, 5 May 2026
+5 may 2027                                   → Wed, 5 May 2027
+days in may                                  → 31 days
+june 5                                       → Fri, 5 Jun 2026
+5 june 2027                                  → Sat, 5 Jun 2027
+days in june                                 → 30 days
+jun 5                                        → Fri, 5 Jun 2026
+5 jun 2027                                   → Sat, 5 Jun 2027
+days in jun                                  → 30 days
+july 5                                       → Sun, 5 Jul 2026
+5 july 2027                                  → Mon, 5 Jul 2027
+days in july                                 → 31 days
+jul 5                                        → Sun, 5 Jul 2026
+5 jul 2027                                   → Mon, 5 Jul 2027
+days in jul                                  → 31 days
+august 5                                     → Wed, 5 Aug 2026
+5 august 2027                                → Thu, 5 Aug 2027
+days in august                               → 31 days
+aug 5                                        → Wed, 5 Aug 2026
+5 aug 2027                                   → Thu, 5 Aug 2027
+days in aug                                  → 31 days
+september 5                                  → Sat, 5 Sep 2026
+5 september 2027                             → Sun, 5 Sep 2027
+days in september                            → 30 days
+sep 5                                        → Sat, 5 Sep 2026
+5 sep 2027                                   → Sun, 5 Sep 2027
+days in sep                                  → 30 days
+sept 5                                       → Sat, 5 Sep 2026
+5 sept 2027                                  → Sun, 5 Sep 2027
+days in sept                                 → 30 days
+october 5                                    → Mon, 5 Oct 2026
+5 october 2027                               → Tue, 5 Oct 2027
+days in october                              → 31 days
+oct 5                                        → Mon, 5 Oct 2026
+5 oct 2027                                   → Tue, 5 Oct 2027
+days in oct                                  → 31 days
+november 5                                   → Thu, 5 Nov 2026
+5 november 2027                              → Fri, 5 Nov 2027
+days in november                             → 30 days
+nov 5                                        → Thu, 5 Nov 2026
+5 nov 2027                                   → Fri, 5 Nov 2027
+days in nov                                  → 30 days
+december 5                                   → Sat, 5 Dec 2026
+5 december 2027                              → Sun, 5 Dec 2027
+days in december                             → 31 days
+dec 5                                        → Sat, 5 Dec 2026
+5 dec 2027                                   → Sun, 5 Dec 2027
+days in dec                                  → 31 days
+
+// Weekdays
+monday                                       → Mon, 28 Sep 2026
+next monday                                  → Mon, 28 Sep 2026
+last monday at 3pm                           → Mon, 21 Sep 2026 15:00
+mon                                          → <error: expected a value at the end>
+next mon                                     → Mon, 28 Sep 2026
+last mon at 3pm                              → Mon, 21 Sep 2026 15:00
+tuesday                                      → Tue, 29 Sep 2026
+next tuesday                                 → Tue, 29 Sep 2026
+last tuesday at 3pm                          → Tue, 22 Sep 2026 15:00
+tue                                          → <error: expected a value at the end>
+next tue                                     → Tue, 29 Sep 2026
+last tue at 3pm                              → Tue, 22 Sep 2026 15:00
+wednesday                                    → Wed, 23 Sep 2026
+next wednesday                               → Wed, 30 Sep 2026
+last wednesday at 3pm                        → Wed, 16 Sep 2026 15:00
+wed                                          → <error: expected a value at the end>
+next wed                                     → Wed, 30 Sep 2026
+last wed at 3pm                              → Wed, 16 Sep 2026 15:00
+thursday                                     → Thu, 24 Sep 2026
+next thursday                                → Thu, 24 Sep 2026
+last thursday at 3pm                         → Thu, 17 Sep 2026 15:00
+thu                                          → <error: expected a value at the end>
+next thu                                     → Thu, 24 Sep 2026
+last thu at 3pm                              → Thu, 17 Sep 2026 15:00
+friday                                       → Fri, 25 Sep 2026
+next friday                                  → Fri, 25 Sep 2026
+last friday at 3pm                           → Fri, 18 Sep 2026 15:00
+fri                                          → <error: expected a value at the end>
+next fri                                     → Fri, 25 Sep 2026
+last fri at 3pm                              → Fri, 18 Sep 2026 15:00
+saturday                                     → Sat, 26 Sep 2026
+next saturday                                → Sat, 26 Sep 2026
+last saturday at 3pm                         → Sat, 19 Sep 2026 15:00
+sat                                          → <error: expected a value at the end>
+next sat                                     → Sat, 26 Sep 2026
+last sat at 3pm                              → Sat, 19 Sep 2026 15:00
+sunday                                       → Sun, 27 Sep 2026
+next sunday                                  → Sun, 27 Sep 2026
+last sunday at 3pm                           → Sun, 20 Sep 2026 15:00
+sun                                          → <error: expected a value at the end>
+next sun                                     → Sun, 27 Sep 2026
+last sun at 3pm                              → Sun, 20 Sep 2026 15:00
+
+// Holidays
+new year's eve                               → Thu, 31 Dec 2026
+days until new year's eve                    → 99 days
+new year's eve 2030                          → Tue, 31 Dec 2030
+new years eve                                → Thu, 31 Dec 2026
+days until new years eve                     → 99 days
+new years eve 2030                           → Tue, 31 Dec 2030
+new year's day                               → Fri, 1 Jan 2027
+days until new year's day                    → 100 days
+new year's day 2030                          → Tue, 1 Jan 2030
+new years day                                → Fri, 1 Jan 2027
+days until new years day                     → 100 days
+new years day 2030                           → Tue, 1 Jan 2030
+new year's                                   → Fri, 1 Jan 2027
+days until new year's                        → 100 days
+new year's 2030                              → Tue, 1 Jan 2030
+new years                                    → Fri, 1 Jan 2027
+days until new years                         → 100 days
+new years 2030                               → Tue, 1 Jan 2030
+new year                                     → Fri, 1 Jan 2027
+days until new year                          → 100 days
+new year 2030                                → Tue, 1 Jan 2030
+valentine's day                              → Sun, 14 Feb 2027
+days until valentine's day                   → 144 days
+valentine's day 2030                         → Thu, 14 Feb 2030
+valentines day                               → Sun, 14 Feb 2027
+days until valentines day                    → 144 days
+valentines day 2030                          → Thu, 14 Feb 2030
+valentine's                                  → Sun, 14 Feb 2027
+days until valentine's                       → 144 days
+valentine's 2030                             → Thu, 14 Feb 2030
+valentines                                   → Sun, 14 Feb 2027
+days until valentines                        → 144 days
+valentines 2030                              → Thu, 14 Feb 2030
+easter sunday                                → Sun, 28 Mar 2027
+days until easter sunday                     → 186 days
+easter sunday 2030                           → Sun, 21 Apr 2030
+easter monday                                → Mon, 29 Mar 2027
+days until easter monday                     → 187 days
+easter monday 2030                           → Mon, 22 Apr 2030
+easter eve                                   → Sat, 27 Mar 2027
+days until easter eve                        → 185 days
+easter eve 2030                              → Sat, 20 Apr 2030
+easter saturday                              → Sat, 27 Mar 2027
+days until easter saturday                   → 185 days
+easter saturday 2030                         → Sat, 20 Apr 2030
+easter friday                                → Fri, 26 Mar 2027
+days until easter friday                     → 184 days
+easter friday 2030                           → Fri, 19 Apr 2030
+easter                                       → Sun, 28 Mar 2027
+days until easter                            → 186 days
+easter 2030                                  → Sun, 21 Apr 2030
+good friday                                  → Fri, 26 Mar 2027
+days until good friday                       → 184 days
+good friday 2030                             → Fri, 19 Apr 2030
+holy friday                                  → Fri, 26 Mar 2027
+days until holy friday                       → 184 days
+holy friday 2030                             → Fri, 19 Apr 2030
+holy saturday                                → Sat, 27 Mar 2027
+days until holy saturday                     → 185 days
+holy saturday 2030                           → Sat, 20 Apr 2030
+orthodox easter                              → Sun, 2 May 2027
+days until orthodox easter                   → 221 days
+orthodox easter 2030                         → Sun, 28 Apr 2030
+orthodox easter sunday                       → Sun, 2 May 2027
+days until orthodox easter sunday            → 221 days
+orthodox easter sunday 2030                  → Sun, 28 Apr 2030
+orthodox pascha                              → Sun, 2 May 2027
+days until orthodox pascha                   → 221 days
+orthodox pascha 2030                         → Sun, 28 Apr 2030
+greek easter                                 → Sun, 2 May 2027
+days until greek easter                      → 221 days
+greek easter 2030                            → Sun, 28 Apr 2030
+russian easter                               → Sun, 2 May 2027
+days until russian easter                    → 221 days
+russian easter 2030                          → Sun, 28 Apr 2030
+orthodox good friday                         → Fri, 30 Apr 2027
+days until orthodox good friday              → 219 days
+orthodox good friday 2030                    → Fri, 26 Apr 2030
+greek good friday                            → Fri, 30 Apr 2027
+days until greek good friday                 → 219 days
+greek good friday 2030                       → Fri, 26 Apr 2030
+halloween                                    → Sat, 31 Oct 2026
+days until halloween                         → 38 days
+halloween 2030                               → Thu, 31 Oct 2030
+thanksgiving                                 → Thu, 26 Nov 2026
+days until thanksgiving                      → 64 days
+thanksgiving 2030                            → Thu, 28 Nov 2030
+black friday                                 → Fri, 27 Nov 2026
+days until black friday                      → 65 days
+black friday 2030                            → Fri, 29 Nov 2030
+christmas eve                                → Thu, 24 Dec 2026
+days until christmas eve                     → 92 days
+christmas eve 2030                           → Tue, 24 Dec 2030
+christmas day                                → Fri, 25 Dec 2026
+days until christmas day                     → 93 days
+christmas day 2030                           → Wed, 25 Dec 2030
+christmas                                    → Fri, 25 Dec 2026
+days until christmas                         → 93 days
+christmas 2030                               → Wed, 25 Dec 2030
+xmas                                         → Fri, 25 Dec 2026
+days until xmas                              → 93 days
+xmas 2030                                    → Wed, 25 Dec 2030
+boxing day                                   → Sat, 26 Dec 2026
+days until boxing day                        → 94 days
+boxing day 2030                              → Thu, 26 Dec 2030
+orthodox christmas                           → Thu, 7 Jan 2027
+days until orthodox christmas                → 106 days
+orthodox christmas 2030                      → Mon, 7 Jan 2030
+orthodox christmas day                       → Thu, 7 Jan 2027
+days until orthodox christmas day            → 106 days
+orthodox christmas day 2030                  → Mon, 7 Jan 2030
+russian christmas                            → Thu, 7 Jan 2027
+days until russian christmas                 → 106 days
+russian christmas 2030                       → Mon, 7 Jan 2030
+serbian christmas                            → Thu, 7 Jan 2027
+days until serbian christmas                 → 106 days
+serbian christmas 2030                       → Mon, 7 Jan 2030
+coptic christmas                             → Thu, 7 Jan 2027
+days until coptic christmas                  → 106 days
+coptic christmas 2030                        → Mon, 7 Jan 2030
+ethiopian christmas                          → Thu, 7 Jan 2027
+days until ethiopian christmas               → 106 days
+ethiopian christmas 2030                     → Mon, 7 Jan 2030
+chinese new year                             → Sat, 6 Feb 2027
+days until chinese new year                  → 136 days
+chinese new year 2030                        → Sun, 3 Feb 2030
+lunar new year                               → Sat, 6 Feb 2027
+days until lunar new year                    → 136 days
+lunar new year 2030                          → Sun, 3 Feb 2030
+spring festival                              → Sat, 6 Feb 2027
+days until spring festival                   → 136 days
+spring festival 2030                         → Sun, 3 Feb 2030
+chinese new year's eve                       → Fri, 5 Feb 2027
+days until chinese new year's eve            → 135 days
+chinese new year's eve 2030                  → Sat, 2 Feb 2030
+chinese new years eve                        → Fri, 5 Feb 2027
+days until chinese new years eve             → 135 days
+chinese new years eve 2030                   → Sat, 2 Feb 2030
+chinese new year eve                         → Fri, 5 Feb 2027
+days until chinese new year eve              → 135 days
+chinese new year eve 2030                    → Sat, 2 Feb 2030
+lunar new year's eve                         → Fri, 5 Feb 2027
+days until lunar new year's eve              → 135 days
+lunar new year's eve 2030                    → Sat, 2 Feb 2030
+lunar new years eve                          → Fri, 5 Feb 2027
+days until lunar new years eve               → 135 days
+lunar new years eve 2030                     → Sat, 2 Feb 2030
+
+// Date parts
+week of year                                 → 39
+week of year of March 9, 2024                → 10
+week of the year                             → 39
+week of the year of March 9, 2024            → 10
+week number                                  → 39
+week number of March 9, 2024                 → 10
+day of year                                  → 266
+day of year of March 9, 2024                 → 69
+day of the year                              → 266
+day of the year of March 9, 2024             → 69
+day number                                   → 266
+day number of March 9, 2024                  → 69
+day of month                                 → 23
+day of month of March 9, 2024                → 9
+day of the month                             → 23
+day of the month of March 9, 2024            → 9
+day of week                                  → Wednesday
+day of week of March 9, 2024                 → Saturday
+day of the week                              → Wednesday
+day of the week of March 9, 2024             → Saturday
+weekday                                      → Wednesday
+weekday of March 9, 2024                     → Saturday
+
+// Events
+gta 6                                        → Thu, 19 Nov 2026 (probably)
+gta vi                                       → Thu, 19 Nov 2026 (probably)
+gta6                                         → Thu, 19 Nov 2026 (probably)
+gtavi                                        → Thu, 19 Nov 2026 (probably)
+grand theft auto 6                           → Thu, 19 Nov 2026 (probably)
+grand theft auto vi                          → Thu, 19 Nov 2026 (probably)
+
+// Sun and moon
+sunrise                                      → 06:45
+sunrise in Tokyo                             → Thu, 24 Sep 2026 05:30 JST
+sunrise on March 21, 2027                    → Sun, 21 Mar 2027 06:58
+sunset                                       → 18:51
+sunset in Tokyo                              → Thu, 24 Sep 2026 17:36 JST
+sunset on March 21, 2027                     → Sun, 21 Mar 2027 19:09
+hours of sunlight                            → 12 hours 6 minutes
+hours of sunlight in Tokyo                   → 12 hours 6 minutes
+hours of sunlight on March 21, 2027          → 12 hours 11 minutes
+hours of daylight                            → 12 hours 6 minutes
+hours of daylight in Tokyo                   → 12 hours 6 minutes
+hours of daylight on March 21, 2027          → 12 hours 11 minutes
+sunlight hours                               → 12 hours 6 minutes
+sunlight hours in Tokyo                      → 12 hours 6 minutes
+sunlight hours on March 21, 2027             → 12 hours 11 minutes
+daylight hours                               → 12 hours 6 minutes
+daylight hours in Tokyo                      → 12 hours 6 minutes
+daylight hours on March 21, 2027             → 12 hours 11 minutes
+sunlight                                     → <none>
+sunlight in Tokyo                            → 12 hours 6 minutes
+sunlight on March 21, 2027                   → 12 hours 11 minutes
+daylight                                     → <none>
+daylight in Tokyo                            → 12 hours 6 minutes
+daylight on March 21, 2027                   → 12 hours 11 minutes
+moon phase                                   → Waxing Gibbous
+moon phase in Tokyo                          → <error: text has no time zone>
+moon phase on March 21, 2027                 → Full Moon
+moonphase                                    → Waxing Gibbous
+moonphase in Tokyo                           → <error: text has no time zone>
+moonphase on March 21, 2027                  → Full Moon
+phase of the moon                            → Waxing Gibbous
+phase of the moon in Tokyo                   → <error: text has no time zone>
+phase of the moon on March 21, 2027          → Full Moon
+lunar phase                                  → Waxing Gibbous
+lunar phase in Tokyo                         → <error: text has no time zone>
+lunar phase on March 21, 2027                → Full Moon
+lunar day                                    → 13
+lunar day in Tokyo                           → <error: a number has no time zone>
+lunar day on March 21, 2027                  → 14
+moon day                                     → 13
+moon day in Tokyo                            → <error: a number has no time zone>
+moon day on March 21, 2027                   → 14

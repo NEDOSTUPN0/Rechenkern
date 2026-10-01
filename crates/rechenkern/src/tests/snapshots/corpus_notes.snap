@@ -1,0 +1,45 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+
+// Amounts in text
+Lunch with the team $45                      → $45.00
+Coffee 3.50                                  → 3.5
+Rent: $1,200                                 → $1,200.00
+Groceries — $200                             → $200.00
+Taxi to airport $35 + tip 15%                → $40.25
+2 tickets at $25 each                        → $50.00
+3 coffees at $4.50                           → $13.50
+I walked 5 km and ran 3 km                   → 8 km
+$20 for lunch, $15 for taxi                  → $35.00
+Budget: $3,000 - $1,200 rent - $400 food     → $1,400.00
+Saved 10% of $2,500                          → $250.00
+Flight 2,340 km at 800 km/h                  → 2.925 hours
+iPhone 16 Pro $999                           → $999.00
+Room 101 costs $10                           → $10.00
+Bought 2 x 4 lumber for $5                   → 8
+2 cats 3 dogs                                → 3
+Meeting at 3pm                               → 15:00
+Call mom tomorrow                            → Thu, 24 Sep 2026
+Q2 sales 600                                 → 600
+Q3 $10k + Q4 $12k                            → $22,000.00
+5 // comment 7                               → 5
+$999 (for iPhone 16)                         → $999.00
+
+// List markers
+- $10                                        → -$10.00
+1. $10 lunch                                 → $10.00
+2) $15 taxi                                  → $15.00
+a) $5 coffee                                 → $5.00
+1. May 2024                                  → Wed, 1 May 2024
+
+// Known differences from SoulverCore
+Paid $50 on 3 March                          → <error: can't add money to a date>
+$500 for team of 5                           → <error: can't take money of something>
+Rent $900 due on the 5th                     → $905.00
+2 hours of work at $50/hour                  → $50.00/hour
+5 km run in 30 minutes                       → 5 km
+5 km/h coffee 3 km/h                         → 3 km/h
+3pm cats June 5                              → Fri, 5 Jun 2026
+10% + 5                                      → 510%
+email me@example.com 5 + 5                   → 10

@@ -1,0 +1,39 @@
+// Amounts in text
+Lunch with the team $45
+Coffee 3.50
+Rent: $1,200
+Groceries — $200
+Taxi to airport $35 + tip 15%
+2 tickets at $25 each
+3 coffees at $4.50
+I walked 5 km and ran 3 km
+$20 for lunch, $15 for taxi
+Budget: $3,000 - $1,200 rent - $400 food
+Saved 10% of $2,500
+Flight 2,340 km at 800 km/h
+iPhone 16 Pro $999
+Room 101 costs $10
+Bought 2 x 4 lumber for $5
+2 cats 3 dogs
+Meeting at 3pm
+Call mom tomorrow
+Q2 sales 600
+Q3 $10k + Q4 $12k
+5 // comment 7
+$999 (for iPhone 16)
+// List markers
+- $10
+1. $10 lunch
+2) $15 taxi
+a) $5 coffee
+1. May 2024
+// Known differences from SoulverCore
+Paid $50 on 3 March
+$500 for team of 5
+Rent $900 due on the 5th
+2 hours of work at $50/hour
+5 km run in 30 minutes
+5 km/h coffee 3 km/h
+3pm cats June 5
+10% + 5
+email me@example.com 5 + 5

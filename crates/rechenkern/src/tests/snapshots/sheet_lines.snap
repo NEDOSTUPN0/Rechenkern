@@ -1,0 +1,17 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+10                                           → 10
+20                                           → 20
+30                                           → 30
+sum                                          → 60
+avg                                          → <error: nothing to average>
+line 1 + line 2                              → 30
+prev                                         → 30
+line 9                                       → <error: line 9 has no answer>
+x = 5                                        → 5
+x += 2                                       → 7
+x * 3                                        → 21
+y = x if x > 5 else 0                        → 7
+if x > 100 then z = 1 else z = 2             → 2
+z                                            → 2

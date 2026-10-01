@@ -1,0 +1,429 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+
+// Functions
+sqrt(16)                                     → 4
+sqrt(2, 8)                                   → <error: Sqrt takes 1 argument>
+sqrt of 2, 8 and 4                           → <error: Sqrt takes 1 argument>
+square root(16)                              → 4
+square root(2, 8)                            → <error: Sqrt takes 1 argument>
+square root of 2, 8 and 4                    → <error: Sqrt takes 1 argument>
+cbrt(16)                                     → 2.5198421
+cbrt(2, 8)                                   → <error: Cbrt takes 1 argument>
+cbrt of 2, 8 and 4                           → <error: Cbrt takes 1 argument>
+cube root(16)                                → 2.5198421
+cube root(2, 8)                              → <error: Cbrt takes 1 argument>
+cube root of 2, 8 and 4                      → <error: Cbrt takes 1 argument>
+squared root(16)                             → 4
+squared root(2, 8)                           → <error: Sqrt takes 1 argument>
+squared root of 2, 8 and 4                   → <error: Sqrt takes 1 argument>
+cubed root(16)                               → 2.5198421
+cubed root(2, 8)                             → <error: Cbrt takes 1 argument>
+cubed root of 2, 8 and 4                     → <error: Cbrt takes 1 argument>
+root(16)                                     → <error: Root takes 2 arguments>
+root(2, 8)                                   → 2.828427125
+root of 2, 8 and 4                           → 12
+exp(16)                                      → 8,886,110.521
+exp(2, 8)                                    → <error: Exp takes 1 argument>
+exp of 2, 8 and 4                            → <error: Exp takes 1 argument>
+ln(16)                                       → 2.772588722
+ln(2, 8)                                     → <error: Ln takes 1 argument>
+ln of 2, 8 and 4                             → <error: Ln takes 1 argument>
+natural log(16)                              → 2.772588722
+natural log(2, 8)                            → <error: Ln takes 1 argument>
+natural log of 2, 8 and 4                    → <error: Ln takes 1 argument>
+natural logarithm(16)                        → 2.772588722
+natural logarithm(2, 8)                      → <error: Ln takes 1 argument>
+natural logarithm of 2, 8 and 4              → <error: Ln takes 1 argument>
+binary log(16)                               → 4
+binary log(2, 8)                             → <error: Log2 takes 1 argument>
+binary log of 2, 8 and 4                     → <error: Log2 takes 1 argument>
+binary logarithm(16)                         → 4
+binary logarithm(2, 8)                       → <error: Log2 takes 1 argument>
+binary logarithm of 2, 8 and 4               → <error: Log2 takes 1 argument>
+log(16)                                      → 1.204119983
+log(2, 8)                                    → 0.3333333333
+log of 2, 8 and 4                            → 0.3333333333
+logarithm(16)                                → 1.204119983
+logarithm(2, 8)                              → 0.3333333333
+logarithm of 2, 8 and 4                      → 0.3333333333
+log2(16)                                     → 4
+log2(2, 8)                                   → <error: Log2 takes 1 argument>
+log2 of 2, 8 and 4                           → <error: Log2 takes 1 argument>
+log10(16)                                    → 1.204119983
+log10(2, 8)                                  → <error: Log10 takes 1 argument>
+log10 of 2, 8 and 4                          → <error: Log10 takes 1 argument>
+lg(16)                                       → 1.204119983
+lg(2, 8)                                     → <error: Log10 takes 1 argument>
+lg of 2, 8 and 4                             → <error: Log10 takes 1 argument>
+abs(16)                                      → 16
+abs(2, 8)                                    → <error: Abs takes 1 argument>
+abs of 2, 8 and 4                            → <error: Abs takes 1 argument>
+absolute value(16)                           → 16
+absolute value(2, 8)                         → <error: Abs takes 1 argument>
+absolute value of 2, 8 and 4                 → <error: Abs takes 1 argument>
+fact(16)                                     → 20,922,789,888,000
+fact(2, 8)                                   → <error: Fact takes 1 argument>
+fact of 2, 8 and 4                           → <error: Fact takes 1 argument>
+factorial(16)                                → 20,922,789,888,000
+factorial(2, 8)                              → <error: Fact takes 1 argument>
+factorial of 2, 8 and 4                      → <error: Fact takes 1 argument>
+round(16)                                    → 16
+round(2, 8)                                  → <error: Round takes 1 argument>
+round of 2, 8 and 4                          → 12
+ceil(16)                                     → 16
+ceil(2, 8)                                   → <error: Ceil takes 1 argument>
+ceil of 2, 8 and 4                           → <error: Ceil takes 1 argument>
+ceiling(16)                                  → 16
+ceiling(2, 8)                                → <error: Ceil takes 1 argument>
+ceiling of 2, 8 and 4                        → <error: Ceil takes 1 argument>
+floor(16)                                    → 16
+floor(2, 8)                                  → <error: Floor takes 1 argument>
+floor of 2, 8 and 4                          → <error: Floor takes 1 argument>
+trunc(16)                                    → 16
+trunc(2, 8)                                  → <error: Trunc takes 1 argument>
+trunc of 2, 8 and 4                          → <error: Trunc takes 1 argument>
+sin(16)                                      → -0.2879033167
+sin(2, 8)                                    → <error: Sin takes 1 argument>
+sin of 2, 8 and 4                            → <error: Sin takes 1 argument>
+cos(16)                                      → -0.9576594803
+cos(2, 8)                                    → <error: Cos takes 1 argument>
+cos of 2, 8 and 4                            → <error: Cos takes 1 argument>
+tan(16)                                      → 0.300632242
+tan(2, 8)                                    → <error: Tan takes 1 argument>
+tan of 2, 8 and 4                            → <error: Tan takes 1 argument>
+asin(16)                                     → <error: result is not a real number>
+asin(2, 8)                                   → <error: Asin takes 1 argument>
+asin of 2, 8 and 4                           → <error: Asin takes 1 argument>
+acos(16)                                     → <error: result is not a real number>
+acos(2, 8)                                   → <error: Acos takes 1 argument>
+acos of 2, 8 and 4                           → <error: Acos takes 1 argument>
+atan(16)                                     → 1.508377517
+atan(2, 8)                                   → <error: Atan takes 1 argument>
+atan of 2, 8 and 4                           → <error: Atan takes 1 argument>
+arcsin(16)                                   → <error: result is not a real number>
+arcsin(2, 8)                                 → <error: Asin takes 1 argument>
+arcsin of 2, 8 and 4                         → <error: Asin takes 1 argument>
+arccos(16)                                   → <error: result is not a real number>
+arccos(2, 8)                                 → <error: Acos takes 1 argument>
+arccos of 2, 8 and 4                         → <error: Acos takes 1 argument>
+arctan(16)                                   → 1.508377517
+arctan(2, 8)                                 → <error: Atan takes 1 argument>
+arctan of 2, 8 and 4                         → <error: Atan takes 1 argument>
+sinh(16)                                     → 4,443,055.26
+sinh(2, 8)                                   → <error: Sinh takes 1 argument>
+sinh of 2, 8 and 4                           → <error: Sinh takes 1 argument>
+cosh(16)                                     → 4,443,055.26
+cosh(2, 8)                                   → <error: Cosh takes 1 argument>
+cosh of 2, 8 and 4                           → <error: Cosh takes 1 argument>
+tanh(16)                                     → 1
+tanh(2, 8)                                   → <error: Tanh takes 1 argument>
+tanh of 2, 8 and 4                           → <error: Tanh takes 1 argument>
+asinh(16)                                    → 3.466711038
+asinh(2, 8)                                  → <error: Asinh takes 1 argument>
+asinh of 2, 8 and 4                          → <error: Asinh takes 1 argument>
+acosh(16)                                    → 3.464757907
+acosh(2, 8)                                  → <error: Acosh takes 1 argument>
+acosh of 2, 8 and 4                          → <error: Acosh takes 1 argument>
+atanh(16)                                    → <error: result is not a real number>
+atanh(2, 8)                                  → <error: Atanh takes 1 argument>
+atanh of 2, 8 and 4                          → <error: Atanh takes 1 argument>
+sind(16)                                     → 0.2756373558
+sind(2, 8)                                   → <error: SinD takes 1 argument>
+sind of 2, 8 and 4                           → <error: SinD takes 1 argument>
+cosd(16)                                     → 0.9612616959
+cosd(2, 8)                                   → <error: CosD takes 1 argument>
+cosd of 2, 8 and 4                           → <error: CosD takes 1 argument>
+tand(16)                                     → 0.2867453858
+tand(2, 8)                                   → <error: TanD takes 1 argument>
+tand of 2, 8 and 4                           → <error: TanD takes 1 argument>
+asind(16)                                    → <error: result is not a real number>
+asind(2, 8)                                  → <error: AsinD takes 1 argument>
+asind of 2, 8 and 4                          → <error: AsinD takes 1 argument>
+acosd(16)                                    → <error: result is not a real number>
+acosd(2, 8)                                  → <error: AcosD takes 1 argument>
+acosd of 2, 8 and 4                          → <error: AcosD takes 1 argument>
+atand(16)                                    → 86.42366563°
+atand(2, 8)                                  → <error: AtanD takes 1 argument>
+atand of 2, 8 and 4                          → <error: AtanD takes 1 argument>
+min(16)                                      → 16
+min(2, 8)                                    → 2
+min of 2, 8 and 4                            → 2
+minimum(16)                                  → 16
+minimum(2, 8)                                → 2
+minimum of 2, 8 and 4                        → 2
+smaller(16)                                  → 16
+smaller(2, 8)                                → 2
+smaller of 2, 8 and 4                        → 2
+smallest(16)                                 → 16
+smallest(2, 8)                               → 2
+smallest of 2, 8 and 4                       → 2
+lesser(16)                                   → 16
+lesser(2, 8)                                 → 2
+lesser of 2, 8 and 4                         → 2
+max(16)                                      → 16
+max(2, 8)                                    → 8
+max of 2, 8 and 4                            → 8
+maximum(16)                                  → 16
+maximum(2, 8)                                → 8
+maximum of 2, 8 and 4                        → 8
+larger(16)                                   → 16
+larger(2, 8)                                 → 8
+larger of 2, 8 and 4                         → 8
+largest(16)                                  → 16
+largest(2, 8)                                → 8
+largest of 2, 8 and 4                        → 8
+greater(16)                                  → 16
+greater(2, 8)                                → 8
+greater of 2, 8 and 4                        → 8
+greatest(16)                                 → 16
+greatest(2, 8)                               → 8
+greatest of 2, 8 and 4                       → 8
+bigger(16)                                   → 16
+bigger(2, 8)                                 → 8
+bigger of 2, 8 and 4                         → 8
+biggest(16)                                  → 16
+biggest(2, 8)                                → 8
+biggest of 2, 8 and 4                        → 8
+gcd(16)                                      → 16
+gcd(2, 8)                                    → 2
+gcd of 2, 8 and 4                            → 2
+hcf(16)                                      → 16
+hcf(2, 8)                                    → 2
+hcf of 2, 8 and 4                            → 2
+gcf(16)                                      → 16
+gcf(2, 8)                                    → 2
+gcf of 2, 8 and 4                            → 2
+greatest common divisor(16)                  → 16
+greatest common divisor(2, 8)                → 2
+greatest common divisor of 2, 8 and 4        → 2
+greatest common factor(16)                   → 16
+greatest common factor(2, 8)                 → 2
+greatest common factor of 2, 8 and 4         → 2
+highest common factor(16)                    → 16
+highest common factor(2, 8)                  → 2
+highest common factor of 2, 8 and 4          → 2
+lcm(16)                                      → 16
+lcm(2, 8)                                    → 8
+lcm of 2, 8 and 4                            → 8
+lowest common multiple(16)                   → 16
+lowest common multiple(2, 8)                 → 8
+lowest common multiple of 2, 8 and 4         → 8
+least common multiple(16)                    → 16
+least common multiple(2, 8)                  → 8
+least common multiple of 2, 8 and 4          → 8
+sum(16)                                      → 16
+sum(2, 8)                                    → 10
+sum of 2, 8 and 4                            → 14
+total(16)                                    → 16
+total(2, 8)                                  → 10
+total of 2, 8 and 4                          → 14
+average(16)                                  → 16
+average(2, 8)                                → 5
+average of 2, 8 and 4                        → 4.666666667
+avg(16)                                      → 16
+avg(2, 8)                                    → 5
+avg of 2, 8 and 4                            → 4.666666667
+mean(16)                                     → 16
+mean(2, 8)                                   → 5
+mean of 2, 8 and 4                           → 4.666666667
+median(16)                                   → 16
+median(2, 8)                                 → 5
+median of 2, 8 and 4                         → 4
+count(16)                                    → 1
+count(2, 8)                                  → 2
+count of 2, 8 and 4                          → 3
+standard deviation(16)                       → <error: standard deviation needs at least two values>
+standard deviation(2, 8)                     → 4.242640687
+standard deviation of 2, 8 and 4             → 3.055050463
+stddev(16)                                   → <error: standard deviation needs at least two values>
+stddev(2, 8)                                 → 4.242640687
+stddev of 2, 8 and 4                         → 3.055050463
+stdev(16)                                    → <error: standard deviation needs at least two values>
+stdev(2, 8)                                  → 4.242640687
+stdev of 2, 8 and 4                          → 3.055050463
+midpoint(16)                                 → <error: Midpoint takes 2 arguments>
+midpoint(2, 8)                               → 5
+midpoint of 2, 8 and 4                       → <error: Midpoint takes 2 arguments>
+halfway(16)                                  → <error: Midpoint takes 2 arguments>
+halfway(2, 8)                                → 5
+halfway of 2, 8 and 4                        → <error: Midpoint takes 2 arguments>
+random number(16)                            → <error: random takes no arguments or a range>
+random number(2, 8)                          → 5
+random number of 2, 8 and 4                  → <error: random takes no arguments or a range>
+random(16)                                   → <error: random takes no arguments or a range>
+random(2, 8)                                 → 5
+random of 2, 8 and 4                         → <error: random takes no arguments or a range>
+rand(16)                                     → <error: random takes no arguments or a range>
+rand(2, 8)                                   → 5
+rand of 2, 8 and 4                           → <error: random takes no arguments or a range>
+clamp(16)                                    → <error: Clamp takes 3 arguments>
+clamp(2, 8)                                  → <error: Clamp takes 3 arguments>
+clamp of 2, 8 and 4                          → 8
+ncr(16)                                      → <error: Comb takes 2 arguments>
+ncr(2, 8)                                    → <error: combinations need 0 ≤ k ≤ n>
+ncr of 2, 8 and 4                            → <error: Comb takes 2 arguments>
+npr(16)                                      → <error: Perm takes 2 arguments>
+npr(2, 8)                                    → <error: combinations need 0 ≤ k ≤ n>
+npr of 2, 8 and 4                            → <error: Perm takes 2 arguments>
+hex(16)                                      → 0x10
+hex(2, 8)                                    → <error: Hex takes 1 argument>
+hex of 2, 8 and 4                            → <error: Hex takes 1 argument>
+bin(16)                                      → 0b10000
+bin(2, 8)                                    → <error: Bin takes 1 argument>
+bin of 2, 8 and 4                            → <error: Bin takes 1 argument>
+oct(16)                                      → 0o20
+oct(2, 8)                                    → <error: Oct takes 1 argument>
+oct of 2, 8 and 4                            → <error: Oct takes 1 argument>
+int(16)                                      → 16
+int(2, 8)                                    → <error: Int takes 1 argument>
+int of 2, 8 and 4                            → <error: Int takes 1 argument>
+
+// Formats
+255 in hex                                   → 0xFF
+0.75 as hex                                  → <error: only whole numbers can be shown in base 16>
+today as hex                                 → <error: only whole numbers can be shown in base 16>
+255 in hexadecimal                           → 0xFF
+0.75 as hexadecimal                          → <error: only whole numbers can be shown in base 16>
+today as hexadecimal                         → <error: only whole numbers can be shown in base 16>
+255 in base 16                               → 0xFF
+0.75 as base 16                              → <error: only whole numbers can be shown in base 16>
+today as base 16                             → <error: only whole numbers can be shown in base 16>
+255 in binary                                → 0b11111111
+0.75 as binary                               → <error: only whole numbers can be shown in base 2>
+today as binary                              → <error: only whole numbers can be shown in base 2>
+255 in bin                                   → 0b11111111
+0.75 as bin                                  → <error: only whole numbers can be shown in base 2>
+today as bin                                 → <error: only whole numbers can be shown in base 2>
+255 in base 2                                → 0b11111111
+0.75 as base 2                               → <error: only whole numbers can be shown in base 2>
+today as base 2                              → <error: only whole numbers can be shown in base 2>
+255 in octal                                 → 0o377
+0.75 as octal                                → <error: only whole numbers can be shown in base 8>
+today as octal                               → <error: only whole numbers can be shown in base 8>
+255 in oct                                   → 0o377
+0.75 as oct                                  → <error: only whole numbers can be shown in base 8>
+today as oct                                 → <error: only whole numbers can be shown in base 8>
+255 in base 8                                → 0o377
+0.75 as base 8                               → <error: only whole numbers can be shown in base 8>
+today as base 8                              → <error: only whole numbers can be shown in base 8>
+255 in decimal                               → 255
+0.75 as decimal                              → 0.75
+today as decimal                             → Wed, 23 Sep 2026
+255 in dec                                   → 255
+0.75 as dec                                  → 0.75
+today as dec                                 → Wed, 23 Sep 2026
+255 in base 10                               → 255
+0.75 as base 10                              → 0.75
+today as base 10                             → Wed, 23 Sep 2026
+255 in scientific notation                   → 2.55e2
+0.75 as scientific notation                  → 7.5e-1
+today as scientific notation                 → Wed, 23 Sep 2026
+255 in scientific                            → 2.55e2
+0.75 as scientific                           → 7.5e-1
+today as scientific                          → Wed, 23 Sep 2026
+255 in sci                                   → 2.55e2
+0.75 as sci                                  → 7.5e-1
+today as sci                                 → Wed, 23 Sep 2026
+255 in fraction                              → 255
+0.75 as fraction                             → 3/4
+today as fraction                            → Wed, 23 Sep 2026
+255 in fractions                             → 255
+0.75 as fractions                            → 3/4
+today as fractions                           → Wed, 23 Sep 2026
+255 in number                                → 255
+0.75 as number                               → 0.75
+today as number                              → <error: can't make a date a plain number>
+255 in num                                   → 255
+0.75 as num                                  → 0.75
+today as num                                 → <error: can't make a date a plain number>
+255 in %                                     → 25,500%
+0.75 as %                                    → 75%
+today as %                                   → <error: can't show a date as a percentage>
+255 in percent                               → 25,500%
+0.75 as percent                              → 75%
+today as percent                             → <error: can't show a date as a percentage>
+255 in percentage                            → 25,500%
+0.75 as percentage                           → 75%
+today as percentage                          → <error: can't show a date as a percentage>
+255 in pct                                   → 25,500%
+0.75 as pct                                  → 75%
+today as pct                                 → <error: can't show a date as a percentage>
+255 in multiplier                            → 255x
+0.75 as multiplier                           → 0.75x
+today as multiplier                          → <error: can't show a date as a multiplier>
+255 in multiple                              → 255x
+0.75 as multiple                             → 0.75x
+today as multiple                            → <error: can't show a date as a multiplier>
+255 in timespan                              → <error: can't show a number as a time span>
+0.75 as timespan                             → <error: can't show a number as a time span>
+today as timespan                            → <error: can't show a date as a time span>
+255 in time span                             → <error: can't show a number as a time span>
+0.75 as time span                            → <error: can't show a number as a time span>
+today as time span                           → <error: can't show a date as a time span>
+255 in laptime                               → <error: can't show a number as a time span>
+0.75 as laptime                              → <error: can't show a number as a time span>
+today as laptime                             → <error: can't show a date as a time span>
+255 in lap time                              → <error: can't show a number as a time span>
+0.75 as lap time                             → <error: can't show a number as a time span>
+today as lap time                            → <error: can't show a date as a time span>
+255 in unix timestamp                        → <error: can't make a timestamp from a number>
+0.75 as unix timestamp                       → <error: can't make a timestamp from a number>
+today as unix timestamp                      → 1790136000
+255 in unix time stamp                       → <error: can't make a timestamp from a number>
+0.75 as unix time stamp                      → <error: can't make a timestamp from a number>
+today as unix time stamp                     → 1790136000
+255 in unix time                             → <error: can't make a timestamp from a number>
+0.75 as unix time                            → <error: can't make a timestamp from a number>
+today as unix time                           → 1790136000
+255 in timestamp                             → <error: can't make a timestamp from a number>
+0.75 as timestamp                            → <error: can't make a timestamp from a number>
+today as timestamp                           → 1790136000
+255 in time stamp                            → <error: can't make a timestamp from a number>
+0.75 as time stamp                           → <error: can't make a timestamp from a number>
+today as time stamp                          → 1790136000
+255 in unix                                  → <error: can't make a timestamp from a number>
+0.75 as unix                                 → <error: can't make a timestamp from a number>
+today as unix                                → 1790136000
+255 in epoch                                 → <error: can't make a timestamp from a number>
+0.75 as epoch                                → <error: can't make a timestamp from a number>
+today as epoch                               → 1790136000
+255 in date                                  → Wed, 31 Dec 1969 19:04:15
+0.75 as date                                 → Wed, 31 Dec 1969 19:00
+today as date                                → Wed, 23 Sep 2026 00:00
+255 in iso 8601                              → <error: can't write a number as ISO 8601>
+0.75 as iso 8601                             → <error: can't write a number as ISO 8601>
+today as iso 8601                            → 2026-09-23T00:00:00-04:00
+255 in iso8601                               → <error: can't write a number as ISO 8601>
+0.75 as iso8601                              → <error: can't write a number as ISO 8601>
+today as iso8601                             → 2026-09-23T00:00:00-04:00
+255 in iso                                   → <error: can't write a number as ISO 8601>
+0.75 as iso                                  → <error: can't write a number as ISO 8601>
+today as iso                                 → 2026-09-23T00:00:00-04:00
+255 in day of the week                       → <error: a number has no weekday>
+0.75 as day of the week                      → <error: a number has no weekday>
+today as day of the week                     → Wednesday
+255 in day of week                           → <error: a number has no weekday>
+0.75 as day of week                          → <error: a number has no weekday>
+today as day of week                         → Wednesday
+255 in weekday                               → <error: a number has no weekday>
+0.75 as weekday                              → <error: a number has no weekday>
+today as weekday                             → Wednesday
+
+// Constants and powers
+speed of light                               → 299,792,458 m/s
+speed of sound                               → 343 m/s
+standard gravity                             → 9.80665 m/s²
+earth gravity                                → 9.80665 m/s²
+avogadro's number                            → 6.02214076e23
+avogadro constant                            → 6.02214076e23
+3 to the power of 4                          → 81
+3 to the power 4                             → 81
+3 to the 4                                   → 81
+3 raised to the power of 4                   → 81
+3 raised to the power 4                      → 81
+3 raised to the 4                            → 81
+3 raised to 4                                → 81
+3 exponent 4                                 → 81
+3 power 4                                    → 81

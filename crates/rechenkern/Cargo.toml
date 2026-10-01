@@ -8,7 +8,9 @@ license.workspace = true
 repository.workspace = true
 
 [dev-dependencies]
+insta = "1.48.0"
 jiff = "0.2.37"
+proptest = { version = "1.11.0", default-features = false, features = ["std"] }
 
 [dependencies]
 jiff = { version = "0.2.37", features = ["tzdb-bundle-always"] }

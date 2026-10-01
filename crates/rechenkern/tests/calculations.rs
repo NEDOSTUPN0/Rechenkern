@@ -679,10 +679,10 @@ fn time_zones() {
         ("time in auckland", "Thu, 24 Sep 2026 06:30 NZST"),
         ("current time in paris", "20:30 CEST"),
         ("time in Tokyo when it is 9am in London", "17:00 JST"),
-        ("time in port-au-prince", "14:30 EDT"),
         ("time in marseille", "20:30 CEST"),
         ("time in cordoba", "15:30 UTC-3"),
         ("time in the hague", "20:30 CEST"),
+        ("time in port-au-prince", "14:30 EDT"),
         // Abbreviations only where they read back: Belize's "CST" would be Chicago's.
         ("3pm Belize", "15:00 UTC-6"),
         ("3pm Kampala", "15:00 UTC+3"),

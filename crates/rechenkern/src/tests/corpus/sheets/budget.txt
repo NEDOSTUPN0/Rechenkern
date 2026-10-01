@@ -1,0 +1,9 @@
+# Budget
+rent = $1,200
+food = $45 a day for a month
+transport = $90
+total = rent + food + transport
+total / 2
+prev * 12
+---
+rent

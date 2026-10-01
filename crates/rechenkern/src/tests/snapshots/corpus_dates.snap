@@ -1,0 +1,78 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+today                                        → Wed, 23 Sep 2026
+tomorrow + 3 days                            → Sun, 27 Sep 2026
+next friday                                  → Fri, 25 Sep 2026
+last monday                                  → Mon, 21 Sep 2026
+in 2 weeks                                   → Wed, 7 Oct 2026
+3 days ago                                   → Sun, 20 Sep 2026
+2 weeks from now                             → Wed, 7 Oct 2026
+March 12                                     → Thu, 12 Mar 2026
+12 March 2027                                → Fri, 12 Mar 2027
+2026/09/23                                   → Wed, 23 Sep 2026
+09/23/2026                                   → Wed, 23 Sep 2026
+23.09.2026                                   → Wed, 23 Sep 2026
+2026-09-23T10:00:00Z                         → Wed, 23 Sep 2026 06:00
+Jan 31 + 1 month                             → Sat, 28 Feb 2026
+days until christmas                         → 93 days
+weeks until new year                         → 14.28571429 weeks
+days since March 1                           → 206 days
+days between March 3 and May 30              → 88 days
+whole weeks between March 3 and May 30       → 12 weeks
+March 3 through March 10                     → 1 week 1 day
+days left in 2026                            → 100 days
+days left in March                           → 0 days
+Q3 2026                                      → 1 Jul – 30 Sep 2026
+next quarter                                 → 1 Oct – 31 Dec 2026
+Q3 in days                                   → 92 days
+time until 5pm                               → 2 hours 30 minutes
+9am to 5pm                                   → 8 hours
+9am to 5pm in minutes                        → 480 minutes
+10pm to 2am                                  → 4 hours
+now to midnight                              → 9 hours 30 minutes
+noon to 5:30pm                               → 5 hours 30 minutes
+1 year - 2 months                            → 10 months
+1 day - 2 hours                              → 22 hours
+3.5 hours in hours and minutes               → 3 hours 30 minutes
+2 hours at 1.5x                              → 1.333333333 hours
+unix time                                    → 1790188200
+1700000000 as date                           → Tue, 14 Nov 2023 17:13:20
+now as iso                                   → 2026-09-23T14:30:00-04:00
+week of year                                 → 39
+day of the week on March 9, 2024             → Saturday
+
+// Workdays
+workdays until christmas                     → 67 workdays
+this quarter in workdays                     → 66 workdays
+10 days in workdays                          → 8 workdays
+40 hours in workdays                         → 5 workdays
+today + 5 workdays                           → Wed, 30 Sep 2026
+1 workday + 4 hours                          → 1.5 workdays
+2 workdays in days                           → <error: can't convert workdays to days>
+
+// Sun and moon
+sunrise                                      → 06:45
+sunset in Paris tomorrow                     → Thu, 24 Sep 2026 19:45 CEST
+hours of daylight in Reykjavik on Dec 21     → 4 hours 7 minutes
+moon phase on Oct 10                         → New Moon
+lunar day on Oct 11                          → 2
+
+// Not supported yet
+days between March 3 to May 30               → 2 months 3 weeks 6 days
+days left in this month                      → <error: can't convert a date to days>
+days left in the year                        → 365.2425 days
+days in next month                           → <error: can't convert a date to days>
+days until March                             → <error: expected a value at the end>
+start of next month                          → Fri, 23 Oct 2026
+end of Q3                                    → 1 Jul – 30 Sep 2026
+year %                                       → <error: can't make time a percentage>
+week number March 5, 2026                    → Thu, 5 Mar 2026
+3 days ago at 5pm                            → <error: can't multiply a date by a date>
+friday in 3 weeks                            → Wed, 14 Oct 2026
+3.5 hours as hms                             → <error: time has no time zone>
+10 km in 50 minutes                          → 10 km
+midday                                       → <none>
+previous monday                              → <error: no previous answer>
+NYE                                          → <none>
+start of Ramadan                             → <error: unexpected "of">

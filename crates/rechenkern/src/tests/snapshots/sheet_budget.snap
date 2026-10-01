@@ -1,0 +1,12 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+# Budget                                     → 
+rent = $1,200                                → $1,200.00
+food = $45 a day for a month                 → $1,369.66
+transport = $90                              → $90.00
+total = rent + food + transport              → $2,659.66
+total / 2                                    → $1,329.83
+prev * 12                                    → $15,957.96
+---                                          → 
+rent                                         →

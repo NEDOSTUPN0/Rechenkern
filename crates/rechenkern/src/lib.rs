@@ -26,6 +26,8 @@ mod number;
 pub mod online;
 mod parser;
 mod rates;
+#[cfg(test)]
+mod tests;
 pub mod units;
 mod value;
 mod zones;

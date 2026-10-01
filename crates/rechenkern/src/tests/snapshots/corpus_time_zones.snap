@@ -1,0 +1,39 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+time in Tokyo                                → Thu, 24 Sep 2026 03:30 JST
+Tokyo time                                   → Thu, 24 Sep 2026 03:30 JST
+3pm in Tokyo                                 → Thu, 24 Sep 2026 04:00 JST
+3pm Tokyo                                    → 15:00 JST
+3pm Tokyo in London                          → 07:00 BST
+9am in New York to Tokyo                     → 22:00 JST
+PST to EST                                   → 14:30 EDT
+time difference Tokyo                        → 13 hours
+time in Tokyo when it is 9am in London       → 17:00 JST
+time in UTC+5:30                             → Thu, 24 Sep 2026 00:00 UTC+5:30
+now in GMT-3                                 → 15:30 UTC-3
+time in pariss                               → <error: unknown place "pariss", did you mean "Paris"?>
+sunrise in Tokyo                             → Thu, 24 Sep 2026 05:30 JST
+sunrise in Texas                             → <error: don't know where exactly "Texas" is: name a city>
+
+// Places that need a closer look
+time in Washington                           → 11:30 PDT
+time in San Juan                             → 15:30 UTC-3
+time in Pasadena                             → 13:30 CDT
+time in Nara                                 → 18:30 GMT
+time in Parma                                → 23:30 UTC+5
+time in Queenstown                           → 20:30 SAST
+time in San Sebastián                        → 12:30 UTC-6
+
+// Not supported yet
+diff Tokyo London                            → <none>
+time in Tokyo when 9am in London             → 14:00 BST
+time in 3 hours in Tokyo                     → Thu, 24 Sep 2026 06:30 JST
+time in Tokyo in 3 hours                     → 17:30
+time in Bruges                               → <error: unknown place "Bruges", did you mean "Brunei"?>
+time in Santorini                            → <error: unknown place "Santorini">
+time in American Samoa                       → <error: unknown place "American Samoa">
+time in Reunion                              → 22:30 UTC+4
+time in qld                                  → <error: unknown place "qld">
+coordinates of Tokyo                         → <error: unexpected "of">
+distance between Tokyo and London            → <error: unexpected "between">

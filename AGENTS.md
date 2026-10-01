@@ -15,6 +15,23 @@ language calculator engine in the spirit of SoulverCore.
 - `crates/rechenkern/tests/calculations.rs` is the main test suite: input line
   -> expected answer text, with a fixed "now" (Wed 23 Sep 2026 14:30 New York)
   and fixed exchange rates. Every new phrase or fix gets a case there.
+- `src/tests/` sweeps the whole engine, at the same "now" and rates (every
+  other currency is 2 to the dollar):
+  - `snapshots.rs`: thousands of lines and their answers in `src/tests/snapshots/`,
+    from every unit, function, format, holiday and place, plus hand-written
+    lines in `src/tests/corpus/*.txt` (and sheets in `corpus/sheets/`). Any
+    changed answer fails the test: review the diff with `cargo insta review`
+    (or `INSTA_UPDATE=always cargo test` to accept all) and read it — an
+    unexpected change is a bug. Lines worth keeping an eye on go in the corpus.
+  - `properties.rs`: proptest checks random lines: no panics, answers read back
+    as the same value, answers that never read the clock don't change with it,
+    both decimal styles agree, a line answers the same after other lines unless
+    it reads them, unit conversions round-trip. The seed is fixed; look further
+    with `PROPTEST_RNG_SEED=$RANDOM PROPTEST_CASES=100000 cargo test --release --lib properties`.
+    A failure is shrunk to the shortest line: fix it, or exclude the case in the
+    property with a comment saying why.
+  - Test-only hooks: `tests::CLOCK_READS`/`SHEET_READS` count reads of the clock
+    and of earlier lines; `random()` is always 0.5 in these tests.
 - Try things by hand: `cargo run -q -- "10 usd to eur"`, pipe a file into
   `cargo run -q -- -a` for sheet mode.
 - `nix develop -c cargo bench` times every line of `benches/lines.txt` and the
@@ -60,8 +77,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   `at_word()`/`eat_word()`, which scan past noise to that word.
 - Leftover tokens: keywords are ignored, anything else is an error.
 - Parentheses that contain unknown words are comments: `$999 (for iPhone 16)`.
-- Values of the same kind side by side add up, also across comments
-  (`$20 for lunch $15 for taxi`, `2 x $3 coffee $5` = $11); a rate never does.
+- Values of the same kind side by side add up, also across comments and commas
+  (`$20 for lunch, $15 for taxi`, `2 x $3 coffee $5` = $11); a rate never does,
+  and in a list a comma separates items (`max($10, $20)`).
   Implicit multiplication (`2 pi`, `2(3 + 4)`) never crosses a comment word.
 - Numbers in text: when the words make no calculation (`Error::is_unclear`),
   the answer is the last value of the strongest kind, as in SoulverCore: a
@@ -71,10 +89,15 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - A list marker starting the line (`1. `, `2) `, `a) `) is skipped, unless a date
   starts there (`1. May 2024`).
 - `in` is never looked up as a unit. After a number it is inches only when no
-  conversion target follows (`5 in`, `5 in to cm`, but `5 in cm`).
+  conversion target follows (`5 in`, `5 in to cm`, but `5 in cm`); answers write
+  inches next to other units as `inch` (`N·inch³`, `$5/inch`).
+- `A` is an article before a word (`A coffee $5`), amperes otherwise (`5 V/A`).
+- Words joined by a hyphen are read together for units and places
+  (`light-year`, `pound-force`, `Aix-en-Provence`).
 - `/unit` and `per unit` right after a value form a rate at postfix level, so
   `4 nights * $120/night` multiplies by the rate (`Op::Per` keeps units apart,
   plain `Op::Div` merges units of the same kind: `3 hours / 3 days` = 0.04).
+  Units multiplied in parentheses are a rate's units too: `W/(m·K)`, `$/(kW·h)`.
 - A unit per an amount (`L/100km`) is a unit of its own, found by its symbol:
   `liters per 100 km` builds "L/100km". Against another unit it works as the
   plain rate (`8 L/100km * 500 km` = 40 L).
@@ -131,6 +154,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   calculation. Update or drop entries when the date changes or passes.
 - Daylight abbreviations (`EDT`, `AEDT`, `BST`) are fixed offsets; standard
   ones (`EST`, `AEST`) follow the region all year, as people use them.
+  Answers show an abbreviation only if it reads back as the same time ("JST",
+  "BST"), the offset otherwise: Belize's "CST" would be Chicago's (`UTC-6`).
+- Answers read back as the same value; that is what `answers_read_back` checks.
+  So picometers are written out (`1 pm` is a clock time) and an infinite result
+  is an error ("result is too large"), not `∞`.
 - Clock-only answers show the date when it isn't today; `Moment::seconds`
   hides seconds of `now`.
 - Numbers show `Config::precision` significant digits (default 10) but never
