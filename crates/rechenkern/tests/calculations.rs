@@ -701,6 +701,9 @@ fn comments_and_labels() {
         ("1. May 2024", "Wed, 1 May 2024"),
         ("# Heading 5", "<none>"),
         ("just some text", "<none>"),
+        ("$20 for lunch, $15 for taxi", "$35.00"),
+        ("3 km walk, 5 km run", "8 km"),
+        ("max($10, $20)", "$20.00"),
     ]);
 }
 

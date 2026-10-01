@@ -305,13 +305,16 @@ impl<'a> Parser<'a> {
     }
 
     /// A value of the same kind as the one `lhs` ends with, added without an operator:
-    /// "$20 for lunch $15 for taxi", "3 km walk 2 km run".
+    /// "$20 for lunch $15 for taxi", "3 km walk, 2 km run".
     fn same_kind_follows(&mut self, lhs: &Expr) -> Option<Expr> {
         let dim = lhs.edge_unit(true)?.dim();
-        if !self.amount_follows(0) {
+        // In a list, as in "max($10, $20)", the comma separates items.
+        let comma = usize::from(!self.in_list && self.at_sym(","));
+        if !self.amount_follows(comma) {
             return None;
         }
         let mut p = self.clone();
+        p.pos += comma;
         let rhs = p.multiplicative().ok()?;
         (rhs.edge_unit(false)?.dim() == dim).then(|| {
             *self = p;

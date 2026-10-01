@@ -406,6 +406,7 @@ impl Parser<'_> {
             return Ok(Some(Expr::Call(func, vec![self.unary()?, base])));
         }
         let mut args = if self.eat_sym("(") {
+            let saved = std::mem::replace(&mut self.in_list, true);
             let mut args = Vec::new();
             while !self.at_sym(")") && self.peek().is_some() {
                 args.push(self.expr()?);
@@ -413,6 +414,7 @@ impl Parser<'_> {
                     break;
                 }
             }
+            self.in_list = saved;
             self.eat_sym(")");
             args
         } else if self.eat_word("of") || self.eat_word("between") {
