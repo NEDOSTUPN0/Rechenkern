@@ -106,6 +106,7 @@ build). The Soulver app may understand more than the engine alone.
 | ------------------------------------------------ | :--------: | :--------------: |
 | Arithmetic, functions, number bases, rounding    |     ✓      |        ✓         |
 | Units, currencies, percentages, rates            |     ✓      |        ✓         |
+| Rate divided by quantity: `$500/month / 30 days` |     ✓      |        ✓         |
 | Dates, clock times, time zones, workdays         |     ✓      |        ✓         |
 | Sunrise, sunset, daylight, moon phase            |     ✓      |        ✓         |
 | Compound interest, rule of three                 |     ✓      |        ✓         |
@@ -115,7 +116,6 @@ build). The Soulver app may understand more than the engine alone.
 | Several currencies at once: `$50 in EUR, GBP`    |     ✓      |        ✗         |
 | Both decimal styles: `10,50` and `10.50`         |     ✓      |        ✗         |
 | `cast`, angles in DMS and hours                  |     ✗      |        ✓         |
-| Rate divided by quantity: `$500/month / 30 days` |     ✗      |        ✓         |
 | Inflation, cooking by density, music, timecode   |     ✗      |        ✓         |
 | Languages                                        |  English   |   English + 8    |
 | API for custom units and functions               |     ✗      |        ✓         |
