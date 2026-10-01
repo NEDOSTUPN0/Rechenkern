@@ -95,8 +95,10 @@ fn arithmetic() {
         ("seven times six", "42"),
         ("1/0", "<error: division by zero>"),
         ("2^99999", "<error: result is too large>"),
+        ("169! * 4211", "<error: result is too large>"),
         // Tiny products keep their digits.
         ("1.234567e-25 * 1.1", "1.3580237e-25"),
+        ("-1 hour", "-1 hour"),
     ]);
 }
 
@@ -120,6 +122,7 @@ fn decimal_separators() {
         ("10.50 eur", "€10,50"),
         ("$1,234,567.8", "$1.234.567,80"),
         ("10 USD in EUR, JPY", "€9,00; ¥1.500"),
+        ("3^45", "2,954312707e21"),
     ] {
         assert_eq!(calc.calculate(input).unwrap().unwrap().text(), expected, "{input}");
     }
@@ -385,6 +388,9 @@ fn units() {
         ("8 L/100km * 500 km", "40 L"),
         ("8 L/100km * 2", "16 L/100km"),
         ("cost of 500 km at 8 L/100km at $1.5/L", "$60.00"),
+        ("1 N * 1 in", "1 N·inch"),
+        ("1 picometer", "1 picometer"),
+        ("3 picometers in m", "3e-12 m"),
         ("2.5 pound-force in N", "11.12055404 N"),
         ("1 light-year in km", "9,460,730,472,581 km"),
         ("3 kilowatt-hours in J", "10,800,000 J"),
@@ -649,7 +655,7 @@ fn time_zones() {
         ("now in utc", "18:30 UTC"),
         ("3pm in tokyo", "Thu, 24 Sep 2026 04:00 JST"),
         ("6pm Sydney in Chicago", "03:00 CDT"),
-        ("2am PST to GMT", "09:00 UTC"),
+        ("2am PST to GMT", "09:00 GMT"),
         ("3pm GMT+8 to Paris", "09:00 CEST"),
         ("9:35am in New York to Japan", "22:35 JST"),
         ("time difference between Seattle and Tokyo", "16 hours"),
@@ -663,6 +669,9 @@ fn time_zones() {
         ("time in marseille", "20:30 CEST"),
         ("time in cordoba", "15:30 UTC-3"),
         ("time in the hague", "20:30 CEST"),
+        // Abbreviations only where they read back: Belize's "CST" would be Chicago's.
+        ("3pm Belize", "15:00 UTC-6"),
+        ("3pm Kampala", "15:00 UTC+3"),
         ("3pm WEST in UTC", "14:00 UTC"),
         ("Jan 10 3pm EDT in UTC", "Sat, 10 Jan 2026 19:00 UTC"),
         ("Jan 10 3pm EST in UTC", "Sat, 10 Jan 2026 20:00 UTC"),

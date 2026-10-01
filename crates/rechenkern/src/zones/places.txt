@@ -10,7 +10,7 @@
 # use it ("EST" in summer); daylight time is a fixed offset in POSIX form,
 # where the sign is reversed ("EDT4" is UTC-4).
 utc = UTC
-gmt = UTC
+gmt = Etc/GMT
 z = UTC
 zulu = UTC
 est = America/New_York

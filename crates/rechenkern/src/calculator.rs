@@ -182,6 +182,11 @@ impl Calculator {
                 (value, display, false, Some(name.clone()))
             }
         };
+        if let Value::Quantity(crate::value::Quantity { number, .. }) | Value::Percent(number) = &value
+            && !number.is_finite()
+        {
+            return Err(crate::Error::new("result is too large"));
+        }
         let text = format::render(&value, &display, &self.config, &env.now);
         drop(env);
         if let Some(name) = name {

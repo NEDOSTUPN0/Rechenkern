@@ -1,6 +1,6 @@
 //! Time zones by place name, abbreviation or UTC offset.
 
-use std::sync::LazyLock;
+use std::sync::{LazyLock, OnceLock};
 
 use jiff::Zoned;
 use jiff::tz::{Offset, TimeZone};
@@ -35,16 +35,26 @@ struct Listed {
     zone: String,
     /// Latitude and longitude of a listed city, if `cities.txt` doesn't have them.
     coordinates: Option<(f64, f64)>,
+    /// The zone, loaded on first use.
+    loaded: OnceLock<Option<TimeZone>>,
 }
 
 impl Listed {
+    fn new(zone: String, coordinates: Option<(f64, f64)>) -> Listed {
+        Listed { zone, coordinates, loaded: OnceLock::new() }
+    }
+
     /// Reads "Europe/London" or "Europe/London 51.38 -2.36".
     fn parse(text: &str) -> Listed {
         let mut fields = text.split_whitespace();
         let zone = fields.next().unwrap_or_default().to_string();
         let mut number = || fields.next()?.parse::<f64>().ok();
         let coordinates = number().zip(number());
-        Listed { zone, coordinates }
+        Listed::new(zone, coordinates)
+    }
+
+    fn time_zone(&self) -> Option<TimeZone> {
+        self.loaded.get_or_init(|| listed(&self.zone)).clone()
     }
 }
 
@@ -65,7 +75,7 @@ static INDEX: LazyLock<TableMap<String, Listed>> = LazyLock::new(|| {
             continue;
         }
         let city = zone_city_name(id);
-        index.entry(city).or_insert_with(|| Listed { zone: id.to_string(), coordinates: None });
+        index.entry(city).or_insert_with(|| Listed::new(id.to_string(), None));
     }
     index
 });
@@ -152,7 +162,7 @@ pub const MAX_WORDS: usize = 6;
 
 /// Finds a zone by lowercase place name or abbreviation, like "new york" or "pst".
 pub fn find(name: &str) -> Option<TimeZone> {
-    if let Some(zone) = INDEX.get(name).and_then(|l| listed(&l.zone)) {
+    if let Some(zone) = INDEX.get(name).and_then(Listed::time_zone) {
         return Some(zone);
     }
     // Full ids like "asia/tokyo" typed by the user.
@@ -279,9 +289,12 @@ pub fn fixed(seconds: i32) -> Option<TimeZone> {
 }
 
 /// A short label for the zone at that moment: "JST", "CEST" or "UTC+5".
+/// Only abbreviations that read back as the same time are used: Belize's
+/// "CST" would be Chicago's, which keeps daylight saving time.
 pub fn label(time: &Zoned) -> String {
     let abbr = time.strftime("%Z").to_string();
-    if !abbr.starts_with(['+', '-']) && !abbr.is_empty() {
+    let same_time = || find(&abbr.to_lowercase()).is_some_and(|zone| zone.to_offset(time.timestamp()) == time.offset());
+    if !abbr.starts_with(['+', '-']) && !abbr.is_empty() && same_time() {
         return abbr;
     }
     offset_label(time.offset())

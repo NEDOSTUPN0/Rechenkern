@@ -38,7 +38,7 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
 pub(crate) fn number(n: Number, config: &Config) -> String {
     match plain_digits(n, config.precision) {
         Some(digits) => group(&digits, config),
-        None => scientific(n, config.precision),
+        None => scientific(n, config),
     }
 }
 
@@ -86,12 +86,13 @@ fn group(digits: &str, config: &Config) -> String {
     out
 }
 
-fn scientific(n: Number, precision: u32) -> String {
-    let text = format!("{:.*e}", precision.saturating_sub(1) as usize, n.to_f64());
-    match text.split_once('e') {
+fn scientific(n: Number, config: &Config) -> String {
+    let text = format!("{:.*e}", config.precision.saturating_sub(1) as usize, n.to_f64());
+    let text = match text.split_once('e') {
         Some((mantissa, exp)) => format!("{}e{exp}", trim_zeros(mantissa.to_string())),
         None => text,
-    }
+    };
+    if config.decimal_comma { text.replace('.', ",") } else { text }
 }
 
 /// Exactly `dp` decimals, as for money: `12.50`.
@@ -159,12 +160,12 @@ fn gcd(a: u128, b: u128) -> u128 {
 fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
     let digits = match display {
         Display::Radix(r) => radix(q.number, *r).unwrap_or_else(|e| e.to_string()),
-        Display::Scientific => scientific(q.number, config.precision),
+        Display::Scientific => scientific(q.number, config),
         Display::Fraction => fraction(q.number, config),
         Display::Multiplier => return format!("{}x", number(q.number, config)),
         Display::Parts(units) => return parts(q, units, config),
         Display::Plain => {
-            plain_digits(q.number, config.precision.max(20)).unwrap_or_else(|| scientific(q.number, config.precision))
+            plain_digits(q.number, config.precision.max(20)).unwrap_or_else(|| scientific(q.number, config))
         }
         Display::Auto | Display::Each(_) | Display::Note(_) | Display::Period => {
             if let Some((currency, 1)) = q.unit.currency() {
@@ -181,7 +182,7 @@ fn with_unit(digits: &str, n: Number, unit: &Unit) -> String {
     if unit.is_none() {
         return digits.to_string();
     }
-    let text = unit_text(unit, n != Number::ONE);
+    let text = unit_text(unit, n.abs() != Number::ONE);
     let tight = unit.single().is_some_and(|d| d.tight) || text.starts_with('/');
     if tight { format!("{digits}{text}") } else { format!("{digits} {text}") }
 }
@@ -192,11 +193,10 @@ fn money(q: &Quantity, currency: &Currency, config: &Config) -> String {
     let minor = q.unit.factors().iter().map(|&(id, _)| registry().def(id)).find(|d| d.currency.is_some());
     let n = q.number * minor.map_or(Number::ONE, |d| d.scale);
     let digits = if currency.crypto {
-        group(
-            &plain_digits(n.abs().round_dp(8), config.precision)
-                .unwrap_or_else(|| scientific(n.abs(), config.precision)),
-            config,
-        )
+        match plain_digits(n.abs().round_dp(8), config.precision) {
+            Some(digits) => group(&digits, config),
+            None => scientific(n.abs(), config),
+        }
     } else {
         fixed(n.abs(), currency.decimals as u32, config)
     };
@@ -247,7 +247,9 @@ pub(crate) fn unit_text(unit: &Unit, plural: bool) -> String {
         let def = reg.def(id);
         // "km/day" reads better than "km/d".
         let long = def.calendar.is_some_and(|(cal, _)| cal >= jiff::Unit::Day);
-        let name = if def.spelled && (words || long) { def.name.clone() } else { def.symbol.clone() };
+        // "in" after other units or "/" reads as a word: "N·inch³", "$5/inch".
+        let inch = def.symbol == "in" && !matches!(unit.factors(), [(_, e)] if *e > 0);
+        let name = if def.spelled && (words || long) || inch { def.name.clone() } else { def.symbol.clone() };
         format!("{name}{}", superscript(e))
     };
     let num_text: Vec<String> = num.iter().map(|&(id, e)| symbol(id, e)).collect();

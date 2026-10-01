@@ -491,14 +491,18 @@ pub(super) fn build() -> Registry {
                 _ => None,
             };
             let base_def = &b.defs[base as usize];
+            let symbol = format!("{}{}", p.symbol, base_def.symbol);
+            // "1 pm" would read as a clock time: picometers are written out.
+            let spelled = symbol == "pm";
+            let symbol = if spelled { format!("{}{}", p.name, base_def.name) } else { symbol };
             let id = b.push(UnitDef {
-                symbol: format!("{}{}", p.symbol, base_def.symbol),
+                symbol,
                 name: format!("{}{}", p.name, base_def.name),
                 plural: format!("{}{}", p.name, base_def.plural),
                 dim: d.dim,
                 scale,
                 offset: Number::ZERO,
-                spelled: false,
+                spelled,
                 tight: false,
                 calendar,
                 currency: None,
