@@ -5,6 +5,8 @@ use std::cell::OnceCell;
 use jiff::tz::TimeZone;
 use jiff::{Timestamp, Zoned};
 
+use crate::number::Number;
+
 /// How to read ambiguous numeric dates like `03/04/2026`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DateOrder {
@@ -37,6 +39,8 @@ pub struct Config {
     /// Currency code meant by a bare `$`.
     pub dollar: String,
     pub angle_unit: AngleUnit,
+    /// Working hours in a workday, for `40 hours in workdays`.
+    pub hours_per_workday: Number,
     /// Local time zone; `None` uses the system zone.
     pub time_zone: Option<TimeZone>,
     /// Fixed current time, mostly for tests; `None` uses the clock.
@@ -53,6 +57,7 @@ impl Default for Config {
             date_order: DateOrder::DayFirst,
             dollar: "USD".into(),
             angle_unit: AngleUnit::Radians,
+            hours_per_workday: Number::from_i64(8),
             time_zone: None,
             now: None,
         }

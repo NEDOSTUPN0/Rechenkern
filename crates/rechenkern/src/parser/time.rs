@@ -33,9 +33,9 @@ pub(super) fn maybe_duration(expr: &Expr) -> bool {
     }
 }
 
-/// Days, weeks, months and years count whole dates.
+/// Days, weeks, months, years and workdays count whole dates.
 fn is_date_unit(unit: &Unit) -> bool {
-    unit.single().and_then(|d| d.calendar).is_some_and(|(cal, _)| cal >= jiff::Unit::Day)
+    unit.dim() == Dim::WORKDAY || unit.single().and_then(|d| d.calendar).is_some_and(|(cal, _)| cal >= jiff::Unit::Day)
 }
 
 impl Parser<'_> {

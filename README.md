@@ -29,7 +29,7 @@ time to upload 3GB at 10 MB/s                   5 minutes
 6 is to 60 as 8 is to what                      80
 days until christmas                            93 days
 3 weeks after March 14, 2019                    Thu, 4 Apr 2019
-workdays until christmas                        66 workdays
+workdays until christmas                        67 workdays
 time in Tokyo when it is 9am in London          17:00 JST
 6pm Sydney in Chicago                           03:00 CDT
 255 in binary                                   0b11111111

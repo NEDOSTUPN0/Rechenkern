@@ -109,7 +109,10 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   `monthly repayment on`) use the same phrase and are paid back monthly;
   `monthly`/`weekly` spread the total over the loan's time.
 - Workdays (Mon–Fri, no public holidays yet) have their own dimension, so they
-  never mix with time; `in workdays` counts them over a range or duration.
+  never mix with days; `in workdays` counts them over a range or a span of days.
+  Shorter time is hours of work (`Config::hours_per_workday`, 8): `40 hours in
+  workdays` = 5, `$100/hour * 1 workday` = $800. Dates move by whole workdays,
+  skipping weekends (`today + 5 workdays`).
 - Quarters (`Q3 2026`, `next quarter`) are periods (`Expr::Period`): alone they show
   their first and last day, in a calculation they are their length (`Q3 in days` =
   92 days), and a range starts at their first day (`days until Q4`) or runs through

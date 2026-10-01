@@ -143,7 +143,7 @@ fn config(args: &Args) -> Result<Config, String> {
         dollar: args.dollar.to_uppercase(),
         angle_unit: if args.degrees { AngleUnit::Degrees } else { AngleUnit::Radians },
         time_zone,
-        now: None,
+        ..Config::default()
     })
 }
 

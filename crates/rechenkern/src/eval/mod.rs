@@ -206,6 +206,9 @@ impl Env<'_> {
             return Ok(Quantity::new(q.number, to.clone()));
         }
         if q.unit.dim() != to.dim() {
+            if let Some(q) = self.work_time(q, to)? {
+                return Ok(q);
+            }
             bail!("can't convert {} to {}", unit_text(&q.unit, true), unit_text(to, true));
         }
         if let (Some(a), Some(b)) = (q.unit.single(), to.single())
@@ -292,12 +295,18 @@ impl Env<'_> {
     }
 
     fn to_unit(&self, value: Value, unit: &Unit) -> Result<Value> {
-        if unit.dim() == Dim::WORKDAY && !matches!(&value, Value::Quantity(q) if q.unit.dim() == Dim::WORKDAY) {
-            let duration = match value {
-                Value::Duration(d) => d,
-                v => Duration::new(self.span_of(&v)?),
+        // Days and longer count Monday to Friday dates; hours are hours of work.
+        if unit.dim() == Dim::WORKDAY {
+            let dates = match &value {
+                Value::Duration(d) => Some(d.clone()),
+                Value::Quantity(q) if q.unit.dim() == Dim::TIME && !time::shorter_than_days(&q.unit) => {
+                    Some(Duration::new(self.span_of(&value)?))
+                }
+                _ => None,
             };
-            return Ok(Value::Quantity(Quantity::new(self.workdays(&duration)?, unit.clone())));
+            if let Some(d) = dates {
+                return Ok(Value::Quantity(Quantity::new(self.workdays(&d)?, unit.clone())));
+            }
         }
         match value {
             // "30 mpg in L/100km", "2 seconds in Hz": a unit of the inverse kind takes the reciprocal,

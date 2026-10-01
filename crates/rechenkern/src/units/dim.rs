@@ -21,7 +21,8 @@ impl Dim {
     pub const ANGLE: Dim = Dim::base(6);
     pub const DATA: Dim = Dim::base(7);
     pub const MONEY: Dim = Dim::base(8);
-    /// Workdays are counted on a calendar, so they don't convert to time.
+    /// Workdays are counted on a calendar, so they don't convert to days; hours
+    /// of work convert at `Config::hours_per_workday`.
     pub const WORKDAY: Dim = Dim::base(9);
 
     pub const AREA: Dim = Dim::LENGTH.pow(2);
@@ -66,6 +67,11 @@ impl Dim {
             i += 1;
         }
         Dim(d)
+    }
+
+    /// The exponent of a base quantity: -1 for time in a speed.
+    pub fn exponent(self, base: Dim) -> i8 {
+        self.0.iter().zip(base.0).map(|(e, b)| e * b).sum()
     }
 
     pub fn is_none(self) -> bool {

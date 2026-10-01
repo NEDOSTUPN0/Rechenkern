@@ -108,6 +108,13 @@ impl Env<'_> {
             return Ok(Value::Quantity(Quantity::new(combine(x.number, y.number), unit)));
         }
         if x.unit.dim() != y.unit.dim() {
+            // "1 workday + 4 hours" counts the hours as work: 1.5 workdays. Rates keep the last unit.
+            if self.work_time(&y, &x.unit)?.is_some() {
+                let rate = y.unit.factors().len() > 1 || y.unit.currency().is_some();
+                let target = if rate || self.work_hours(&x.unit).is_none() { y.unit.clone() } else { x.unit.clone() };
+                let (a, b) = (self.convert_quantity(&x, &target)?.number, self.convert_quantity(&y, &target)?.number);
+                return Ok(Value::Quantity(Quantity::new(combine(a, b), target)));
+            }
             bail!("can't combine {} and {}", unit_text(&x.unit, true), unit_text(&y.unit, true));
         }
         if x.unit.dim() == Dim::TIME && !is_calendar(&x.unit) && !is_calendar(&y.unit) {
@@ -229,6 +236,7 @@ impl Env<'_> {
             true => (x, y),
             false => (plain_rates(x), plain_rates(y)),
         };
+        let (x, y) = self.work_hours_against_time(x, y, divide);
         let y_unit = if divide { y.unit.pow(-1) } else { y.unit.clone() };
         let number = if divide { x.number / y.number } else { x.number * y.number };
         // "$30 × 4 days" means $30 a day: money times a non-money unit stays money.
@@ -248,6 +256,22 @@ impl Env<'_> {
         }
         let (unit, factor) = x.unit.mul(&y_unit, &|id| self.scale(id))?;
         Ok(Quantity::new(number * factor, unit))
+    }
+
+    /// Workdays that would cancel against hours are hours of work:
+    /// "$100/hour × 1 workday" is $800, "1 workday / 1 hour" is 8.
+    fn work_hours_against_time(&self, x: Quantity, y: Quantity, divide: bool) -> (Quantity, Quantity) {
+        let dim = if divide { x.unit.dim().div(y.unit.dim()) } else { x.unit.dim().mul(y.unit.dim()) };
+        let (work, time) = (dim.exponent(Dim::WORKDAY), dim.exponent(Dim::TIME));
+        let clock = super::time::shorter_than_days(&x.unit) && super::time::shorter_than_days(&y.unit);
+        if work * time >= 0 || !clock {
+            return (x, y);
+        }
+        let hours = |q: Quantity| match self.work_hours(&q.unit) {
+            Some((unit, factor)) => Quantity::new(q.number * factor, unit),
+            None => q,
+        };
+        (hours(x), hours(y))
     }
 
     fn pow(&self, a: Value, b: Value) -> Result<Value> {

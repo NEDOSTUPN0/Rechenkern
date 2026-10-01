@@ -293,6 +293,15 @@ impl Env<'_> {
 
     /// Moves a moment by a duration or a time quantity.
     pub(super) fn shift(&self, m: &Moment, by: &Value, back: bool) -> Result<Moment> {
+        if let Value::Quantity(q) = by
+            && q.unit.dim() == Dim::WORKDAY
+        {
+            let Some(n) = q.number.to_i64().filter(|_| q.number.is_integer() && q.unit.single().is_some()) else {
+                bail!("only whole workdays can be added to a date");
+            };
+            let date = add_workdays(m.time.date(), if back { -n } else { n })?;
+            return Ok(Moment { time: m.time.with().date(date).build()?, ..m.clone() });
+        }
         let span = self.span_of(by)?;
         let span = if back { span.negate() } else { span };
         let time = m.time.checked_add(span)?;
@@ -389,21 +398,51 @@ impl Env<'_> {
         self.convert_quantity(&seconds, unit)
     }
 
-    /// Monday to Friday days in a duration, starting today unless anchored.
+    /// Workdays in a duration: Monday to Friday dates in a span of days or more,
+    /// starting today unless anchored; hours of work in a shorter one.
     pub(super) fn workdays(&self, d: &Duration) -> Result<Number> {
         let span = d.span.abs();
-        let start = d.anchor.map_or(self.today(), |a| a.date());
-        let end = start.checked_add(span)?;
+        if [Cal::Year, Cal::Month, Cal::Week, Cal::Day].iter().all(|&c| get(&span, c) == 0) {
+            let hours = self.seconds(&Value::Duration(d.clone()))?.abs() / Number::from_i64(3600);
+            return Ok(hours / self.config.hours_per_workday);
+        }
+        let start = d.anchor.unwrap_or_else(|| self.today().to_datetime(jiff::civil::Time::midnight()));
+        let (start, end) = (start.date(), start.checked_add(span)?.date());
         let days = start.until((Cal::Day, end))?.get_days() as i64;
         let mut count = days / 7 * 5;
         let mut day = start.checked_add(Span::new().weeks(days / 7))?;
         while day < end {
-            if !matches!(day.weekday(), Weekday::Saturday | Weekday::Sunday) {
+            if !is_weekend(day) {
                 count += 1;
             }
             day = day.tomorrow()?;
         }
         Ok(Number::from_i64(count))
+    }
+
+    /// The unit with its workdays written as hours of work, and the factor for
+    /// the value: `$800/workday` is $100/h. `None` without workdays.
+    pub(super) fn work_hours(&self, unit: &Unit) -> Option<(Unit, Number)> {
+        let workday = registry().get("workday");
+        let exp = unit.dim().exponent(Dim::WORKDAY);
+        if exp == 0 {
+            return None;
+        }
+        let hours = unit.product(&workday.pow(-exp)).product(&registry().get("h").pow(exp));
+        Some((hours, self.config.hours_per_workday.powi(exp as i64)))
+    }
+
+    /// Workdays and clock time meet as hours of work: `3 workdays in hours`,
+    /// `$100/hour in per workday`. Days and longer don't: they count dates.
+    pub(super) fn work_time(&self, q: &Quantity, to: &Unit) -> Result<Option<Quantity>> {
+        let (from, factor) = self.work_hours(&q.unit).unwrap_or((q.unit.clone(), Number::ONE));
+        let (target, target_factor) = self.work_hours(to).unwrap_or((to.clone(), Number::ONE));
+        let has_workdays = from != q.unit || target != *to;
+        if !has_workdays || from.dim() != target.dim() || !shorter_than_days(&q.unit) || !shorter_than_days(to) {
+            return Ok(None);
+        }
+        let hours = self.convert_quantity(&Quantity::new(q.number * factor, from), &target)?;
+        Ok(Some(Quantity::new(hours.number / target_factor, to.clone())))
     }
 
     /// Seconds (or milliseconds, for big numbers) since 1970 as a date.
@@ -414,6 +453,34 @@ impl Env<'_> {
         let time = Timestamp::from_nanosecond(nanos)?.to_zoned(self.local_zone());
         Ok(Moment { time, kind: MomentKind::DateTime, zoned: false, seconds: true })
     }
+}
+
+/// Its time units are all shorter than a day: hours of work fit in workdays, days don't.
+pub(super) fn shorter_than_days(unit: &Unit) -> bool {
+    let day = Number::from_i64(86_400);
+    unit.factors().iter().map(|&(id, _)| registry().def(id)).all(|d| d.dim != Dim::TIME || d.scale < day)
+}
+
+fn is_weekend(date: Date) -> bool {
+    matches!(date.weekday(), Weekday::Saturday | Weekday::Sunday)
+}
+
+/// Moves `n` workdays from `date`, skipping weekends: Friday + 1 is Monday.
+fn add_workdays(date: Date, n: i64) -> Result<Date> {
+    let step = days(n.signum());
+    let mut day = date;
+    // From a weekend, count from the workday behind it: Saturday + 1 is Monday.
+    while n != 0 && is_weekend(day) {
+        day = day.checked_sub(step)?;
+    }
+    day = day.checked_add(Span::new().try_weeks(n / 5)?)?;
+    for _ in 0..(n % 5).abs() {
+        day = day.checked_add(step)?;
+        while is_weekend(day) {
+            day = day.checked_add(step)?;
+        }
+    }
+    Ok(day)
 }
 
 fn weekday_date(today: Date, weekday: Weekday, which: Option<Which>) -> Result<Date> {
