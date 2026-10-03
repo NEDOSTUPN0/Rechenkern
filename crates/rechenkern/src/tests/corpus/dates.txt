@@ -52,18 +52,19 @@ sunset in Paris tomorrow
 hours of daylight in Reykjavik on Dec 21
 moon phase on Oct 10
 lunar day on Oct 11
-// Not supported yet
+// Periods and weeks
 days between March 3 to May 30
+start of next month
+end of Q3
+week number March 5, 2026
+friday in 3 weeks
+// Not supported yet
 days left in this month
 days left in the year
 days in next month
 days until March
-start of next month
-end of Q3
 year %
-week number March 5, 2026
 3 days ago at 5pm
-friday in 3 weeks
 3.5 hours as hms
 10 km in 50 minutes
 midday

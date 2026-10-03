@@ -25,11 +25,13 @@ time in Parma                                → 23:30 UTC+5
 time in Queenstown                           → 20:30 SAST
 time in San Sebastián                        → 12:30 UTC-6
 
-// Not supported yet
-diff Tokyo London                            → <none>
+// Times elsewhere
 time in Tokyo when 9am in London             → 17:00 JST
 time in 3 hours in Tokyo                     → Thu, 24 Sep 2026 06:30 JST
 time in Tokyo in 3 hours                     → Thu, 24 Sep 2026 06:30 JST
+
+// Not supported yet
+diff Tokyo London                            → <none>
 time in Bruges                               → <error: unknown place "Bruges", did you mean "Brunei"?>
 time in Santorini                            → <error: unknown place "Santorini">
 time in American Samoa                       → <error: unknown place "American Samoa">

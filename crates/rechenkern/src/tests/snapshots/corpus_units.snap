@@ -28,18 +28,18 @@ hours in a week                              → 168 hours
 1 AU in km                                   → 149,597,870.7 km
 3K                                           → 3 K
 3 kelvin                                     → 3 K
-
-// Not supported yet
 100 farenheit in celcius                     → 37.77777778 °C
-1 rad/s in rpm                               → <error: can't convert rad/s to rpm>
-12 V * 2 A                                   → 24 V·A
-5 A * 10 Ω                                   → 50 A·Ω
-10 kg * 9.8 m/s^2                            → 98 kg·m/s²
 12pt in px                                   → 16 px
 2 rem in px                                  → 32 px
 1 Kib in bits                                → 1,024 bit
 1 cup of flour in grams                      → <error: can't convert cup to g>
 100 hp at 3000 rpm                           → 237.3636413 N·m
+1 quarter in months                          → 3 months
+
+// Not supported yet
+1 rad/s in rpm                               → <error: can't convert rad/s to rpm>
+12 V * 2 A                                   → 24 V·A
+5 A * 10 Ω                                   → 50 A·Ω
+10 kg * 9.8 m/s^2                            → 98 kg·m/s²
 5 km cast to miles                           → 3.106855961 mi
 2000 mAh * 3.7 V                             → 7,400 mA·h·V
-1 quarter in months                          → 3 months

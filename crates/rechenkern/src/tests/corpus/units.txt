@@ -25,17 +25,17 @@ hours in a week
 1 AU in km
 3K
 3 kelvin
-// Not supported yet
 100 farenheit in celcius
-1 rad/s in rpm
-12 V * 2 A
-5 A * 10 Ω
-10 kg * 9.8 m/s^2
 12pt in px
 2 rem in px
 1 Kib in bits
 1 cup of flour in grams
 100 hp at 3000 rpm
+1 quarter in months
+// Not supported yet
+1 rad/s in rpm
+12 V * 2 A
+5 A * 10 Ω
+10 kg * 9.8 m/s^2
 5 km cast to miles
 2000 mAh * 3.7 V
-1 quarter in months
