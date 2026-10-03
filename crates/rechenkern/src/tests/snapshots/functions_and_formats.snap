@@ -243,9 +243,24 @@ stddev of 2, 8 and 4                         → 3.055050463
 stdev(16)                                    → <error: standard deviation needs at least two values>
 stdev(2, 8)                                  → 4.242640687
 stdev of 2, 8 and 4                          → 3.055050463
+std dev(16)                                  → <error: standard deviation needs at least two values>
+std dev(2, 8)                                → 4.242640687
+std dev of 2, 8 and 4                        → 3.055050463
+std deviation(16)                            → <error: standard deviation needs at least two values>
+std deviation(2, 8)                          → 4.242640687
+std deviation of 2, 8 and 4                  → 3.055050463
+sample standard deviation(16)                → <error: standard deviation needs at least two values>
+sample standard deviation(2, 8)              → 4.242640687
+sample standard deviation of 2, 8 and 4      → 3.055050463
 midpoint(16)                                 → <error: Midpoint takes 2 arguments>
 midpoint(2, 8)                               → 5
 midpoint of 2, 8 and 4                       → <error: Midpoint takes 2 arguments>
+mid point(16)                                → <error: Midpoint takes 2 arguments>
+mid point(2, 8)                              → 5
+mid point of 2, 8 and 4                      → <error: Midpoint takes 2 arguments>
+mid-point(16)                                → <error: Midpoint takes 2 arguments>
+mid-point(2, 8)                              → 5
+mid-point of 2, 8 and 4                      → <error: Midpoint takes 2 arguments>
 halfway(16)                                  → <error: Midpoint takes 2 arguments>
 halfway(2, 8)                                → 5
 halfway of 2, 8 and 4                        → <error: Midpoint takes 2 arguments>

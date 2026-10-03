@@ -231,6 +231,14 @@ pub enum Func {
     IsPrime,
 }
 
+impl Func {
+    /// Takes a list of values, also without "of": `average 36, 42, 19`.
+    pub fn takes_list(self) -> bool {
+        use Func::*;
+        matches!(self, Sum | Average | Median | Count | StdDev | Min | Max | Gcd | Lcm | Midpoint)
+    }
+}
+
 /// Reference to answers of earlier lines.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LineRef {

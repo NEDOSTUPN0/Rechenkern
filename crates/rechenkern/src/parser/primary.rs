@@ -321,7 +321,9 @@ impl Parser<'_> {
     /// `prev`, `line 3`, `sum`, `average`.
     fn line_ref(&mut self) -> Result<Option<Expr>> {
         let w = self.lower(self.pos).unwrap_or_default();
-        let followed_by_args = self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_sym("("));
+        // "sum of 1, 2", "average(1, 2)", "average 36, 42" are functions.
+        let followed_by_args =
+            self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_sym("(")) || self.amount_follows(1);
         let line = match w.as_str() {
             "prev" | "previous" | "ans" | "answer" | "above" => LineRef::Previous,
             "sum" | "total" | "subtotal" if !followed_by_args => LineRef::Sum,
@@ -432,6 +434,9 @@ impl Parser<'_> {
             args
         } else if self.eat_word("of") || self.eat_word("between") {
             self.list()?
+        } else if func.takes_list() && self.list_follows() {
+            // "average 36, 42, 19, 81"
+            self.list()?
         } else {
             let first = self.unary()?;
             // "log 4 of 20": the base comes first, like the degree of a root.
@@ -472,6 +477,13 @@ impl Parser<'_> {
         let x = p.unary()?;
         *self = p;
         Ok(Some(Expr::Call(Func::Root, vec![Expr::Number(degree), x])))
+    }
+
+    /// A list of items starts at the cursor: `36, 42` or `3 and 7`.
+    fn list_follows(&self) -> bool {
+        let mut p = self.clone();
+        p.in_list = true;
+        p.bit_or().is_ok() && (p.at_sym(",") || p.at_word("and"))
     }
 
     /// Items separated by commas and "and": `3, 4 and 5`.

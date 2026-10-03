@@ -126,6 +126,14 @@ impl<'a> Parser<'a> {
             if rest.is_empty() {
                 return Some(n);
             }
+            // "mid-point": a hyphen joins the words.
+            if let Some(after) = rest.strip_prefix('-')
+                && self.toks.get(i + n).is_some_and(|t| t.is_sym("-") && !t.space_before)
+            {
+                n += 1;
+                rest = after;
+                continue;
+            }
             rest = rest.strip_prefix(' ')?;
         }
     }

@@ -33,7 +33,7 @@ impl<T> Phrases<T> {
         let index = self.by_first_word.get_or_init(|| {
             let mut index: TableMap<String, Vec<usize>> = TableMap::default();
             for (k, (phrase, _)) in self.entries.iter().enumerate() {
-                let first = phrase.split(' ').next().unwrap_or(phrase);
+                let first = phrase.split([' ', '-']).next().unwrap_or(phrase);
                 index.entry(first.to_ascii_lowercase()).or_default().push(k);
             }
             index
@@ -260,7 +260,12 @@ pub static FUNCTIONS: Phrases<Func> = Phrases::new(&[
     ("standard deviation", Func::StdDev),
     ("stddev", Func::StdDev),
     ("stdev", Func::StdDev),
+    ("std dev", Func::StdDev),
+    ("std deviation", Func::StdDev),
+    ("sample standard deviation", Func::StdDev),
     ("midpoint", Func::Midpoint),
+    ("mid point", Func::Midpoint),
+    ("mid-point", Func::Midpoint),
     ("halfway", Func::Midpoint),
     ("random number", Func::Random),
     ("random", Func::Random),
