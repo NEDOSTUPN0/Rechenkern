@@ -332,6 +332,11 @@ impl Parser<'_> {
                 matches!(self.toks.get(self.pos + 1).map(|t| &t.tok), Some(Tok::Num(_) | Tok::Clock { .. }));
             if !short || clock_follows {
                 self.pos += 1;
+                // "friday in 3 weeks": that day of the week 3 weeks from now.
+                if let Some(weeks) = self.in_weeks() {
+                    let day = Expr::Time(TimeExpr::Weekday(weekday, Some(Which::This)));
+                    return Ok(Some(Expr::binary(Op::Add, day, weeks)));
+                }
                 return Ok(Some(Expr::Time(TimeExpr::Weekday(weekday, None))));
             }
         }
@@ -356,6 +361,23 @@ impl Parser<'_> {
             return Ok(Some(Expr::Noted(date.boxed(), event.note)));
         }
         Ok(None)
+    }
+
+    /// "in 3 weeks", "in a fortnight" at the cursor: the weeks, read past.
+    fn in_weeks(&mut self) -> Option<Expr> {
+        if !self.words_at(self.pos, &["in"]) {
+            return None;
+        }
+        let mut p = self.clone();
+        p.pos += 1;
+        let amount = p.multiplicative().ok()?;
+        let unit = match &amount {
+            Expr::WithUnit(_, u) | Expr::BareUnit(u) => u,
+            _ => return None,
+        };
+        unit.single()?.calendar.filter(|(cal, _)| *cal == jiff::Unit::Week)?;
+        *self = p;
+        Some(amount)
     }
 
     /// An event name at token `i`, such as `GTA 6`.
@@ -427,11 +449,21 @@ impl Parser<'_> {
         Ok(Some(Expr::Time(TimeExpr::Today(0))))
     }
 
-    /// `A and B` inside `between`.
+    /// `A and B` inside `between`; also `A to B` and `A - B`.
     fn pair(&mut self) -> Result<[Expr; 2]> {
         let saved = std::mem::replace(&mut self.in_list, true);
         let a = self.additive()?;
-        let through = self.range_word(&["and"]) == Some(true);
+        let through = match self.range_word(&["and", "to"]) {
+            Some(through) => through,
+            // "between March 3 - May 30" reads as a subtraction of dates.
+            None => match a {
+                Expr::Binary(Op::Sub, a, b) if matches!((&*a, &*b), (Expr::Time(_), Expr::Time(_))) => {
+                    self.in_list = saved;
+                    return Ok([*a, *b]);
+                }
+                _ => false,
+            },
+        };
         let b = self.range_end(through)?;
         self.in_list = saved;
         Ok([a, b])

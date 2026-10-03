@@ -518,7 +518,7 @@ impl Parser<'_> {
     fn date_part(&mut self) -> Result<Option<Expr>> {
         let Some((format, n)) = self.phrase_at(self.pos, &words::DATE_PARTS) else { return Ok(None) };
         self.pos += n;
-        let date = if self.eat_word("on") || self.eat_word("of") || self.eat_word("for") {
+        let date = if self.eat_word("on") || self.eat_word("of") || self.eat_word("for") || self.date_starts(self.pos) {
             self.additive()?
         } else {
             Expr::Time(TimeExpr::Today(0))

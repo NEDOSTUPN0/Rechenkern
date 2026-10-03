@@ -59,7 +59,7 @@ moon phase on Oct 10                         → New Moon
 lunar day on Oct 11                          → 2
 
 // Not supported yet
-days between March 3 to May 30               → 2 months 3 weeks 6 days
+days between March 3 to May 30               → 88 days
 days left in this month                      → <error: can't convert a date to days>
 days left in the year                        → 365.2425 days
 days in next month                           → <error: can't convert a date to days>
@@ -67,9 +67,9 @@ days until March                             → <error: expected a value at the
 start of next month                          → Thu, 1 Oct 2026
 end of Q3                                    → Wed, 30 Sep 2026
 year %                                       → <error: can't make time a percentage>
-week number March 5, 2026                    → Thu, 5 Mar 2026
+week number March 5, 2026                    → 10
 3 days ago at 5pm                            → <error: can't multiply a date by a date>
-friday in 3 weeks                            → Wed, 14 Oct 2026
+friday in 3 weeks                            → Fri, 16 Oct 2026
 3.5 hours as hms                             → <error: time has no time zone>
 10 km in 50 minutes                          → 10 km
 midday                                       → <none>
