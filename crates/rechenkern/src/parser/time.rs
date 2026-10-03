@@ -531,8 +531,11 @@ impl Parser<'_> {
             "from" if self.date_starts(self.pos + 1) => {
                 self.pos += 1;
                 let a = self.additive()?;
-                let through = self.range_word(&["to"]) == Some(true);
-                Expr::Range(a.boxed(), self.range_end(through)?.boxed())
+                match self.range_word(&["to", "until", "till"]) {
+                    Some(through) => Expr::Range(a.boxed(), self.range_end(through)?.boxed()),
+                    // "days from Jan 1" counts to now, as "since" does.
+                    None => Expr::Range(a.boxed(), start().boxed()),
+                }
             }
             // "days in February 2020", "days in Q3", "days left in 2026"
             "in" | "left" | "remaining" => {

@@ -5,7 +5,7 @@ use jiff::tz::TimeZone;
 use jiff::{Span, Timestamp, Unit as Cal, Zoned};
 
 use super::Env;
-use crate::ast::{Expr, Holiday, TimeExpr, Which};
+use crate::ast::{Expr, Holiday, Op, TimeExpr, Which};
 use crate::error::{Error, Result, bail};
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
@@ -149,6 +149,15 @@ pub(super) fn split(seconds: Number, units: &[Unit]) -> Result<Span> {
     Ok(if negative { span.negate() } else { span })
 }
 
+/// A date without a year, maybe moved: "March 10", "March 10 + 1 day".
+pub(super) fn yearless(e: &Expr) -> bool {
+    match e {
+        Expr::Time(TimeExpr::Date { year: None, .. }) => true,
+        Expr::Binary(Op::Add, date, _) => yearless(date),
+        _ => false,
+    }
+}
+
 fn days(n: i64) -> Span {
     Span::new().days(n)
 }
@@ -188,9 +197,10 @@ impl Env<'_> {
                         0
                     };
                 }
-                match Date::new(year, *month, *day) {
-                    Ok(d) => self.date_moment(d),
-                    Err(_) => bail!("invalid date {month}/{day}"),
+                // February 29 is the next one.
+                match (year..year + 8).find_map(|y| Date::new(y, *month, *day).ok()) {
+                    Some(d) => self.date_moment(d),
+                    None => bail!("invalid date {month}/{day}"),
                 }
             }
             TimeExpr::Weekday(weekday, which) => self.date_moment(weekday_date(today, *weekday, *which)?),
@@ -268,6 +278,46 @@ impl Env<'_> {
             return Ok(Moment { time: date.to_zoned(zone.clone())?, zoned: true, ..m });
         }
         Ok(Moment { time: m.time.with_time_zone(zone.clone()), zoned: true, ..m })
+    }
+
+    /// The two ends of a range. A date without a year is read next to the other end:
+    /// "Dec 1 to Jan 31" ends next year, "days since Dec 25" starts last year.
+    pub(super) fn range_ends(&self, a: &Expr, b: &Expr) -> Result<(Value, Value)> {
+        if yearless(b) {
+            let start = self.endpoint(a)?;
+            let end = match &start {
+                Value::Moment(m) => self.date_near(b, m.time.date(), true)?,
+                _ => self.endpoint(b)?,
+            };
+            return Ok((start, end));
+        }
+        if yearless(a) {
+            let end = self.endpoint(b)?;
+            let start = match &end {
+                Value::Moment(m) => self.date_near(a, m.time.date(), false)?,
+                _ => self.endpoint(a)?,
+            };
+            return Ok((start, end));
+        }
+        Ok((self.endpoint(a)?, self.endpoint(b)?))
+    }
+
+    /// A date without a year (maybe moved, as in "through March 10") on or after
+    /// `anchor`, or on or before it.
+    fn date_near(&self, e: &Expr, anchor: Date, after: bool) -> Result<Value> {
+        match e {
+            Expr::Time(TimeExpr::Date { year: None, month, day }) => {
+                // February 29 can be years away.
+                let step = if after { 1 } else { -1 };
+                let date = (0..=8)
+                    .filter_map(|k| Date::new(anchor.year() + step * k, *month, *day).ok())
+                    .find(|&d| if after { d >= anchor } else { d <= anchor })
+                    .ok_or_else(|| Error::new(format!("invalid date {month}/{day}")))?;
+                Ok(Value::Moment(self.date_moment(date)?))
+            }
+            Expr::Binary(Op::Add, date, by) => self.add(self.date_near(date, anchor, after)?, self.eval(by)?),
+            e => self.endpoint(e),
+        }
     }
 
     /// A range endpoint; a period there is its first day: `days until Q4`.

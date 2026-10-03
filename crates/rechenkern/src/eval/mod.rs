@@ -9,7 +9,7 @@ pub(crate) use time::get as span_field;
 
 use std::collections::HashMap;
 
-use crate::ast::{Direction, Expr, Format, GrowthResult, LineRef, Rounding, Target};
+use crate::ast::{Direction, Expr, Format, GrowthResult, LineRef, Op, Rounding, Target};
 use crate::config::{Config, Now};
 use crate::error::{Error, Result, bail};
 use crate::format::unit_text;
@@ -103,6 +103,11 @@ impl Env<'_> {
             },
             Expr::Neg(inner) => self.negate(self.eval(inner)?)?,
             Expr::Factorial(inner) => functions::factorial(self.eval(inner)?)?,
+            // "Jan 1 - Mar 1" is a range, as "Jan 1 to Mar 1".
+            Expr::Binary(Op::Sub, a, b) if time::yearless(a) && time::yearless(b) => {
+                let (a, b) = self.range_ends(a, b)?;
+                self.range(a, b)?
+            }
             Expr::Binary(op, a, b) => self.binary(*op, self.eval(a)?, self.eval(b)?)?,
             Expr::Composite(parts) => self.composite(parts)?,
             Expr::Noted(inner, _) => self.eval(inner)?,
@@ -118,7 +123,10 @@ impl Env<'_> {
             Expr::Line(line) => self.line(*line)?,
             Expr::Time(t) => Value::Moment(self.moment(t)?),
             Expr::InZone(inner, zone) => Value::Moment(self.place_in_zone(self.eval(inner)?, zone)?),
-            Expr::Range(a, b) => self.range(self.endpoint(a)?, self.endpoint(b)?)?,
+            Expr::Range(a, b) => {
+                let (a, b) = self.range_ends(a, b)?;
+                self.range(a, b)?
+            }
             Expr::Period(first, length) => self.period(first, length)?,
             Expr::ZoneDiff(a, b) => self.zone_difference(a, b)?,
             Expr::Sky { what, place, on } => self.sky(*what, place.as_ref(), on.as_deref())?,

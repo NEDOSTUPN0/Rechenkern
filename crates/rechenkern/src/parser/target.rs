@@ -29,9 +29,10 @@ impl Parser<'_> {
             self.pos += n;
             return Ok(Some(Expr::Convert(expr.clone().boxed(), Target::Format(format))));
         }
-        // "March 3 through March 10"
-        if self.range_word(&[]).is_some() {
-            return Ok(Some(Expr::Range(expr.clone().boxed(), self.range_end(true)?.boxed())));
+        // "March 3 through March 10", "Jan 1 until Mar 1"
+        let until: &[&str] = if is_moment(expr) { &["until", "till"] } else { &[] };
+        if let Some(through) = self.range_word(until) {
+            return Ok(Some(Expr::Range(expr.clone().boxed(), self.range_end(through)?.boxed())));
         }
         let Some(tok) = self.peek() else { return Ok(None) };
         let keyword = match &tok.tok {

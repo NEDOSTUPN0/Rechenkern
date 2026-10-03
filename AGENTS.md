@@ -169,7 +169,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Month = 30.436875 days, year = 365.2425 days (as in Soulver). Date
   arithmetic uses calendar spans (`Jan 31 + 1 month` = `Feb 29` in 2020).
 - A date without a year is this year unless that is more than 270 days away.
-  Holidays without a year are the next occurrence.
+  Holidays without a year are the next occurrence. In a range the other end
+  decides, as in SoulverCore: `Dec 1 to Jan 31` ends next year, `days since Dec 25`
+  starts last year, `Jan 1 - Mar 1` is a range too.
 - Events with a fixed date (`GTA 6 release date`) live in `words::EVENTS`;
   their note (`(probably)`) is display only (`Expr::Noted`), never part of a
   calculation. Update or drop entries when the date changes or passes.
