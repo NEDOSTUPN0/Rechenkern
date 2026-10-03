@@ -220,9 +220,9 @@ impl Parser<'_> {
         p.eat_sym(",");
         let Some(Tok::Num(n)) = p.cur().map(|t| &t.tok) else { return None };
         let y = n.to_i64().filter(|y| (1000..=9999).contains(y))?;
-        // "June 5 2020 + 3" keeps the year, "June 5 1500 m" does not.
+        // "June 5 2020 + 3" and "March 9, 2024 day of the week" keep the year, "June 5 1500 m" does not.
         p.pos += 1;
-        if p.unit_at(p.pos, true).is_some() {
+        if p.unit_at(p.pos, true).is_some() && p.phrase_at(p.pos, &words::DATE_PARTS).is_none() {
             return None;
         }
         *self = p;

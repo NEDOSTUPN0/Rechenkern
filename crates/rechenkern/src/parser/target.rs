@@ -22,6 +22,13 @@ impl Parser<'_> {
         {
             return Ok(Some(shifted(expr, op, amount)));
         }
+        // "March 9, 2024 day of the week"
+        if is_moment(expr)
+            && let Some((format, n)) = self.phrase_at(self.pos, &words::DATE_PARTS)
+        {
+            self.pos += n;
+            return Ok(Some(Expr::Convert(expr.clone().boxed(), Target::Format(format))));
+        }
         // "March 3 through March 10"
         if self.range_word(&[]).is_some() {
             return Ok(Some(Expr::Range(expr.clone().boxed(), self.range_end(true)?.boxed())));
