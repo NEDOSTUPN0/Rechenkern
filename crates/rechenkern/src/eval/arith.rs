@@ -223,8 +223,12 @@ impl Env<'_> {
     fn tidy_time(&self, q: Quantity, (a, b): (Unit, Unit)) -> Result<Value> {
         let second = registry().get("s");
         let derived = q.unit.same_as(&second) && !a.same_as(&second) && !b.same_as(&second);
-        if derived && q.number.abs() >= Number::from_i64(60) {
-            return Ok(Value::Duration(Duration::new(super::time::balance(q.number, jiff::Unit::Hour)?)));
+        // Too long for a time span, it stays in seconds.
+        if derived
+            && q.number.abs() >= Number::from_i64(60)
+            && let Ok(span) = super::time::balance(q.number, jiff::Unit::Hour)
+        {
+            return Ok(Value::Duration(Duration::new(span)));
         }
         Ok(Value::Quantity(q))
     }

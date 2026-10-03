@@ -405,6 +405,7 @@ fn units() {
         ("$0.30/kWh * 100 kWh", "$30.00"),
         ("2 N·m/s", "2 N·m/s"),
         ("$2/Nm", "$2.00/(N·m)"),
+        ("1 PB / 1 kbps", "8,000,000,000,000 seconds"),
         ("180 deg in rad", "3.141592654 rad"),
         ("2 sq ft in sq in", "288 in²"),
         ("3 cubic feet in liters", "84.95053978 L"),
