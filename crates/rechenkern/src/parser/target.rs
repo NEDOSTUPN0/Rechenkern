@@ -109,8 +109,17 @@ impl Parser<'_> {
 
     /// An amount of time at the cursor, read past: "3 hours", "an hour", "1 hour 30 min".
     fn time_amount(&mut self) -> Option<Expr> {
-        // Right here: "time in Tokyo in 3 hours" is not "in 3 hours" after the word "Tokyo".
-        if !self.cur().is_some_and(|t| matches!(t.tok, Tok::Num(_)) || self.significant(self.pos)) {
+        // A number or an article right here: "time in Tokyo in 3 hours" is not
+        // "in 3 hours" after the word "Tokyo".
+        let starts = self.cur().is_some_and(|t| match &t.tok {
+            Tok::Num(_) => true,
+            Tok::Word(w) => {
+                let w = w.to_lowercase();
+                matches!(w.as_str(), "a" | "an") || words::number_word(&w).is_some()
+            }
+            _ => false,
+        });
+        if !starts {
             return None;
         }
         let mut p = self.clone();
