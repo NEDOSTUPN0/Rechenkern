@@ -208,6 +208,8 @@ fn functions() {
         ("standard deviation of 20, 30 and 40", "10"),
         ("std dev of 20, 30 and 40", "10"),
         ("average 36, 42, 19, 81", "44.5"),
+        ("average between 10 and 20", "15"),
+        ("mean between 10, 20 and 30", "20"),
         ("sum 1, 2, 3", "6"),
         ("max 5, 3 and 9", "9"),
         ("average 36 + 42", "78"),

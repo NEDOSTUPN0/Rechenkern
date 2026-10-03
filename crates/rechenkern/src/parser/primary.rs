@@ -352,9 +352,10 @@ impl Parser<'_> {
     /// `prev`, `line 3`, `sum`, `average`.
     fn line_ref(&mut self) -> Result<Option<Expr>> {
         let w = self.lower(self.pos).unwrap_or_default();
-        // "sum of 1, 2", "average(1, 2)", "average 36, 42" are functions.
+        // "sum of 1, 2", "average(1, 2)", "average 36, 42", "average between 10 and 20" are functions.
         let followed_by_args =
-            self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_sym("(")) || self.amount_follows(1);
+            self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_word("between") || t.is_sym("("))
+                || self.amount_follows(1);
         let line = match w.as_str() {
             "prev" | "previous" | "ans" | "answer" | "above" => LineRef::Previous,
             "sum" | "total" | "subtotal" if !followed_by_args => LineRef::Sum,
