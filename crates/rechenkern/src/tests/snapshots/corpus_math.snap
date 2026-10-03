@@ -60,6 +60,6 @@ std dev of 20, 30 and 40                     → 10
 clamp 26 5 25                                → 25
 mid point of 3 and 7                         → 5
 fromunix(1559740303)                         → <error: unknown function "fromunix">
-1,00,000                                     → 0
-（2+3）*4                                      → 14
-5 => 3                                       → 3
+1,00,000                                     → 100,000
+（2+3）*4                                      → 20
+5 => 3                                       → true

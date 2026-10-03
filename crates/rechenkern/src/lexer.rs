@@ -57,6 +57,9 @@ const MULTI_SYMBOLS: &[(&str, &str)] = &[
     ("!=", "!="),
     ("<=", "<="),
     (">=", ">="),
+    ("=<", "<="),
+    ("=>", ">="),
+    ("=!", "!="),
     ("+=", "+="),
     ("-=", "-="),
     ("&&", "&&"),
@@ -73,8 +76,8 @@ fn single_symbol(c: char) -> Option<&'static str> {
         '^' => "^",
         '%' => "%",
         '!' => "!",
-        '(' | '[' | '{' => "(",
-        ')' | ']' | '}' => ")",
+        '(' | '[' | '{' | '（' => "(",
+        ')' | ']' | '}' | '）' => ")",
         ',' | ';' => ",",
         '=' => "=",
         '<' => "<",
@@ -343,6 +346,20 @@ impl Lexer<'_> {
     fn separators(&self, int: &str, groups: &[(char, String, usize)]) -> (usize, Option<usize>) {
         let Some(&(first, _, _)) = groups.first() else { return (0, None) };
         let whole = !int.is_empty() && !int.starts_with('0');
+        // In `max(1,5)` the comma separates arguments, in `1,2,3` items.
+        let in_list = self.parens.last() == Some(&true) || self.in_glued_list();
+        // Indian grouping: "1,00,000", "12,34,567.89".
+        let pairs = groups.iter().take_while(|(sep, digits, _)| *sep == ',' && digits.len() == 2).count();
+        if !self.decimal_comma
+            && !in_list
+            && whole
+            && int.len() <= 2
+            && pairs > 0
+            && groups.get(pairs).is_some_and(|(sep, digits, _)| *sep == ',' && digits.len() == 3)
+        {
+            let decimals = groups.get(pairs + 1).is_some_and(|(sep, _, _)| *sep == '.');
+            return if decimals { (pairs + 2, Some(pairs + 1)) } else { (pairs + 1, None) };
+        }
         let run = groups.iter().take_while(|(sep, digits, _)| *sep == first && digits.len() == 3).count();
         let decimal_after = groups.get(run).is_some_and(|(sep, _, _)| *sep != first);
         let grouping = if self.decimal_comma { '.' } else { ',' };
@@ -357,9 +374,7 @@ impl Lexer<'_> {
         } else {
             (1, Some(0))
         };
-        // In `max(1,5)` the comma separates arguments, in `1,2,3` items.
-        let in_call = self.parens.last() == Some(&true);
-        if (in_call || self.in_glued_list()) && decimal.is_some_and(|k| groups[k].0 == ',') {
+        if in_list && decimal.is_some_and(|k| groups[k].0 == ',') {
             return (0, None);
         }
         (used, decimal)
@@ -480,6 +495,8 @@ mod tests {
         assert_eq!(toks("5 10/4").len(), 4);
         assert_eq!(toks("1 1/2/3").len(), 6);
         assert_eq!(toks("2/10 1/3").len(), 6);
+        assert_eq!(toks("1,00,000 12,34,567.89"), vec![num("100000"), num("1234567.89")]);
+        assert_eq!(toks("1,00,00").len(), 5);
     }
 
     #[test]
