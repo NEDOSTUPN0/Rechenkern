@@ -35,8 +35,8 @@ hours in a week                              → 168 hours
 12 V * 2 A                                   → 24 V·A
 5 A * 10 Ω                                   → 50 A·Ω
 10 kg * 9.8 m/s^2                            → 98 kg·m/s²
-12pt in px                                   → 12 pt
-2 rem in px                                  → 2
+12pt in px                                   → 16 px
+2 rem in px                                  → 32 px
 1 Kib in bits                                → 1,024 bit
 1 cup of flour in grams                      → 1 cup
 100 hp at 3000 rpm                           → 300,000 hp·rpm

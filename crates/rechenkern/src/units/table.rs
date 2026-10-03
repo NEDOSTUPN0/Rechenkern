@@ -129,6 +129,7 @@ const DAY: i64 = 86_400;
 fn definitions() -> Vec<Def> {
     let pi = Number::parse(PI).unwrap();
     let days = |n: &str| Number::parse(n).unwrap() * Number::from_i64(DAY);
+    let inch = Number::parse("0.0254").unwrap();
     vec![
         // Time
         unit("s", "second", Dim::TIME, "1")
@@ -184,6 +185,11 @@ fn definitions() -> Vec<Def> {
             "light-years",
         ]),
         unit("pc", "parsec", Dim::LENGTH, "30856775814913673").prefixes(&[KILO, MEGA, GIGA]),
+        // Screen and print, as in CSS: 96 pixels or 72 points to the inch, 16 pixels to the em.
+        unit("px", "pixel", Dim::LENGTH, "1").scale(inch / Number::from_i64(96)),
+        unit("pt", "typographic point", Dim::LENGTH, "1").scale(inch / Number::from_i64(72)),
+        unit("em", "em", Dim::LENGTH, "1").scale(inch / Number::from_i64(6)),
+        unit("rem", "rem", Dim::LENGTH, "1").scale(inch / Number::from_i64(6)),
         // Mass
         unit("g", "gram", Dim::MASS, "0.001").aliases(&["gramme", "grammes"]).prefixes(MASS),
         unit("t", "tonne", Dim::MASS, "1000")
@@ -205,7 +211,8 @@ fn definitions() -> Vec<Def> {
         unit("gal", "gallon", Dim::VOLUME, "0.003785411784").aliases(&["us gallon", "us gallons"]),
         unit("imp gal", "imperial gallon", Dim::VOLUME, "0.00454609").aliases(&["uk gallon", "uk gallons"]),
         unit("qt", "quart", Dim::VOLUME, "0.000946352946"),
-        unit("pt", "pint", Dim::VOLUME, "0.000473176473").aliases(&["us pint", "us pints"]),
+        // "pt" is the typographic point.
+        unit("pint", "pint", Dim::VOLUME, "0.000473176473").aliases(&["us pint", "us pints"]).spelled(),
         unit("imp pt", "imperial pint", Dim::VOLUME, "0.00056826125").aliases(&["uk pint", "uk pints"]),
         unit("cup", "cup", Dim::VOLUME, "0.0002365882365").aliases(&["us cup", "us cups"]),
         unit("metric cup", "metric cup", Dim::VOLUME, "0.00025"),
