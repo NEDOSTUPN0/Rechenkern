@@ -351,6 +351,11 @@ impl<'a> Parser<'a> {
                 }
                 return Ok(lhs);
             };
+            // "1 cup of flour": "of" before a comment word only describes the amount.
+            if op == Op::Of && lhs.edge_unit(true).is_some() && self.comment_at(self.pos + 1) {
+                self.pos += 1;
+                continue;
+            }
             if !self.operand_follows(len) {
                 return Ok(lhs);
             }

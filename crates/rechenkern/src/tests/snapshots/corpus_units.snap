@@ -38,7 +38,7 @@ hours in a week                              → 168 hours
 12pt in px                                   → 16 px
 2 rem in px                                  → 32 px
 1 Kib in bits                                → 1,024 bit
-1 cup of flour in grams                      → 1 cup
+1 cup of flour in grams                      → <error: can't convert cup to g>
 100 hp at 3000 rpm                           → 300,000 hp·rpm
 5 km cast to miles                           → 3.106855961 mi
 2000 mAh * 3.7 V                             → 7,400 mA·h·V

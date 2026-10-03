@@ -202,6 +202,11 @@ impl<'a> Parser<'a> {
             || self.place_sky_at(i).is_some()
     }
 
+    /// The token at `i` is a word that means nothing here.
+    pub(super) fn comment_at(&self, i: usize) -> bool {
+        self.toks.get(i).is_some_and(|t| t.word().is_some()) && !self.significant(i)
+    }
+
     /// A unit spelled at token `i`: its value and length in tokens.
     pub(super) fn unit_at(&self, i: usize, after_number: bool) -> Option<(Unit, usize)> {
         let tok = self.toks.get(i)?;
