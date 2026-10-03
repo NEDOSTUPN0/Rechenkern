@@ -28,6 +28,14 @@ impl<T> Phrases<T> {
         self.entries.iter().map(|(phrase, _)| *phrase)
     }
 
+    /// The first phrase that means `value`.
+    pub fn first_for(&self, value: T) -> Option<&'static str>
+    where
+        T: PartialEq,
+    {
+        self.entries.iter().find(|(_, v)| *v == value).map(|(phrase, _)| *phrase)
+    }
+
     /// Entries whose first word is `word` (ASCII case ignored), in table order.
     pub fn starting_with(&self, word: &str) -> impl Iterator<Item = &(&'static str, T)> {
         let index = self.by_first_word.get_or_init(|| {
@@ -191,11 +199,11 @@ pub static FUNCTIONS: Phrases<Func> = Phrases::new(&[
     ("ln", Func::Ln),
     ("natural log", Func::Ln),
     ("natural logarithm", Func::Ln),
-    ("binary log", Func::Log2),
-    ("binary logarithm", Func::Log2),
     ("log", Func::Log),
     ("logarithm", Func::Log),
     ("log2", Func::Log2),
+    ("binary log", Func::Log2),
+    ("binary logarithm", Func::Log2),
     ("log10", Func::Log10),
     ("lg", Func::Log10),
     ("abs", Func::Abs),

@@ -104,12 +104,17 @@ fn random() -> f64 {
     (x >> 11) as f64 / (1u64 << 53) as f64
 }
 
+/// The function's name as written: "sqrt", "sind", "standard deviation".
+fn name(func: Func) -> &'static str {
+    crate::parser::words::FUNCTIONS.first_for(func).unwrap_or("prime")
+}
+
 impl Env<'_> {
     pub(super) fn call(&self, func: Func, args: Vec<Value>) -> Result<Value> {
         use Func::*;
         let arity = |n: usize| -> Result<()> {
             if args.len() != n {
-                bail!("{func:?} takes {n} argument{}", if n == 1 { "" } else { "s" });
+                bail!("{} takes {n} argument{}", name(func), if n == 1 { "" } else { "s" });
             }
             Ok(())
         };
@@ -298,7 +303,7 @@ impl Env<'_> {
     fn aggregate(&self, func: Func, args: Vec<Value>) -> Result<Value> {
         use Func::*;
         if args.is_empty() {
-            bail!("{func:?} needs at least one value");
+            bail!("{} needs at least one value", name(func));
         }
         let n = Value::number(Number::from_i64(args.len() as i64));
         match func {
@@ -329,7 +334,7 @@ impl Env<'_> {
                 for v in &args {
                     match v {
                         Value::Quantity(q) => numbers.push(self.convert_quantity(q, &unit)?.number),
-                        v => bail!("{func:?} needs numbers, not {}", v.kind()),
+                        v => bail!("{} needs numbers, not {}", name(func), v.kind()),
                     }
                 }
                 let result = if func == Median {

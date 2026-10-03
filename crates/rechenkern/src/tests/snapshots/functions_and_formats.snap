@@ -4,44 +4,38 @@ source: crates/rechenkern/src/tests/snapshots.rs
 
 // Functions
 sqrt(16)                                     → 4
-sqrt(2, 8)                                   → <error: Sqrt takes 1 argument>
-sqrt of 2, 8 and 4                           → <error: Sqrt takes 1 argument>
+sqrt(2, 8)                                   → <error: sqrt takes 1 argument>
+sqrt of 2, 8 and 4                           → <error: sqrt takes 1 argument>
 square root(16)                              → 4
-square root(2, 8)                            → <error: Sqrt takes 1 argument>
-square root of 2, 8 and 4                    → <error: Sqrt takes 1 argument>
+square root(2, 8)                            → <error: sqrt takes 1 argument>
+square root of 2, 8 and 4                    → <error: sqrt takes 1 argument>
 cbrt(16)                                     → 2.5198421
-cbrt(2, 8)                                   → <error: Cbrt takes 1 argument>
-cbrt of 2, 8 and 4                           → <error: Cbrt takes 1 argument>
+cbrt(2, 8)                                   → <error: cbrt takes 1 argument>
+cbrt of 2, 8 and 4                           → <error: cbrt takes 1 argument>
 cube root(16)                                → 2.5198421
-cube root(2, 8)                              → <error: Cbrt takes 1 argument>
-cube root of 2, 8 and 4                      → <error: Cbrt takes 1 argument>
+cube root(2, 8)                              → <error: cbrt takes 1 argument>
+cube root of 2, 8 and 4                      → <error: cbrt takes 1 argument>
 squared root(16)                             → 4
-squared root(2, 8)                           → <error: Sqrt takes 1 argument>
-squared root of 2, 8 and 4                   → <error: Sqrt takes 1 argument>
+squared root(2, 8)                           → <error: sqrt takes 1 argument>
+squared root of 2, 8 and 4                   → <error: sqrt takes 1 argument>
 cubed root(16)                               → 2.5198421
-cubed root(2, 8)                             → <error: Cbrt takes 1 argument>
-cubed root of 2, 8 and 4                     → <error: Cbrt takes 1 argument>
-root(16)                                     → <error: Root takes 2 arguments>
+cubed root(2, 8)                             → <error: cbrt takes 1 argument>
+cubed root of 2, 8 and 4                     → <error: cbrt takes 1 argument>
+root(16)                                     → <error: root takes 2 arguments>
 root(2, 8)                                   → 2.828427125
 root of 2, 8 and 4                           → 12
 exp(16)                                      → 8,886,110.521
-exp(2, 8)                                    → <error: Exp takes 1 argument>
-exp of 2, 8 and 4                            → <error: Exp takes 1 argument>
+exp(2, 8)                                    → <error: exp takes 1 argument>
+exp of 2, 8 and 4                            → <error: exp takes 1 argument>
 ln(16)                                       → 2.772588722
-ln(2, 8)                                     → <error: Ln takes 1 argument>
-ln of 2, 8 and 4                             → <error: Ln takes 1 argument>
+ln(2, 8)                                     → <error: ln takes 1 argument>
+ln of 2, 8 and 4                             → <error: ln takes 1 argument>
 natural log(16)                              → 2.772588722
-natural log(2, 8)                            → <error: Ln takes 1 argument>
-natural log of 2, 8 and 4                    → <error: Ln takes 1 argument>
+natural log(2, 8)                            → <error: ln takes 1 argument>
+natural log of 2, 8 and 4                    → <error: ln takes 1 argument>
 natural logarithm(16)                        → 2.772588722
-natural logarithm(2, 8)                      → <error: Ln takes 1 argument>
-natural logarithm of 2, 8 and 4              → <error: Ln takes 1 argument>
-binary log(16)                               → 4
-binary log(2, 8)                             → <error: Log2 takes 1 argument>
-binary log of 2, 8 and 4                     → <error: Log2 takes 1 argument>
-binary logarithm(16)                         → 4
-binary logarithm(2, 8)                       → <error: Log2 takes 1 argument>
-binary logarithm of 2, 8 and 4               → <error: Log2 takes 1 argument>
+natural logarithm(2, 8)                      → <error: ln takes 1 argument>
+natural logarithm of 2, 8 and 4              → <error: ln takes 1 argument>
 log(16)                                      → 1.204119983
 log(2, 8)                                    → 0.3333333333
 log of 2, 8 and 4                            → 0.3333333333
@@ -49,104 +43,110 @@ logarithm(16)                                → 1.204119983
 logarithm(2, 8)                              → 0.3333333333
 logarithm of 2, 8 and 4                      → 0.3333333333
 log2(16)                                     → 4
-log2(2, 8)                                   → <error: Log2 takes 1 argument>
-log2 of 2, 8 and 4                           → <error: Log2 takes 1 argument>
+log2(2, 8)                                   → <error: log2 takes 1 argument>
+log2 of 2, 8 and 4                           → <error: log2 takes 1 argument>
+binary log(16)                               → 4
+binary log(2, 8)                             → <error: log2 takes 1 argument>
+binary log of 2, 8 and 4                     → <error: log2 takes 1 argument>
+binary logarithm(16)                         → 4
+binary logarithm(2, 8)                       → <error: log2 takes 1 argument>
+binary logarithm of 2, 8 and 4               → <error: log2 takes 1 argument>
 log10(16)                                    → 1.204119983
-log10(2, 8)                                  → <error: Log10 takes 1 argument>
-log10 of 2, 8 and 4                          → <error: Log10 takes 1 argument>
+log10(2, 8)                                  → <error: log10 takes 1 argument>
+log10 of 2, 8 and 4                          → <error: log10 takes 1 argument>
 lg(16)                                       → 1.204119983
-lg(2, 8)                                     → <error: Log10 takes 1 argument>
-lg of 2, 8 and 4                             → <error: Log10 takes 1 argument>
+lg(2, 8)                                     → <error: log10 takes 1 argument>
+lg of 2, 8 and 4                             → <error: log10 takes 1 argument>
 abs(16)                                      → 16
-abs(2, 8)                                    → <error: Abs takes 1 argument>
-abs of 2, 8 and 4                            → <error: Abs takes 1 argument>
+abs(2, 8)                                    → <error: abs takes 1 argument>
+abs of 2, 8 and 4                            → <error: abs takes 1 argument>
 absolute value(16)                           → 16
-absolute value(2, 8)                         → <error: Abs takes 1 argument>
-absolute value of 2, 8 and 4                 → <error: Abs takes 1 argument>
+absolute value(2, 8)                         → <error: abs takes 1 argument>
+absolute value of 2, 8 and 4                 → <error: abs takes 1 argument>
 fact(16)                                     → 20,922,789,888,000
-fact(2, 8)                                   → <error: Fact takes 1 argument>
-fact of 2, 8 and 4                           → <error: Fact takes 1 argument>
+fact(2, 8)                                   → <error: fact takes 1 argument>
+fact of 2, 8 and 4                           → <error: fact takes 1 argument>
 factorial(16)                                → 20,922,789,888,000
-factorial(2, 8)                              → <error: Fact takes 1 argument>
-factorial of 2, 8 and 4                      → <error: Fact takes 1 argument>
+factorial(2, 8)                              → <error: fact takes 1 argument>
+factorial of 2, 8 and 4                      → <error: fact takes 1 argument>
 round(16)                                    → 16
-round(2, 8)                                  → <error: Round takes 1 argument>
+round(2, 8)                                  → <error: round takes 1 argument>
 round of 2, 8 and 4                          → 12
 ceil(16)                                     → 16
-ceil(2, 8)                                   → <error: Ceil takes 1 argument>
-ceil of 2, 8 and 4                           → <error: Ceil takes 1 argument>
+ceil(2, 8)                                   → <error: ceil takes 1 argument>
+ceil of 2, 8 and 4                           → <error: ceil takes 1 argument>
 ceiling(16)                                  → 16
-ceiling(2, 8)                                → <error: Ceil takes 1 argument>
-ceiling of 2, 8 and 4                        → <error: Ceil takes 1 argument>
+ceiling(2, 8)                                → <error: ceil takes 1 argument>
+ceiling of 2, 8 and 4                        → <error: ceil takes 1 argument>
 floor(16)                                    → 16
-floor(2, 8)                                  → <error: Floor takes 1 argument>
-floor of 2, 8 and 4                          → <error: Floor takes 1 argument>
+floor(2, 8)                                  → <error: floor takes 1 argument>
+floor of 2, 8 and 4                          → <error: floor takes 1 argument>
 trunc(16)                                    → 16
-trunc(2, 8)                                  → <error: Trunc takes 1 argument>
-trunc of 2, 8 and 4                          → <error: Trunc takes 1 argument>
+trunc(2, 8)                                  → <error: trunc takes 1 argument>
+trunc of 2, 8 and 4                          → <error: trunc takes 1 argument>
 sin(16)                                      → -0.2879033167
-sin(2, 8)                                    → <error: Sin takes 1 argument>
-sin of 2, 8 and 4                            → <error: Sin takes 1 argument>
+sin(2, 8)                                    → <error: sin takes 1 argument>
+sin of 2, 8 and 4                            → <error: sin takes 1 argument>
 cos(16)                                      → -0.9576594803
-cos(2, 8)                                    → <error: Cos takes 1 argument>
-cos of 2, 8 and 4                            → <error: Cos takes 1 argument>
+cos(2, 8)                                    → <error: cos takes 1 argument>
+cos of 2, 8 and 4                            → <error: cos takes 1 argument>
 tan(16)                                      → 0.300632242
-tan(2, 8)                                    → <error: Tan takes 1 argument>
-tan of 2, 8 and 4                            → <error: Tan takes 1 argument>
+tan(2, 8)                                    → <error: tan takes 1 argument>
+tan of 2, 8 and 4                            → <error: tan takes 1 argument>
 asin(16)                                     → <error: result is not a real number>
-asin(2, 8)                                   → <error: Asin takes 1 argument>
-asin of 2, 8 and 4                           → <error: Asin takes 1 argument>
+asin(2, 8)                                   → <error: asin takes 1 argument>
+asin of 2, 8 and 4                           → <error: asin takes 1 argument>
 acos(16)                                     → <error: result is not a real number>
-acos(2, 8)                                   → <error: Acos takes 1 argument>
-acos of 2, 8 and 4                           → <error: Acos takes 1 argument>
+acos(2, 8)                                   → <error: acos takes 1 argument>
+acos of 2, 8 and 4                           → <error: acos takes 1 argument>
 atan(16)                                     → 1.508377517
-atan(2, 8)                                   → <error: Atan takes 1 argument>
-atan of 2, 8 and 4                           → <error: Atan takes 1 argument>
+atan(2, 8)                                   → <error: atan takes 1 argument>
+atan of 2, 8 and 4                           → <error: atan takes 1 argument>
 arcsin(16)                                   → <error: result is not a real number>
-arcsin(2, 8)                                 → <error: Asin takes 1 argument>
-arcsin of 2, 8 and 4                         → <error: Asin takes 1 argument>
+arcsin(2, 8)                                 → <error: asin takes 1 argument>
+arcsin of 2, 8 and 4                         → <error: asin takes 1 argument>
 arccos(16)                                   → <error: result is not a real number>
-arccos(2, 8)                                 → <error: Acos takes 1 argument>
-arccos of 2, 8 and 4                         → <error: Acos takes 1 argument>
+arccos(2, 8)                                 → <error: acos takes 1 argument>
+arccos of 2, 8 and 4                         → <error: acos takes 1 argument>
 arctan(16)                                   → 1.508377517
-arctan(2, 8)                                 → <error: Atan takes 1 argument>
-arctan of 2, 8 and 4                         → <error: Atan takes 1 argument>
+arctan(2, 8)                                 → <error: atan takes 1 argument>
+arctan of 2, 8 and 4                         → <error: atan takes 1 argument>
 sinh(16)                                     → 4,443,055.26
-sinh(2, 8)                                   → <error: Sinh takes 1 argument>
-sinh of 2, 8 and 4                           → <error: Sinh takes 1 argument>
+sinh(2, 8)                                   → <error: sinh takes 1 argument>
+sinh of 2, 8 and 4                           → <error: sinh takes 1 argument>
 cosh(16)                                     → 4,443,055.26
-cosh(2, 8)                                   → <error: Cosh takes 1 argument>
-cosh of 2, 8 and 4                           → <error: Cosh takes 1 argument>
+cosh(2, 8)                                   → <error: cosh takes 1 argument>
+cosh of 2, 8 and 4                           → <error: cosh takes 1 argument>
 tanh(16)                                     → 1
-tanh(2, 8)                                   → <error: Tanh takes 1 argument>
-tanh of 2, 8 and 4                           → <error: Tanh takes 1 argument>
+tanh(2, 8)                                   → <error: tanh takes 1 argument>
+tanh of 2, 8 and 4                           → <error: tanh takes 1 argument>
 asinh(16)                                    → 3.466711038
-asinh(2, 8)                                  → <error: Asinh takes 1 argument>
-asinh of 2, 8 and 4                          → <error: Asinh takes 1 argument>
+asinh(2, 8)                                  → <error: asinh takes 1 argument>
+asinh of 2, 8 and 4                          → <error: asinh takes 1 argument>
 acosh(16)                                    → 3.464757907
-acosh(2, 8)                                  → <error: Acosh takes 1 argument>
-acosh of 2, 8 and 4                          → <error: Acosh takes 1 argument>
+acosh(2, 8)                                  → <error: acosh takes 1 argument>
+acosh of 2, 8 and 4                          → <error: acosh takes 1 argument>
 atanh(16)                                    → <error: result is not a real number>
-atanh(2, 8)                                  → <error: Atanh takes 1 argument>
-atanh of 2, 8 and 4                          → <error: Atanh takes 1 argument>
+atanh(2, 8)                                  → <error: atanh takes 1 argument>
+atanh of 2, 8 and 4                          → <error: atanh takes 1 argument>
 sind(16)                                     → 0.2756373558
-sind(2, 8)                                   → <error: SinD takes 1 argument>
-sind of 2, 8 and 4                           → <error: SinD takes 1 argument>
+sind(2, 8)                                   → <error: sind takes 1 argument>
+sind of 2, 8 and 4                           → <error: sind takes 1 argument>
 cosd(16)                                     → 0.9612616959
-cosd(2, 8)                                   → <error: CosD takes 1 argument>
-cosd of 2, 8 and 4                           → <error: CosD takes 1 argument>
+cosd(2, 8)                                   → <error: cosd takes 1 argument>
+cosd of 2, 8 and 4                           → <error: cosd takes 1 argument>
 tand(16)                                     → 0.2867453858
-tand(2, 8)                                   → <error: TanD takes 1 argument>
-tand of 2, 8 and 4                           → <error: TanD takes 1 argument>
+tand(2, 8)                                   → <error: tand takes 1 argument>
+tand of 2, 8 and 4                           → <error: tand takes 1 argument>
 asind(16)                                    → <error: result is not a real number>
-asind(2, 8)                                  → <error: AsinD takes 1 argument>
-asind of 2, 8 and 4                          → <error: AsinD takes 1 argument>
+asind(2, 8)                                  → <error: asind takes 1 argument>
+asind of 2, 8 and 4                          → <error: asind takes 1 argument>
 acosd(16)                                    → <error: result is not a real number>
-acosd(2, 8)                                  → <error: AcosD takes 1 argument>
-acosd of 2, 8 and 4                          → <error: AcosD takes 1 argument>
+acosd(2, 8)                                  → <error: acosd takes 1 argument>
+acosd of 2, 8 and 4                          → <error: acosd takes 1 argument>
 atand(16)                                    → 86.42366563°
-atand(2, 8)                                  → <error: AtanD takes 1 argument>
-atand of 2, 8 and 4                          → <error: AtanD takes 1 argument>
+atand(2, 8)                                  → <error: atand takes 1 argument>
+atand of 2, 8 and 4                          → <error: atand takes 1 argument>
 min(16)                                      → 16
 min(2, 8)                                    → 2
 min of 2, 8 and 4                            → 2
@@ -252,18 +252,18 @@ std deviation of 2, 8 and 4                  → 3.055050463
 sample standard deviation(16)                → <error: standard deviation needs at least two values>
 sample standard deviation(2, 8)              → 4.242640687
 sample standard deviation of 2, 8 and 4      → 3.055050463
-midpoint(16)                                 → <error: Midpoint takes 2 arguments>
+midpoint(16)                                 → <error: midpoint takes 2 arguments>
 midpoint(2, 8)                               → 5
-midpoint of 2, 8 and 4                       → <error: Midpoint takes 2 arguments>
-mid point(16)                                → <error: Midpoint takes 2 arguments>
+midpoint of 2, 8 and 4                       → <error: midpoint takes 2 arguments>
+mid point(16)                                → <error: midpoint takes 2 arguments>
 mid point(2, 8)                              → 5
-mid point of 2, 8 and 4                      → <error: Midpoint takes 2 arguments>
-mid-point(16)                                → <error: Midpoint takes 2 arguments>
+mid point of 2, 8 and 4                      → <error: midpoint takes 2 arguments>
+mid-point(16)                                → <error: midpoint takes 2 arguments>
 mid-point(2, 8)                              → 5
-mid-point of 2, 8 and 4                      → <error: Midpoint takes 2 arguments>
-halfway(16)                                  → <error: Midpoint takes 2 arguments>
+mid-point of 2, 8 and 4                      → <error: midpoint takes 2 arguments>
+halfway(16)                                  → <error: midpoint takes 2 arguments>
 halfway(2, 8)                                → 5
-halfway of 2, 8 and 4                        → <error: Midpoint takes 2 arguments>
+halfway of 2, 8 and 4                        → <error: midpoint takes 2 arguments>
 random number(16)                            → <error: random takes no arguments or a range>
 random number(2, 8)                          → 5
 random number of 2, 8 and 4                  → <error: random takes no arguments or a range>
@@ -273,27 +273,27 @@ random of 2, 8 and 4                         → <error: random takes no argumen
 rand(16)                                     → <error: random takes no arguments or a range>
 rand(2, 8)                                   → 5
 rand of 2, 8 and 4                           → <error: random takes no arguments or a range>
-clamp(16)                                    → <error: Clamp takes 3 arguments>
-clamp(2, 8)                                  → <error: Clamp takes 3 arguments>
+clamp(16)                                    → <error: clamp takes 3 arguments>
+clamp(2, 8)                                  → <error: clamp takes 3 arguments>
 clamp of 2, 8 and 4                          → 8
-ncr(16)                                      → <error: Comb takes 2 arguments>
+ncr(16)                                      → <error: ncr takes 2 arguments>
 ncr(2, 8)                                    → <error: combinations need 0 ≤ k ≤ n>
-ncr of 2, 8 and 4                            → <error: Comb takes 2 arguments>
-npr(16)                                      → <error: Perm takes 2 arguments>
+ncr of 2, 8 and 4                            → <error: ncr takes 2 arguments>
+npr(16)                                      → <error: npr takes 2 arguments>
 npr(2, 8)                                    → <error: combinations need 0 ≤ k ≤ n>
-npr of 2, 8 and 4                            → <error: Perm takes 2 arguments>
+npr of 2, 8 and 4                            → <error: npr takes 2 arguments>
 hex(16)                                      → 0x10
-hex(2, 8)                                    → <error: Hex takes 1 argument>
-hex of 2, 8 and 4                            → <error: Hex takes 1 argument>
+hex(2, 8)                                    → <error: hex takes 1 argument>
+hex of 2, 8 and 4                            → <error: hex takes 1 argument>
 bin(16)                                      → 0b10000
-bin(2, 8)                                    → <error: Bin takes 1 argument>
-bin of 2, 8 and 4                            → <error: Bin takes 1 argument>
+bin(2, 8)                                    → <error: bin takes 1 argument>
+bin of 2, 8 and 4                            → <error: bin takes 1 argument>
 oct(16)                                      → 0o20
-oct(2, 8)                                    → <error: Oct takes 1 argument>
-oct of 2, 8 and 4                            → <error: Oct takes 1 argument>
+oct(2, 8)                                    → <error: oct takes 1 argument>
+oct of 2, 8 and 4                            → <error: oct takes 1 argument>
 int(16)                                      → 16
-int(2, 8)                                    → <error: Int takes 1 argument>
-int of 2, 8 and 4                            → <error: Int takes 1 argument>
+int(2, 8)                                    → <error: int takes 1 argument>
+int of 2, 8 and 4                            → <error: int takes 1 argument>
 
 // Formats
 255 in hex                                   → 0xFF
