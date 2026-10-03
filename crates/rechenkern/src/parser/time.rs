@@ -3,7 +3,7 @@
 use jiff::tz::TimeZone;
 
 use super::{Parser, words};
-use crate::ast::{Expr, Format, Func, Target, TimeExpr, Which};
+use crate::ast::{Expr, Format, Func, Op, Target, TimeExpr, Which};
 use crate::config::DateOrder;
 use crate::error::{Result, bail};
 use crate::lexer::Tok;
@@ -252,7 +252,7 @@ impl Parser<'_> {
                 if let Expr::Period(..) = amount {
                     return Ok(Some(amount));
                 }
-                return Ok(Some(Expr::binary(crate::ast::Op::Add, now_for(&amount), amount)));
+                return Ok(Some(Expr::binary(Op::Add, now_for(&amount), amount)));
             }
             "from" if self.operand_follows(1) => {
                 self.pos += 1;
@@ -277,6 +277,10 @@ impl Parser<'_> {
                 return Ok(Some(Self::formatted(Expr::Time(TimeExpr::Now), Format::Timestamp)));
             }
             _ => {}
+        }
+        if let Some((date, n)) = self.period_bound_at(self.pos) {
+            self.pos += n;
+            return self.date_tail(date).map(Some);
         }
         if let Some((first, length, n)) = self.quarter_at(self.pos, &w) {
             self.pos += n;
@@ -452,7 +456,7 @@ impl Parser<'_> {
             Expr::Period(first, length) => (*first, *length),
             end => (end, Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("d"))),
         };
-        Ok(Expr::binary(crate::ast::Op::Add, end, length))
+        Ok(Expr::binary(Op::Add, end, length))
     }
 
     /// "difference between Seattle and Tokyo", "Seattle Tokyo", "Tokyo" (from here)
@@ -507,7 +511,7 @@ impl Parser<'_> {
                     return Ok(None);
                 };
                 self.pos = at + n;
-                let end = Expr::binary(crate::ast::Op::Add, first.clone(), span);
+                let end = Expr::binary(Op::Add, first.clone(), span);
                 if left {
                     // What is left starts now, or when the period does; a past period has none.
                     let from = Expr::Call(Func::Max, vec![start(), first]);
@@ -541,6 +545,45 @@ impl Parser<'_> {
         let year = p.year().map(|y| y as i16);
         let start = Expr::Time(TimeExpr::Date { year, month, day: 1 });
         Some((start, months(1), p.pos - i))
+    }
+
+    /// "start of next month", "end of Q3", "beginning of the year": the first or last
+    /// day of a period, and its length in tokens.
+    pub(super) fn period_bound_at(&self, i: usize) -> Option<(Expr, usize)> {
+        let last = match self.lower(i)?.as_str() {
+            "start" | "beginning" => false,
+            "end" => true,
+            _ => return None,
+        };
+        if !self.words_at(i + 1, &["of"]) {
+            return None;
+        }
+        let at = i + 2 + usize::from(self.words_at(i + 2, &["the"]));
+        let (first, length, n) = self.named_period_at(at)?;
+        let date = match last {
+            true => {
+                let day = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("d"));
+                Expr::binary(Op::Sub, Expr::binary(Op::Add, first, length), day)
+            }
+            false => first,
+        };
+        Some((date, at + n - i))
+    }
+
+    /// A period at token `i`: "next month", "week" (as in "the week"), "this quarter", "Q3", "March", "2027".
+    fn named_period_at(&self, i: usize) -> Option<(Expr, Expr, usize)> {
+        let which = self.lower(i).and_then(|w| words::which(&w));
+        let at = i + usize::from(which.is_some());
+        let which = which.unwrap_or(Which::This);
+        let (start, length) = match self.lower(at).as_deref() {
+            Some("week") => (TimeExpr::PeriodStart(jiff::Unit::Week, which), (1, "wk")),
+            Some("month") => (TimeExpr::PeriodStart(jiff::Unit::Month, which), (1, "mo")),
+            Some("year") => (TimeExpr::PeriodStart(jiff::Unit::Year, which), (1, "yr")),
+            Some("quarter") => (TimeExpr::Quarter(which), (3, "mo")),
+            _ => return self.period_at(i),
+        };
+        let length = Expr::WithUnit(Expr::Number(Number::from_i64(length.0)).boxed(), registry().get(length.1));
+        Some((Expr::Time(start), length, at + 1 - i))
     }
 
     /// The quarter at token `i` is a value, not a label as in "Q2 sales 600" or "Q3 $10k".

@@ -287,6 +287,8 @@ pub enum TimeExpr {
     Period(jiff::Unit, Which),
     /// First day of this, next or last quarter.
     Quarter(Which),
+    /// First day of this, next or last week (from Monday), month or year.
+    PeriodStart(jiff::Unit, Which),
     /// A time of day, optionally on a given date.
     Clock {
         hour: i8,

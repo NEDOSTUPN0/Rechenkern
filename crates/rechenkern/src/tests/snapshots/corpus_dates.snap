@@ -64,8 +64,8 @@ days left in this month                      → <error: can't convert a date to
 days left in the year                        → 365.2425 days
 days in next month                           → <error: can't convert a date to days>
 days until March                             → <error: expected a value at the end>
-start of next month                          → Fri, 23 Oct 2026
-end of Q3                                    → 1 Jul – 30 Sep 2026
+start of next month                          → Thu, 1 Oct 2026
+end of Q3                                    → Wed, 30 Sep 2026
 year %                                       → <error: can't make time a percentage>
 week number March 5, 2026                    → Thu, 5 Mar 2026
 3 days ago at 5pm                            → <error: can't multiply a date by a date>

@@ -197,6 +197,14 @@ impl Env<'_> {
             TimeExpr::Period(unit, which) => {
                 self.date_moment(today.checked_add(set(Span::new(), *unit, which.step())?)?)
             }
+            TimeExpr::PeriodStart(unit, which) => {
+                let first = match unit {
+                    Cal::Week => today.checked_sub(days(today.weekday().to_monday_zero_offset() as i64))?,
+                    Cal::Month => today.first_of_month(),
+                    _ => today.first_of_year(),
+                };
+                self.date_moment(first.checked_add(set(Span::new(), *unit, which.step())?)?)
+            }
             TimeExpr::Quarter(which) => {
                 let first = today.first_of_month().checked_sub(Span::new().months((today.month() - 1) % 3))?;
                 self.date_moment(first.checked_add(Span::new().months(3 * which.step()))?)
