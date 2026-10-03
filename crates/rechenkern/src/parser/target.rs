@@ -1,11 +1,11 @@
 //! Conversions (`in km`, `as hex`, `to Tokyo`) and rounding (`to 2 dp`).
 
 use super::{Parser, words};
-use crate::ast::{Direction, Expr, Format, Func, Rounding, Sky, Target, TimeExpr};
+use crate::ast::{Direction, Expr, Format, Func, Op, Rounding, Sky, Target, TimeExpr};
 use crate::error::{Result, bail};
 use crate::lexer::{Tok, Token};
 use crate::number::Number;
-use crate::units::{Unit, registry};
+use crate::units::{Dim, Unit, registry};
 use crate::zones;
 
 impl Parser<'_> {
@@ -43,6 +43,13 @@ impl Parser<'_> {
             && let Some((rounding, format)) = self.rounding(Direction::Nearest)?
         {
             return Ok(Some(rounded(expr, rounding, format)));
+        }
+        // "time in Tokyo in 3 hours", "time in 3 hours": the time that much later.
+        if keyword == "in"
+            && is_moment(expr)
+            && let Some(amount) = self.time_amount()
+        {
+            return Ok(Some(later(expr, amount)));
         }
         // A date or time goes to a place, even one named like a unit: "time in Cordoba".
         let zone = match is_moment(expr) {
@@ -98,6 +105,24 @@ impl Parser<'_> {
             Some(hint) => bail!("unknown place \"{typed}\", did you mean \"{hint}\"?"),
             None => bail!("unknown place \"{typed}\""),
         }
+    }
+
+    /// An amount of time at the cursor, read past: "3 hours", "an hour", "1 hour 30 min".
+    fn time_amount(&mut self) -> Option<Expr> {
+        // Right here: "time in Tokyo in 3 hours" is not "in 3 hours" after the word "Tokyo".
+        if !self.cur().is_some_and(|t| matches!(t.tok, Tok::Num(_)) || self.significant(self.pos)) {
+            return None;
+        }
+        let mut p = self.clone();
+        let amount = p.multiplicative().ok()?;
+        let unit = match &amount {
+            Expr::BareUnit(unit) | Expr::WithUnit(_, unit) => Some(unit),
+            Expr::Composite(parts) => parts.last().and_then(|e| e.edge_unit(true)),
+            _ => None,
+        };
+        unit.filter(|u| u.dim() == Dim::TIME)?;
+        *self = p;
+        Some(amount)
     }
 
     fn zone_conversion_follows(&self) -> bool {
@@ -337,9 +362,22 @@ impl Parser<'_> {
 fn is_moment(expr: &Expr) -> bool {
     match expr {
         Expr::Time(_) | Expr::InZone(..) => true,
+        // A moment moved by a time: "now + 3 hours".
+        Expr::Binary(Op::Add, a, b) => is_moment(a) != is_moment(b),
+        Expr::Binary(Op::Sub, a, b) => is_moment(a) && !is_moment(b),
         Expr::Sky { what, .. } => matches!(what, Sky::Sunrise | Sky::Sunset),
         Expr::Convert(inner, Target::Zone(_)) => is_moment(inner),
         _ => false,
+    }
+}
+
+/// `expr` moved by `amount`, still shown in its zone: "time in Tokyo in 3 hours".
+fn later(expr: &Expr, amount: Expr) -> Expr {
+    match expr {
+        Expr::Convert(inner, Target::Zone(zone)) => {
+            Expr::Convert(later(inner, amount).boxed(), Target::Zone(zone.clone()))
+        }
+        other => Expr::binary(Op::Add, other.clone(), amount),
     }
 }
 

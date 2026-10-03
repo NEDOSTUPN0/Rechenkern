@@ -311,12 +311,15 @@ impl Parser<'_> {
         Ok(Some(Self::formatted(change(a, b), Format::Percent)))
     }
 
-    /// "time in Tokyo when it is 9am in London".
+    /// "time in Tokyo when it is 9am in London", "time in Tokyo when 9am in London".
     fn when_it_is(&self) -> Result<Option<Expr>> {
-        let (at, len) = match (self.find(1, &["when", "it", "is"]), self.find(1, &["when", "it's"])) {
-            (Some(at), _) => (at, 3),
-            (None, Some(at)) => (at, 2),
-            _ => return Ok(None),
+        let Some(at) = self.find(1, &["when"]) else { return Ok(None) };
+        let len = if self.matches_at(at, &["when", "it", "is"]) {
+            3
+        } else if self.matches_at(at, &["when", "it's"]) {
+            2
+        } else {
+            1
         };
         let moment = match self.part(at + len, self.toks.len())? {
             // "9am in London" places the clock in London.

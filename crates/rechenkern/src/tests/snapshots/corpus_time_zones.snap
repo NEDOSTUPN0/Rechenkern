@@ -27,9 +27,9 @@ time in San Sebastián                        → 12:30 UTC-6
 
 // Not supported yet
 diff Tokyo London                            → <none>
-time in Tokyo when 9am in London             → 14:00 BST
+time in Tokyo when 9am in London             → 17:00 JST
 time in 3 hours in Tokyo                     → Thu, 24 Sep 2026 06:30 JST
-time in Tokyo in 3 hours                     → 17:30
+time in Tokyo in 3 hours                     → Thu, 24 Sep 2026 06:30 JST
 time in Bruges                               → <error: unknown place "Bruges", did you mean "Brunei"?>
 time in Santorini                            → <error: unknown place "Santorini">
 time in American Samoa                       → <error: unknown place "American Samoa">
