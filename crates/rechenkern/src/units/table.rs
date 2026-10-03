@@ -40,7 +40,7 @@ const PICO: Prefix = si("p", "pico", -12);
 const SMALL: &[Prefix] = &[MILLI, MICRO, MICRO_GREEK, NANO, PICO];
 const LENGTH: &[Prefix] = &[KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO, PICO];
 const MASS: &[Prefix] = &[KILO, CENTI, MILLI, MICRO, MICRO_GREEK, NANO];
-const VOLUME: &[Prefix] = &[KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK];
+const VOLUME: &[Prefix] = &[MEGA, KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK];
 const DATA: &[Prefix] = &[
     KILO,
     MEGA,
@@ -206,6 +206,7 @@ fn definitions() -> Vec<Def> {
         // Area
         unit("ha", "hectare", Dim::AREA, "10000"),
         unit("ac", "acre", Dim::AREA, "4046.8564224"),
+        unit("are", "are", Dim::AREA, "100").spelled(),
         // Volume
         unit("L", "liter", Dim::VOLUME, "0.001").aliases(&["l", "ℓ", "litre", "litres"]).prefixes(VOLUME),
         unit("gal", "gallon", Dim::VOLUME, "0.003785411784").aliases(&["us gallon", "us gallons"]),

@@ -91,7 +91,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - `in` is never looked up as a unit. After a number it is inches only when no
   conversion target follows (`5 in`, `5 in to cm`, but `5 in cm`); answers write
   inches next to other units as `inch` (`N·inch³`, `$5/inch`).
-- `A` is an article before a word (`A coffee $5`), amperes otherwise (`5 V/A`).
+- `A` is an article before a word (`A coffee $5`), amperes otherwise (`5 V/A`);
+  `are` is the area only after a number or in a target (`there are 5`).
 - Words joined by a hyphen are read together for units, places and functions
   (`light-year`, `pound-force`, `Aix-en-Provence`, `mid-point`); otherwise they
   are one comment word (`T-shirt $20`, `half-life`), unless every part is a

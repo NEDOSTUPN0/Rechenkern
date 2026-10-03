@@ -344,6 +344,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 MJ in J                                  → 2,500,000 J
 2.5 MKD                                      → 2.50 MKD
 2.5 MKD in EUR                               → €1.13
+2.5 ML                                       → 2.5 ML
+2.5 ML in L                                  → 2,500,000 L
 2.5 MMK                                      → 2.50 MMK
 2.5 MMK in EUR                               → €1.13
 2.5 MN                                       → 2.5 MN
@@ -396,6 +398,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 Mib in B                                 → 327,680 B
 2.5 Mibit                                    → 2.5 Mibit
 2.5 Mibit in B                               → 327,680 B
+2.5 Ml                                       → 2.5 ML
+2.5 Ml in L                                  → 2,500,000 L
 2.5 Mmetric ton                              → 2.5 Mt
 2.5 Mmetric ton in kg                        → 2,500,000,000 kg
 2.5 Mmetric tonne                            → 2.5 Mt
@@ -736,6 +740,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 arcseconds in rad                        → 0.00001212034203 rad
 2.5 arcsecs                                  → 2.5 arcsec
 2.5 arcsecs in rad                           → 0.00001212034203 rad
+2.5 are                                      → 2.5 ares
+2.5 are in m2                                → 250 m²
+2.5 ares                                     → 2.5 ares
+2.5 ares in m2                               → 250 m²
 2.5 argentine peso                           → 2.50 ARS
 2.5 argentine peso in EUR                    → €1.13
 2.5 argentine pesos                          → 2.50 ARS
@@ -2356,6 +2364,14 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 megajoule in J                           → 2,500,000 J
 2.5 megajoules                               → 2.5 MJ
 2.5 megajoules in J                          → 2,500,000 J
+2.5 megaliter                                → 2.5 ML
+2.5 megaliter in L                           → 2,500,000 L
+2.5 megaliters                               → 2.5 ML
+2.5 megaliters in L                          → 2,500,000 L
+2.5 megalitre                                → 2.5 ML
+2.5 megalitre in L                           → 2,500,000 L
+2.5 megalitres                               → 2.5 ML
+2.5 megalitres in L                          → 2,500,000 L
 2.5 meganewton                               → 2.5 MN
 2.5 meganewton in N                          → 2,500,000 N
 2.5 meganewtons                              → 2.5 MN
@@ -2392,6 +2408,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 megawatt hours in J                      → 9,000,000,000 J
 2.5 megawatts                                → 2.5 MW
 2.5 megawatts in W                           → 2,500,000 W
+2.5 megaℓ                                    → 2.5 ML
+2.5 megaℓ in L                               → 2,500,000 L
 2.5 meter                                    → 2.5 m
 2.5 meter per second                         → 2.5 m/s
 2.5 meter per second in mph                  → 5.59234073 mph

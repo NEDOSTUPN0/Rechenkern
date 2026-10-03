@@ -239,7 +239,9 @@ impl<'a> Parser<'a> {
         // "A" is an article before a word ("A coffee"), amperes otherwise ("5 V/A").
         let article = matches!(word, "a" | "an")
             || (word == "A" && self.toks.get(i + 1).is_some_and(|t| t.word().is_some() && t.space_before));
-        if word.eq_ignore_ascii_case("in") || (!after_number && article) {
+        // "are" is the area only after a number or in a target: "there are 5" is not.
+        let are = word.eq_ignore_ascii_case("are") || word.eq_ignore_ascii_case("ares");
+        if word.eq_ignore_ascii_case("in") || (!after_number && (article || are)) {
             return None;
         }
         // "min(" is a function.
