@@ -152,10 +152,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 ETH in EUR                               → €1.13
 2.5 EUR                                      → €2.50
 2.5 EUR in USD                               → $2.78
+2.5 Eb                                       → 2.5 Ebit
+2.5 Eb in B                                  → 312,500,000,000,000,000 B
 2.5 Ebit                                     → 2.5 Ebit
 2.5 Ebit in B                                → 312,500,000,000,000,000 B
 2.5 EiB                                      → 2.5 EiB
 2.5 EiB in B                                 → 2,882,303,761,517,117,440 B
+2.5 Eib                                      → 2.5 Eibit
+2.5 Eib in B                                 → 360,287,970,189,639,680 B
+2.5 Eibit                                    → 2.5 Eibit
+2.5 Eibit in B                               → 360,287,970,189,639,680 B
 2.5 F                                        → 2.5 °F
 2.5 F in K                                   → 256.7611111 K
 2.5 FIL                                      → 2.5 FIL
@@ -208,6 +214,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 Gelectron volts in J                     → 4.005441585e-10 J
 2.5 GiB                                      → 2.5 GiB
 2.5 GiB in B                                 → 2,684,354,560 B
+2.5 Gib                                      → 2.5 Gibit
+2.5 Gib in B                                 → 335,544,320 B
+2.5 Gibit                                    → 2.5 Gibit
+2.5 Gibit in B                               → 335,544,320 B
 2.5 Gmetric ton                              → 2.5 Gt
 2.5 Gmetric ton in kg                        → 2,500,000,000,000 kg
 2.5 Gmetric tonne                            → 2.5 Gt
@@ -289,6 +299,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 Kbps in bps                              → 2,500 bps
 2.5 KiB                                      → 2.5 KiB
 2.5 KiB in B                                 → 2,560 B
+2.5 Kib                                      → 2.5 Kibit
+2.5 Kib in B                                 → 320 B
+2.5 Kibit                                    → 2.5 Kibit
+2.5 Kibit in B                               → 320 B
 2.5 Kč                                       → 2.50 CZK
 2.5 Kč in EUR                                → €1.13
 2.5 L                                        → 2.5 L
@@ -378,6 +392,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 Melectron volts in J                     → 4.005441585e-13 J
 2.5 MiB                                      → 2.5 MiB
 2.5 MiB in B                                 → 2,621,440 B
+2.5 Mib                                      → 2.5 Mibit
+2.5 Mib in B                                 → 327,680 B
+2.5 Mibit                                    → 2.5 Mibit
+2.5 Mibit in B                               → 327,680 B
 2.5 Mmetric ton                              → 2.5 Mt
 2.5 Mmetric ton in kg                        → 2,500,000,000 kg
 2.5 Mmetric tonne                            → 2.5 Mt
@@ -444,10 +462,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 PYG                                      → 3 PYG
 2.5 PYG in EUR                               → €1.13
 2.5 Pa                                       → 2.5 Pa
+2.5 Pb                                       → 2.5 Pbit
+2.5 Pb in B                                  → 312,500,000,000,000 B
 2.5 Pbit                                     → 2.5 Pbit
 2.5 Pbit in B                                → 312,500,000,000,000 B
 2.5 PiB                                      → 2.5 PiB
 2.5 PiB in B                                 → 2,814,749,767,106,560 B
+2.5 Pib                                      → 2.5 Pibit
+2.5 Pib in B                                 → 351,843,720,888,320 B
+2.5 Pibit                                    → 2.5 Pibit
+2.5 Pibit in B                               → 351,843,720,888,320 B
 2.5 QAR                                      → 2.50 QAR
 2.5 QAR in EUR                               → €1.13
 2.5 R$                                       → R$2.50
@@ -560,6 +584,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 Telectron volts in J                     → 0.0000004005441585 J
 2.5 TiB                                      → 2.5 TiB
 2.5 TiB in B                                 → 2,748,779,069,440 B
+2.5 Tib                                      → 2.5 Tibit
+2.5 Tib in B                                 → 343,597,383,680 B
+2.5 Tibit                                    → 2.5 Tibit
+2.5 Tibit in B                               → 343,597,383,680 B
 2.5 Torr                                     → 2.5 Torr
 2.5 Torr in Pa                               → 333.3059211 Pa
 2.5 UAH                                      → ₴2.50
@@ -1300,6 +1328,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 egyptian pound in EUR                    → €1.13
 2.5 egyptian pounds                          → 2.50 EGP
 2.5 egyptian pounds in EUR                   → €1.13
+2.5 eib                                      → 2.5 EiB
+2.5 eib in B                                 → 2,882,303,761,517,117,440 B
 2.5 el salvador colon                        → 2.50 SVC
 2.5 el salvador colon in EUR                 → €1.13
 2.5 el salvador colons                       → 2.50 SVC
@@ -1368,6 +1398,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 exaoctet in B                            → 2,500,000,000,000,000,000 B
 2.5 exaoctets                                → 2.5 EB
 2.5 exaoctets in B                           → 2,500,000,000,000,000,000 B
+2.5 exbibit                                  → 2.5 Eibit
+2.5 exbibit in B                             → 360,287,970,189,639,680 B
+2.5 exbibits                                 → 2.5 Eibit
+2.5 exbibits in B                            → 360,287,970,189,639,680 B
 2.5 exbibyte                                 → 2.5 EiB
 2.5 exbibyte in B                            → 2,882,303,761,517,117,440 B
 2.5 exbibytes                                → 2.5 EiB
@@ -1480,6 +1514,12 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 ghanaian cedis in EUR                    → €1.13
 2.5 ghs                                      → 2.50 GHS
 2.5 ghs in EUR                               → €1.13
+2.5 gib                                      → 2.5 GiB
+2.5 gib in B                                 → 2,684,354,560 B
+2.5 gibibit                                  → 2.5 Gibit
+2.5 gibibit in B                             → 335,544,320 B
+2.5 gibibits                                 → 2.5 Gibit
+2.5 gibibits in B                            → 335,544,320 B
 2.5 gibibyte                                 → 2.5 GiB
 2.5 gibibyte in B                            → 2,684,354,560 B
 2.5 gibibytes                                → 2.5 GiB
@@ -1842,6 +1882,12 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 kgs in EUR                               → €1.13
 2.5 khr                                      → 2.50 KHR
 2.5 khr in EUR                               → €1.13
+2.5 kib                                      → 2.5 KiB
+2.5 kib in B                                 → 2,560 B
+2.5 kibibit                                  → 2.5 Kibit
+2.5 kibibit in B                             → 320 B
+2.5 kibibits                                 → 2.5 Kibit
+2.5 kibibits in B                            → 320 B
 2.5 kibibyte                                 → 2.5 KiB
 2.5 kibibyte in B                            → 2,560 B
 2.5 kibibytes                                → 2.5 KiB
@@ -2272,6 +2318,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 mcg in kg                                → 0.0000000025 kg
 2.5 mdl                                      → 2.50 MDL
 2.5 mdl in EUR                               → €1.13
+2.5 mebibit                                  → 2.5 Mibit
+2.5 mebibit in B                             → 327,680 B
+2.5 mebibits                                 → 2.5 Mibit
+2.5 mebibits in B                            → 327,680 B
 2.5 mebibyte                                 → 2.5 MiB
 2.5 mebibyte in B                            → 2,621,440 B
 2.5 mebibytes                                → 2.5 MiB
@@ -2372,6 +2422,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 mga in EUR                               → €1.13
 2.5 mi                                       → 2.5 mi
 2.5 mi in m                                  → 4,023.36 m
+2.5 mib                                      → 2.5 MiB
+2.5 mib in B                                 → 2,621,440 B
 2.5 microamp                                 → 2.5 µA
 2.5 microamp in A                            → 0.0000025 A
 2.5 microampere                              → 2.5 µA
@@ -2822,6 +2874,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 patacas in EUR                           → €1.13
 2.5 pc                                       → 2.5 pc
 2.5 pc in m                                  → 77,141,939,537,284,183 m
+2.5 pebibit                                  → 2.5 Pibit
+2.5 pebibit in B                             → 351,843,720,888,320 B
+2.5 pebibits                                 → 2.5 Pibit
+2.5 pebibits in B                            → 351,843,720,888,320 B
 2.5 pebibyte                                 → 2.5 PiB
 2.5 pebibyte in B                            → 2,814,749,767,106,560 B
 2.5 pebibytes                                → 2.5 PiB
@@ -2868,6 +2924,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 philippine pesos in EUR                  → €1.13
 2.5 php                                      → ₱2.50
 2.5 php in EUR                               → €1.13
+2.5 pib                                      → 2.5 PiB
+2.5 pib in B                                 → 2,814,749,767,106,560 B
 2.5 picometer                                → 2.5 picometers
 2.5 picometer in m                           → 2.5e-12 m
 2.5 picometers                               → 2.5 picometers
@@ -3308,6 +3366,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 teaspoon in L                            → 0.01232230398 L
 2.5 teaspoons                                → 2.5 tsp
 2.5 teaspoons in L                           → 0.01232230398 L
+2.5 tebibit                                  → 2.5 Tibit
+2.5 tebibit in B                             → 343,597,383,680 B
+2.5 tebibits                                 → 2.5 Tibit
+2.5 tebibits in B                            → 343,597,383,680 B
 2.5 tebibyte                                 → 2.5 TiB
 2.5 tebibyte in B                            → 2,748,779,069,440 B
 2.5 tebibytes                                → 2.5 TiB
@@ -3360,6 +3422,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 thai bahts in EUR                        → €1.13
 2.5 thb                                      → ฿2.50
 2.5 thb in EUR                               → €1.13
+2.5 tib                                      → 2.5 TiB
+2.5 tib in B                                 → 2,748,779,069,440 B
 2.5 tjs                                      → 2.50 TJS
 2.5 tjs in EUR                               → €1.13
 2.5 tmt                                      → 2.50 TMT

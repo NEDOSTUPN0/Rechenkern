@@ -37,12 +37,11 @@ const MICRO_GREEK: Prefix = si("μ", "micro", -6);
 const NANO: Prefix = si("n", "nano", -9);
 const PICO: Prefix = si("p", "pico", -12);
 
-const BIG: &[Prefix] = &[KILO, MEGA, GIGA, TERA, PETA, EXA];
 const SMALL: &[Prefix] = &[MILLI, MICRO, MICRO_GREEK, NANO, PICO];
 const LENGTH: &[Prefix] = &[KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO, PICO];
 const MASS: &[Prefix] = &[KILO, CENTI, MILLI, MICRO, MICRO_GREEK, NANO];
 const VOLUME: &[Prefix] = &[KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK];
-const BYTES: &[Prefix] = &[
+const DATA: &[Prefix] = &[
     KILO,
     MEGA,
     GIGA,
@@ -302,8 +301,8 @@ fn definitions() -> Vec<Def> {
         unit("Ω", "ohm", Dim::RESISTANCE, "1").aliases(&["Ω"]).prefixes(&[KILO, MEGA, MILLI]),
         unit("mol", "mole", Dim::AMOUNT, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO]),
         // Data (base: bit)
-        unit("bit", "bit", Dim::DATA, "1").prefixes(BIG),
-        unit("B", "byte", Dim::DATA, "8").aliases(&["octet", "octets"]).prefixes(BYTES),
+        unit("bit", "bit", Dim::DATA, "1").prefixes(DATA),
+        unit("B", "byte", Dim::DATA, "8").aliases(&["octet", "octets"]).prefixes(DATA),
     ]
 }
 
@@ -367,9 +366,24 @@ const EXTRA: &[(&str, &str)] = &[
     ("Mb", "Mbit"),
     ("Gb", "Gbit"),
     ("Tb", "Tbit"),
+    ("Pb", "Pbit"),
+    ("Eb", "Ebit"),
+    ("Kib", "Kibit"),
+    ("Mib", "Mibit"),
+    ("Gib", "Gibit"),
+    ("Tib", "Tibit"),
+    ("Pib", "Pibit"),
+    ("Eib", "Eibit"),
     ("mb", "MB"),
     ("gb", "GB"),
     ("tb", "TB"),
+    // Lowercase binary prefixes are bytes, as "mb" is.
+    ("kib", "KiB"),
+    ("mib", "MiB"),
+    ("gib", "GiB"),
+    ("tib", "TiB"),
+    ("pib", "PiB"),
+    ("eib", "EiB"),
     ("mcg", "µg"),
     ("micron", "µm"),
     ("microns", "µm"),
