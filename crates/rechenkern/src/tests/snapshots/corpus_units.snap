@@ -8,7 +8,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 1 1/2 cups in ml                             → 354.8823548 mL
 2 3/4 cups in tbsp                           → 44 tbsp
 100 °F in °C                                 → 37.77777778 °C
-30 ℃ in ℉                                    → 30 in
+30 ℃ in ℉                                    → 86 °F
 1 m³ in L                                    → 1,000 L
 10 m² in sq ft                               → 107.6391042 ft²
 60 mph in km/h                               → 96.56064 km/h
@@ -30,7 +30,7 @@ hours in a week                              → 168 hours
 3 kelvin                                     → 3 K
 
 // Not supported yet
-100 farenheit in celcius                     → 100
+100 farenheit in celcius                     → 37.77777778 °C
 1 rad/s in rpm                               → <error: can't convert rad/s to rpm>
 12 V * 2 A                                   → 24 V·A
 5 A * 10 Ω                                   → 50 A·Ω

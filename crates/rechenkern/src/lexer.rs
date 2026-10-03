@@ -182,10 +182,12 @@ impl Lexer<'_> {
                     }
                     _ => self.push(Tok::Num(frac), start),
                 }
-            } else if c.is_alphabetic() || c == '_' {
+            // "º" is a letter, but in "20 ºC" a degree sign.
+            } else if (c.is_alphabetic() && c != 'º') || c == '_' {
                 let tok = self.word();
                 self.push(tok, start);
-            } else if CURRENCY_SIGNS.contains(c) {
+            } else if CURRENCY_SIGNS.contains(c) || matches!(c, '℃' | '℉') {
+                // Signs that stand for a word: "$", "℃".
                 self.i += 1;
                 self.push(Tok::Word(c.to_string()), start);
             } else if matches!(c, '"' | '″' | '“' | '”') {

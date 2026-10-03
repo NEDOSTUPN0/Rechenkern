@@ -240,6 +240,10 @@ fn definitions() -> Vec<Def> {
                 "degrees c",
                 "degree celsius",
                 "degrees celsius",
+                "°c",
+                "celcius",
+                "degree celcius",
+                "degrees celcius",
             ]),
         unit("°F", "degree Fahrenheit", Dim::TEMPERATURE, "1")
             .plural("degrees Fahrenheit")
@@ -256,6 +260,10 @@ fn definitions() -> Vec<Def> {
                 "degrees f",
                 "degree fahrenheit",
                 "degrees fahrenheit",
+                "°f",
+                "farenheit",
+                "degree farenheit",
+                "degrees farenheit",
             ]),
         unit("°R", "degree Rankine", Dim::TEMPERATURE, "1")
             .plural("degrees Rankine")

@@ -996,6 +996,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 cedi in EUR                              → €1.13
 2.5 cedis                                    → 2.50 GHS
 2.5 cedis in EUR                             → €1.13
+2.5 celcius                                  → 2.5 °C
+2.5 celcius in K                             → 275.65 K
 2.5 celsius                                  → 2.5 °C
 2.5 celsius in K                             → 275.65 K
 2.5 cent                                     → $0.03
@@ -1198,24 +1200,32 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 degree in rad                            → 0.0436332313 rad
 2.5 degree c                                 → 2.5 °C
 2.5 degree c in K                            → 275.65 K
+2.5 degree celcius                           → 2.5 °C
+2.5 degree celcius in K                      → 275.65 K
 2.5 degree celsius                           → 2.5 °C
 2.5 degree celsius in K                      → 275.65 K
 2.5 degree f                                 → 2.5 °F
 2.5 degree f in K                            → 256.7611111 K
 2.5 degree fahrenheit                        → 2.5 °F
 2.5 degree fahrenheit in K                   → 256.7611111 K
+2.5 degree farenheit                         → 2.5 °F
+2.5 degree farenheit in K                    → 256.7611111 K
 2.5 degree rankine                           → 2.5 °R
 2.5 degree rankine in K                      → 1.388888889 K
 2.5 degrees                                  → 2.5°
 2.5 degrees in rad                           → 0.0436332313 rad
 2.5 degrees c                                → 2.5 °C
 2.5 degrees c in K                           → 275.65 K
+2.5 degrees celcius                          → 2.5 °C
+2.5 degrees celcius in K                     → 275.65 K
 2.5 degrees celsius                          → 2.5 °C
 2.5 degrees celsius in K                     → 275.65 K
 2.5 degrees f                                → 2.5 °F
 2.5 degrees f in K                           → 256.7611111 K
 2.5 degrees fahrenheit                       → 2.5 °F
 2.5 degrees fahrenheit in K                  → 256.7611111 K
+2.5 degrees farenheit                        → 2.5 °F
+2.5 degrees farenheit in K                   → 256.7611111 K
 2.5 degrees rankine                          → 2.5 °R
 2.5 degrees rankine in K                     → 1.388888889 K
 2.5 degs                                     → 2.5°
@@ -1374,6 +1384,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 falkland islands pound in EUR            → €1.13
 2.5 falkland islands pounds                  → 2.50 FKP
 2.5 falkland islands pounds in EUR           → €1.13
+2.5 farenheit                                → 2.5 °F
+2.5 farenheit in K                           → 256.7611111 K
 2.5 fathom                                   → 2.5 ftm
 2.5 fathom in m                              → 4.572 m
 2.5 fathoms                                  → 2.5 ftm
@@ -3640,6 +3652,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 °K                                       → 2.5 K
 2.5 °R                                       → 2.5 °R
 2.5 °R in K                                  → 1.388888889 K
+2.5 °c                                       → 2.5 °C
+2.5 °c in K                                  → 275.65 K
+2.5 °f                                       → 2.5 °F
+2.5 °f in K                                  → 256.7611111 K
 2.5 µA                                       → 2.5 µA
 2.5 µA in A                                  → 0.0000025 A
 2.5 µL                                       → 2.5 µL
@@ -3719,10 +3735,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 ₾ in EUR                                 → €1.13
 2.5 ₿                                        → 2.5 BTC
 2.5 ₿ in EUR                                 → €225,000.00
-2.5 ℃                                        → 2.5
-2.5 ℃ in K                                   → 2.5 K
-2.5 ℉                                        → 2.5
-2.5 ℉ in K                                   → 2.5 K
+2.5 ℃                                        → 2.5 °C
+2.5 ℃ in K                                   → 275.65 K
+2.5 ℉                                        → 2.5 °F
+2.5 ℉ in K                                   → 256.7611111 K
 2.5 ℓ                                        → 2.5 L
 2.5 元                                        → CN¥2.50
 2.5 元 in EUR                                 → €1.13
