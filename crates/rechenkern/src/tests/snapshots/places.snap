@@ -1979,579 +1979,585 @@ time in zurich                               → 20:30 CEST
 sunrise in zurich                            → 07:14 CEST
 
 // Every 200th city
-time in 'abasan al kabirah                   → <error: unknown place "abasan al kabirah", did you mean "'abasan Al Kabirah"?>
-sunrise in 'abasan al kabirah                → <error: unknown place "abasan al kabirah", did you mean "'abasan Al Kabirah"?>
-time in abizhan khot                         → 18:30 GMT
-sunrise in abizhan khot                      → 06:05 GMT
-time in adachi city                          → Thu, 24 Sep 2026 03:30 JST
-sunrise in adachi city                       → Thu, 24 Sep 2026 05:30 JST
-time in agia paraskevi                       → 21:30 EEST
-sunrise in agia paraskevi                    → 07:13 EEST
-time in ain taoujdat                         → 18:30 UTC
-sunrise in ain taoujdat                      → 06:10 UTC
-time in akşehir                              → 21:30 UTC+3
-sunrise in akşehir                           → 06:43 UTC+3
-time in al mash'iliyah                       → 21:30 UTC+3
-sunrise in al mash'iliyah                    → 05:51 UTC+3
-time in alatyr'                              → <error: unknown place "alatyr", did you mean "Alatyr'"?>
-sunrise in alatyr'                           → <error: unknown place "alatyr", did you mean "Alatyr'"?>
-time in alief                                → 13:30 CDT
-sunrise in alief                             → 07:11 CDT
-time in alushta                              → 21:30 MSK
-sunrise in alushta                           → 06:30 MSK
-time in ammana                               → 21:30 UTC+3
-sunrise in ammana                            → 06:25 UTC+3
-time in anand                                → Thu, 24 Sep 2026 00:00 IST
-sunrise in anand                             → Thu, 24 Sep 2026 06:27 IST
-time in annur                                → Thu, 24 Sep 2026 00:00 IST
-sunrise in annur                             → Thu, 24 Sep 2026 06:11 IST
-time in apatzingán                           → 12:30 UTC-6
-sunrise in apatzingán                        → 06:39 UTC-6
-time in arbroath                             → 19:30 BST
-sunrise in arbroath                          → 06:57 BST
-time in artur nogueira                       → 15:30 UTC-3
-sunrise in artur nogueira                    → 05:57 UTC-3
-time in ashkhabadi                           → 23:30 UTC+5
-sunrise in ashkhabadi                        → 06:55 UTC+5
-time in atascadero                           → 11:30 PDT
-sunrise in atascadero                        → 06:52 PDT
-time in avtovo                               → 21:30 MSK
-sunrise in avtovo                            → 06:45 MSK
-time in aïn beïda                            → 19:30 UTC+1
-sunrise in aïn beïda                         → 06:19 UTC+1
-time in baddi                                → Thu, 24 Sep 2026 00:00 IST
-sunrise in baddi                             → Thu, 24 Sep 2026 06:12 IST
-time in bailadores                           → 14:30 UTC-4
-sunrise in bailadores                        → 06:36 UTC-4
-time in bals                                 → 21:30 EEST
-sunrise in bals                              → 07:12 EEST
-time in bandariba                            → 14:30 UTC-4
-sunrise in bandariba                         → 06:24 UTC-4
-time in banī na‘īm                           → <error: unknown place "banī na īm", did you mean "Banī Na‘īm"?>
-sunrise in banī na‘īm                        → <error: unknown place "banī na īm", did you mean "Banī Na‘īm"?>
-time in barkā’                               → <error: unknown place "barkā">
-sunrise in barkā’                            → <error: unknown place "barkā">
-time in basti                                → Thu, 24 Sep 2026 00:00 IST
-sunrise in basti                             → Thu, 24 Sep 2026 05:48 IST
-time in bañga                                → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in bañga                             → Thu, 24 Sep 2026 05:30 UTC+8
-time in beled hawo                           → 21:30 UTC+3
-sunrise in beled hawo                        → 06:02 UTC+3
-time in beni saf                             → 19:30 UTC+1
-sunrise in beni saf                          → 06:54 UTC+1
-time in bethnal green                        → 19:30 BST
-sunrise in bethnal green                     → 06:48 BST
-time in bhokardan                            → Thu, 24 Sep 2026 00:00 IST
-sunrise in bhokardan                         → Thu, 24 Sep 2026 06:16 IST
-time in billai                               → Thu, 24 Sep 2026 00:00 IST
-sunrise in billai                            → Thu, 24 Sep 2026 05:54 IST
-time in biyala                               → 21:30 EEST
-sunrise in biyala                            → 06:44 EEST
-time in boca do acre                         → 14:30 UTC-4
-sunrise in boca do acre                      → 06:19 UTC-4
-time in bontang                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in bontang                           → Thu, 24 Sep 2026 05:59 UTC+8
-time in boursa                               → 21:30 UTC+3
-sunrise in boursa                            → 06:52 UTC+3
-time in bretigny sur orge                    → 20:30 CEST
-sunrise in bretigny sur orge                 → 07:39 CEST
-time in bryukhovetskaya                      → 21:30 MSK
-sunrise in bryukhovetskaya                   → 06:12 MSK
-time in bugarama                             → 21:30 UTC+3
-sunrise in bugarama                          → 06:47 UTC+3
-time in burj al ‘arab al jadīdah             → <error: unknown place "burj al arab", did you mean "Burj Al 'arab"?>
-sunrise in burj al ‘arab al jadīdah          → <error: unknown place "burj al arab", did you mean "Burj Al 'arab"?>
-time in bydgoszcz                            → 20:30 CEST
-sunrise in bydgoszcz                         → 06:35 CEST
-time in bạc liêu                             → Thu, 24 Sep 2026 01:30 UTC+7
-sunrise in bạc liêu                          → Thu, 24 Sep 2026 05:46 UTC+7
-time in calcuta                              → Thu, 24 Sep 2026 00:00 IST
-sunrise in calcuta                           → Thu, 24 Sep 2026 05:26 IST
-time in canberra                             → Thu, 24 Sep 2026 04:30 AEST
-sunrise in canberra                          → Thu, 24 Sep 2026 05:51 AEST
-time in caransebeş                           → 21:30 EEST
-sunrise in caransebeş                        → 07:19 EEST
-time in castaños                             → 12:30 UTC-6
-sunrise in castaños                          → 06:35 UTC-6
-time in celabinsk                            → 23:30 UTC+5
-sunrise in celabinsk                         → 06:41 UTC+5
-time in ch'u chiang                          → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in ch'u chiang                       → Thu, 24 Sep 2026 06:15 UTC+8
-time in changbai                             → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in changbai                          → Thu, 24 Sep 2026 05:16 UTC+8
-time in chatelineau                          → 20:30 CEST
-sunrise in chatelineau                       → 07:30 CEST
-time in cheranellūr                          → Thu, 24 Sep 2026 00:00 IST
-sunrise in cheranellūr                       → Thu, 24 Sep 2026 06:14 IST
-time in chidawa                              → Thu, 24 Sep 2026 00:00 IST
-sunrise in chidawa                           → Thu, 24 Sep 2026 06:17 IST
+time in 'abasan al kabirah                   → 21:30 EEST
+sunrise in 'abasan al kabirah                → 06:31 EEST
+time in abiy adi                             → 21:30 UTC+3
+sunrise in abiy adi                          → 06:13 UTC+3
+time in ad douiem                            → 20:30 UTC+2
+sunrise in ad douiem                         → 05:40 UTC+2
+time in agen                                 → 20:30 CEST
+sunrise in agen                              → 07:46 CEST
+time in ain defla                            → 19:30 UTC+1
+sunrise in ain defla                         → 06:41 UTC+1
+time in akuce                                → 19:30 UTC+1
+sunrise in akuce                             → 06:28 UTC+1
+time in al khabrā’                           → 21:30 UTC+3
+sunrise in al khabrā’                        → 05:54 UTC+3
+time in ala buka                             → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in ala buka                          → Thu, 24 Sep 2026 07:03 UTC+6
+time in alesund                              → 20:30 CEST
+sunrise in alesund                           → 07:21 CEST
+time in alswys                               → 21:30 EEST
+sunrise in alswys                            → 06:39 EEST
+time in ambikāpur                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in ambikāpur                         → Thu, 24 Sep 2026 05:46 IST
+time in an nasiriyah                         → 21:30 UTC+3
+sunrise in an nasiriyah                      → 05:44 UTC+3
+time in angleton                             → 13:30 CDT
+sunrise in angleton                          → 07:11 CDT
+time in antwrp                               → 20:30 CEST
+sunrise in antwrp                            → 07:30 CEST
+time in aracatuba                            → 15:30 UTC-3
+sunrise in aracatuba                         → 06:10 UTC-3
+time in ariyalur                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in ariyalur                          → Thu, 24 Sep 2026 06:03 IST
+time in asagaya minami                       → Thu, 24 Sep 2026 03:30 JST
+sunrise in asagaya minami                    → Thu, 24 Sep 2026 05:31 JST
+time in astanh                               → 23:30 UTC+5
+sunrise in astanh                            → 06:02 UTC+5
+time in attock city                          → 23:30 PKT
+sunrise in attock city                       → 05:59 PKT
+time in ayla patakata                        → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in ayla patakata                     → Thu, 24 Sep 2026 05:48 UTC+6
+time in baatou                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in baatou                            → Thu, 24 Sep 2026 06:30 UTC+8
+time in bagdzhylar                           → 21:30 UTC+3
+sunrise in bagdzhylar                        → 06:53 UTC+3
+time in bako                                 → 22:30 UTC+4
+sunrise in bako                              → 06:29 UTC+4
+time in ban houakhoua                        → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in ban houakhoua                     → Thu, 24 Sep 2026 06:07 UTC+7
+time in bangalor                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in bangalor                          → Thu, 24 Sep 2026 06:09 IST
+time in barah                                → 20:30 UTC+2
+sunrise in barah                             → 05:48 UTC+2
+time in barranca                             → 13:30 UTC-5
+sunrise in barranca                          → 06:00 UTC-5
+time in batu arang                           → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in batu arang                        → Thu, 24 Sep 2026 07:03 UTC+8
+time in beghdad                              → 21:30 UTC+3
+sunrise in beghdad                           → 05:51 UTC+3
+time in belmopan                             → 12:30 UTC-6
+sunrise in belmopan                          → 05:44 UTC-6
+time in ber mein                             → 20:30 CEST
+sunrise in ber mein                          → 07:12 CEST
+time in beāwar                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in beāwar                            → Thu, 24 Sep 2026 06:22 IST
+time in bialogard                            → 20:30 CEST
+sunrise in bialogard                         → 06:43 CEST
+time in binh thuy                            → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in binh thuy                         → Thu, 24 Sep 2026 05:46 UTC+7
+time in blantayr                             → 20:30 UTC+2
+sunrise in blantayr                          → 05:29 UTC+2
+time in bogoro                               → Thu, 24 Sep 2026 01:30 WIB
+sunrise in bogoro                            → Thu, 24 Sep 2026 05:42 WIB
+time in boromo                               → 18:30 GMT
+sunrise in boromo                            → 06:01 GMT
+time in braganca paulista                    → 15:30 UTC-3
+sunrise in braganca paulista                 → 05:55 UTC-3
+time in briuselis                            → 20:30 CEST
+sunrise in briuselis                         → 07:30 CEST
+time in bu'ake                               → 18:30 GMT
+sunrise in bu'ake                            → 06:09 GMT
+time in buhusi                               → 21:30 EEST
+sunrise in buhusi                            → 07:01 EEST
+time in burnaby                              → 11:30 PDT
+sunrise in burnaby                           → 07:00 PDT
+time in byjng                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in byjng                             → Thu, 24 Sep 2026 06:03 UTC+8
+time in bến cát                              → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in bến cát                           → Thu, 24 Sep 2026 05:43 UTC+7
+time in caledon                              → 14:30 EDT
+sunrise in caledon                           → 07:08 EDT
+time in candeias                             → 15:30 UTC-3
+sunrise in candeias                          → 05:23 UTC-3
+time in caravaca                             → 20:30 CEST
+sunrise in caravaca                          → 07:56 CEST
+time in castellana                           → 20:30 CEST
+sunrise in castellana                        → 08:03 CEST
+time in celbridge                            → 19:30 UTC+1
+sunrise in celbridge                         → 07:14 UTC+1
+time in ch'u chou                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in ch'u chou                         → Thu, 24 Sep 2026 05:54 UTC+8
+time in changchiakow                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in changchiakow                      → Thu, 24 Sep 2026 06:10 UTC+8
+time in chatenay malabry                     → 20:30 CEST
+sunrise in chatenay malabry                  → 07:39 CEST
+time in cheranmahadevi                       → Thu, 24 Sep 2026 00:00 IST
+sunrise in cheranmahadevi                    → Thu, 24 Sep 2026 06:09 IST
+time in chidda                               → 21:30 UTC+3
+sunrise in chidda                            → 06:12 UTC+3
 time in chisu xoa ka                         → Thu, 24 Sep 2026 03:30 JST
 sunrise in chisu xoa ka                      → Thu, 24 Sep 2026 05:36 JST
-time in chu zhou shi                         → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in chu zhou shi                      → Thu, 24 Sep 2026 05:56 UTC+8
-time in cianorte                             → 15:30 UTC-3
-sunrise in cianorte                          → 06:19 UTC-3
-time in ciudad benito juárez                 → 12:30 UTC-6
-sunrise in ciudad benito juárez              → 06:29 UTC-6
-time in coalinga                             → 11:30 PDT
-sunrise in coalinga                          → 06:50 PDT
-time in conception bay south                 → 16:00 NDT
-sunrise in conception bay south              → 06:50 NDT
-time in coswig                               → 20:30 CEST
-sunrise in coswig                            → 06:53 CEST
-time in cuilo                                → 19:30 UTC+1
-sunrise in cuilo                             → 05:31 UTC+1
-time in da ban                               → Thu, 24 Sep 2026 03:30 JST
-sunrise in da ban                            → Thu, 24 Sep 2026 05:47 JST
-time in daliang                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in daliang                           → Thu, 24 Sep 2026 06:16 UTC+8
-time in darchula                             → Thu, 24 Sep 2026 00:15 UTC+5:45
-sunrise in darchula                          → Thu, 24 Sep 2026 06:12 UTC+5:45
-time in dedougou                             → 18:30 GMT
-sunrise in dedougou                          → 06:03 GMT
-time in derry                                → 19:30 BST
-sunrise in derry                             → 07:16 BST
-time in dianópolis                           → 15:30 UTC-3
-sunrise in dianópolis                        → 05:56 UTC-3
-time in divnoye                              → 21:30 MSK
-sunrise in divnoye                           → 05:55 MSK
-time in dondaicha                            → Thu, 24 Sep 2026 00:00 IST
-sunrise in dondaicha                         → Thu, 24 Sep 2026 06:21 IST
-time in drezda                               → 20:30 CEST
-sunrise in drezda                            → 06:53 CEST
-time in dung ing si                          → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in dung ing si                       → Thu, 24 Sep 2026 05:55 UTC+8
-time in dzhamshedpur                         → Thu, 24 Sep 2026 00:00 IST
-sunrise in dzhamshedpur                      → Thu, 24 Sep 2026 05:34 IST
-time in east independence                    → 13:30 CDT
-sunrise in east independence                 → 07:06 CDT
-time in ehl' makhalla ehl' kubra             → <error: unknown place "ehl makhalla ehl">
-sunrise in ehl' makhalla ehl' kubra          → <error: unknown place "ehl makhalla ehl">
-time in el mirage                            → 11:30 UTC-7
-sunrise in el mirage                         → 06:18 UTC-7
-time in emkhomazi                            → 20:30 SAST
-sunrise in emkhomazi                         → 05:45 SAST
-time in eruwa                                → 19:30 UTC+1
-sunrise in eruwa                             → 06:35 UTC+1
-time in eunápolis                            → 15:30 UTC-3
-sunrise in eunápolis                         → 05:27 UTC-3
-time in farīdkot                             → Thu, 24 Sep 2026 00:00 IST
-sunrise in farīdkot                          → Thu, 24 Sep 2026 06:20 IST
-time in filadelfiye                          → 14:30 EDT
-sunrise in filadelfiye                       → 06:49 EDT
-time in fort st. john                        → <error: unknown place "fort", did you mean "Forst"?>
-sunrise in fort st. john                     → <error: unknown place "fort", did you mean "Forst"?>
-time in frita'una                            → 18:30 GMT
-sunrise in frita'una                         → 06:42 GMT
-time in fusō                                 → Thu, 24 Sep 2026 03:30 JST
-sunrise in fusō                              → Thu, 24 Sep 2026 05:41 JST
-time in gama                                 → 15:30 UTC-3
-sunrise in gama                              → 06:01 UTC-3
-time in gaurela                              → Thu, 24 Sep 2026 00:00 IST
-sunrise in gaurela                           → Thu, 24 Sep 2026 05:52 IST
-time in gesundbrunnen                        → 20:30 CEST
-sunrise in gesundbrunnen                     → 06:54 CEST
-time in giv`at hananya                       → <error: unknown place "giv">
-sunrise in giv`at hananya                    → <error: unknown place "giv">
-time in goianesia                            → 15:30 UTC-3
-sunrise in goianesia                         → 06:05 UTC-3
-time in goth radhan                          → 23:30 PKT
-sunrise in goth radhan                       → 06:17 PKT
-time in grozny                               → 21:30 MSK
-sunrise in grozny                            → 05:45 MSK
-time in guayakiru                            → 13:30 UTC-5
-sunrise in guayakiru                         → 06:09 UTC-5
-time in guocun                               → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in guocun                            → Thu, 24 Sep 2026 06:37 UTC+8
-time in göd                                  → 20:30 CEST
-sunrise in göd                               → 06:31 CEST
-time in haidelabadeu                         → 23:30 PKT
-sunrise in haidelabadeu                      → 06:15 PKT
-time in hamtramck                            → 14:30 EDT
-sunrise in hamtramck                         → 07:21 EDT
-time in hardoī                               → Thu, 24 Sep 2026 00:00 IST
-sunrise in hardoī                            → Thu, 24 Sep 2026 05:59 IST
-time in he bi shi                            → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in he bi shi                         → Thu, 24 Sep 2026 06:12 UTC+8
-time in herdecke                             → 20:30 CEST
-sunrise in herdecke                          → 07:18 CEST
-time in hinh gjai                            → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in hinh gjai                         → Thu, 24 Sep 2026 06:11 UTC+8
-time in hoima                                → 21:30 UTC+3
-sunrise in hoima                             → 06:44 UTC+3
-time in hough                                → 14:30 EDT
-sunrise in hough                             → 07:15 EDT
-time in huaiyang                             → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in huaiyang                          → Thu, 24 Sep 2026 06:11 UTC+8
-time in hunucmá                              → 12:30 UTC-6
-sunrise in hunucmá                           → 05:49 UTC-6
-time in hồng lĩnh                            → Thu, 24 Sep 2026 01:30 UTC+7
-sunrise in hồng lĩnh                         → Thu, 24 Sep 2026 05:46 UTC+7
-time in iga                                  → Thu, 24 Sep 2026 03:30 JST
-sunrise in iga                               → Thu, 24 Sep 2026 05:45 JST
-time in immokalee                            → 14:30 EDT
-sunrise in immokalee                         → 07:15 EDT
-time in ipixuna do para                      → 15:30 UTC-3
-sunrise in ipixuna do para                   → 05:59 UTC-3
-time in islip                                → 14:30 EDT
-sunrise in islip                             → 06:41 EDT
-time in iuzivka                              → 21:30 EEST
-sunrise in iuzivka                           → 06:17 EEST
-time in jaguaquara                           → 15:30 UTC-3
-sunrise in jaguaquara                        → 05:29 UTC-3
-time in jandiāla                             → Thu, 24 Sep 2026 00:00 IST
-sunrise in jandiāla                          → Thu, 24 Sep 2026 06:17 IST
-time in jehol                                → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in jehol                             → Thu, 24 Sep 2026 05:57 UTC+8
-time in jialing                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in jialing                           → Thu, 24 Sep 2026 06:46 UTC+8
-time in jipijapa                             → 13:30 UTC-5
-sunrise in jipijapa                          → 06:11 UTC-5
-time in josé bonifácio                       → 15:30 UTC-3
-sunrise in josé bonifácio                    → 06:07 UTC-3
-time in jynhwa                               → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in jynhwa                            → Thu, 24 Sep 2026 05:51 UTC+8
-time in kadiri                               → Thu, 24 Sep 2026 00:00 IST
-sunrise in kadiri                            → Thu, 24 Sep 2026 06:07 IST
-time in kakdwip                              → Thu, 24 Sep 2026 00:00 IST
-sunrise in kakdwip                           → Thu, 24 Sep 2026 05:26 IST
-time in kalur kot                            → 23:30 PKT
-sunrise in kalur kot                         → 06:04 PKT
-time in kan shan                             → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in kan shan                          → Thu, 24 Sep 2026 05:45 UTC+8
-time in kaoueni                              → 21:30 UTC+3
-sunrise in kaoueni                           → 05:48 UTC+3
-time in karnal                               → Thu, 24 Sep 2026 00:00 IST
-sunrise in karnal                            → Thu, 24 Sep 2026 06:11 IST
-time in kathhāra                             → Thu, 24 Sep 2026 00:00 IST
-sunrise in kathhāra                          → Thu, 24 Sep 2026 05:36 IST
-time in ke la si nuo da er                   → 21:30 MSK
-sunrise in ke la si nuo da er                → 06:12 MSK
-time in kerki                                → 23:30 UTC+5
-sunrise in kerki                             → 06:28 UTC+5
-time in khanpur mahar                        → 23:30 PKT
-sunrise in khanpur mahar                     → 06:11 PKT
-time in khowai                               → Thu, 24 Sep 2026 00:00 IST
-sunrise in khowai                            → Thu, 24 Sep 2026 05:13 IST
-time in kikvita                              → 19:30 UTC+1
-sunrise in kikvita                           → 05:34 UTC+1
-time in kirovas                              → 21:30 MSK
-sunrise in kirovas                           → 05:28 MSK
-time in klkwth                               → Thu, 24 Sep 2026 00:00 IST
-sunrise in klkwth                            → Thu, 24 Sep 2026 05:26 IST
-time in koleudoba                            → 15:30 UTC-3
-sunrise in koleudoba                         → 07:05 UTC-3
-time in kopengagen                           → 20:30 CEST
-sunrise in kopengagen                        → 06:57 CEST
-time in kotikawatta                          → Thu, 24 Sep 2026 00:00 UTC+5:30
-sunrise in kotikawatta                       → Thu, 24 Sep 2026 05:59 UTC+5:30
-time in krasnoiarsk                          → Thu, 24 Sep 2026 01:30 UTC+7
-sunrise in krasnoiarsk                       → Thu, 24 Sep 2026 06:37 UTC+7
-time in kuang chou shih                      → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in kuang chou shih                   → Thu, 24 Sep 2026 06:16 UTC+8
-time in kumārapuram                          → Thu, 24 Sep 2026 00:00 IST
-sunrise in kumārapuram                       → Thu, 24 Sep 2026 06:13 IST
-time in kutiyana                             → Thu, 24 Sep 2026 00:00 IST
-sunrise in kutiyana                          → Thu, 24 Sep 2026 06:39 IST
-time in kyaukme                              → Thu, 24 Sep 2026 01:00 UTC+6:30
-sunrise in kyaukme                           → Thu, 24 Sep 2026 05:51 UTC+6:30
-time in kōtari                               → Thu, 24 Sep 2026 03:30 JST
-sunrise in kōtari                            → Thu, 24 Sep 2026 05:46 JST
-time in la trinité                           → 14:30 UTC-4
-sunrise in la trinité                        → 05:53 UTC-4
-time in laixi                                → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in laixi                             → Thu, 24 Sep 2026 05:47 UTC+8
-time in langouo                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in langouo                           → Thu, 24 Sep 2026 06:54 UTC+8
-time in lauri                                → Thu, 24 Sep 2026 00:00 IST
-sunrise in lauri                             → Thu, 24 Sep 2026 05:59 IST
-time in lejpcyg                              → 20:30 CEST
-sunrise in lejpcyg                           → 06:58 CEST
-time in liang zan                            → 21:30 MSK
-sunrise in liang zan                         → 06:08 MSK
-time in limuru                               → 21:30 UTC+3
-sunrise in limuru                            → 06:23 UTC+3
-time in liu pan shui                         → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in liu pan shui                      → Thu, 24 Sep 2026 06:50 UTC+8
-time in lojang                               → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in lojang                            → Thu, 24 Sep 2026 06:19 UTC+8
-time in los reyes de salgado                 → 12:30 UTC-6
-sunrise in los reyes de salgado              → 06:39 UTC-6
-time in ludvika                              → 20:30 CEST
-sunrise in ludvika                           → 06:46 CEST
-time in luoyang                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in luoyang                           → Thu, 24 Sep 2026 06:19 UTC+8
-time in lübeck                               → 20:30 CEST
-sunrise in lübeck                            → 07:05 CEST
-time in maddaloni                            → 20:30 CEST
-sunrise in maddaloni                         → 06:51 CEST
-time in mahbubabad                           → Thu, 24 Sep 2026 00:00 IST
-sunrise in mahbubabad                        → Thu, 24 Sep 2026 05:59 IST
-time in makinsk                              → 23:30 UTC+5
-sunrise in makinsk                           → 06:05 UTC+5
-time in mana'usa                             → 14:30 UTC-4
-sunrise in mana'usa                          → 05:49 UTC-4
-time in manilae                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in manilae                           → Thu, 24 Sep 2026 05:45 UTC+8
-time in marakaimpo                           → 14:30 UTC-4
-sunrise in marakaimpo                        → 06:36 UTC-4
-time in marsala                              → 20:30 CEST
-sunrise in marsala                           → 06:59 CEST
-time in mastic                               → 14:30 EDT
-sunrise in mastic                            → 06:40 EDT
-time in mayyanad                             → Thu, 24 Sep 2026 00:00 IST
-sunrise in mayyanad                          → Thu, 24 Sep 2026 06:12 IST
-time in medvezh'yegorsk                      → 21:30 MSK
-sunrise in medvezh'yegorsk                   → 06:28 MSK
-time in mendī                                → 21:30 UTC+3
-sunrise in mendī                             → 06:29 UTC+3
-time in mezőkövesd                           → 20:30 CEST
-sunrise in mezőkövesd                        → 06:26 CEST
-time in milwalky                             → 13:30 CDT
-sunrise in milwalky                          → 06:40 CDT
-time in misisogeo                            → 14:30 EDT
-sunrise in misisogeo                         → 07:07 EDT
-time in moema                                → 15:30 UTC-3
-sunrise in moema                             → 05:55 UTC-3
-time in mons                                 → 20:30 CEST
-sunrise in mons                              → 07:32 CEST
-time in morganton                            → 14:30 EDT
-sunrise in morganton                         → 07:16 EDT
-time in mountain view                        → 11:30 PDT
-sunrise in mountain view                     → 06:57 PDT
-time in mukandpur                            → Thu, 24 Sep 2026 00:00 IST
-sunrise in mukandpur                         → Thu, 24 Sep 2026 06:11 IST
-time in mustafakemalpaşa                     → 21:30 UTC+3
-sunrise in mustafakemalpaşa                  → 06:55 UTC+3
-time in myŏnggan dong                        → Thu, 24 Sep 2026 03:30 KST
-sunrise in myŏnggan dong                     → Thu, 24 Sep 2026 06:11 KST
-time in nachville                            → 13:30 CDT
-sunrise in nachville                         → 06:36 CDT
-time in nakwrw                               → 21:30 UTC+3
-sunrise in nakwrw                            → 06:25 UTC+3
-time in nandri                               → Thu, 24 Sep 2026 00:00 IST
-sunrise in nandri                            → Thu, 24 Sep 2026 06:27 IST
-time in narnaul                              → Thu, 24 Sep 2026 00:00 IST
-sunrise in narnaul                           → Thu, 24 Sep 2026 06:15 IST
-time in nayrubi                              → 21:30 UTC+3
-sunrise in nayrubi                           → 06:22 UTC+3
-time in nesvizh                              → 21:30 UTC+3
-sunrise in nesvizh                           → 07:01 UTC+3
-time in ngaoundal                            → 19:30 UTC+1
-sunrise in ngaoundal                         → 05:56 UTC+1
-time in nilüfer                              → 21:30 UTC+3
-sunrise in nilüfer                           → 06:53 UTC+3
-time in nobres                               → 14:30 UTC-4
-sunrise in nobres                            → 05:34 UTC-4
-time in nour soultan                         → 23:30 UTC+5
-sunrise in nour soultan                      → 06:02 UTC+5
-time in nowokusnezk                          → Thu, 24 Sep 2026 01:30 UTC+7
-sunrise in nowokusnezk                       → Thu, 24 Sep 2026 07:00 UTC+7
-time in nyamy                                → 19:30 UTC+1
-sunrise in nyamy                             → 06:41 UTC+1
-time in obispos                              → 14:30 UTC-4
-sunrise in obispos                           → 06:30 UTC-4
-time in okoa                                 → 19:30 UTC+1
-sunrise in okoa                              → 06:03 UTC+1
-time in oranas                               → 19:30 UTC+1
-sunrise in oranas                            → 06:51 UTC+1
-time in osu                                  → 18:30 GMT
-sunrise in osu                               → 05:50 GMT
-time in oytograk                             → Thu, 24 Sep 2026 00:30 UTC+6
-sunrise in oytograk                          → Thu, 24 Sep 2026 06:21 UTC+6
-time in pakwach                              → 21:30 UTC+3
-sunrise in pakwach                           → 06:43 UTC+3
-time in pandacaqui                           → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in pandacaqui                        → Thu, 24 Sep 2026 05:47 UTC+8
-time in parchim                              → 20:30 CEST
-sunrise in parchim                           → 07:00 CEST
-time in pat heung                            → Thu, 24 Sep 2026 02:30 HKT
-sunrise in pat heung                         → Thu, 24 Sep 2026 06:13 HKT
-time in peekskill                            → 14:30 EDT
-sunrise in peekskill                         → 06:44 EDT
-time in perris                               → 11:30 PDT
-sunrise in perris                            → 06:38 PDT
-time in phenjan                              → Thu, 24 Sep 2026 03:30 KST
-sunrise in phenjan                           → Thu, 24 Sep 2026 06:26 KST
-time in pihani                               → Thu, 24 Sep 2026 00:00 IST
-sunrise in pihani                            → Thu, 24 Sep 2026 05:58 IST
-time in piranvādi                            → Thu, 24 Sep 2026 00:00 IST
-sunrise in piranvādi                         → Thu, 24 Sep 2026 06:21 IST
-time in pnom pehn'                           → <error: unknown place "pnom pehn", did you mean "Pnom Pehn'"?>
-sunrise in pnom pehn'                        → <error: unknown place "pnom pehn", did you mean "Pnom Pehn'"?>
-time in pontbuiten                           → 15:30 UTC-3
-sunrise in pontbuiten                        → 06:30 UTC-3
-time in porto velo                           → 14:30 UTC-4
-sunrise in porto velo                        → 06:05 UTC-4
-time in prestena                             → 20:30 CEST
-sunrise in prestena                          → 06:24 CEST
-time in pueblo de los angeles                → 11:30 PDT
-sunrise in pueblo de los angeles             → 06:42 PDT
-time in purépero de echáiz                   → 12:30 UTC-6
-sunrise in purépero de echáiz                → 06:37 UTC-6
-time in pānihāti                             → Thu, 24 Sep 2026 00:00 IST
-sunrise in pānihāti                          → Thu, 24 Sep 2026 05:26 IST
-time in qionghai shi                         → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in qionghai shi                      → Thu, 24 Sep 2026 06:27 UTC+8
-time in quipungo                             → 19:30 UTC+1
-sunrise in quipungo                          → 05:51 UTC+1
-time in raiganj                              → Thu, 24 Sep 2026 00:00 IST
-sunrise in raiganj                           → Thu, 24 Sep 2026 05:27 IST
-time in ranzan                               → Thu, 24 Sep 2026 03:30 JST
-sunrise in ranzan                            → Thu, 24 Sep 2026 05:32 JST
-time in rehsifi                              → 15:30 UTC-3
-sunrise in rehsifi                           → 05:09 UTC-3
-time in ribeiropolis                         → 15:30 UTC-3
-sunrise in ribeiropolis                      → 05:19 UTC-3
-time in rivuiu                               → 21:30 EEST
-sunrise in rivuiu                            → 07:12 EEST
-time in rosh ha‘ayin                         → <error: unknown place "rosh", did you mean "Osh"?>
-sunrise in rosh ha‘ayin                      → <error: unknown place "rosh", did you mean "Osh"?>
-time in rusanivka                            → 21:30 EEST
-sunrise in rusanivka                         → 06:45 EEST
-time in sa da bandeira                       → 19:30 UTC+1
-sunrise in sa da bandeira                    → 05:55 UTC+1
-time in sai kung                             → Thu, 24 Sep 2026 02:30 HKT
-sunrise in sai kung                          → Thu, 24 Sep 2026 06:12 HKT
-time in sakhkhara                            → 23:30 PKT
-sunrise in sakhkhara                         → 06:13 PKT
-time in samarakada                           → 23:30 UTC+5
-sunrise in samarakada                        → 06:20 UTC+5
-time in san francisco tesistan               → 12:30 UTC-6
-sunrise in san francisco tesistan            → 06:43 UTC-6
-time in san miniato basso                    → 20:30 CEST
-sunrise in san miniato basso                 → 07:05 CEST
-time in sandbach                             → 19:30 BST
-sunrise in sandbach                          → 06:57 BST
-time in santa ana chiautempan                → 12:30 UTC-6
-sunrise in santa ana chiautempan             → 06:22 UTC-6
-time in santiago de veraguas                 → 13:30 UTC-5
-sunrise in santiago de veraguas              → 06:13 UTC-5
-time in sao joao do rio do peixe             → 15:30 UTC-3
-sunrise in sao joao do rio do peixe          → 05:23 UTC-3
-time in saraqib                              → 21:30 UTC+3
-sunrise in saraqib                           → 06:21 UTC+3
-time in savelugu                             → 18:30 GMT
-sunrise in savelugu                          → 05:52 GMT
-time in sector 2                             → <error: unknown place "sector", did you mean "Sector 1"?>
-sunrise in sector 2                          → <error: unknown place "sector", did you mean "Sector 1"?>
-time in seon yang si                         → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in seon yang si                      → Thu, 24 Sep 2026 05:35 UTC+8
-time in seyah cheshmeh                       → 22:00 UTC+3:30
-sunrise in seyah cheshmeh                    → 06:21 UTC+3:30
-time in shankou                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in shankou                           → Thu, 24 Sep 2026 06:30 UTC+8
-time in sheoganj                             → Thu, 24 Sep 2026 00:00 IST
-sunrise in sheoganj                          → Thu, 24 Sep 2026 06:27 IST
-time in shirvan                              → 22:00 UTC+3:30
-sunrise in shirvan                           → 05:27 UTC+3:30
-time in shyangtan                            → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in shyangtan                         → Thu, 24 Sep 2026 06:18 UTC+8
-time in sidnejus                             → Thu, 24 Sep 2026 04:30 AEST
-sunrise in sidnejus                          → Thu, 24 Sep 2026 05:43 AEST
-time in sing gapoleu                         → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in sing gapoleu                      → Thu, 24 Sep 2026 06:54 UTC+8
-time in sitārganj                            → Thu, 24 Sep 2026 00:00 IST
-sunrise in sitārganj                         → Thu, 24 Sep 2026 06:00 IST
-time in soacha                               → 13:30 UTC-5
-sunrise in soacha                            → 05:46 UTC-5
-time in songnan                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in songnan                           → Thu, 24 Sep 2026 05:43 UTC+8
-time in spandau                              → 20:30 CEST
-sunrise in spandau                           → 06:55 CEST
-time in staryy malgobek                      → 21:30 MSK
-sunrise in staryy malgobek                   → 05:50 MSK
-time in suan luang                           → Thu, 24 Sep 2026 01:30 UTC+7
-sunrise in suan luang                        → Thu, 24 Sep 2026 06:07 UTC+7
-time in sumy                                 → 21:30 EEST
-sunrise in sumy                              → 06:28 EEST
-time in svay rieng                           → Thu, 24 Sep 2026 01:30 UTC+7
-sunrise in svay rieng                        → Thu, 24 Sep 2026 05:46 UTC+7
-time in são desidério                        → 15:30 UTC-3
-sunrise in são desidério                     → 05:49 UTC-3
-time in słupsk                               → 20:30 CEST
-sunrise in słupsk                            → 06:39 CEST
-time in tahla                                → 18:30 UTC
-sunrise in tahla                             → 06:06 UTC
-time in takum                                → 19:30 UTC+1
-sunrise in takum                             → 06:09 UTC+1
-time in tang gu                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in tang gu                           → Thu, 24 Sep 2026 05:58 UTC+8
-time in tartu                                → 21:30 EEST
-sunrise in tartu                             → 07:00 EEST
-time in te la ke pa ke                       → 12:30 UTC-6
-sunrise in te la ke pa ke                    → 06:42 UTC-6
-time in tenosique                            → 12:30 UTC-6
-sunrise in tenosique                         → 05:55 UTC-6
-time in thanha ho'a                          → Thu, 24 Sep 2026 01:30 UTC+7
-sunrise in thanha ho'a                       → Thu, 24 Sep 2026 05:46 UTC+7
-time in thān                                 → Thu, 24 Sep 2026 00:00 IST
-sunrise in thān                              → Thu, 24 Sep 2026 06:34 IST
-time in tinde                                → 21:30 UTC+3
-sunrise in tinde                             → 06:36 UTC+3
-time in tlalnepantla                         → 12:30 UTC-6
-sunrise in tlalnepantla                      → 06:26 UTC-6
-time in tonj                                 → 20:30 UTC+2
-sunrise in tonj                              → 05:54 UTC+2
-time in traunreut                            → 20:30 CEST
-sunrise in traunreut                         → 06:57 CEST
-time in tsamkong                             → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in tsamkong                          → Thu, 24 Sep 2026 06:28 UTC+8
-time in tuenis                               → 19:30 UTC+1
-sunrise in tuenis                            → 06:08 UTC+1
-time in turmeric city                        → Thu, 24 Sep 2026 00:00 IST
-sunrise in turmeric city                     → Thu, 24 Sep 2026 06:21 IST
-time in tākestān                             → 22:00 UTC+3:30
-sunrise in tākestān                          → 06:00 UTC+3:30
-time in ujiie                                → Thu, 24 Sep 2026 03:30 JST
-sunrise in ujiie                             → Thu, 24 Sep 2026 05:29 JST
-time in unnamalaikadai                       → Thu, 24 Sep 2026 00:00 IST
-sunrise in unnamalaikadai                    → Thu, 24 Sep 2026 06:10 IST
-time in uttamapālaiyam                       → Thu, 24 Sep 2026 00:00 IST
-sunrise in uttamapālaiyam                    → Thu, 24 Sep 2026 06:10 IST
-time in valparaíso de goiás                  → 15:30 UTC-3
-sunrise in valparaíso de goiás               → 06:01 UTC-3
-time in vejle                                → 20:30 CEST
-sunrise in vejle                             → 07:09 CEST
-time in vicálvaro                            → 20:30 CEST
-sunrise in vicálvaro                         → 08:03 CEST
-time in villaguay                            → 15:30 UTC-3
-sunrise in villaguay                         → 06:44 UTC-3
-time in vitryani hory                        → 21:30 EEST
-sunrise in vitryani hory                     → 06:46 EEST
-time in vung tau                             → Thu, 24 Sep 2026 01:30 UTC+7
-sunrise in vung tau                          → Thu, 24 Sep 2026 05:41 UTC+7
-time in wallingford                          → 14:30 EDT
-sunrise in wallingford                       → 06:40 EDT
-time in wayaobu                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in wayaobu                           → Thu, 24 Sep 2026 06:31 UTC+8
-time in west elkridge                        → 14:30 EDT
-sunrise in west elkridge                     → 06:56 EDT
-time in wilmersdorf                          → 20:30 CEST
-sunrise in wilmersdorf                       → 06:54 CEST
-time in wu chin                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in wu chin                           → Thu, 24 Sep 2026 05:49 UTC+8
-time in xai xai                              → 20:30 UTC+2
-sunrise in xai xai                           → 05:34 UTC+2
-time in xingren                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in xingren                           → Thu, 24 Sep 2026 06:48 UTC+8
-time in yakubu                               → 19:30 UTC+1
-sunrise in yakubu                            → 06:10 UTC+1
-time in yasu                                 → Thu, 24 Sep 2026 03:30 JST
-sunrise in yasu                              → Thu, 24 Sep 2026 05:45 JST
-time in yi zi mi er                          → 21:30 UTC+3
-sunrise in yi zi mi er                       → 07:00 UTC+3
-time in youting                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in youting                           → Thu, 24 Sep 2026 06:46 UTC+8
-time in z'wngz'yng                           → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in z'wngz'yng                        → Thu, 24 Sep 2026 06:43 UTC+8
-time in zaventem                             → 20:30 CEST
-sunrise in zaventem                          → 07:30 CEST
-time in zhigou                               → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in zhigou                            → Thu, 24 Sep 2026 05:52 UTC+8
-time in zongsan                              → Thu, 24 Sep 2026 02:30 UTC+8
-sunrise in zongsan                           → Thu, 24 Sep 2026 06:16 UTC+8
-time in épernay                              → 20:30 CEST
-sunrise in épernay                           → 07:32 CEST
-time in śródmieście                          → 20:30 CEST
-sunrise in śródmieście                       → 06:23 CEST
+time in chu xiong shi                        → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in chu xiong shi                     → Thu, 24 Sep 2026 07:03 UTC+8
+time in ci'ongaju si                         → Thu, 24 Sep 2026 03:30 KST
+sunrise in ci'ongaju si                      → Thu, 24 Sep 2026 06:19 KST
+time in ciuciang                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in ciuciang                          → Thu, 24 Sep 2026 06:05 UTC+8
+time in cláudio                              → 15:30 UTC-3
+sunrise in cláudio                           → 05:48 UTC-3
+time in conceição do almeida                 → 15:30 UTC-3
+sunrise in conceição do almeida              → 05:26 UTC-3
+time in cosoleacaque                         → 12:30 UTC-6
+sunrise in cosoleacaque                      → 06:08 UTC-6
+time in cuernavaca                           → 12:30 UTC-6
+sunrise in cuernavaca                        → 06:26 UTC-6
+time in cần thơ                              → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in cần thơ                           → Thu, 24 Sep 2026 05:46 UTC+7
+time in dalai                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in dalai                             → Thu, 24 Sep 2026 05:32 UTC+8
+time in dar uel beyda                        → 18:30 UTC
+sunrise in dar uel beyda                     → 06:19 UTC
+time in dearborn heights                     → 14:30 EDT
+sunrise in dearborn heights                  → 07:22 EDT
+time in depok kutha                          → Thu, 24 Sep 2026 01:30 WIB
+sunrise in depok kutha                       → Thu, 24 Sep 2026 05:41 WIB
+time in di hua                               → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in di hua                            → Thu, 24 Sep 2026 05:59 UTC+6
+time in diriamba                             → 12:30 UTC-6
+sunrise in diriamba                          → 05:34 UTC-6
+time in dombovar                             → 20:30 CEST
+sunrise in dombovar                          → 06:35 CEST
+time in dracut                               → 14:30 EDT
+sunrise in dracut                            → 06:34 EDT
+time in dumra                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in dumra                             → Thu, 24 Sep 2026 05:37 IST
+time in dzangdzou                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in dzangdzou                         → Thu, 24 Sep 2026 05:59 UTC+8
+time in earlsfield                           → 19:30 BST
+sunrise in earlsfield                        → 06:48 BST
+time in effiduase                            → 18:30 GMT
+sunrise in effiduase                         → 05:55 GMT
+time in el hajeb                             → 18:30 UTC
+sunrise in el hajeb                          → 06:10 UTC
+time in elsin'ki                             → 21:30 EEST
+sunrise in elsin'ki                          → 07:06 EEST
+time in erie                                 → 14:30 EDT
+sunrise in erie                              → 07:09 EDT
+time in estrella                             → 20:30 CEST
+sunrise in estrella                          → 08:03 CEST
+time in farafenni                            → 18:30 GMT
+sunrise in farafenni                         → 06:52 GMT
+time in ferntree gully                       → Thu, 24 Sep 2026 04:30 AEST
+sunrise in ferntree gully                    → Thu, 24 Sep 2026 06:06 AEST
+time in fordon                               → 20:30 CEST
+sunrise in fordon                            → 06:35 CEST
+time in fredericton                          → 15:30 ADT
+sunrise in fredericton                       → 07:15 ADT
+time in fulad shahr                          → 22:00 UTC+3:30
+sunrise in fulad shahr                       → 05:53 UTC+3:30
+time in gainsborough                         → 19:30 BST
+sunrise in gainsborough                      → 06:50 BST
+time in garges lès gonesse                   → 20:30 CEST
+sunrise in garges lès gonesse                → 07:38 CEST
+time in geng muong                           → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in geng muong                        → Thu, 24 Sep 2026 06:17 UTC+8
+time in gilgit                               → 23:30 PKT
+sunrise in gilgit                            → 05:51 PKT
+time in go vap                               → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in go vap                            → Thu, 24 Sep 2026 05:42 UTC+7
+time in gorbitz                              → 20:30 CEST
+sunrise in gorbitz                           → 06:53 CEST
+time in greenfield                           → 13:30 CDT
+sunrise in greenfield                        → 06:41 CDT
+time in guantanamo                           → 14:30 UTC-4
+sunrise in guantanamo                        → 06:50 UTC-4
+time in gujranvala                           → 23:30 PKT
+sunrise in gujranvala                        → 05:52 PKT
+time in gwangmyeong                          → Thu, 24 Sep 2026 03:30 KST
+sunrise in gwangmyeong                       → Thu, 24 Sep 2026 06:22 KST
+time in hadero                               → 21:30 UTC+3
+sunrise in hadero                            → 06:19 UTC+3
+time in hamamasseu si                        → Thu, 24 Sep 2026 03:30 JST
+sunrise in hamamasseu si                     → Thu, 24 Sep 2026 05:38 JST
+time in hanseong                             → Thu, 24 Sep 2026 03:30 KST
+sunrise in hanseong                          → Thu, 24 Sep 2026 06:21 KST
+time in havelock                             → 14:30 EDT
+sunrise in havelock                          → 06:56 EDT
+time in henan                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in henan                             → Thu, 24 Sep 2026 06:19 UTC+8
+time in high park north                      → 14:30 EDT
+sunrise in high park north                   → 07:06 EDT
+time in ho si minh varos                     → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in ho si minh varos                  → Thu, 24 Sep 2026 05:43 UTC+7
+time in hoogstraten                          → 20:30 CEST
+sunrise in hoogstraten                       → 07:29 CEST
+time in hsu chia hui chen                    → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in hsu chia hui chen                 → Thu, 24 Sep 2026 05:43 UTC+8
+time in huimin                               → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in huimin                            → Thu, 24 Sep 2026 06:42 UTC+8
+time in hywstwn                              → 13:30 CDT
+sunrise in hywstwn                           → 07:10 CDT
+time in ibshaway                             → 21:30 EEST
+sunrise in ibshaway                          → 06:46 EEST
+time in ilam                                 → 22:00 UTC+3:30
+sunrise in ilam                              → 06:13 UTC+3:30
+time in inglewood finn hill                  → 11:30 PDT
+sunrise in inglewood finn hill               → 06:57 PDT
+time in isanlu itedoijowa                    → 19:30 UTC+1
+sunrise in isanlu itedoijowa                 → 06:26 UTC+1
+time in itapetinga                           → 15:30 UTC-3
+sunrise in itapetinga                        → 05:30 UTC-3
+time in iúna                                 → 15:30 UTC-3
+sunrise in iúna                              → 05:35 UTC-3
+time in jalolquduq                           → 23:30 UTC+5
+sunrise in jalolquduq                        → 05:58 UTC+5
+time in jarporyaay                           → 21:30 EEST
+sunrise in jarporyaay                        → 06:27 EEST
+time in jhalawar                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in jhalawar                          → Thu, 24 Sep 2026 06:15 IST
+time in jilin                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in jilin                             → Thu, 24 Sep 2026 05:23 UTC+8
+time in jodiya bandar                        → Thu, 24 Sep 2026 00:00 IST
+sunrise in jodiya bandar                     → Thu, 24 Sep 2026 06:38 IST
+time in jullundur                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in jullundur                         → Thu, 24 Sep 2026 06:17 IST
+time in ka sa bu lan ka                      → 18:30 UTC
+sunrise in ka sa bu lan ka                   → 06:19 UTC
+time in kahnuj                               → 22:00 UTC+3:30
+sunrise in kahnuj                            → 05:28 UTC+3:30
+time in kalgari                              → 12:30 MDT
+sunrise in kalgari                           → 07:24 MDT
+time in kamisu                               → Thu, 24 Sep 2026 03:30 JST
+sunrise in kamisu                            → Thu, 24 Sep 2026 05:26 JST
+time in kangkun                              → 13:30 UTC-5
+sunrise in kangkun                           → 06:37 UTC-5
+time in karakasa                             → 14:30 UTC-4
+sunrise in karakasa                          → 06:17 UTC-4
+time in kasangulu                            → 19:30 UTC+1
+sunrise in kasangulu                         → 05:48 UTC+1
+time in kavaklı                              → 21:30 UTC+3
+sunrise in kavaklı                           → 06:55 UTC+3
+time in keletalo                             → 12:30 UTC-6
+sunrise in keletalo                          → 06:31 UTC-6
+time in kh wibek                             → 14:30 EDT
+sunrise in kh wibek                          → 06:33 EDT
+time in kheiyf                               → 21:30 EEST
+sunrise in kheiyf                            → 06:45 EEST
+time in khānāpur                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in khānāpur                          → Thu, 24 Sep 2026 06:21 IST
+time in king of prussia                      → 14:30 EDT
+sunrise in king of prussia                   → 06:50 EDT
+time in kisyneu                              → 21:30 EEST
+sunrise in kisyneu                           → 06:52 EEST
+time in kochi                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in kochi                             → Thu, 24 Sep 2026 06:14 IST
+time in kombolcha                            → 21:30 UTC+3
+sunrise in kombolcha                         → 06:10 UTC+3
+time in korura                               → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in korura                            → Thu, 24 Sep 2026 06:05 UTC+6
+time in kovai                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in kovai                             → Thu, 24 Sep 2026 06:11 IST
+time in krokuva                              → 20:30 CEST
+sunrise in krokuva                           → 06:28 CEST
+time in kuetta                               → 23:30 PKT
+sunrise in kuetta                            → 06:21 PKT
+time in kurakufu                             → 20:30 CEST
+sunrise in kurakufu                          → 06:28 CEST
+time in kwala lambwr                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in kwala lambwr                      → Thu, 24 Sep 2026 07:02 UTC+8
+time in kyzyl suu                            → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in kyzyl suu                         → Thu, 24 Sep 2026 06:37 UTC+6
+time in la cite limoilou                     → 14:30 EDT
+sunrise in la cite limoilou                  → 06:33 EDT
+time in ladário                              → 14:30 UTC-4
+sunrise in ladário                           → 05:39 UTC-4
+time in laksar                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in laksar                            → Thu, 24 Sep 2026 06:07 IST
+time in laredo                               → 13:30 CDT
+sunrise in laredo                            → 07:27 CDT
+time in le chesnay                           → 20:30 CEST
+sunrise in le chesnay                        → 07:39 CEST
+time in leopul                               → 21:30 EEST
+sunrise in leopul                            → 07:12 EEST
+time in librevili                            → 19:30 UTC+1
+sunrise in librevili                         → 06:11 UTC+1
+time in lingsugūr                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in lingsugūr                         → Thu, 24 Sep 2026 06:13 IST
+time in liyon                                → 20:30 CEST
+sunrise in liyon                             → 07:29 CEST
+time in londro                               → 19:30 BST
+sunrise in londro                            → 06:48 BST
+time in lower moyamensing                    → 14:30 EDT
+sunrise in lower moyamensing                 → 06:49 EDT
+time in lukut                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in lukut                             → Thu, 24 Sep 2026 07:02 UTC+8
+time in lviv                                 → 21:30 EEST
+sunrise in lviv                              → 07:12 EEST
+time in ma di nah                            → 21:30 UTC+3
+sunrise in ma di nah                         → 06:11 UTC+3
+time in madrid                               → 20:30 CEST
+sunrise in madrid                            → 08:03 CEST
+time in mahuva                               → Thu, 24 Sep 2026 00:00 IST
+sunrise in mahuva                            → Thu, 24 Sep 2026 06:32 IST
+time in malaga                               → 20:30 CEST
+sunrise in malaga                            → 08:06 CEST
+time in manaung                              → Thu, 24 Sep 2026 01:00 UTC+6:30
+sunrise in manaung                           → Thu, 24 Sep 2026 06:04 UTC+6:30
+time in manoa                                → 08:30 HST
+sunrise in manoa                             → 06:20 HST
+time in marayur                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in marayur                           → Thu, 24 Sep 2026 06:10 IST
+time in marshalltown                         → 13:30 CDT
+sunrise in marshalltown                      → 07:00 CDT
+time in materi                               → 19:30 UTC+1
+sunrise in materi                            → 06:45 UTC+1
+time in maḩmūdābād nemūneh                   → 22:00 UTC+3:30
+sunrise in maḩmūdābād nemūneh                → 05:59 UTC+3:30
+time in mehrabpur                            → 23:30 PKT
+sunrise in mehrabpur                         → 06:17 PKT
+time in menton                               → 20:30 CEST
+sunrise in menton                            → 07:18 CEST
+time in miandrivazo                          → 21:30 UTC+3
+sunrise in miandrivazo                       → 05:47 UTC+3
+time in minamiashigara                       → Thu, 24 Sep 2026 03:30 JST
+sunrise in minamiashigara                    → Thu, 24 Sep 2026 05:33 JST
+time in mitcham                              → 19:30 BST
+sunrise in mitcham                           → 06:48 BST
+time in mogadixo                             → 21:30 UTC+3
+sunrise in mogadixo                          → 05:48 UTC+3
+time in montauban                            → 20:30 CEST
+sunrise in montauban                         → 07:43 CEST
+time in morogoro                             → 21:30 UTC+3
+sunrise in morogoro                          → 06:18 UTC+3
+time in moḩammad shahr                       → 22:00 UTC+3:30
+sunrise in moḩammad shahr                    → 05:55 UTC+3:30
+time in mulanur                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in mulanur                           → Thu, 24 Sep 2026 06:08 IST
+time in mutubas                              → 21:30 EEST
+sunrise in mutubas                           → 06:47 EEST
+time in mégara                               → 21:30 EEST
+sunrise in mégara                            → 07:15 EEST
+time in naduvattam                           → Thu, 24 Sep 2026 00:00 IST
+sunrise in naduvattam                        → Thu, 24 Sep 2026 06:15 IST
+time in nallavila                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in nallavila                         → Thu, 24 Sep 2026 06:10 IST
+time in nangandao                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in nangandao                         → Thu, 24 Sep 2026 06:14 UTC+8
+time in naruto                               → Thu, 24 Sep 2026 03:30 JST
+sunrise in naruto                            → Thu, 24 Sep 2026 05:27 JST
+time in nazret                               → 21:30 UTC+3
+sunrise in nazret                            → 06:12 UTC+3
+time in neu hohenschönhausen                 → 20:30 CEST
+sunrise in neu hohenschönhausen              → 06:53 CEST
+time in nghen                                → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in nghen                             → Thu, 24 Sep 2026 05:46 UTC+7
+time in ning bo                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in ning bo                           → Thu, 24 Sep 2026 05:43 UTC+8
+time in noerdlingen                          → 20:30 CEST
+sunrise in noerdlingen                       → 07:06 CEST
+time in nova bavariya                        → 21:30 EEST
+sunrise in nova bavariya                     → 06:23 EEST
+time in nowrangpur                           → Thu, 24 Sep 2026 00:00 IST
+sunrise in nowrangpur                        → Thu, 24 Sep 2026 05:49 IST
+time in nyara                                → 20:30 UTC+2
+sunrise in nyara                             → 06:10 UTC+2
+time in obninsk                              → 21:30 MSK
+sunrise in obninsk                           → 06:21 MSK
+time in okolona                              → 14:30 EDT
+sunrise in okolona                           → 07:31 EDT
+time in orana                                → 19:30 UTC+1
+sunrise in orana                             → 06:51 UTC+1
+time in ostuni                               → 20:30 CEST
+sunrise in ostuni                            → 06:38 CEST
+time in oyten                                → 20:30 CEST
+sunrise in oyten                             → 07:11 CEST
+time in pakse                                → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in pakse                             → Thu, 24 Sep 2026 05:46 UTC+7
+time in panchiao                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in panchiao                          → Thu, 24 Sep 2026 05:43 UTC+8
+time in parbatipur                           → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in parbatipur                        → Thu, 24 Sep 2026 05:54 UTC+6
+time in pasilaiciai                          → 21:30 EEST
+sunrise in pasilaiciai                       → 07:06 EEST
+time in pecinum                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in pecinum                           → Thu, 24 Sep 2026 06:03 UTC+8
+time in perigueux                            → 20:30 CEST
+sunrise in perigueux                         → 07:45 CEST
+time in phagwāra                             → Thu, 24 Sep 2026 00:00 IST
+sunrise in phagwāra                          → Thu, 24 Sep 2026 06:16 IST
+time in picpus                               → 20:30 CEST
+sunrise in picpus                            → 07:38 CEST
+time in pionki                               → 20:30 CEST
+sunrise in pionki                            → 06:22 CEST
+time in pleasant prairie                     → 13:30 CDT
+sunrise in pleasant prairie                  → 06:40 CDT
+time in pondichery                           → Thu, 24 Sep 2026 00:00 IST
+sunrise in pondichery                        → Thu, 24 Sep 2026 06:00 IST
+time in porto alegri                         → 15:30 UTC-3
+sunrise in porto alegri                      → 06:13 UTC-3
+time in prayagraj                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in prayagraj                         → Thu, 24 Sep 2026 05:52 IST
+time in puaengteunualeu                      → 19:30 UTC+1
+sunrise in puaengteunualeu                   → 06:02 UTC+1
+time in punto fijo                           → 14:30 UTC-4
+sunrise in punto fijo                        → 06:30 UTC-4
+time in péruwelz                             → 20:30 CEST
+sunrise in péruwelz                          → 07:33 CEST
+time in qing dao                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in qing dao                          → Thu, 24 Sep 2026 05:48 UTC+8
+time in quetta                               → 23:30 PKT
+sunrise in quetta                            → 06:21 PKT
+time in radomyshl                            → 21:30 EEST
+sunrise in radomyshl                         → 06:51 EEST
+time in ranci                                → Thu, 24 Sep 2026 00:00 IST
+sunrise in ranci                             → Thu, 24 Sep 2026 05:38 IST
+time in red wing                             → 13:30 CDT
+sunrise in red wing                          → 06:59 CDT
+time in rhondda                              → 19:30 BST
+sunrise in rhondda                           → 07:01 BST
+time in rionegro                             → 13:30 UTC-5
+sunrise in rionegro                          → 05:51 UTC-5
+time in rongai                               → 21:30 UTC+3
+sunrise in rongai                            → 06:26 UTC+3
+time in rubino                               → 18:30 GMT
+sunrise in rubino                            → 06:06 GMT
+time in rājākhera                            → Thu, 24 Sep 2026 00:00 IST
+sunrise in rājākhera                         → Thu, 24 Sep 2026 06:07 IST
+time in safonovo                             → 21:30 MSK
+sunrise in safonovo                          → 06:34 MSK
+time in saint peter port                     → 19:30 BST
+sunrise in saint peter port                  → 06:58 BST
+time in saltyllw                             → 12:30 UTC-6
+sunrise in saltyllw                          → 06:33 UTC-6
+time in san blas canillejas                  → 20:30 CEST
+sunrise in san blas canillejas               → 08:03 CEST
+time in san lucas sacatepéquez               → 12:30 UTC-6
+sunrise in san lucas sacatepéquez            → 05:52 UTC-6
+time in san ya chiang shih                   → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in san ya chiang shih                → Thu, 24 Sep 2026 06:31 UTC+8
+time in sanmensja                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in sanmensja                         → Thu, 24 Sep 2026 06:24 UTC+8
+time in santa rita de cássia                 → 15:30 UTC-3
+sunrise in santa rita de cássia              → 05:47 UTC-3
+time in santyaqo de kuba                     → 14:30 UTC-4
+sunrise in santyaqo de kuba                  → 06:52 UTC-4
+time in saporischschja                       → 21:30 EEST
+sunrise in saporischschja                    → 06:27 EEST
+time in sasebo                               → Thu, 24 Sep 2026 03:30 JST
+sunrise in sasebo                            → Thu, 24 Sep 2026 06:10 JST
+time in schwandorf in bayern                 → 20:30 CEST
+sunrise in schwandorf in bayern              → 06:59 CEST
+time in sena amtoniyo                        → 13:30 CDT
+sunrise in sena amtoniyo                     → 07:23 CDT
+time in settimo torinese                     → 20:30 CEST
+sunrise in settimo torinese                  → 07:17 CEST
+time in sham chan                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in sham chan                         → Thu, 24 Sep 2026 06:13 UTC+8
+time in shefild                              → 19:30 BST
+sunrise in shefild                           → 06:53 BST
+time in shikhedzy                            → Thu, 24 Sep 2026 00:30 UTC+6
+sunrise in shikhedzy                         → Thu, 24 Sep 2026 06:05 UTC+6
+time in shuang ya shan shi                   → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in shuang ya shan shi                → Thu, 24 Sep 2026 05:04 UTC+8
+time in siangyang                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in siangyang                         → Thu, 24 Sep 2026 06:21 UTC+8
+time in siloam springs                       → 13:30 CDT
+sunrise in siloam springs                    → 07:07 CDT
+time in siong tang                           → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in siong tang                        → Thu, 24 Sep 2026 06:18 UTC+8
+time in skr                                  → 23:30 PKT
+sunrise in skr                               → 06:13 PKT
+time in solapur                              → Thu, 24 Sep 2026 00:00 IST
+sunrise in solapur                           → Thu, 24 Sep 2026 06:16 IST
+time in south chicago                        → 13:30 CDT
+sunrise in south chicago                     → 06:39 CDT
+time in srīperumbūdūr                        → Thu, 24 Sep 2026 00:00 IST
+sunrise in srīperumbūdūr                     → Thu, 24 Sep 2026 05:59 IST
+time in stokholmi                            → 20:30 CEST
+sunrise in stokholmi                         → 06:34 CEST
+time in suicheng                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in suicheng                          → Thu, 24 Sep 2026 05:57 UTC+8
+time in suo wei tuo                          → 20:30 SAST
+sunrise in suo wei tuo                       → 05:57 SAST
+time in syana di'ego                         → 11:30 PDT
+sunrise in syana di'ego                      → 06:38 PDT
+time in são mamede de infesta                → 19:30 WEST
+sunrise in são mamede de infesta             → 07:23 WEST
+time in ta t'ung hsien                       → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in ta t'ung hsien                    → Thu, 24 Sep 2026 06:16 UTC+8
+time in tainhoa shi                          → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in tainhoa shi                       → Thu, 24 Sep 2026 05:46 UTC+7
+time in tam giang                            → Thu, 24 Sep 2026 01:30 UTC+7
+sunrise in tam giang                         → Thu, 24 Sep 2026 05:48 UTC+7
+time in tanjung balai                        → Thu, 24 Sep 2026 01:30 WIB
+sunrise in tanjung balai                     → Thu, 24 Sep 2026 05:55 WIB
+time in taua                                 → 15:30 UTC-3
+sunrise in taua                              → 05:30 UTC-3
+time in teguzigalpa                          → 12:30 UTC-6
+sunrise in teguzigalpa                       → 05:38 UTC-6
+time in terni                                → 20:30 CEST
+sunrise in terni                             → 06:58 CEST
+time in thetford                             → 19:30 BST
+sunrise in thetford                          → 06:44 BST
+time in tianshui                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in tianshui                          → Thu, 24 Sep 2026 06:46 UTC+8
+time in tiruchchinappalli                    → Thu, 24 Sep 2026 00:00 IST
+sunrise in tiruchchinappalli                 → Thu, 24 Sep 2026 06:04 IST
+time in togane                               → Thu, 24 Sep 2026 03:30 JST
+sunrise in togane                            → Thu, 24 Sep 2026 05:28 JST
+time in torrejón de ardoz                    → 20:30 CEST
+sunrise in torrejón de ardoz                 → 08:02 CEST
+time in trikala                              → 21:30 EEST
+sunrise in trikala                           → 07:21 EEST
+time in tsiaotso                             → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in tsiaotso                          → Thu, 24 Sep 2026 06:16 UTC+8
+time in tulun                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in tulun                             → Thu, 24 Sep 2026 07:06 UTC+8
+time in twin falls                           → 12:30 MDT
+sunrise in twin falls                        → 07:26 MDT
+time in uambu                                → 19:30 UTC+1
+sunrise in uambu                             → 05:46 UTC+1
+time in ulanbatar                            → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in ulanbatar                         → Thu, 24 Sep 2026 06:41 UTC+8
+time in urbs montis videi                    → 15:30 UTC-3
+sunrise in urbs montis videi                 → 06:33 UTC-3
+time in vacoas                               → 22:30 UTC+4
+sunrise in vacoas                            → 05:59 UTC+4
+time in vanino                               → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in vanino                            → Thu, 24 Sep 2026 06:28 UTC+10
+time in vena                                 → 20:30 CEST
+sunrise in vena                              → 06:42 CEST
+time in vigan                                → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in vigan                             → Thu, 24 Sep 2026 05:48 UTC+8
+time in villeneuve la garenne                → 20:30 CEST
+sunrise in villeneuve la garenne             → 07:39 CEST
+time in vladivostok                          → Thu, 24 Sep 2026 04:30 UTC+10
+sunrise in vladivostok                       → Thu, 24 Sep 2026 07:01 UTC+10
+time in vyronas                              → 21:30 EEST
+sunrise in vyronas                           → 07:13 EEST
+time in wan ning shi                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in wan ning shi                      → Thu, 24 Sep 2026 06:28 UTC+8
+time in wei hai shih                         → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in wei hai shih                      → Thu, 24 Sep 2026 05:41 UTC+8
+time in west milford                         → 14:30 EDT
+sunrise in west milford                      → 06:46 EDT
+time in winnetka                             → 11:30 PDT
+sunrise in winnetka                          → 06:43 PDT
+time in wu ji da                             → 18:30 UTC
+sunrise in wu ji da                          → 05:56 UTC
+time in xarja                                → 22:30 UTC+4
+sunrise in xarja                             → 06:07 UTC+4
+time in xinyingpan                           → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in xinyingpan                        → Thu, 24 Sep 2026 07:06 UTC+8
+time in yamato                               → Thu, 24 Sep 2026 03:30 JST
+sunrise in yamato                            → Thu, 24 Sep 2026 05:31 JST
+time in yavné                                → 21:30 UTC+3
+sunrise in yavné                             → 06:30 UTC+3
+time in yin di an na bo li si                → <error: unknown place "yin di an">
+sunrise in yin di an na bo li si             → <error: unknown place "yin di an">
+time in ytrebygda                            → 20:30 CEST
+sunrise in ytrebygda                         → 07:25 CEST
+time in zabīd                                → 21:30 UTC+3
+sunrise in zabīd                             → 05:56 UTC+3
+time in zaïbo                                → 18:30 GMT
+sunrise in zaïbo                             → 06:16 GMT
+time in zhong qing                           → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in zhong qing                        → Thu, 24 Sep 2026 06:43 UTC+8
+time in zouxian                              → Thu, 24 Sep 2026 02:30 UTC+8
+sunrise in zouxian                           → Thu, 24 Sep 2026 06:01 UTC+8
+time in çumra                                → 21:30 UTC+3
+sunrise in çumra                             → 06:37 UTC+3
+time in ōtake                                → Thu, 24 Sep 2026 03:30 JST
+sunrise in ōtake                             → Thu, 24 Sep 2026 06:00 JST

@@ -767,6 +767,8 @@ fn time_zones() {
         ("time in marseille", "20:30 CEST"),
         ("time in cordoba", "15:30 UTC-3"),
         ("time in the hague", "20:30 CEST"),
+        ("time in Fort St. John", "11:30 UTC-7"),
+        ("time in 'Afak", "21:30 UTC+3"),
         ("time in port-au-prince", "14:30 EDT"),
         // Abbreviations only where they read back: Belize's "CST" would be Chicago's.
         ("3pm Belize", "15:00 UTC-6"),
