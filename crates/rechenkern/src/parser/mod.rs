@@ -45,6 +45,8 @@ pub(crate) struct Parser<'a> {
     scope: &'a Scope<'a>,
     /// Inside a list or `between`, "and" separates items instead of adding.
     in_list: bool,
+    /// On the right of a comparison, where "and" before another comparison is logic.
+    comparing: bool,
     /// Lookups remembered per token, shared by clones over the same tokens.
     memo: Rc<[TokenMemo]>,
 }
@@ -59,7 +61,7 @@ struct TokenMemo {
 impl<'a> Parser<'a> {
     fn new(src: &'a str, toks: &'a [Token], scope: &'a Scope<'a>) -> Parser<'a> {
         let memo = toks.iter().map(|_| TokenMemo::default()).collect();
-        Parser { src, toks, pos: 0, scope, in_list: false, memo }
+        Parser { src, toks, pos: 0, scope, in_list: false, comparing: false, memo }
     }
 
     /// A parser over part of the tokens.
@@ -194,11 +196,10 @@ impl<'a> Parser<'a> {
     fn logic(&mut self) -> Result<Expr> {
         let mut lhs = self.comparison()?;
         loop {
-            let is_comparison =
-                matches!(lhs, Expr::Binary(Op::Eq | Op::Ne | Op::Lt | Op::Gt | Op::Le | Op::Ge | Op::And | Op::Or, ..));
-            let op = if self.eat_sym("&&") || (is_comparison && self.eat_word("and")) {
+            let logical = is_boolean(&lhs);
+            let op = if self.eat_sym("&&") || (logical && self.eat_word("and")) {
                 Op::And
-            } else if self.eat_sym("||") || (is_comparison && self.eat_word("or")) {
+            } else if self.eat_sym("||") || (logical && self.eat_word("or")) {
                 Op::Or
             } else {
                 return Ok(lhs);
@@ -219,7 +220,10 @@ impl<'a> Parser<'a> {
             _ => return Ok(lhs),
         };
         self.pos += 1;
-        Ok(Expr::binary(op, lhs, self.bit_or()?))
+        let saved = std::mem::replace(&mut self.comparing, true);
+        let rhs = self.bit_or();
+        self.comparing = saved;
+        Ok(Expr::binary(op, lhs, rhs?))
     }
 
     fn bit_or(&mut self) -> Result<Expr> {
@@ -278,8 +282,14 @@ impl<'a> Parser<'a> {
                 Tok::Word(w) => match w.to_lowercase().as_str() {
                     "plus" => (Op::Add, 1, false),
                     "minus" => (Op::Sub, 1, false),
-                    // "$20 and $15" adds, "x > 1 and x < 5" is logic.
-                    "and" if !self.in_list && self.amount_follows(1) => (Op::Add, 1, false),
+                    // "$20 and $15" adds, "x > 1 and x < 5" and "5 > 3 and 2 > 1" are logic.
+                    "and"
+                        if !self.in_list
+                            && self.amount_follows(1)
+                            && !(self.comparing && self.comparison_follows(1)) =>
+                    {
+                        (Op::Add, 1, false)
+                    }
                     // "3 days after March 1", "2 weeks from now"
                     "after" | "from" => (Op::Add, 1, true),
                     "before" => (Op::Sub, 1, true),
@@ -302,6 +312,14 @@ impl<'a> Parser<'a> {
             }
             lhs = if swap { Expr::binary(op, rhs, lhs) } else { Expr::binary(op, lhs, rhs) };
         }
+    }
+
+    /// A comparison follows the value `skip` tokens ahead: the "2 > 1" of "5 > 3 and 2 > 1".
+    fn comparison_follows(&self, skip: usize) -> bool {
+        let mut p = self.clone();
+        p.pos += skip;
+        p.multiplicative().is_ok()
+            && p.peek().is_some_and(|t| matches!(t.tok, Tok::Sym("==" | "!=" | "<" | ">" | "<=" | ">=")))
     }
 
     /// A value of the same kind as the one `lhs` ends with, added without an operator:
@@ -552,6 +570,16 @@ fn text_weight(expr: &Expr) -> u8 {
     } else {
         1
     }
+}
+
+/// True or false: `true`, `x > 1`, `is 17 prime`.
+fn is_boolean(expr: &Expr) -> bool {
+    matches!(
+        expr,
+        Expr::Bool(_)
+            | Expr::Call(Func::IsPrime, _)
+            | Expr::Binary(Op::Eq | Op::Ne | Op::Lt | Op::Gt | Op::Le | Op::Ge | Op::And | Op::Or, ..)
+    )
 }
 
 /// A unit, or units multiplied as written: `day`, `(s·week)`.

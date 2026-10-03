@@ -49,8 +49,8 @@ is 17 prime                                  → true
 6 is to 60 as 8 is to what                   → 80
 
 // Not like SoulverCore yet
-5 > 3 and 2 > 1                              → false
-true and false                               → true
+5 > 3 and 2 > 1                              → true
+true and false                               → false
 cot(1)                                       → <error: unknown function "cot">
 average 36, 42, 19, 81                       → 44.5
 std dev of 20, 30 and 40                     → 10
