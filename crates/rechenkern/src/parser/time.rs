@@ -537,14 +537,18 @@ impl Parser<'_> {
                     None => Expr::Range(a.boxed(), start().boxed()),
                 }
             }
-            // "days in February 2020", "days in Q3", "days left in 2026"
+            // "days in February 2020", "days in Q3", "days left in 2026", "days left in the year"
             "in" | "left" | "remaining" => {
                 let left = w != "in";
                 let at = self.pos + if left { 2 } else { 1 };
-                let Some((first, span, n)) = self.period_at(at).filter(|_| !left || self.words_at(at - 1, &["in"]))
-                else {
+                // "the month" and "next month" name a period, but "days in month" is the unit's.
+                let the = usize::from(self.words_at(at, &["the"]));
+                let named = the == 1 || self.lower(at).is_some_and(|w| words::which(&w).is_some());
+                let period = if named { self.named_period_at(at + the) } else { self.period_at(at) };
+                let Some((first, span, n)) = period.filter(|_| !left || self.words_at(at - 1, &["in"])) else {
                     return Ok(None);
                 };
+                let n = n + the;
                 self.pos = at + n;
                 let end = Expr::binary(Op::Add, first.clone(), span);
                 if left {
@@ -605,12 +609,13 @@ impl Parser<'_> {
         Some((date, at + n - i))
     }
 
-    /// A period at token `i`: "next month", "week" (as in "the week"), "this quarter", "Q3", "March", "2027".
+    /// A period at token `i`: "next month", "week" (as in "the week"), "the day", "this quarter", "Q3", "March", "2027".
     fn named_period_at(&self, i: usize) -> Option<(Expr, Expr, usize)> {
         let which = self.lower(i).and_then(|w| words::which(&w));
         let at = i + usize::from(which.is_some());
         let which = which.unwrap_or(Which::This);
         let (start, length) = match self.lower(at).as_deref() {
+            Some("day") => (TimeExpr::Today(which.step()), (1, "d")),
             Some("week") => (TimeExpr::PeriodStart(jiff::Unit::Week, which), (1, "wk")),
             Some("month") => (TimeExpr::PeriodStart(jiff::Unit::Month, which), (1, "mo")),
             Some("year") => (TimeExpr::PeriodStart(jiff::Unit::Year, which), (1, "yr")),

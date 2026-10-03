@@ -58,10 +58,13 @@ start of next month
 end of Q3
 week number March 5, 2026
 friday in 3 weeks
-// Not supported yet
 days left in this month
 days left in the year
 days in next month
+hours left in the day
+Jan 1 until Mar 1
+days since Dec 25
+// Not supported yet
 days until March
 year %
 3 days ago at 5pm
