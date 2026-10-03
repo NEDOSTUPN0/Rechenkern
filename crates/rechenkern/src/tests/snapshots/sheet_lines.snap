@@ -5,7 +5,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 20                                           → 20
 30                                           → 30
 sum                                          → 60
-avg                                          → <error: nothing to average>
+avg                                          → 20
 line 1 + line 2                              → 30
 prev                                         → 30
 line 9                                       → <error: line 9 has no answer>

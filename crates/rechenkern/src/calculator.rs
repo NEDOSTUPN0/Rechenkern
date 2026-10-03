@@ -166,7 +166,9 @@ impl Calculator {
             Stmt::Expr(expr) => {
                 let Some(expr) = env.branch(expr)? else { return Ok(None) };
                 let (value, display) = env.answer(expr)?;
-                (value, display, matches!(expr, Expr::Line(LineRef::Sum)), None)
+                // "sum in EUR" and "average" are totals too.
+                let is_total = expr.contains(&|e| matches!(e, Expr::Line(LineRef::Sum | LineRef::Average)));
+                (value, display, is_total, None)
             }
             Stmt::Assign { name, op, expr } => {
                 let Some(expr) = env.branch(expr)? else { return Ok(None) };

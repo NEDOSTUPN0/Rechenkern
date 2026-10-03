@@ -827,6 +827,11 @@ fn sheets() {
     assert_eq!(sheet("discount = 10%\ncost = $550\ncost - discount"), "$495.00");
     assert_eq!(sheet("x = 5\nx += 3\nx * 2"), "16");
     assert_eq!(sheet("10\n20\nsum"), "30");
+    assert_eq!(sheet("$10\n$20\nsum\nsum in EUR"), "€27.00");
+    assert_eq!(sheet("$10\n$20\nsum in EUR\nsum"), "$30.00");
+    assert_eq!(sheet("10\n20\nsum\naverage"), "15");
+    assert_eq!(sheet("10\n20\naverage\nsum"), "30");
+    assert_eq!(sheet("$10\nsum\n$5\nsum"), "$5.00");
     assert_eq!(sheet("10\n20\n\n5\n7\nsum"), "12");
     assert_eq!(sheet("# Costs\nLunch: $20\nTaxi: $15\ntotal"), "$35.00");
     assert_eq!(sheet("10\n20\naverage"), "15");
