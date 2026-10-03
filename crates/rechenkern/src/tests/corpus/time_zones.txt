@@ -24,12 +24,17 @@ time in San Sebastián
 time in Tokyo when 9am in London
 time in 3 hours in Tokyo
 time in Tokyo in 3 hours
-// Not supported yet
-diff Tokyo London
+time in Tokyo 3 hours ago
 time in Bruges
 time in Santorini
 time in American Samoa
 time in Reunion
+Fez time
+Qwertyville time
+dinner time
+what time is it
+// Not supported yet
+diff Tokyo London
 time in qld
 coordinates of Tokyo
 distance between Tokyo and London

@@ -79,7 +79,7 @@ impl<'a> Parser<'a> {
     // ---- Statements ----
 
     fn statement(&mut self) -> Result<Option<Stmt>> {
-        if !(0..self.toks.len()).any(|i| self.significant(i)) {
+        if !(0..self.toks.len()).any(|i| self.significant(i) && !self.time_after_word(i)) {
             return Ok(None);
         }
         // "if earnings > $30k then tax = 20% else tax = 5%"

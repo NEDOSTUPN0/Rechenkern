@@ -402,10 +402,22 @@ impl Parser<'_> {
         })
     }
 
+    /// "time" after an unknown word is not now, as in SoulverCore: "Qwertyville time",
+    /// "dinner time". "what time is it" and "the time" still are.
+    pub(super) fn time_after_word(&self, i: usize) -> bool {
+        self.toks[i].is_word("time")
+            && i > 0
+            && self.comment_at(i - 1)
+            && !self.lower(i - 1).is_some_and(|w| matches!(w.as_str(), "the" | "what" | "what's" | "whats" | "local"))
+    }
+
     /// Phrases starting with "time", "date" or "difference".
     fn time_phrase(&mut self, w: &str) -> Result<Option<Expr>> {
         let now = || Expr::Time(TimeExpr::Now);
         let timespan = |e: Expr| Self::formatted(e, Format::Timespan);
+        if self.time_after_word(self.pos) {
+            return Ok(None);
+        }
         self.pos += 1;
         let difference = w == "difference" || (w == "time" && (self.eat_word("difference") || self.eat_word("diff")));
         // "time to upload 3GB at 10 MB/s" is just the division.

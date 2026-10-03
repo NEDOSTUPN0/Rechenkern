@@ -29,13 +29,18 @@ time in San Sebastián                        → 12:30 UTC-6
 time in Tokyo when 9am in London             → 17:00 JST
 time in 3 hours in Tokyo                     → Thu, 24 Sep 2026 06:30 JST
 time in Tokyo in 3 hours                     → Thu, 24 Sep 2026 06:30 JST
+time in Tokyo 3 hours ago                    → Thu, 24 Sep 2026 00:30 JST
+time in Bruges                               → 20:30 CEST
+time in Santorini                            → 21:30 EEST
+time in American Samoa                       → 07:30 UTC-11
+time in Reunion                              → 22:30 UTC+4
+Fez time                                     → 18:30 UTC
+Qwertyville time                             → <none>
+dinner time                                  → <none>
+what time is it                              → 14:30
 
 // Not supported yet
 diff Tokyo London                            → <none>
-time in Bruges                               → <error: unknown place "Bruges", did you mean "Brunei"?>
-time in Santorini                            → <error: unknown place "Santorini">
-time in American Samoa                       → <error: unknown place "American Samoa">
-time in Reunion                              → 22:30 UTC+4
 time in qld                                  → <error: unknown place "qld">
 coordinates of Tokyo                         → <error: unexpected "of">
 distance between Tokyo and London            → <error: unexpected "between">
