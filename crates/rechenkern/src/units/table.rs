@@ -146,6 +146,7 @@ fn definitions() -> Vec<Def> {
             .aliases(&["mos"])
             .spelled()
             .calendar(Cal::Month, 1),
+        unit("quarter", "quarter", Dim::TIME, "1").scale(days("91.310625")).spelled().calendar(Cal::Month, 3),
         unit("yr", "year", Dim::TIME, "1")
             .scale(days("365.2425"))
             .aliases(&["yrs", "annum"])

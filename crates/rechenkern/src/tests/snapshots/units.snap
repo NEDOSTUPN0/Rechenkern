@@ -3010,6 +3010,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 qt in L                                  → 2.365882365 L
 2.5 quart                                    → 2.5 qt
 2.5 quart in L                               → 2.365882365 L
+2.5 quarter                                  → 2.5 quarters
+2.5 quarter in s                             → 19,723,095 seconds
+2.5 quarters                                 → 2.5 quarters
+2.5 quarters in s                            → 19,723,095 seconds
 2.5 quarts                                   → 2.5 qt
 2.5 quarts in L                              → 2.365882365 L
 2.5 quetzal                                  → 2.50 GTQ
