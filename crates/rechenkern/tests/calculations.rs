@@ -770,6 +770,8 @@ fn time_zones() {
         ("time in London in 2 hours", "21:30 BST"),
         ("time in 3 hours", "17:30"),
         ("time in 3 hours in Tokyo", "Thu, 24 Sep 2026 06:30 JST"),
+        ("time in Tokyo 3 hours ago", "Thu, 24 Sep 2026 00:30 JST"),
+        ("Tokyo time 2 days later", "Sat, 26 Sep 2026 03:30 JST"),
         ("now in an hour", "15:30"),
         ("time in marseille", "20:30 CEST"),
         ("time in cordoba", "15:30 UTC-3"),

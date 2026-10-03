@@ -16,6 +16,12 @@ impl Parser<'_> {
             let dir = self.direction();
             return self.rounded_to(expr, dir).map(Some);
         }
+        // "time in Tokyo 3 hours ago": that much earlier, still shown in Tokyo.
+        if is_moment(expr)
+            && let Some((amount, op)) = self.time_shift()
+        {
+            return Ok(Some(shifted(expr, op, amount)));
+        }
         // "March 3 through March 10"
         if self.range_word(&[]).is_some() {
             return Ok(Some(Expr::Range(expr.clone().boxed(), self.range_end(true)?.boxed())));
@@ -49,7 +55,7 @@ impl Parser<'_> {
             && is_moment(expr)
             && let Some(amount) = self.time_amount()
         {
-            return Ok(Some(later(expr, amount)));
+            return Ok(Some(shifted(expr, Op::Add, amount)));
         }
         // A date or time goes to a place, even one named like a unit: "time in Cordoba".
         let zone = match is_moment(expr) {
@@ -132,6 +138,19 @@ impl Parser<'_> {
         unit.filter(|u| u.dim() == Dim::TIME)?;
         *self = p;
         Some(amount)
+    }
+
+    /// An amount of time and `ago` or `later` at the cursor, read past: "3 hours ago".
+    fn time_shift(&mut self) -> Option<(Expr, Op)> {
+        let end = (self.pos..self.toks.len()).find(|&i| self.words_at(i, &["ago"]) || self.words_at(i, &["later"]))?;
+        let mut amount = self.sub(self.pos, end);
+        let shift = amount.time_amount()?;
+        if amount.pos != end - self.pos {
+            return None;
+        }
+        let op = if self.toks[end].is_word("later") { Op::Add } else { Op::Sub };
+        self.pos = end + 1;
+        Some((shift, op))
     }
 
     fn zone_conversion_follows(&self) -> bool {
@@ -381,12 +400,12 @@ fn is_moment(expr: &Expr) -> bool {
 }
 
 /// `expr` moved by `amount`, still shown in its zone: "time in Tokyo in 3 hours".
-fn later(expr: &Expr, amount: Expr) -> Expr {
+fn shifted(expr: &Expr, op: Op, amount: Expr) -> Expr {
     match expr {
         Expr::Convert(inner, Target::Zone(zone)) => {
-            Expr::Convert(later(inner, amount).boxed(), Target::Zone(zone.clone()))
+            Expr::Convert(shifted(inner, op, amount).boxed(), Target::Zone(zone.clone()))
         }
-        other => Expr::binary(Op::Add, other.clone(), amount),
+        other => Expr::binary(op, other.clone(), amount),
     }
 }
 
