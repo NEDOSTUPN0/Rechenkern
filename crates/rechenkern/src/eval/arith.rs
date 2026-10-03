@@ -334,6 +334,12 @@ impl Env<'_> {
 
     /// "30 hours at $30/hour" multiplies, "$500 at $20/hour" divides.
     fn at(&self, a: Value, b: Value) -> Result<Value> {
+        if let (Value::Quantity(x), Value::Quantity(speed)) = (&a, &b)
+            && speed.unit.dim() == Dim::FREQUENCY
+            && let Some(turned) = self.turning(x, speed)?
+        {
+            return Ok(Value::Quantity(turned));
+        }
         // Playback speed: "1 hour at 1.5x".
         let is_time = matches!(&a, Value::Duration(_)) || matches!(&a, Value::Quantity(q) if q.unit.dim() == Dim::TIME);
         if is_time && matches!(&b, Value::Quantity(q) if q.unit.is_none()) {
@@ -347,6 +353,29 @@ impl Env<'_> {
             Err(_) => usize::MAX,
         };
         if factors(&quotient) < factors(&product) { quotient } else { product }
+    }
+
+    /// Power and torque at a rotation speed: "100 hp at 3000 rpm" is the torque,
+    /// "300 N·m at 3000 rpm" the power.
+    fn turning(&self, x: &Quantity, speed: &Quantity) -> Result<Option<Quantity>> {
+        let reg = registry();
+        let hertz = self.convert_quantity(speed, &reg.get("Hz"))?.number;
+        // A turn is 2π radians.
+        let turn = reg.get("rev").single().map_or(Number::ONE, |rev| rev.scale);
+        let radians_per_second = hertz * turn;
+        if radians_per_second.is_zero() {
+            bail!("division by zero");
+        }
+        let torque = x.unit.factors().iter().any(|&(id, e)| e == 1 && reg.def(id).dim == Dim::FORCE);
+        Ok(if x.unit.dim() == Dim::POWER {
+            let watts = self.convert_quantity(x, &reg.get("W"))?.number;
+            reg.lookup("N·m").map(|nm| Quantity::new(watts / radians_per_second, nm))
+        } else if x.unit.dim() == Dim::ENERGY && torque {
+            let joules = self.convert_quantity(x, &reg.get("J"))?.number;
+            Some(Quantity::new(joules * radians_per_second, reg.get("W")))
+        } else {
+            None
+        })
     }
 
     fn compare(&self, op: Op, a: Value, b: Value) -> Result<Value> {

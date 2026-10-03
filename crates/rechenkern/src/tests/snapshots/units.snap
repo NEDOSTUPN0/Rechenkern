@@ -437,6 +437,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 NZD in EUR                               → €1.13
 2.5 NZD$                                     → NZ$2.50
 2.5 NZD$ in EUR                              → €1.13
+2.5 Nm                                       → 2.5 N·m
+2.5 Nm in J                                  → 2.5 J
+2.5 N·m                                      → 2.5 N·m
+2.5 N·m in J                                 → 2.5 J
 2.5 OMR                                      → 2.500 OMR
 2.5 OMR in EUR                               → €1.13
 2.5 OP                                       → 2.5 OP
@@ -2753,6 +2757,14 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 new zealand dollars                      → NZ$2.50
 2.5 new zealand dollars in EUR               → €1.13
 2.5 newton                                   → 2.5 N
+2.5 newton meter                             → 2.5 N·m
+2.5 newton meter in J                        → 2.5 J
+2.5 newton meters                            → 2.5 N·m
+2.5 newton meters in J                       → 2.5 J
+2.5 newton metre                             → 2.5 N·m
+2.5 newton metre in J                        → 2.5 J
+2.5 newton metres                            → 2.5 N·m
+2.5 newton metres in J                       → 2.5 J
 2.5 newtons                                  → 2.5 N
 2.5 ng                                       → 2.5 ng
 2.5 ng in kg                                 → 2.5e-12 kg

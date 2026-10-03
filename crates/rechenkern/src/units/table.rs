@@ -339,6 +339,7 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("MWh", &["MWh", "megawatt hour", "megawatt hours"], "MW*h"),
     ("GWh", &["GWh", "gigawatt hour", "gigawatt hours"], "GW*h"),
     ("TWh", &["TWh", "terawatt hour", "terawatt hours"], "TW*h"),
+    ("N·m", &["Nm", "N·m", "newton meter", "newton meters", "newton metre", "newton metres"], "N*m"),
     ("Ah", &["Ah", "amp hour", "amp hours", "ampere hour", "ampere hours"], "A*h"),
     ("mAh", &["mAh", "mah", "milliamp hour", "milliamp hours"], "mA*h"),
     ("bps", &["bps", "bits per second"], "bit/s"),
