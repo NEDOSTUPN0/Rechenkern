@@ -28,6 +28,8 @@ const GIGA: Prefix = si("G", "giga", 9);
 const TERA: Prefix = si("T", "tera", 12);
 const PETA: Prefix = si("P", "peta", 15);
 const EXA: Prefix = si("E", "exa", 18);
+const ZETTA: Prefix = si("Z", "zetta", 21);
+const YOTTA: Prefix = si("Y", "yotta", 24);
 const HECTO: Prefix = si("h", "hecto", 2);
 const DECI: Prefix = si("d", "deci", -1);
 const CENTI: Prefix = si("c", "centi", -2);
@@ -40,7 +42,7 @@ const PICO: Prefix = si("p", "pico", -12);
 const SMALL: &[Prefix] = &[MILLI, MICRO, MICRO_GREEK, NANO, PICO];
 const LENGTH: &[Prefix] = &[KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO, PICO];
 const MASS: &[Prefix] = &[KILO, CENTI, MILLI, MICRO, MICRO_GREEK, NANO];
-const VOLUME: &[Prefix] = &[MEGA, KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK];
+const VOLUME: &[Prefix] = &[MEGA, KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO];
 const DATA: &[Prefix] = &[
     KILO,
     MEGA,
@@ -48,6 +50,8 @@ const DATA: &[Prefix] = &[
     TERA,
     PETA,
     EXA,
+    ZETTA,
+    YOTTA,
     bin("Ki", "kibi", 10),
     bin("Mi", "mebi", 20),
     bin("Gi", "gibi", 30),
@@ -200,7 +204,7 @@ fn definitions() -> Vec<Def> {
         unit("st", "stone", Dim::MASS, "6.35029318").plural("stone").aliases(&["stones"]),
         unit("ton", "short ton", Dim::MASS, "907.18474").aliases(&["ton", "tons", "us ton", "us tons"]),
         unit("long ton", "long ton", Dim::MASS, "1016.0469088").aliases(&["imperial ton", "imperial tons"]),
-        unit("oz t", "troy ounce", Dim::MASS, "0.0311034768").aliases(&["ozt", "troy oz"]),
+        unit("oz t", "troy ounce", Dim::MASS, "0.0311034768").aliases(&["ozt", "troy oz", "ounce troy", "ounces troy"]),
         unit("ct", "carat", Dim::MASS, "0.0002"),
         unit("grain", "grain", Dim::MASS, "0.00006479891").spelled(),
         // Area
@@ -211,16 +215,44 @@ fn definitions() -> Vec<Def> {
         unit("L", "liter", Dim::VOLUME, "0.001").aliases(&["l", "ℓ", "litre", "litres"]).prefixes(VOLUME),
         unit("gal", "gallon", Dim::VOLUME, "0.003785411784").aliases(&["us gallon", "us gallons"]),
         unit("imp gal", "imperial gallon", Dim::VOLUME, "0.00454609").aliases(&["uk gallon", "uk gallons"]),
-        unit("qt", "quart", Dim::VOLUME, "0.000946352946"),
+        unit("qt", "quart", Dim::VOLUME, "0.000946352946").aliases(&["us quart", "us quarts"]),
+        unit("imp qt", "imperial quart", Dim::VOLUME, "0.0011365225").aliases(&["uk quart", "uk quarts"]),
         // "pt" is the typographic point.
         unit("pint", "pint", Dim::VOLUME, "0.000473176473").aliases(&["us pint", "us pints"]).spelled(),
         unit("imp pt", "imperial pint", Dim::VOLUME, "0.00056826125").aliases(&["uk pint", "uk pints"]),
         unit("cup", "cup", Dim::VOLUME, "0.0002365882365").aliases(&["us cup", "us cups"]),
         unit("metric cup", "metric cup", Dim::VOLUME, "0.00025"),
-        unit("fl oz", "fluid ounce", Dim::VOLUME, "0.0000295735295625").aliases(&["floz", "fl. oz", "fl oz"]),
+        unit("fl oz", "fluid ounce", Dim::VOLUME, "0.0000295735295625").aliases(&[
+            "floz",
+            "fl. oz",
+            "fl oz",
+            "us fl oz",
+            "us fluid ounce",
+            "us fluid ounces",
+        ]),
+        unit("imp fl oz", "imperial fluid ounce", Dim::VOLUME, "0.0000284130625").aliases(&[
+            "uk fl oz",
+            "uk fluid ounce",
+            "uk fluid ounces",
+        ]),
         unit("tbsp", "tablespoon", Dim::VOLUME, "0.00001478676478125").aliases(&["Tbsp", "tbs"]),
         unit("tsp", "teaspoon", Dim::VOLUME, "0.00000492892159375"),
+        // The old British spoons: 5/8 and 5/24 of an imperial fluid ounce.
+        unit("imp tbsp", "imperial tablespoon", Dim::VOLUME, "0.0000177581640625")
+            .aliases(&["uk tablespoon", "uk tablespoons"]),
+        unit("imp tsp", "imperial teaspoon", Dim::VOLUME, "1")
+            .scale(Number::parse("0.0000177581640625").unwrap() / Number::from_i64(3))
+            .aliases(&["uk teaspoon", "uk teaspoons"]),
         unit("bbl", "barrel", Dim::VOLUME, "0.158987294928"),
+        unit("bu", "bushel", Dim::VOLUME, "0.03523907016688"),
+        unit("acre-foot", "acre-foot", Dim::VOLUME, "1233.48183754752")
+            .plural("acre-feet")
+            .aliases(&["acre foot", "acre feet", "acre-ft", "acre ft"])
+            .spelled(),
+        unit("board foot", "board foot", Dim::VOLUME, "0.002359737216")
+            .plural("board feet")
+            .aliases(&["board-foot", "board-feet", "FBM", "fbm"])
+            .spelled(),
         // Fuel consumption: a unit per an amount, read and multiplied by its symbol.
         unit("L/100km", "liter per 100 kilometers", Dim::VOLUME.div(Dim::LENGTH), "0.00000001")
             .plural("liters per 100 kilometers"),
@@ -229,8 +261,20 @@ fn definitions() -> Vec<Def> {
         unit("°", "degree", Dim::ANGLE, "1").scale(pi / Number::from_i64(180)).aliases(&["deg", "degs"]).tight(),
         unit("grad", "gradian", Dim::ANGLE, "1").scale(pi / Number::from_i64(200)).aliases(&["gon", "gons"]),
         unit("rev", "revolution", Dim::ANGLE, "1").scale(pi * Number::from_i64(2)).aliases(&["turn", "turns", "revs"]),
-        unit("arcmin", "arcminute", Dim::ANGLE, "1").scale(pi / Number::from_i64(10_800)).aliases(&["arcmins"]),
-        unit("arcsec", "arcsecond", Dim::ANGLE, "1").scale(pi / Number::from_i64(648_000)).aliases(&["arcsecs"]),
+        unit("arcmin", "arcminute", Dim::ANGLE, "1").scale(pi / Number::from_i64(10_800)).aliases(&[
+            "arcmins",
+            "arc min",
+            "arc mins",
+            "arc minute",
+            "arc minutes",
+        ]),
+        unit("arcsec", "arcsecond", Dim::ANGLE, "1").scale(pi / Number::from_i64(648_000)).aliases(&[
+            "arcsecs",
+            "arc sec",
+            "arc secs",
+            "arc second",
+            "arc seconds",
+        ]),
         // Temperature (base: kelvin)
         unit("K", "kelvin", Dim::TEMPERATURE, "1").plural("kelvin").aliases(&["°K", "kelvins"]),
         unit("°C", "degree Celsius", Dim::TEMPERATURE, "1")
@@ -278,15 +322,28 @@ fn definitions() -> Vec<Def> {
             .scale(Number::ratio(5, 9))
             .aliases(&["rankine"]),
         // Frequency
-        unit("Hz", "hertz", Dim::FREQUENCY, "1").plural("hertz").prefixes(&[KILO, MEGA, GIGA, TERA, MILLI]),
+        unit("Hz", "hertz", Dim::FREQUENCY, "1")
+            .plural("hertz")
+            .prefixes(&[KILO, MEGA, GIGA, TERA, MILLI, MICRO, NANO]),
         unit("rpm", "revolution per minute", Dim::FREQUENCY, "1")
             .plural("revolutions per minute")
             .scale(Number::ratio(1, 60)),
         // Mechanics
-        unit("N", "newton", Dim::FORCE, "1").prefixes(&[KILO, MEGA, MILLI, MICRO]),
-        unit("lbf", "pound-force", Dim::FORCE, "4.4482216152605")
-            .plural("pounds-force")
-            .aliases(&["pound force", "pounds force"]),
+        unit("N", "newton", Dim::FORCE, "1").prefixes(&[KILO, MEGA, GIGA, MILLI, MICRO, NANO]),
+        unit("lbf", "pound-force", Dim::FORCE, "4.4482216152605").plural("pounds-force").aliases(&[
+            "pound force",
+            "pounds force",
+            "poundforce",
+            "pound of force",
+            "pounds of force",
+        ]),
+        unit("ozf", "ounce-force", Dim::FORCE, "0.27801385095378125").plural("ounces-force").aliases(&[
+            "ounce force",
+            "ounces force",
+            "ounce of force",
+            "ounces of force",
+        ]),
+        unit("pdl", "poundal", Dim::FORCE, "0.138254954376"),
         unit("kgf", "kilogram-force", Dim::FORCE, "9.80665").plural("kilograms-force").aliases(&["kilogram force"]),
         unit("J", "joule", Dim::ENERGY, "1").prefixes(&[KILO, MEGA, GIGA, TERA, MILLI]),
         unit("cal", "calorie", Dim::ENERGY, "4.184").prefixes(&[KILO]),
@@ -296,18 +353,35 @@ fn definitions() -> Vec<Def> {
         unit("BTU", "British thermal unit", Dim::ENERGY, "1055.05585262").aliases(&["btu", "btus"]),
         unit("W", "watt", Dim::POWER, "1").prefixes(&[KILO, MEGA, GIGA, TERA, MILLI]),
         unit("hp", "horsepower", Dim::POWER, "745.69987158227022").plural("horsepower"),
+        unit("PS", "metric horsepower", Dim::POWER, "735.49875").plural("metric horsepower").aliases(&["metric hp"]),
         unit("Pa", "pascal", Dim::PRESSURE, "1").prefixes(&[HECTO, KILO, MEGA, GIGA]),
         unit("bar", "bar", Dim::PRESSURE, "100000").prefixes(&[MILLI]),
         unit("atm", "atmosphere", Dim::PRESSURE, "101325"),
-        unit("psi", "pound per square inch", Dim::PRESSURE, "6894.757293168361").plural("pounds per square inch"),
-        unit("ksi", "kilopound per square inch", Dim::PRESSURE, "6894757.293168361"),
+        unit("psi", "pound per square inch", Dim::PRESSURE, "6894.757293168361")
+            .plural("pounds per square inch")
+            .aliases(&[
+                "pound-force per square inch",
+                "pounds-force per square inch",
+                "pound of force per square inch",
+                "pounds of force per square inch",
+            ]),
+        unit("ksi", "kilopound per square inch", Dim::PRESSURE, "6894757.293168361")
+            .plural("kilopounds per square inch"),
+        unit("Mpsi", "megapound per square inch", Dim::PRESSURE, "6894757293.168361")
+            .plural("megapounds per square inch"),
         unit("mmHg", "millimeter of mercury", Dim::PRESSURE, "133.322387415").plural("millimeters of mercury"),
         unit("inHg", "inch of mercury", Dim::PRESSURE, "3386.388640341").plural("inches of mercury"),
         unit("Torr", "torr", Dim::PRESSURE, "1").scale(Number::ratio(101_325, 760)).plural("torr"),
         // Electricity and chemistry
-        unit("A", "ampere", Dim::CURRENT, "1").aliases(&["amp", "amps"]).prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK]),
+        unit("A", "ampere", Dim::CURRENT, "1").aliases(&["amp", "amps"]).prefixes(&[
+            MEGA,
+            KILO,
+            MILLI,
+            MICRO,
+            MICRO_GREEK,
+        ]),
         unit("V", "volt", Dim::VOLTAGE, "1").prefixes(&[KILO, MEGA, MILLI, MICRO]),
-        unit("Ω", "ohm", Dim::RESISTANCE, "1").aliases(&["Ω"]).prefixes(&[KILO, MEGA, MILLI]),
+        unit("Ω", "ohm", Dim::RESISTANCE, "1").aliases(&["Ω"]).prefixes(&[KILO, MEGA, MILLI, MICRO]),
         unit("mol", "mole", Dim::AMOUNT, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO]),
         // Data (base: bit)
         unit("bit", "bit", Dim::DATA, "1").prefixes(DATA),
@@ -337,10 +411,32 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("mpg", &["mpg", "miles per gallon"], "mi/gal"),
     ("Wh", &["Wh", "watt hour", "watt hours", "watt-hour", "watt-hours"], "W*h"),
     ("kWh", &["kWh", "kwh", "kilowatt hour", "kilowatt hours", "kilowatt-hour", "kilowatt-hours"], "kW*h"),
-    ("MWh", &["MWh", "megawatt hour", "megawatt hours"], "MW*h"),
-    ("GWh", &["GWh", "gigawatt hour", "gigawatt hours"], "GW*h"),
-    ("TWh", &["TWh", "terawatt hour", "terawatt hours"], "TW*h"),
-    ("N·m", &["Nm", "N·m", "newton meter", "newton meters", "newton metre", "newton metres"], "N*m"),
+    // Lowercase "mwh" is megawatt hours, as in SoulverCore.
+    ("MWh", &["MWh", "mwh", "megawatt hour", "megawatt hours"], "MW*h"),
+    ("GWh", &["GWh", "gwh", "gigawatt hour", "gigawatt hours"], "GW*h"),
+    ("TWh", &["TWh", "twh", "terawatt hour", "terawatt hours"], "TW*h"),
+    ("N·m", &["Nm", "N·m", "N⋅m", "N m", "newton meter", "newton meters", "newton metre", "newton metres"], "N*m"),
+    ("", &["Ws", "W s", "watt second", "watt seconds"], "W*s"),
+    (
+        "",
+        &[
+            "lbf-ft",
+            "lbf ft",
+            "ft-lb",
+            "ft-lbs",
+            "ft-lbf",
+            "lb-ft",
+            "foot-pound",
+            "foot-pounds",
+            "foot pound",
+            "foot pounds",
+            "pound-foot",
+            "pound-feet",
+        ],
+        "lbf*ft",
+    ),
+    ("", &["lbf-in", "in-lb", "in-lbs", "in-lbf", "lb-in", "inch-pound", "inch-pounds"], "lbf*in"),
+    ("", &["ozf-in", "oz-in", "in-oz", "inch-ounce", "inch-ounces"], "ozf*in"),
     ("Ah", &["Ah", "amp hour", "amp hours", "ampere hour", "ampere hours"], "A*h"),
     ("mAh", &["mAh", "mah", "milliamp hour", "milliamp hours"], "mA*h"),
     ("bps", &["bps", "bits per second"], "bit/s"),
@@ -356,11 +452,13 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("", &["TBps"], "TB/s"),
     ("", &["sqm"], "m^2"),
     ("", &["sqkm"], "km^2"),
+    ("", &["sqdm"], "dm^2"),
     ("", &["sqcm"], "cm^2"),
-    ("", &["sqft"], "ft^2"),
+    ("", &["sqmm"], "mm^2"),
+    ("", &["sqft", "sqfeet"], "ft^2"),
     ("", &["sqin"], "in^2"),
-    ("", &["sqyd"], "yd^2"),
-    ("", &["sqmi"], "mi^2"),
+    ("", &["sqyd", "sqyard", "sqyards"], "yd^2"),
+    ("", &["sqmi", "sqmile", "sqmiles"], "mi^2"),
     ("", &["cc", "ccm"], "cm^3"),
     ("", &["cuft"], "ft^3"),
     ("", &["cuin"], "in^3"),
@@ -378,6 +476,8 @@ const EXTRA: &[(&str, &str)] = &[
     ("Tb", "Tbit"),
     ("Pb", "Pbit"),
     ("Eb", "Ebit"),
+    ("Zb", "Zbit"),
+    ("Yb", "Ybit"),
     ("Kib", "Kibit"),
     ("Mib", "Mibit"),
     ("Gib", "Gibit"),
@@ -395,6 +495,15 @@ const EXTRA: &[(&str, &str)] = &[
     ("pib", "PiB"),
     ("eib", "EiB"),
     ("mcg", "µg"),
+    // Lowercase "mj" is megajoules, as in SoulverCore.
+    ("kj", "kJ"),
+    ("mj", "MJ"),
+    ("gj", "GJ"),
+    ("KV", "kV"),
+    ("kCal", "kcal"),
+    ("millimol", "mmol"),
+    ("micromol", "µmol"),
+    ("nanomol", "nmol"),
     ("micron", "µm"),
     ("microns", "µm"),
     ("Cal", "kcal"),
@@ -543,7 +652,16 @@ pub(super) fn build() -> Registry {
                 let is_symbol = a.chars().any(|c| !c.is_lowercase()) || a.len() <= 2;
                 format!("{}{a}", if is_symbol { p.symbol } else { p.name })
             });
-            b.register(id, aliases.collect::<Vec<_>>());
+            let mut aliases = aliases.collect::<Vec<_>>();
+            // "ug", "uL": "u" for micro, but not "us" and "um", which are words.
+            if p.symbol == "µ" {
+                let typed = format!("u{}", d.symbol);
+                if !matches!(typed.as_str(), "us" | "um") {
+                    aliases.push(typed);
+                }
+                aliases.extend(d.aliases.iter().filter(|a| a.len() <= 2).map(|a| format!("u{a}")));
+            }
+            b.register(id, aliases);
         }
     }
 

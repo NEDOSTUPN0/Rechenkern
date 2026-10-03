@@ -359,6 +359,12 @@ impl<'a> Parser<'a> {
                 self.pos += 1;
                 continue;
             }
+            // "lbf·in": "in" right after a dot is the inch.
+            if op == Op::Mul && self.dot_inch_follows() {
+                self.pos += 2;
+                lhs = Expr::binary(Op::Mul, lhs, Expr::BareUnit(crate::units::registry().get("in")));
+                continue;
+            }
             if !self.operand_follows(len) {
                 return Ok(lhs);
             }
@@ -386,6 +392,13 @@ impl<'a> Parser<'a> {
             };
             lhs = if swap { Expr::binary(op, rhs, lhs) } else { Expr::binary(op, lhs, rhs) };
         }
+    }
+
+    /// A dot glued to "in" at the cursor: "lbf·in".
+    fn dot_inch_follows(&self) -> bool {
+        let Some(dot) = self.cur().filter(|t| t.is_sym("*")) else { return false };
+        self.src[dot.start..].starts_with(['·', '⋅', '∙'])
+            && self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("in") && !t.space_before)
     }
 
     /// The multiplicative operator at the cursor and its length in tokens.
