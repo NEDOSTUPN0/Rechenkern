@@ -56,7 +56,7 @@ average 36, 42, 19, 81                       → 44.5
 std dev of 20, 30 and 40                     → 10
 0xFF & 0x0F                                  → 15
 0.5 as frac                                  → 0.5
-6 to 600 as 8 to what                        → 8
+6 to 600 as 8 to what                        → 800
 clamp 26 5 25                                → 25
 mid point of 3 and 7                         → 5
 fromunix(1559740303)                         → <error: unknown function "fromunix">

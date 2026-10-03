@@ -38,11 +38,25 @@ impl Parser<'_> {
             let b = self.part(is_to + 2, as_)?;
             if self.ends_with(&["is", "to", "what"]) {
                 let c = self.part(as_ + 1, end - 3)?;
-                return Ok(Some(Expr::binary(Op::Div, Expr::binary(Op::Mul, c, b), a)));
+                return Ok(Some(proportion(c, a, b)));
             }
             if self.matches_at(as_ + 1, &["what", "is", "to"]) {
                 let d = self.part(as_ + 4, end)?;
-                return Ok(Some(Expr::binary(Op::Div, Expr::binary(Op::Mul, a, d), b)));
+                return Ok(Some(proportion(d, b, a)));
+            }
+        }
+
+        // "6 to 600 as 8 to what", "6 to 600 is what to 8"
+        if let Some(to) = self.find(1, &["to"])
+            && let Some(mid) = ["as", "is"].iter().filter_map(|w| self.find(to + 2, &[w])).min()
+        {
+            if self.ends_with(&["to", "what"]) && mid + 1 < end - 2 {
+                let (a, b, c) = (self.part(0, to)?, self.part(to + 1, mid)?, self.part(mid + 1, end - 2)?);
+                return Ok(Some(proportion(c, a, b)));
+            }
+            if self.matches_at(mid + 1, &["what", "to"]) {
+                let (a, b, d) = (self.part(0, to)?, self.part(to + 1, mid)?, self.part(mid + 3, end)?);
+                return Ok(Some(proportion(d, b, a)));
             }
         }
 
@@ -405,6 +419,12 @@ fn share(kind: &str, a: Expr, b: Expr) -> Expr {
         "after" => div(b.clone(), sub(a, b)),
         _ => div(a, b),
     }
+}
+
+/// The missing term of a proportion: `x / of × by`. Dividing first keeps the
+/// units apart: "$6 to 2 kg as $9 to what" is 3 kg.
+fn proportion(x: Expr, of: Expr, by: Expr) -> Expr {
+    Expr::binary(Op::Mul, Expr::binary(Op::Div, x, of), by)
 }
 
 fn change(a: Expr, b: Expr) -> Expr {
