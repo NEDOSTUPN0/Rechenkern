@@ -169,17 +169,48 @@ impl Parser<'_> {
             self.pos = start;
             return None;
         };
-        if power > 1 && unit.dim() != Dim::LENGTH {
+        // "cubic meters per second": the power is the meters'.
+        let per = self.per_unit_in(self.pos, n);
+        let base = per.as_ref().map_or(unit.clone(), |per| unit.product(per));
+        if power > 1 && base.dim() != Dim::LENGTH {
             self.pos = start;
             return None;
         }
         self.pos += n;
-        let unit = self.unit_exponent(unit.pow(power));
+        let unit = match &per {
+            Some(per) if power > 1 => base.pow(power).product(&per.pow(-1)),
+            _ => unit.pow(power),
+        };
+        let unit = self.per_unit_power(unit, per.as_ref());
         Some(self.per_amount(&unit).unwrap_or(unit))
+    }
+
+    /// A power after a unit; "meters per second squared" gives it to the second.
+    fn per_unit_power(&mut self, unit: Unit, per: Option<&Unit>) -> Unit {
+        match (self.exponent(), per) {
+            (None, _) => unit,
+            (Some(e), Some(per)) => unit.product(&per.pow(1 - e)),
+            (Some(e), None) => unit.pow(e),
+        }
+    }
+
+    /// The unit after "per" in a unit name read at `start`, `n` tokens long: "meters per second".
+    fn per_unit_in(&self, start: usize, n: usize) -> Option<Unit> {
+        let per = (start..start + n).find(|&k| self.toks[k].is_word("per"))?;
+        let (unit, len) = self.unit_at(per + 1, true)?;
+        (per + 1 + len == start + n).then_some(unit)
     }
 
     /// A power written after a unit: `m²`, `m^3`, `m squared`.
     fn unit_exponent(&mut self, unit: Unit) -> Unit {
+        match self.exponent() {
+            Some(e) => unit.pow(e),
+            None => unit,
+        }
+    }
+
+    /// A power at the cursor, read past: `²`, `^3`, `squared`.
+    fn exponent(&mut self) -> Option<i8> {
         let exp = match self.cur().map(|t| &t.tok) {
             Some(Tok::Sym("²")) => Some((2, 1)),
             Some(Tok::Sym("³")) => Some((3, 1)),
@@ -191,9 +222,9 @@ impl Parser<'_> {
             Some(Tok::Word(w)) if w.eq_ignore_ascii_case("cubed") => Some((3, 1)),
             _ => None,
         };
-        let Some((e, len)) = exp else { return unit };
+        let (e, len) = exp?;
         self.pos += len;
-        unit.pow(e)
+        Some(e)
     }
 
     /// A unit per an amount of another unit, known as a unit of its own: "L/100km", "liters per 100 km".
@@ -368,7 +399,12 @@ impl Parser<'_> {
     fn bare_unit(&mut self, unit: Unit, n: usize) -> Result<Expr> {
         // "whole weeks between March 3 and May 30" counts complete weeks only.
         let whole = self.pos > 0 && self.toks[self.pos - 1].is_word("whole");
+        let per = self.per_unit_in(self.pos, n);
         self.pos += n;
+        let unit = match per {
+            Some(per) => self.per_unit_power(unit, Some(&per)),
+            None => unit,
+        };
         if (unit.dim() == Dim::TIME || unit.dim() == Dim::WORKDAY)
             && let Some(expr) = self.time_unit_phrase(&unit)?
         {

@@ -5,7 +5,7 @@ use jiff::tz::TimeZone;
 use super::{Parser, words};
 use crate::ast::Func;
 use crate::lexer::{Tok, Token};
-use crate::units::{Unit, registry};
+use crate::units::{Dim, Unit, registry};
 use crate::zones::{self, Location};
 
 /// Words glued by a hyphen are somewhere in the tokens: "x-ray".
@@ -251,7 +251,25 @@ impl<'a> Parser<'a> {
             return None;
         }
         let (text, ends) = self.joined_words(i, registry().max_words(), false);
-        ends.iter().rev().find_map(|&(end, n)| Some((registry().lookup(&text[..end])?, n)))
+        ends.iter()
+            .rev()
+            .find_map(|&(end, n)| Some((registry().lookup(&text[..end])?, n)))
+            .or_else(|| self.time_power_at(i))
+    }
+
+    /// A time with a power after a slash: the "s2" of "m/s2".
+    fn time_power_at(&self, i: usize) -> Option<(Unit, usize)> {
+        if !self.toks.get(i.checked_sub(1)?).is_some_and(|t| t.is_sym("/")) {
+            return None;
+        }
+        let word = self.toks.get(i)?.word()?;
+        let exp = match word.chars().last()? {
+            '2' => 2,
+            '3' => 3,
+            _ => return None,
+        };
+        let unit = registry().lookup(&word[..word.len() - 1]).filter(|u| u.dim() == Dim::TIME)?;
+        Some((unit.pow(exp), 1))
     }
 
     pub(super) fn dollar(&self) -> Unit {
