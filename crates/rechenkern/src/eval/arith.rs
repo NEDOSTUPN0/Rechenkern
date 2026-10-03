@@ -30,7 +30,7 @@ impl Env<'_> {
             Op::Pow => self.pow(a, b),
             Op::Mod => self.rem(a, b),
             Op::Of => self.of(a, b),
-            Op::OutOf => Ok(self.to_format(self.div(a, b)?, Format::Percent, Display::Auto)?.0),
+            Op::OutOf => self.share(a, b),
             Op::On | Op::Off => self.on_off(a, b, op == Op::Off),
             Op::At => self.at(a, b),
             Op::BitAnd | Op::BitOr | Op::BitXor | Op::Shl | Op::Shr => bitwise(op, a, b),
@@ -327,13 +327,21 @@ impl Env<'_> {
         }
     }
 
+    /// "4 out of 10", "10 of $20": a share as a percentage. A plain number on one side
+    /// counts in the other's unit.
+    fn share(&self, a: Value, b: Value) -> Result<Value> {
+        let (a, b) = match (a, b) {
+            (Value::Quantity(x), Value::Quantity(y)) if x.unit.is_none() != y.unit.is_none() => {
+                (Value::number(x.number), Value::number(y.number))
+            }
+            pair => pair,
+        };
+        Ok(self.to_format(self.div(a, b)?, Format::Percent, Display::Auto)?.0)
+    }
+
     /// "10% on 200" adds, "10% off 200" subtracts.
     fn on_off(&self, a: Value, b: Value, off: bool) -> Result<Value> {
-        match a {
-            Value::Percent(p) => self.add_sub(b, Value::Percent(p), off),
-            // "$5 off $20"
-            a => self.add_sub(b, a, off),
-        }
+        self.add_sub(b, a, off)
     }
 
     /// "30 hours at $30/hour" multiplies, "$500 at $20/hour" divides.

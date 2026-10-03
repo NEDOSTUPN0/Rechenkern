@@ -359,6 +359,13 @@ impl<'a> Parser<'a> {
                 self.pos += 1;
                 continue;
             }
+            // "10 of 20", "$5 off $20": a number's share of another, as in SoulverCore.
+            let share = matches!(op, Op::Of | Op::On | Op::Off) && self.share_before(&lhs);
+            // "$500 for team of 5", "$900 on the 5th": words around it make it text.
+            if share && (self.comment_at(self.pos - 1) || self.comment_at(self.pos + len)) {
+                return Ok(lhs);
+            }
+            let op = if share { Op::OutOf } else { op };
             // "lbf·in": "in" right after a dot is the inch.
             if op == Op::Mul && self.dot_inch_follows() {
                 self.pos += 2;
@@ -371,11 +378,17 @@ impl<'a> Parser<'a> {
             // "3 permutations of 10" means 10 permutation 3.
             let swap = matches!(op, Op::Perm | Op::Comb) && len == 2;
             let slash = self.cur().is_some_and(|t| t.is_sym("/"));
+            let op_pos = self.pos;
             self.pos += len;
             let number_follows = self.cur().is_some_and(|t| matches!(t.tok, Tok::Num(_)));
             // "30 hours at $30/hour": the rate on the right is one value.
             let rhs =
                 if matches!(op, Op::At | Op::Of | Op::On | Op::Off) { self.multiplicative()? } else { self.unary()? };
+            // "Paid $50 on 3 March": a date is not a share either.
+            if share && matches!(rhs, Expr::Time(_)) {
+                self.pos = op_pos;
+                return Ok(lhs);
+            }
             // "3/4 cup", "100 / 4 kg": a plain number over an amount is a part of that amount.
             if slash
                 && number_follows
@@ -392,6 +405,17 @@ impl<'a> Parser<'a> {
             };
             lhs = if swap { Expr::binary(op, rhs, lhs) } else { Expr::binary(op, lhs, rhs) };
         }
+    }
+
+    /// `lhs`, before the operator at the cursor, is a written amount, not a fraction
+    /// word: "10" and "$5" in "10 of 20" and "$5 off $20", but not "half" in "half of 10".
+    fn share_before(&self, lhs: &Expr) -> bool {
+        let literal = match lhs {
+            Expr::Number(_) => true,
+            Expr::WithUnit(value, _) => matches!(**value, Expr::Number(_)),
+            _ => false,
+        };
+        literal && !self.lower(self.pos - 1).is_some_and(|w| words::fraction_word(&w).is_some())
     }
 
     /// A dot glued to "in" at the cursor: "lbf·in".

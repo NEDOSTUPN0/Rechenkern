@@ -40,11 +40,12 @@ twenty-five                                  → 25
 2) $15 taxi                                  → $15.00
 a) $5 coffee                                 → $5.00
 1. May 2024                                  → Wed, 1 May 2024
+Paid $50 on 3 March                          → $50.00
+$500 for team of 5                           → $500.00
+$900 on the 5                                → $900.00
 
 // Known differences from SoulverCore
-Paid $50 on 3 March                          → <error: can't add money to a date>
-$500 for team of 5                           → <error: can't take money of something>
-Rent $900 due on the 5th                     → $905.00
+Rent $900 due on the 5th                     → $900.00
 2 hours of work at $50/hour                  → $100.00
 5 km run in 30 minutes                       → 5 km
 5 km/h coffee 3 km/h                         → 3 km/h

@@ -159,6 +159,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   heading or an earlier total; totals right after a total take the same lines
   (`sum`, then `sum in EUR` or `average`).
 - Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`.
+  A written amount of/on/off another is its share, as in SoulverCore (`10 of 20`
+  = 50%, `$5 off $20` = 25%; `half of 10` = 5); words around the operator or a
+  date after it make it text (`$500 for team of 5` = $500).
 - `pt` is the typographic point, as in SoulverCore: 96 px or 72 pt to the inch
   and 16 px to the em, as in CSS. Pints are written out (`2.11 pints`).
 - A quarter is three months (`1 quarter in months`), a fraction only before

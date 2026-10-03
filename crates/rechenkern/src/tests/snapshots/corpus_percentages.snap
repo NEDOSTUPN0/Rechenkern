@@ -32,9 +32,12 @@ if 30 is 20%, what is 50%                    → 75
 200% of 3                                    → 6
 -5% of 100                                   → -5
 5 is what multiplier on 1                    → 4x
+10 on 20                                     → 50%
+10 off 20                                    → 50%
+10 of 20                                     → 50%
+$5 off $20                                   → 25%
+3 of 10 apples                               → 30%
+half of 10                                   → 5
 
 // Not like SoulverCore yet
-10 on 20                                     → 30
-10 off 20                                    → 10
-10 of 20                                     → 200
 20% off of 50                                → 40

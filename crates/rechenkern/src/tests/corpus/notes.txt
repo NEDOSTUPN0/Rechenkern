@@ -34,9 +34,10 @@ twenty-five
 2) $15 taxi
 a) $5 coffee
 1. May 2024
-// Known differences from SoulverCore
 Paid $50 on 3 March
 $500 for team of 5
+$900 on the 5
+// Known differences from SoulverCore
 Rent $900 due on the 5th
 2 hours of work at $50/hour
 5 km run in 30 minutes

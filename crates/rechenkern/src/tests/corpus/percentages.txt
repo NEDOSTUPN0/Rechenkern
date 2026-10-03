@@ -29,8 +29,11 @@ if 30 is 20%, what is 50%
 200% of 3
 -5% of 100
 5 is what multiplier on 1
-// Not like SoulverCore yet
 10 on 20
 10 off 20
 10 of 20
+$5 off $20
+3 of 10 apples
+half of 10
+// Not like SoulverCore yet
 20% off of 50
