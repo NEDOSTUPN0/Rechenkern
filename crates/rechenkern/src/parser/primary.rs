@@ -351,13 +351,16 @@ impl Parser<'_> {
         let first = words::number_word(&self.lower(self.pos)?)?;
         self.pos += 1;
         let mut total = first;
+        // "twenty five", "twenty-five"
+        let hyphen = self.cur().is_some_and(|t| t.is_sym("-") && !t.space_before)
+            && self.toks.get(self.pos + 1).is_some_and(|t| !t.space_before);
+        let at = self.pos + usize::from(hyphen);
         if first >= 20
             && first % 10 == 0
-            && let Some(ones) =
-                self.lower(self.pos).and_then(|w| words::number_word(&w)).filter(|n| (1..10).contains(n))
+            && let Some(ones) = self.lower(at).and_then(|w| words::number_word(&w)).filter(|n| (1..10).contains(n))
         {
             total += ones;
-            self.pos += 1;
+            self.pos = at + 1;
         }
         Some(Number::from_i64(total))
     }

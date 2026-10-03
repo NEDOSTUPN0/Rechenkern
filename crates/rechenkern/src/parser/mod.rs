@@ -30,7 +30,10 @@ pub struct Scope<'a> {
 
 /// Parses one line; `None` means the line has nothing to calculate.
 pub fn parse(src: &str, scope: &Scope) -> Result<Option<Stmt>> {
-    let tokens = lexer::lex(src, scope.config.decimal_comma);
+    let mut tokens = lexer::lex(src, scope.config.decimal_comma);
+    if tokens::has_hyphenated_words(&tokens) {
+        tokens = Parser::new(src, &tokens, scope).with_hyphenated_words();
+    }
     let marker = Parser::new(src, &tokens, scope).list_marker();
     let tokens = Parser::new(src, &tokens[marker..], scope).without_comment_groups();
     let mut parser = Parser::new(src, &tokens, scope);

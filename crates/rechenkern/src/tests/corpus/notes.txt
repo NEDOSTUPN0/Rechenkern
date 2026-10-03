@@ -21,6 +21,13 @@ Q2 sales 600
 Q3 $10k + Q4 $12k
 5 // comment 7
 $999 (for iPhone 16)
+// Hyphenated words
+T-shirt $20
+Coca-Cola $2 + Pepsi $3
+follow-up in 3 days
+half-life 5
+x-ray 5
+twenty-five
 // List markers
 - $10
 1. $10 lunch

@@ -8,6 +8,13 @@ use crate::lexer::{Tok, Token};
 use crate::units::{Unit, registry};
 use crate::zones::{self, Location};
 
+/// Words glued by a hyphen are somewhere in the tokens: "x-ray".
+pub(super) fn has_hyphenated_words(toks: &[Token]) -> bool {
+    toks.windows(3).any(|w| {
+        w[0].word().is_some() && w[1].is_sym("-") && !w[1].space_before && w[2].word().is_some() && !w[2].space_before
+    })
+}
+
 impl<'a> Parser<'a> {
     pub(super) fn cur(&self) -> Option<&'a Token> {
         self.toks.get(self.pos)
@@ -431,6 +438,54 @@ impl<'a> Parser<'a> {
             return 0;
         }
         if self.toks.get(1).is_some_and(|t| t.is_sym(")")) { 2 } else { 1 }
+    }
+
+    /// Joins words glued by hyphens into one comment word: "half-life", "x-ray",
+    /// "T-shirt". Units, places and functions stay ("light-year", "Aix-en-Provence",
+    /// "mid-point"), and so does a minus between values ("pi-e", "twenty-five").
+    pub(super) fn with_hyphenated_words(&self) -> Vec<Token> {
+        let mut out = Vec::with_capacity(self.toks.len());
+        let mut i = 0;
+        while i < self.toks.len() {
+            let end = self.hyphen_chain_end(i);
+            if end > i + 1 && self.hyphenated_comment(i, end) {
+                let (first, last) = (&self.toks[i], &self.toks[end - 1]);
+                let word = self.src[first.start..last.end].to_string();
+                out.push(Token { tok: Tok::Word(word), start: first.start, end: last.end, ..first.clone() });
+            } else {
+                out.extend_from_slice(&self.toks[i..end]);
+            }
+            i = end;
+        }
+        out
+    }
+
+    /// Where words glued by hyphens from token `i` end: "x-ray" takes three tokens.
+    fn hyphen_chain_end(&self, i: usize) -> usize {
+        let glued = |k: usize, sym: bool| {
+            self.toks.get(k).is_some_and(|t| !t.space_before && if sym { t.is_sym("-") } else { t.word().is_some() })
+        };
+        if self.toks.get(i).and_then(Token::word).is_none() {
+            return i + 1;
+        }
+        let mut k = i;
+        while glued(k + 1, true) && glued(k + 2, false) {
+            k += 2;
+        }
+        k + 1
+    }
+
+    /// The hyphenated words in tokens `i..end` mean nothing together.
+    fn hyphenated_comment(&self, i: usize, end: usize) -> bool {
+        let n = end - i;
+        let known = self.unit_at(i, false).is_some_and(|(_, m)| m >= n)
+            || self.place_at(i).is_some_and(|(_, m)| m >= n)
+            || self.phrase_at(i, &words::FUNCTIONS).is_some_and(|(_, m)| m >= n);
+        let value = |k: usize| {
+            let w = self.lower(k).unwrap_or_default();
+            words::constant(&w).is_some() || words::number_word(&w).is_some() || self.var_at(k).is_some()
+        };
+        !known && !(i..end).step_by(2).all(value)
     }
 
     /// Removes parentheses that hold comments: "$999 (for iPhone 16)".

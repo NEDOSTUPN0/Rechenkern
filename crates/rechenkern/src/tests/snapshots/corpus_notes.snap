@@ -26,6 +26,14 @@ Q3 $10k + Q4 $12k                            → $22,000.00
 5 // comment 7                               → 5
 $999 (for iPhone 16)                         → $999.00
 
+// Hyphenated words
+T-shirt $20                                  → $20.00
+Coca-Cola $2 + Pepsi $3                      → $5.00
+follow-up in 3 days                          → Sat, 26 Sep 2026
+half-life 5                                  → 5
+x-ray 5                                      → 5
+twenty-five                                  → 25
+
 // List markers
 - $10                                        → -$10.00
 1. $10 lunch                                 → $10.00
