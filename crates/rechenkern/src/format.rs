@@ -252,10 +252,14 @@ pub(crate) fn unit_text(unit: &Unit, plural: bool) -> String {
         let name = if def.spelled && (words || long) || inch { def.name.clone() } else { def.symbol.clone() };
         format!("{name}{}", superscript(e))
     };
-    // A compound with a name of its own keeps it: "$/kWh", not "$/(kW·hour)".
+    // A compound with a name of its own keeps it: "$/kWh", not "$/(kW·hour)"; "/(N·m)" stays in parentheses.
     let named = |factors: &[Factor], sign: i8| {
         let unit = factors.iter().fold(Unit::none(), |u, &(id, e)| u.product(&Unit::of(id).pow(e * sign)));
-        reg.compound_symbol(&unit).filter(|_| factors.len() > 1).map(|s| vec![s.to_string()])
+        let symbol = reg.compound_symbol(&unit).filter(|_| factors.len() > 1)?;
+        Some(match sign < 0 && symbol.contains('·') {
+            true => vec![format!("({symbol})")],
+            false => vec![symbol.to_string()],
+        })
     };
     let num_text = named(&num, 1).unwrap_or_else(|| num.iter().map(|&(id, e)| symbol(id, e)).collect());
     let den_text = named(&den, -1).unwrap_or_else(|| den.iter().map(|&(id, e)| symbol(id, -e)).collect());
