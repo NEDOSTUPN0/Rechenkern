@@ -360,6 +360,11 @@ fn units() {
         ("meters in 10 km", "10,000 m"),
         ("days in 3 weeks", "21 days"),
         ("seconds in a day", "86,400 seconds"),
+        // An article before a unit is one of it.
+        ("a day in hours", "24 hours"),
+        ("an inch in cm", "2.54 cm"),
+        ("a cup in ml", "236.5882365 mL"),
+        ("a quarter of an hour", "0.25 hours"),
         ("300 + 20 km", "320 km"),
         ("1km + 1,000m", "2 km"),
         ("10m × 10m", "100 m²"),
@@ -533,6 +538,7 @@ fn cooking() {
     check(&[
         ("1 cup of flour in grams", "125 g"),
         ("1 cup flour in g", "125 g"),
+        ("a cup of flour in grams", "125 g"),
         ("1 cup of all-purpose flour in grams", "125 g"),
         ("200 g sugar in cups", "1 cup"),
         ("200 grams of sugar to cups", "1 cup"),
@@ -664,6 +670,8 @@ fn dates() {
         ("3 days in the past", "Sun, 20 Sep 2026"),
         ("2 weeks in the future", "Wed, 7 Oct 2026"),
         ("4 days from now", "Sun, 27 Sep 2026"),
+        ("a week from now", "Wed, 30 Sep 2026"),
+        ("a day ago", "Tue, 22 Sep 2026"),
         ("$100 from 1990 is worth what today", "<error: expected a length of time before \"from\">"),
         ("in 3 days", "Sat, 26 Sep 2026"),
         ("next friday", "Fri, 25 Sep 2026"),

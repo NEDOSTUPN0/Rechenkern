@@ -41,11 +41,20 @@ impl Parser<'_> {
                 self.pos += n;
                 Ok(Expr::BareUnit(unit))
             }
-            Tok::Word(_) => match self.word()? {
+            Tok::Word(w) => match self.word()? {
                 Some(expr) => Ok(expr),
                 // The word turned out to be a comment: try what follows.
                 None => {
+                    let article = w.eq_ignore_ascii_case("a") || w.eq_ignore_ascii_case("an");
                     self.pos += 1;
+                    // "a day in hours", "a week from now", "a cup of flour": one of the unit,
+                    // but "a quarter of an hour" is a fraction.
+                    if article
+                        && self.fraction_at(self.pos).is_none()
+                        && let Some(unit) = self.unit_phrase(false)
+                    {
+                        return Ok(Expr::WithUnit(Expr::Number(Number::ONE).boxed(), unit));
+                    }
                     self.primary()
                 }
             },
