@@ -1,0 +1,1587 @@
+---
+source: crates/rechenkern/src/tests/snapshots.rs
+---
+1 cup of active dry yeast in grams           → 192 g
+100 g active dry yeast in cups               → 0.5208333333 cup
+1 cup of agave in grams                      → 220 g
+100 g agave in cups                          → 0.4545454545 cup
+1 cup of agave nectar in grams               → 220 g
+100 g agave nectar in cups                   → 0.4545454545 cup
+1 cup of agave syrup in grams                → 220 g
+100 g agave syrup in cups                    → 0.4545454545 cup
+1 cup of alfalfa sprouts in grams            → 33 g
+100 g alfalfa sprouts in cups                → 3.03030303 cup
+1 cup of all purpose flour in grams          → 125 g
+100 g all purpose flour in cups              → 0.8 cup
+1 cup of all-purpose flour in grams          → 125 g
+100 g all-purpose flour in cups              → 0.8 cup
+1 cup of allspice in grams                   → 96 g
+100 g allspice in cups                       → 1.041666667 cup
+1 cup of almond in grams                     → 143 g
+100 g almond in cups                         → 0.6993006993 cup
+1 cup of almond butter in grams              → 250 g
+100 g almond butter in cups                  → 0.4 cup
+1 cup of almond flour in grams               → 95 g
+100 g almond flour in cups                   → 1.052631579 cup
+1 cup of almond meal in grams                → 95 g
+100 g almond meal in cups                    → 1.052631579 cup
+1 cup of almond milk in grams                → 240 g
+100 g almond milk in cups                    → 0.4166666667 cup
+1 cup of almond oil in grams                 → 218 g
+100 g almond oil in cups                     → 0.4587155963 cup
+1 cup of almond paste in grams               → 227 g
+100 g almond paste in cups                   → 0.4405286344 cup
+1 cup of almonds in grams                    → 143 g
+100 g almonds in cups                        → 0.6993006993 cup
+1 cup of amaranth in grams                   → 193 g
+100 g amaranth in cups                       → 0.518134715 cup
+1 cup of amaranth leaves in grams            → 28 g
+100 g amaranth leaves in cups                → 3.571428571 cup
+1 cup of anise seed in grams                 → 107.2 g
+100 g anise seed in cups                     → 0.9328358209 cup
+1 cup of aniseed in grams                    → 107.2 g
+100 g aniseed in cups                        → 0.9328358209 cup
+1 cup of apple in grams                      → 125 g
+100 g apple in cups                          → 0.8 cup
+1 cup of apple cider vinegar in grams        → 239 g
+100 g apple cider vinegar in cups            → 0.4184100418 cup
+1 cup of apple juice in grams                → 248 g
+100 g apple juice in cups                    → 0.4032258065 cup
+1 cup of apple sauce in grams                → 244 g
+100 g apple sauce in cups                    → 0.4098360656 cup
+1 cup of apple slices in grams               → 109 g
+100 g apple slices in cups                   → 0.9174311927 cup
+1 cup of apples in grams                     → 125 g
+100 g apples in cups                         → 0.8 cup
+1 cup of applesauce in grams                 → 244 g
+100 g applesauce in cups                     → 0.4098360656 cup
+1 cup of apricot nectar in grams             → 266 g
+100 g apricot nectar in cups                 → 0.3759398496 cup
+1 cup of apricots in grams                   → 155 g
+100 g apricots in cups                       → 0.6451612903 cup
+1 cup of arborio rice in grams               → 195 g
+100 g arborio rice in cups                   → 0.5128205128 cup
+1 cup of arrowroot in grams                  → 128 g
+100 g arrowroot in cups                      → 0.78125 cup
+1 cup of arrowroot flour in grams            → 128 g
+100 g arrowroot flour in cups                → 0.78125 cup
+1 cup of artichoke hearts in grams           → 168 g
+100 g artichoke hearts in cups               → 0.5952380952 cup
+1 cup of arugula in grams                    → 20 g
+100 g arugula in cups                        → 5 cup
+1 cup of asparagus in grams                  → 134 g
+100 g asparagus in cups                      → 0.7462686567 cup
+1 cup of aubergine in grams                  → 82 g
+100 g aubergine in cups                      → 1.219512195 cup
+1 cup of avocado in grams                    → 150 g
+100 g avocado in cups                        → 0.6666666667 cup
+1 cup of avocado oil in grams                → 218 g
+100 g avocado oil in cups                    → 0.4587155963 cup
+1 cup of avocados in grams                   → 150 g
+100 g avocados in cups                       → 0.6666666667 cup
+1 cup of baked beans in grams                → 254 g
+100 g baked beans in cups                    → 0.3937007874 cup
+1 cup of baking chocolate in grams           → 132 g
+100 g baking chocolate in cups               → 0.7575757576 cup
+1 cup of baking powder in grams              → 220.8 g
+100 g baking powder in cups                  → 0.4528985507 cup
+1 cup of baking soda in grams                → 220.8 g
+100 g baking soda in cups                    → 0.4528985507 cup
+1 cup of balsamic in grams                   → 255 g
+100 g balsamic in cups                       → 0.3921568627 cup
+1 cup of balsamic vinegar in grams           → 255 g
+100 g balsamic vinegar in cups               → 0.3921568627 cup
+1 cup of banana in grams                     → 225 g
+100 g banana in cups                         → 0.4444444444 cup
+1 cup of banana powder in grams              → 100 g
+100 g banana powder in cups                  → 1 cup
+1 cup of bananas in grams                    → 225 g
+100 g bananas in cups                        → 0.4444444444 cup
+1 cup of barbecue sauce in grams             → 286 g
+100 g barbecue sauce in cups                 → 0.3496503497 cup
+1 cup of barley in grams                     → 200 g
+100 g barley in cups                         → 0.5 cup
+1 cup of barley flour in grams               → 148 g
+100 g barley flour in cups                   → 0.6756756757 cup
+1 cup of barley malt flour in grams          → 162 g
+100 g barley malt flour in cups              → 0.6172839506 cup
+1 cup of barley malt syrup in grams          → 332 g
+100 g barley malt syrup in cups              → 0.3012048193 cup
+1 cup of basil in grams                      → 24 g
+100 g basil in cups                          → 4.166666667 cup
+1 cup of basil leaves in grams               → 24 g
+100 g basil leaves in cups                   → 4.166666667 cup
+1 cup of basmati rice in grams               → 185 g
+100 g basmati rice in cups                   → 0.5405405405 cup
+1 cup of bay leaves in grams                 → 28.8 g
+100 g bay leaves in cups                     → 3.472222222 cup
+1 cup of bbq sauce in grams                  → 286 g
+100 g bbq sauce in cups                      → 0.3496503497 cup
+1 cup of bean sprouts in grams               → 104 g
+100 g bean sprouts in cups                   → 0.9615384615 cup
+1 cup of beaten egg in grams                 → 243 g
+100 g beaten egg in cups                     → 0.4115226337 cup
+1 cup of beaten eggs in grams                → 243 g
+100 g beaten eggs in cups                    → 0.4115226337 cup
+1 cup of beef broth in grams                 → 240 g
+100 g beef broth in cups                     → 0.4166666667 cup
+1 cup of beef fat in grams                   → 205 g
+100 g beef fat in cups                       → 0.487804878 cup
+1 cup of beef stock in grams                 → 240 g
+100 g beef stock in cups                     → 0.4166666667 cup
+1 cup of beef tallow in grams                → 205 g
+100 g beef tallow in cups                    → 0.487804878 cup
+1 cup of beer in grams                       → 237.6 g
+100 g beer in cups                           → 0.4208754209 cup
+1 cup of beetroot in grams                   → 136 g
+100 g beetroot in cups                       → 0.7352941176 cup
+1 cup of beets in grams                      → 136 g
+100 g beets in cups                          → 0.7352941176 cup
+1 cup of bell pepper in grams                → 149 g
+100 g bell pepper in cups                    → 0.6711409396 cup
+1 cup of bell peppers in grams               → 149 g
+100 g bell peppers in cups                   → 0.6711409396 cup
+1 cup of besan in grams                      → 92 g
+100 g besan in cups                          → 1.086956522 cup
+1 cup of bicarbonate of soda in grams        → 220.8 g
+100 g bicarbonate of soda in cups            → 0.4528985507 cup
+1 cup of black beans in grams                → 194 g
+100 g black beans in cups                    → 0.5154639175 cup
+1 cup of black currants in grams             → 112 g
+100 g black currants in cups                 → 0.8928571429 cup
+1 cup of black pepper in grams               → 110.4 g
+100 g black pepper in cups                   → 0.9057971014 cup
+1 cup of black treacle in grams              → 337 g
+100 g black treacle in cups                  → 0.296735905 cup
+1 cup of black walnuts in grams              → 125 g
+100 g black walnuts in cups                  → 0.8 cup
+1 cup of blackberries in grams               → 144 g
+100 g blackberries in cups                   → 0.6944444444 cup
+1 cup of blackberry in grams                 → 144 g
+100 g blackberry in cups                     → 0.6944444444 cup
+1 cup of blackcurrants in grams              → 112 g
+100 g blackcurrants in cups                  → 0.8928571429 cup
+1 cup of blanched almonds in grams           → 145 g
+100 g blanched almonds in cups               → 0.6896551724 cup
+1 cup of blue cheese in grams                → 135 g
+100 g blue cheese in cups                    → 0.7407407407 cup
+1 cup of blueberries in grams                → 148 g
+100 g blueberries in cups                    → 0.6756756757 cup
+1 cup of blueberry in grams                  → 148 g
+100 g blueberry in cups                      → 0.6756756757 cup
+1 cup of bow tie pasta in grams              → 81 g
+100 g bow tie pasta in cups                  → 1.234567901 cup
+1 cup of bran in grams                       → 58 g
+100 g bran in cups                           → 1.724137931 cup
+1 cup of brazil nuts in grams                → 133 g
+100 g brazil nuts in cups                    → 0.7518796992 cup
+1 cup of bread crumbs in grams               → 108 g
+100 g bread crumbs in cups                   → 0.9259259259 cup
+1 cup of bread flour in grams                → 137 g
+100 g bread flour in cups                    → 0.7299270073 cup
+1 cup of breadcrumbs in grams                → 108 g
+100 g breadcrumbs in cups                    → 0.9259259259 cup
+1 cup of brewed coffee in grams              → 237 g
+100 g brewed coffee in cups                  → 0.4219409283 cup
+1 cup of brewed tea in grams                 → 237 g
+100 g brewed tea in cups                     → 0.4219409283 cup
+1 cup of broccoli in grams                   → 91 g
+100 g broccoli in cups                       → 1.098901099 cup
+1 cup of broccoli florets in grams           → 91 g
+100 g broccoli florets in cups               → 1.098901099 cup
+1 cup of broth in grams                      → 240 g
+100 g broth in cups                          → 0.4166666667 cup
+1 cup of brown lentils in grams              → 192 g
+100 g brown lentils in cups                  → 0.5208333333 cup
+1 cup of brown rice in grams                 → 185 g
+100 g brown rice in cups                     → 0.5405405405 cup
+1 cup of brown rice flour in grams           → 158 g
+100 g brown rice flour in cups               → 0.6329113924 cup
+1 cup of brown sugar in grams                → 220 g
+100 g brown sugar in cups                    → 0.4545454545 cup
+1 cup of brussels sprouts in grams           → 88 g
+100 g brussels sprouts in cups               → 1.136363636 cup
+1 cup of buckwheat in grams                  → 170 g
+100 g buckwheat in cups                      → 0.5882352941 cup
+1 cup of buckwheat flour in grams            → 120 g
+100 g buckwheat flour in cups                → 0.8333333333 cup
+1 cup of buckwheat groats in grams           → 170 g
+100 g buckwheat groats in cups               → 0.5882352941 cup
+1 cup of bulghur in grams                    → 140 g
+100 g bulghur in cups                        → 0.7142857143 cup
+1 cup of bulgur in grams                     → 140 g
+100 g bulgur in cups                         → 0.7142857143 cup
+1 cup of bulgur wheat in grams               → 140 g
+100 g bulgur wheat in cups                   → 0.7142857143 cup
+1 cup of butter in grams                     → 227 g
+100 g butter in cups                         → 0.4405286344 cup
+1 cup of butter beans in grams               → 178 g
+100 g butter beans in cups                   → 0.5617977528 cup
+1 cup of butter oil in grams                 → 205 g
+100 g butter oil in cups                     → 0.487804878 cup
+1 cup of buttermilk in grams                 → 245 g
+100 g buttermilk in cups                     → 0.4081632653 cup
+1 cup of buttermilk powder in grams          → 120 g
+100 g buttermilk powder in cups              → 0.8333333333 cup
+1 cup of butternuts in grams                 → 120 g
+100 g butternuts in cups                     → 0.8333333333 cup
+1 cup of cabbage in grams                    → 70 g
+100 g cabbage in cups                        → 1.428571429 cup
+1 cup of cake flour in grams                 → 137 g
+100 g cake flour in cups                     → 0.7299270073 cup
+1 cup of canned chickpeas in grams           → 152 g
+100 g canned chickpeas in cups               → 0.6578947368 cup
+1 cup of canned pumpkin in grams             → 245 g
+100 g canned pumpkin in cups                 → 0.4081632653 cup
+1 cup of canned tomatoes in grams            → 240 g
+100 g canned tomatoes in cups                → 0.4166666667 cup
+1 cup of canola oil in grams                 → 218 g
+100 g canola oil in cups                     → 0.4587155963 cup
+1 cup of cantaloupe in grams                 → 156 g
+100 g cantaloupe in cups                     → 0.641025641 cup
+1 cup of caramel sauce in grams              → 328 g
+100 g caramel sauce in cups                  → 0.3048780488 cup
+1 cup of caraway in grams                    → 107.2 g
+100 g caraway in cups                        → 0.9328358209 cup
+1 cup of caraway seeds in grams              → 107.2 g
+100 g caraway seeds in cups                  → 0.9328358209 cup
+1 cup of cardamom in grams                   → 92.8 g
+100 g cardamom in cups                       → 1.077586207 cup
+1 cup of carob flour in grams                → 103 g
+100 g carob flour in cups                    → 0.9708737864 cup
+1 cup of carob powder in grams               → 103 g
+100 g carob powder in cups                   → 0.9708737864 cup
+1 cup of carrot in grams                     → 128 g
+100 g carrot in cups                         → 0.78125 cup
+1 cup of carrots in grams                    → 128 g
+100 g carrots in cups                        → 0.78125 cup
+1 cup of cashew in grams                     → 137 g
+100 g cashew in cups                         → 0.7299270073 cup
+1 cup of cashew butter in grams              → 256 g
+100 g cashew butter in cups                  → 0.390625 cup
+1 cup of cashew nuts in grams                → 137 g
+100 g cashew nuts in cups                    → 0.7299270073 cup
+1 cup of cashews in grams                    → 137 g
+100 g cashews in cups                        → 0.7299270073 cup
+1 cup of caster sugar in grams               → 200 g
+100 g caster sugar in cups                   → 0.5 cup
+1 cup of castor sugar in grams               → 200 g
+100 g castor sugar in cups                   → 0.5 cup
+1 cup of catsup in grams                     → 240 g
+100 g catsup in cups                         → 0.4166666667 cup
+1 cup of cauliflower in grams                → 107 g
+100 g cauliflower in cups                    → 0.9345794393 cup
+1 cup of cayenne in grams                    → 84.8 g
+100 g cayenne in cups                        → 1.179245283 cup
+1 cup of cayenne pepper in grams             → 84.8 g
+100 g cayenne pepper in cups                 → 1.179245283 cup
+1 cup of celeriac in grams                   → 156 g
+100 g celeriac in cups                       → 0.641025641 cup
+1 cup of celery in grams                     → 101 g
+100 g celery in cups                         → 0.9900990099 cup
+1 cup of celery root in grams                → 156 g
+100 g celery root in cups                    → 0.641025641 cup
+1 cup of celery seed in grams                → 104 g
+100 g celery seed in cups                    → 0.9615384615 cup
+1 cup of cheddar in grams                    → 113 g
+100 g cheddar in cups                        → 0.8849557522 cup
+1 cup of cheddar cheese in grams             → 113 g
+100 g cheddar cheese in cups                 → 0.8849557522 cup
+1 cup of cherries in grams                   → 154 g
+100 g cherries in cups                       → 0.6493506494 cup
+1 cup of cherry tomatoes in grams            → 149 g
+100 g cherry tomatoes in cups                → 0.6711409396 cup
+1 cup of chervil in grams                    → 30.4 g
+100 g chervil in cups                        → 3.289473684 cup
+1 cup of chestnuts in grams                  → 143 g
+100 g chestnuts in cups                      → 0.6993006993 cup
+1 cup of chicken broth in grams              → 240 g
+100 g chicken broth in cups                  → 0.4166666667 cup
+1 cup of chicken fat in grams                → 205 g
+100 g chicken fat in cups                    → 0.487804878 cup
+1 cup of chicken stock in grams              → 240 g
+100 g chicken stock in cups                  → 0.4166666667 cup
+1 cup of chickpea flour in grams             → 92 g
+100 g chickpea flour in cups                 → 1.086956522 cup
+1 cup of chickpeas in grams                  → 200 g
+100 g chickpeas in cups                      → 0.5 cup
+1 cup of chile powder in grams               → 128 g
+100 g chile powder in cups                   → 0.78125 cup
+1 cup of chili powder in grams               → 128 g
+100 g chili powder in cups                   → 0.78125 cup
+1 cup of chives in grams                     → 48 g
+100 g chives in cups                         → 2.083333333 cup
+1 cup of chocolate chips in grams            → 168 g
+100 g chocolate chips in cups                → 0.5952380952 cup
+1 cup of chocolate morsels in grams          → 168 g
+100 g chocolate morsels in cups              → 0.5952380952 cup
+1 cup of chocolate syrup in grams            → 300 g
+100 g chocolate syrup in cups                → 0.3333333333 cup
+1 cup of chopped apple in grams              → 125 g
+100 g chopped apple in cups                  → 0.8 cup
+1 cup of chopped apples in grams             → 125 g
+100 g chopped apples in cups                 → 0.8 cup
+1 cup of chopped carrots in grams            → 128 g
+100 g chopped carrots in cups                → 0.78125 cup
+1 cup of chopped celery in grams             → 101 g
+100 g chopped celery in cups                 → 0.9900990099 cup
+1 cup of chopped dates in grams              → 147 g
+100 g chopped dates in cups                  → 0.6802721088 cup
+1 cup of chopped hazelnuts in grams          → 115 g
+100 g chopped hazelnuts in cups              → 0.8695652174 cup
+1 cup of chopped onion in grams              → 160 g
+100 g chopped onion in cups                  → 0.625 cup
+1 cup of chopped onions in grams             → 160 g
+100 g chopped onions in cups                 → 0.625 cup
+1 cup of chopped pecans in grams             → 109 g
+100 g chopped pecans in cups                 → 0.9174311927 cup
+1 cup of chopped tomatoes in grams           → 180 g
+100 g chopped tomatoes in cups               → 0.5555555556 cup
+1 cup of chopped walnuts in grams            → 117 g
+100 g chopped walnuts in cups                → 0.8547008547 cup
+1 cup of chunky peanut butter in grams       → 258 g
+100 g chunky peanut butter in cups           → 0.3875968992 cup
+1 cup of cider vinegar in grams              → 239 g
+100 g cider vinegar in cups                  → 0.4184100418 cup
+1 cup of cilantro in grams                   → 16 g
+100 g cilantro in cups                       → 6.25 cup
+1 cup of cinnamon in grams                   → 124.8 g
+100 g cinnamon in cups                       → 0.8012820513 cup
+1 cup of clarified butter in grams           → 205 g
+100 g clarified butter in cups               → 0.487804878 cup
+1 cup of cloves in grams                     → 104 g
+100 g cloves in cups                         → 0.9615384615 cup
+1 cup of cocoa in grams                      → 86 g
+100 g cocoa in cups                          → 1.162790698 cup
+1 cup of cocoa butter in grams               → 218 g
+100 g cocoa butter in cups                   → 0.4587155963 cup
+1 cup of cocoa powder in grams               → 86 g
+100 g cocoa powder in cups                   → 1.162790698 cup
+1 cup of coconut in grams                    → 93 g
+100 g coconut in cups                        → 1.075268817 cup
+1 cup of coconut cream in grams              → 240 g
+100 g coconut cream in cups                  → 0.4166666667 cup
+1 cup of coconut flakes in grams             → 85 g
+100 g coconut flakes in cups                 → 1.176470588 cup
+1 cup of coconut milk in grams               → 226 g
+100 g coconut milk in cups                   → 0.4424778761 cup
+1 cup of coconut oil in grams                → 218 g
+100 g coconut oil in cups                    → 0.4587155963 cup
+1 cup of coconut water in grams              → 240 g
+100 g coconut water in cups                  → 0.4166666667 cup
+1 cup of cod liver oil in grams              → 218 g
+100 g cod liver oil in cups                  → 0.4587155963 cup
+1 cup of coffee in grams                     → 237 g
+100 g coffee in cups                         → 0.4219409283 cup
+1 cup of coffee cream in grams               → 240 g
+100 g coffee cream in cups                   → 0.4166666667 cup
+1 cup of condensed milk in grams             → 306 g
+100 g condensed milk in cups                 → 0.3267973856 cup
+1 cup of confectioner's sugar in grams       → 120 g
+100 g confectioner's sugar in cups           → 0.8333333333 cup
+1 cup of confectioners sugar in grams        → 120 g
+100 g confectioners sugar in cups            → 0.8333333333 cup
+1 cup of cooked barley in grams              → 157 g
+100 g cooked barley in cups                  → 0.6369426752 cup
+1 cup of cooked black beans in grams         → 172 g
+100 g cooked black beans in cups             → 0.5813953488 cup
+1 cup of cooked brown rice in grams          → 202 g
+100 g cooked brown rice in cups              → 0.495049505 cup
+1 cup of cooked bulgur in grams              → 182 g
+100 g cooked bulgur in cups                  → 0.5494505495 cup
+1 cup of cooked chickpeas in grams           → 164 g
+100 g cooked chickpeas in cups               → 0.6097560976 cup
+1 cup of cooked couscous in grams            → 157 g
+100 g cooked couscous in cups                → 0.6369426752 cup
+1 cup of cooked kidney beans in grams        → 177 g
+100 g cooked kidney beans in cups            → 0.5649717514 cup
+1 cup of cooked lentils in grams             → 198 g
+100 g cooked lentils in cups                 → 0.5050505051 cup
+1 cup of cooked millet in grams              → 174 g
+100 g cooked millet in cups                  → 0.5747126437 cup
+1 cup of cooked pinto beans in grams         → 171 g
+100 g cooked pinto beans in cups             → 0.5847953216 cup
+1 cup of cooked quinoa in grams              → 185 g
+100 g cooked quinoa in cups                  → 0.5405405405 cup
+1 cup of cooked rice in grams                → 158 g
+100 g cooked rice in cups                    → 0.6329113924 cup
+1 cup of cooked split peas in grams          → 196 g
+100 g cooked split peas in cups              → 0.5102040816 cup
+1 cup of cooked white rice in grams          → 158 g
+100 g cooked white rice in cups              → 0.6329113924 cup
+1 cup of cooked wild rice in grams           → 164 g
+100 g cooked wild rice in cups               → 0.6097560976 cup
+1 cup of cooking oil in grams                → 218 g
+100 g cooking oil in cups                    → 0.4587155963 cup
+1 cup of coriander in grams                  → 80 g
+100 g coriander in cups                      → 1.25 cup
+1 cup of coriander leaves in grams           → 16 g
+100 g coriander leaves in cups               → 6.25 cup
+1 cup of coriander seeds in grams            → 80 g
+100 g coriander seeds in cups                → 1.25 cup
+1 cup of corn in grams                       → 145 g
+100 g corn in cups                           → 0.6896551724 cup
+1 cup of corn flour in grams                 → 117 g
+100 g corn flour in cups                     → 0.8547008547 cup
+1 cup of corn kernels in grams               → 145 g
+100 g corn kernels in cups                   → 0.6896551724 cup
+1 cup of corn meal in grams                  → 157 g
+100 g corn meal in cups                      → 0.6369426752 cup
+1 cup of corn oil in grams                   → 218 g
+100 g corn oil in cups                       → 0.4587155963 cup
+1 cup of corn starch in grams                → 128 g
+100 g corn starch in cups                    → 0.78125 cup
+1 cup of corn syrup in grams                 → 341 g
+100 g corn syrup in cups                     → 0.293255132 cup
+1 cup of cornflour in grams                  → 128 g
+100 g cornflour in cups                      → 0.78125 cup
+1 cup of cornmeal in grams                   → 157 g
+100 g cornmeal in cups                       → 0.6369426752 cup
+1 cup of cornstarch in grams                 → 128 g
+100 g cornstarch in cups                     → 0.78125 cup
+1 cup of cottage cheese in grams             → 225 g
+100 g cottage cheese in cups                 → 0.4444444444 cup
+1 cup of cottonseed oil in grams             → 218 g
+100 g cottonseed oil in cups                 → 0.4587155963 cup
+1 cup of courgette in grams                  → 124 g
+100 g courgette in cups                      → 0.8064516129 cup
+1 cup of cous cous in grams                  → 173 g
+100 g cous cous in cups                      → 0.5780346821 cup
+1 cup of couscous in grams                   → 173 g
+100 g couscous in cups                       → 0.5780346821 cup
+1 cup of craisins in grams                   → 160 g
+100 g craisins in cups                       → 0.625 cup
+1 cup of cranberries in grams                → 100 g
+100 g cranberries in cups                    → 1 cup
+1 cup of cranberry juice in grams            → 253 g
+100 g cranberry juice in cups                → 0.395256917 cup
+1 cup of cream in grams                      → 238 g
+100 g cream in cups                          → 0.4201680672 cup
+1 cup of cream cheese in grams               → 232 g
+100 g cream cheese in cups                   → 0.4310344828 cup
+1 cup of cream of coconut in grams           → 296 g
+100 g cream of coconut in cups               → 0.3378378378 cup
+1 cup of cream of tartar in grams            → 144 g
+100 g cream of tartar in cups                → 0.6944444444 cup
+1 cup of creamy peanut butter in grams       → 258 g
+100 g creamy peanut butter in cups           → 0.3875968992 cup
+1 cup of croutons in grams                   → 30 g
+100 g croutons in cups                       → 3.333333333 cup
+1 cup of crumbled blue cheese in grams       → 135 g
+100 g crumbled blue cheese in cups           → 0.7407407407 cup
+1 cup of crumbled feta in grams              → 150 g
+100 g crumbled feta in cups                  → 0.6666666667 cup
+1 cup of crunchy peanut butter in grams      → 258 g
+100 g crunchy peanut butter in cups          → 0.3875968992 cup
+1 cup of cumin in grams                      → 96 g
+100 g cumin in cups                          → 1.041666667 cup
+1 cup of cumin seeds in grams                → 96 g
+100 g cumin seeds in cups                    → 1.041666667 cup
+1 cup of currants in grams                   → 144 g
+100 g currants in cups                       → 0.6944444444 cup
+1 cup of curry powder in grams               → 100.8 g
+100 g curry powder in cups                   → 0.9920634921 cup
+1 cup of dark brown sugar in grams           → 220 g
+100 g dark brown sugar in cups               → 0.4545454545 cup
+1 cup of dark corn syrup in grams            → 328 g
+100 g dark corn syrup in cups                → 0.3048780488 cup
+1 cup of dark rye flour in grams             → 128 g
+100 g dark rye flour in cups                 → 0.78125 cup
+1 cup of dates in grams                      → 147 g
+100 g dates in cups                          → 0.6802721088 cup
+1 cup of dehydrated apples in grams          → 60 g
+100 g dehydrated apples in cups              → 1.666666667 cup
+1 cup of dehydrated apricots in grams        → 119 g
+100 g dehydrated apricots in cups            → 0.8403361345 cup
+1 cup of dehydrated carrots in grams         → 74 g
+100 g dehydrated carrots in cups             → 1.351351351 cup
+1 cup of dehydrated peaches in grams         → 116 g
+100 g dehydrated peaches in cups             → 0.8620689655 cup
+1 cup of dehydrated prunes in grams          → 132 g
+100 g dehydrated prunes in cups              → 0.7575757576 cup
+1 cup of demerara sugar in grams             → 202 g
+100 g demerara sugar in cups                 → 0.495049505 cup
+1 cup of desiccated coconut in grams         → 93 g
+100 g desiccated coconut in cups             → 1.075268817 cup
+1 cup of diced apple in grams                → 125 g
+100 g diced apple in cups                    → 0.8 cup
+1 cup of diced avocado in grams              → 150 g
+100 g diced avocado in cups                  → 0.6666666667 cup
+1 cup of diced mango in grams                → 165 g
+100 g diced mango in cups                    → 0.6060606061 cup
+1 cup of diced onion in grams                → 160 g
+100 g diced onion in cups                    → 0.625 cup
+1 cup of diced potatoes in grams             → 150 g
+100 g diced potatoes in cups                 → 0.6666666667 cup
+1 cup of diced tomatoes in grams             → 180 g
+100 g diced tomatoes in cups                 → 0.5555555556 cup
+1 cup of dill in grams                       → 49.6 g
+100 g dill in cups                           → 2.016129032 cup
+1 cup of dill seed in grams                  → 105.6 g
+100 g dill seed in cups                      → 0.946969697 cup
+1 cup of dill weed in grams                  → 49.6 g
+100 g dill weed in cups                      → 2.016129032 cup
+1 cup of distilled vinegar in grams          → 238 g
+100 g distilled vinegar in cups              → 0.4201680672 cup
+1 cup of double cream in grams               → 238 g
+100 g double cream in cups                   → 0.4201680672 cup
+1 cup of dried apples in grams               → 86 g
+100 g dried apples in cups                   → 1.162790698 cup
+1 cup of dried apricots in grams             → 130 g
+100 g dried apricots in cups                 → 0.7692307692 cup
+1 cup of dried basil in grams                → 33.6 g
+100 g dried basil in cups                    → 2.976190476 cup
+1 cup of dried blueberries in grams          → 160 g
+100 g dried blueberries in cups              → 0.625 cup
+1 cup of dried buttermilk in grams           → 120 g
+100 g dried buttermilk in cups               → 0.8333333333 cup
+1 cup of dried cranberries in grams          → 160 g
+100 g dried cranberries in cups              → 0.625 cup
+1 cup of dried currants in grams             → 144 g
+100 g dried currants in cups                 → 0.6944444444 cup
+1 cup of dried dill in grams                 → 49.6 g
+100 g dried dill in cups                     → 2.016129032 cup
+1 cup of dried egg in grams                  → 85 g
+100 g dried egg in cups                      → 1.176470588 cup
+1 cup of dried egg white in grams            → 107 g
+100 g dried egg white in cups                → 0.9345794393 cup
+1 cup of dried figs in grams                 → 149 g
+100 g dried figs in cups                     → 0.6711409396 cup
+1 cup of dried oregano in grams              → 48 g
+100 g dried oregano in cups                  → 2.083333333 cup
+1 cup of dried parsley in grams              → 25.6 g
+100 g dried parsley in cups                  → 3.90625 cup
+1 cup of dried peaches in grams              → 160 g
+100 g dried peaches in cups                  → 0.625 cup
+1 cup of dried plums in grams                → 174 g
+100 g dried plums in cups                    → 0.5747126437 cup
+1 cup of dried rosemary in grams             → 52.8 g
+100 g dried rosemary in cups                 → 1.893939394 cup
+1 cup of dried thyme in grams                → 43.2 g
+100 g dried thyme in cups                    → 2.314814815 cup
+1 cup of dry bread crumbs in grams           → 108 g
+100 g dry bread crumbs in cups               → 0.9259259259 cup
+1 cup of dry bulgur in grams                 → 140 g
+100 g dry bulgur in cups                     → 0.7142857143 cup
+1 cup of dry instant milk in grams           → 68 g
+100 g dry instant milk in cups               → 1.470588235 cup
+1 cup of dry milk in grams                   → 120 g
+100 g dry milk in cups                       → 0.8333333333 cup
+1 cup of dry mustard in grams                → 100.8 g
+100 g dry mustard in cups                    → 0.9920634921 cup
+1 cup of dry whole milk in grams             → 128 g
+100 g dry whole milk in cups                 → 0.78125 cup
+1 cup of dry yeast in grams                  → 192 g
+100 g dry yeast in cups                      → 0.5208333333 cup
+1 cup of dutch process cocoa in grams        → 86 g
+100 g dutch process cocoa in cups            → 1.162790698 cup
+1 cup of dutch-process cocoa in grams        → 86 g
+100 g dutch-process cocoa in cups            → 1.162790698 cup
+1 cup of edamame in grams                    → 118 g
+100 g edamame in cups                        → 0.8474576271 cup
+1 cup of egg in grams                        → 243 g
+100 g egg in cups                            → 0.4115226337 cup
+1 cup of egg noodles in grams                → 38 g
+100 g egg noodles in cups                    → 2.631578947 cup
+1 cup of egg powder in grams                 → 85 g
+100 g egg powder in cups                     → 1.176470588 cup
+1 cup of egg white in grams                  → 243 g
+100 g egg white in cups                      → 0.4115226337 cup
+1 cup of egg white powder in grams           → 107 g
+100 g egg white powder in cups               → 0.9345794393 cup
+1 cup of egg whites in grams                 → 243 g
+100 g egg whites in cups                     → 0.4115226337 cup
+1 cup of egg yolk in grams                   → 243 g
+100 g egg yolk in cups                       → 0.4115226337 cup
+1 cup of egg yolks in grams                  → 243 g
+100 g egg yolks in cups                      → 0.4115226337 cup
+1 cup of eggnog in grams                     → 254 g
+100 g eggnog in cups                         → 0.3937007874 cup
+1 cup of eggplant in grams                   → 82 g
+100 g eggplant in cups                       → 1.219512195 cup
+1 cup of eggs in grams                       → 243 g
+100 g eggs in cups                           → 0.4115226337 cup
+1 cup of elbow macaroni in grams             → 122 g
+100 g elbow macaroni in cups                 → 0.8196721311 cup
+1 cup of elderberries in grams               → 145 g
+100 g elderberries in cups                   → 0.6896551724 cup
+1 cup of evaporated milk in grams            → 252 g
+100 g evaporated milk in cups                → 0.3968253968 cup
+1 cup of extra virgin olive oil in grams     → 216 g
+100 g extra virgin olive oil in cups         → 0.462962963 cup
+1 cup of extra-virgin olive oil in grams     → 216 g
+100 g extra-virgin olive oil in cups         → 0.462962963 cup
+1 cup of farfalle in grams                   → 81 g
+100 g farfalle in cups                       → 1.234567901 cup
+1 cup of fat free milk in grams              → 245 g
+100 g fat free milk in cups                  → 0.4081632653 cup
+1 cup of fat-free milk in grams              → 245 g
+100 g fat-free milk in cups                  → 0.4081632653 cup
+1 cup of fennel seed in grams                → 92.8 g
+100 g fennel seed in cups                    → 1.077586207 cup
+1 cup of fennel seeds in grams               → 92.8 g
+100 g fennel seeds in cups                   → 1.077586207 cup
+1 cup of fenugreek in grams                  → 177.6 g
+100 g fenugreek in cups                      → 0.5630630631 cup
+1 cup of feta in grams                       → 150 g
+100 g feta in cups                           → 0.6666666667 cup
+1 cup of feta cheese in grams                → 150 g
+100 g feta cheese in cups                    → 0.6666666667 cup
+1 cup of filberts in grams                   → 135 g
+100 g filberts in cups                       → 0.7407407407 cup
+1 cup of fine salt in grams                  → 292 g
+100 g fine salt in cups                      → 0.3424657534 cup
+1 cup of fish oil in grams                   → 218 g
+100 g fish oil in cups                       → 0.4587155963 cup
+1 cup of fish sauce in grams                 → 288 g
+100 g fish sauce in cups                     → 0.3472222222 cup
+1 cup of fish stock in grams                 → 233 g
+100 g fish stock in cups                     → 0.4291845494 cup
+1 cup of flaked almonds in grams             → 92 g
+100 g flaked almonds in cups                 → 1.086956522 cup
+1 cup of flaked coconut in grams             → 85 g
+100 g flaked coconut in cups                 → 1.176470588 cup
+1 cup of flax seeds in grams                 → 168 g
+100 g flax seeds in cups                     → 0.5952380952 cup
+1 cup of flaxseed in grams                   → 168 g
+100 g flaxseed in cups                       → 0.5952380952 cup
+1 cup of flaxseed meal in grams              → 112 g
+100 g flaxseed meal in cups                  → 0.8928571429 cup
+1 cup of flaxseed oil in grams               → 218 g
+100 g flaxseed oil in cups                   → 0.4587155963 cup
+1 cup of flaxseeds in grams                  → 168 g
+100 g flaxseeds in cups                      → 0.5952380952 cup
+1 cup of flour in grams                      → 125 g
+100 g flour in cups                          → 0.8 cup
+1 cup of fluid buttermilk in grams           → 245 g
+100 g fluid buttermilk in cups               → 0.4081632653 cup
+1 cup of fresh cranberries in grams          → 100 g
+100 g fresh cranberries in cups              → 1 cup
+1 cup of frozen blueberries in grams         → 155 g
+100 g frozen blueberries in cups             → 0.6451612903 cup
+1 cup of frozen peas in grams                → 134 g
+100 g frozen peas in cups                    → 0.7462686567 cup
+1 cup of fusilli in grams                    → 96 g
+100 g fusilli in cups                        → 1.041666667 cup
+1 cup of garbanzo beans in grams             → 200 g
+100 g garbanzo beans in cups                 → 0.5 cup
+1 cup of garbanzos in grams                  → 200 g
+100 g garbanzos in cups                      → 0.5 cup
+1 cup of garlic in grams                     → 136 g
+100 g garlic in cups                         → 0.7352941176 cup
+1 cup of garlic powder in grams              → 155.2 g
+100 g garlic powder in cups                  → 0.6443298969 cup
+1 cup of ghee in grams                       → 205 g
+100 g ghee in cups                           → 0.487804878 cup
+1 cup of gin in grams                        → 222.4 g
+100 g gin in cups                            → 0.4496402878 cup
+1 cup of ginger in grams                     → 96 g
+100 g ginger in cups                         → 1.041666667 cup
+1 cup of glutinous rice in grams             → 185 g
+100 g glutinous rice in cups                 → 0.5405405405 cup
+1 cup of goat milk in grams                  → 244 g
+100 g goat milk in cups                      → 0.4098360656 cup
+1 cup of goat's milk in grams                → 244 g
+100 g goat's milk in cups                    → 0.4098360656 cup
+1 cup of golden raisins in grams             → 145 g
+100 g golden raisins in cups                 → 0.6896551724 cup
+1 cup of goose fat in grams                  → 205 g
+100 g goose fat in cups                      → 0.487804878 cup
+1 cup of gooseberries in grams               → 150 g
+100 g gooseberries in cups                   → 0.6666666667 cup
+1 cup of graham cracker crumbs in grams      → 84 g
+100 g graham cracker crumbs in cups          → 1.19047619 cup
+1 cup of gram flour in grams                 → 92 g
+100 g gram flour in cups                     → 1.086956522 cup
+1 cup of granulated sugar in grams           → 200 g
+100 g granulated sugar in cups               → 0.5 cup
+1 cup of grape in grams                      → 151 g
+100 g grape in cups                          → 0.6622516556 cup
+1 cup of grape juice in grams                → 253 g
+100 g grape juice in cups                    → 0.395256917 cup
+1 cup of grape leaves in grams               → 14 g
+100 g grape leaves in cups                   → 7.142857143 cup
+1 cup of grapes in grams                     → 151 g
+100 g grapes in cups                         → 0.6622516556 cup
+1 cup of grapeseed oil in grams              → 218 g
+100 g grapeseed oil in cups                  → 0.4587155963 cup
+1 cup of grated carrot in grams              → 110 g
+100 g grated carrot in cups                  → 0.9090909091 cup
+1 cup of grated carrots in grams             → 110 g
+100 g grated carrots in cups                 → 0.9090909091 cup
+1 cup of grated cheddar in grams             → 113 g
+100 g grated cheddar in cups                 → 0.8849557522 cup
+1 cup of grated cheese in grams              → 113 g
+100 g grated cheese in cups                  → 0.8849557522 cup
+1 cup of grated chocolate in grams           → 132 g
+100 g grated chocolate in cups               → 0.7575757576 cup
+1 cup of grated ginger in grams              → 96 g
+100 g grated ginger in cups                  → 1.041666667 cup
+1 cup of grated parmesan in grams            → 100 g
+100 g grated parmesan in cups                → 1 cup
+1 cup of great northern beans in grams       → 183 g
+100 g great northern beans in cups           → 0.5464480874 cup
+1 cup of green beans in grams                → 100 g
+100 g green beans in cups                    → 1 cup
+1 cup of green lentils in grams              → 192 g
+100 g green lentils in cups                  → 0.5208333333 cup
+1 cup of green peas in grams                 → 145 g
+100 g green peas in cups                     → 0.6896551724 cup
+1 cup of grenadine in grams                  → 320 g
+100 g grenadine in cups                      → 0.3125 cup
+1 cup of ground almonds in grams             → 95 g
+100 g ground almonds in cups                 → 1.052631579 cup
+1 cup of ground black pepper in grams        → 110.4 g
+100 g ground black pepper in cups            → 0.9057971014 cup
+1 cup of ground cinnamon in grams            → 124.8 g
+100 g ground cinnamon in cups                → 0.8012820513 cup
+1 cup of ground cloves in grams              → 104 g
+100 g ground cloves in cups                  → 0.9615384615 cup
+1 cup of ground coriander in grams           → 80 g
+100 g ground coriander in cups               → 1.25 cup
+1 cup of ground cumin in grams               → 96 g
+100 g ground cumin in cups                   → 1.041666667 cup
+1 cup of ground flaxseed in grams            → 112 g
+100 g ground flaxseed in cups                → 0.8928571429 cup
+1 cup of ground ginger in grams              → 83.2 g
+100 g ground ginger in cups                  → 1.201923077 cup
+1 cup of ground hazelnuts in grams           → 75 g
+100 g ground hazelnuts in cups               → 1.333333333 cup
+1 cup of ground mustard in grams             → 100.8 g
+100 g ground mustard in cups                 → 0.9920634921 cup
+1 cup of ground nutmeg in grams              → 112 g
+100 g ground nutmeg in cups                  → 0.8928571429 cup
+1 cup of ground pepper in grams              → 110.4 g
+100 g ground pepper in cups                  → 0.9057971014 cup
+1 cup of ground walnuts in grams             → 80 g
+100 g ground walnuts in cups                 → 1.25 cup
+1 cup of groundnut oil in grams              → 216 g
+100 g groundnut oil in cups                  → 0.462962963 cup
+1 cup of gruyere in grams                    → 108 g
+100 g gruyere in cups                        → 0.9259259259 cup
+1 cup of gruyere cheese in grams             → 108 g
+100 g gruyere cheese in cups                 → 0.9259259259 cup
+1 cup of guava in grams                      → 165 g
+100 g guava in cups                          → 0.6060606061 cup
+1 cup of guavas in grams                     → 165 g
+100 g guavas in cups                         → 0.6060606061 cup
+1 cup of half and half in grams              → 242 g
+100 g half and half in cups                  → 0.4132231405 cup
+1 cup of half-and-half in grams              → 242 g
+100 g half-and-half in cups                  → 0.4132231405 cup
+1 cup of haricot beans in grams              → 208 g
+100 g haricot beans in cups                  → 0.4807692308 cup
+1 cup of hazelnut in grams                   → 135 g
+100 g hazelnut in cups                       → 0.7407407407 cup
+1 cup of hazelnut oil in grams               → 218 g
+100 g hazelnut oil in cups                   → 0.4587155963 cup
+1 cup of hazelnuts in grams                  → 135 g
+100 g hazelnuts in cups                      → 0.7407407407 cup
+1 cup of heavy cream in grams                → 238 g
+100 g heavy cream in cups                    → 0.4201680672 cup
+1 cup of heavy whipping cream in grams       → 238 g
+100 g heavy whipping cream in cups           → 0.4201680672 cup
+1 cup of hemp hearts in grams                → 160 g
+100 g hemp hearts in cups                    → 0.625 cup
+1 cup of hemp seeds in grams                 → 160 g
+100 g hemp seeds in cups                     → 0.625 cup
+1 cup of hominy in grams                     → 165 g
+100 g hominy in cups                         → 0.6060606061 cup
+1 cup of honey in grams                      → 339 g
+100 g honey in cups                          → 0.2949852507 cup
+1 cup of hot sauce in grams                  → 225.6 g
+100 g hot sauce in cups                      → 0.4432624113 cup
+1 cup of houmous in grams                    → 246 g
+100 g houmous in cups                        → 0.406504065 cup
+1 cup of hulled barley in grams              → 184 g
+100 g hulled barley in cups                  → 0.5434782609 cup
+1 cup of hummus in grams                     → 246 g
+100 g hummus in cups                         → 0.406504065 cup
+1 cup of ice cream in grams                  → 214 g
+100 g ice cream in cups                      → 0.4672897196 cup
+1 cup of icing sugar in grams                → 120 g
+100 g icing sugar in cups                    → 0.8333333333 cup
+1 cup of instant milk in grams               → 68 g
+100 g instant milk in cups                   → 1.470588235 cup
+1 cup of instant milk powder in grams        → 68 g
+100 g instant milk powder in cups            → 1.470588235 cup
+1 cup of instant rice in grams               → 95 g
+100 g instant rice in cups                   → 1.052631579 cup
+1 cup of instant yeast in grams              → 192 g
+100 g instant yeast in cups                  → 0.5208333333 cup
+1 cup of jam in grams                        → 320 g
+100 g jam in cups                            → 0.3125 cup
+1 cup of jasmine rice in grams               → 185 g
+100 g jasmine rice in cups                   → 0.5405405405 cup
+1 cup of kale in grams                       → 21 g
+100 g kale in cups                           → 4.761904762 cup
+1 cup of kamut in grams                      → 186 g
+100 g kamut in cups                          → 0.5376344086 cup
+1 cup of kasha in grams                      → 164 g
+100 g kasha in cups                          → 0.6097560976 cup
+1 cup of ketchup in grams                    → 240 g
+100 g ketchup in cups                        → 0.4166666667 cup
+1 cup of khorasan wheat in grams             → 186 g
+100 g khorasan wheat in cups                 → 0.5376344086 cup
+1 cup of kidney beans in grams               → 184 g
+100 g kidney beans in cups                   → 0.5434782609 cup
+1 cup of kiwi in grams                       → 180 g
+100 g kiwi in cups                           → 0.5555555556 cup
+1 cup of kiwifruit in grams                  → 180 g
+100 g kiwifruit in cups                      → 0.5555555556 cup
+1 cup of lard in grams                       → 205 g
+100 g lard in cups                           → 0.487804878 cup
+1 cup of leeks in grams                      → 89 g
+100 g leeks in cups                          → 1.123595506 cup
+1 cup of lemon grass in grams                → 67 g
+100 g lemon grass in cups                    → 1.492537313 cup
+1 cup of lemon juice in grams                → 244 g
+100 g lemon juice in cups                    → 0.4098360656 cup
+1 cup of lemon peel in grams                 → 96 g
+100 g lemon peel in cups                     → 1.041666667 cup
+1 cup of lemon zest in grams                 → 96 g
+100 g lemon zest in cups                     → 1.041666667 cup
+1 cup of lemongrass in grams                 → 67 g
+100 g lemongrass in cups                     → 1.492537313 cup
+1 cup of lentils in grams                    → 192 g
+100 g lentils in cups                        → 0.5208333333 cup
+1 cup of lettuce in grams                    → 72 g
+100 g lettuce in cups                        → 1.388888889 cup
+1 cup of light brown sugar in grams          → 220 g
+100 g light brown sugar in cups              → 0.4545454545 cup
+1 cup of light corn syrup in grams           → 341 g
+100 g light corn syrup in cups               → 0.293255132 cup
+1 cup of light cream in grams                → 240 g
+100 g light cream in cups                    → 0.4166666667 cup
+1 cup of light rye flour in grams            → 102 g
+100 g light rye flour in cups                → 0.9803921569 cup
+1 cup of light whipping cream in grams       → 239 g
+100 g light whipping cream in cups           → 0.4184100418 cup
+1 cup of lima beans in grams                 → 178 g
+100 g lima beans in cups                     → 0.5617977528 cup
+1 cup of lime juice in grams                 → 242 g
+100 g lime juice in cups                     → 0.4132231405 cup
+1 cup of linseed in grams                    → 168 g
+100 g linseed in cups                        → 0.5952380952 cup
+1 cup of linseed oil in grams                → 218 g
+100 g linseed oil in cups                    → 0.4587155963 cup
+1 cup of litchis in grams                    → 190 g
+100 g litchis in cups                        → 0.5263157895 cup
+1 cup of long grain rice in grams            → 185 g
+100 g long grain rice in cups                → 0.5405405405 cup
+1 cup of long-grain rice in grams            → 185 g
+100 g long-grain rice in cups                → 0.5405405405 cup
+1 cup of low fat milk in grams               → 244 g
+100 g low fat milk in cups                   → 0.4098360656 cup
+1 cup of low-fat milk in grams               → 244 g
+100 g low-fat milk in cups                   → 0.4098360656 cup
+1 cup of lowfat milk in grams                → 244 g
+100 g lowfat milk in cups                    → 0.4098360656 cup
+1 cup of lychee in grams                     → 190 g
+100 g lychee in cups                         → 0.5263157895 cup
+1 cup of lychees in grams                    → 190 g
+100 g lychees in cups                        → 0.5263157895 cup
+1 cup of macadamia nuts in grams             → 134 g
+100 g macadamia nuts in cups                 → 0.7462686567 cup
+1 cup of macadamias in grams                 → 134 g
+100 g macadamias in cups                     → 0.7462686567 cup
+1 cup of macaroni in grams                   → 122 g
+100 g macaroni in cups                       → 0.8196721311 cup
+1 cup of mace in grams                       → 84.8 g
+100 g mace in cups                           → 1.179245283 cup
+1 cup of maize flour in grams                → 117 g
+100 g maize flour in cups                    → 0.8547008547 cup
+1 cup of malt flour in grams                 → 162 g
+100 g malt flour in cups                     → 0.6172839506 cup
+1 cup of malt syrup in grams                 → 332 g
+100 g malt syrup in cups                     → 0.3012048193 cup
+1 cup of mango in grams                      → 165 g
+100 g mango in cups                          → 0.6060606061 cup
+1 cup of mango nectar in grams               → 251 g
+100 g mango nectar in cups                   → 0.3984063745 cup
+1 cup of mangoes in grams                    → 165 g
+100 g mangoes in cups                        → 0.6060606061 cup
+1 cup of mangos in grams                     → 165 g
+100 g mangos in cups                         → 0.6060606061 cup
+1 cup of mangosteen in grams                 → 196 g
+100 g mangosteen in cups                     → 0.5102040816 cup
+1 cup of maple syrup in grams                → 315 g
+100 g maple syrup in cups                    → 0.3174603175 cup
+1 cup of margarine in grams                  → 227 g
+100 g margarine in cups                      → 0.4405286344 cup
+1 cup of marjoram in grams                   → 27.2 g
+100 g marjoram in cups                       → 3.676470588 cup
+1 cup of marmalade in grams                  → 320 g
+100 g marmalade in cups                      → 0.3125 cup
+1 cup of masa in grams                       → 114 g
+100 g masa in cups                           → 0.8771929825 cup
+1 cup of masa harina in grams                → 114 g
+100 g masa harina in cups                    → 0.8771929825 cup
+1 cup of mashed avocado in grams             → 230 g
+100 g mashed avocado in cups                 → 0.4347826087 cup
+1 cup of mashed banana in grams              → 225 g
+100 g mashed banana in cups                  → 0.4444444444 cup
+1 cup of mashed bananas in grams             → 225 g
+100 g mashed bananas in cups                 → 0.4444444444 cup
+1 cup of mashed potatoes in grams            → 210 g
+100 g mashed potatoes in cups                → 0.4761904762 cup
+1 cup of mayo in grams                       → 220 g
+100 g mayo in cups                           → 0.4545454545 cup
+1 cup of mayonnaise in grams                 → 220 g
+100 g mayonnaise in cups                     → 0.4545454545 cup
+1 cup of mayonnaise dressing in grams        → 220 g
+100 g mayonnaise dressing in cups            → 0.4545454545 cup
+1 cup of medium grain rice in grams          → 195 g
+100 g medium grain rice in cups              → 0.5128205128 cup
+1 cup of medium rye flour in grams           → 102 g
+100 g medium rye flour in cups               → 0.9803921569 cup
+1 cup of medium-grain rice in grams          → 195 g
+100 g medium-grain rice in cups              → 0.5128205128 cup
+1 cup of milk in grams                       → 244 g
+100 g milk in cups                           → 0.4098360656 cup
+1 cup of milk chocolate chips in grams       → 168 g
+100 g milk chocolate chips in cups           → 0.5952380952 cup
+1 cup of milk powder in grams                → 120 g
+100 g milk powder in cups                    → 0.8333333333 cup
+1 cup of millet in grams                     → 200 g
+100 g millet in cups                         → 0.5 cup
+1 cup of millet flour in grams               → 119 g
+100 g millet flour in cups                   → 0.8403361345 cup
+1 cup of minced garlic in grams              → 136 g
+100 g minced garlic in cups                  → 0.7352941176 cup
+1 cup of mini chocolate chips in grams       → 173 g
+100 g mini chocolate chips in cups           → 0.5780346821 cup
+1 cup of mint in grams                       → 91.2 g
+100 g mint in cups                           → 1.096491228 cup
+1 cup of mint leaves in grams                → 91.2 g
+100 g mint leaves in cups                    → 1.096491228 cup
+1 cup of miso in grams                       → 275 g
+100 g miso in cups                           → 0.3636363636 cup
+1 cup of molasses in grams                   → 337 g
+100 g molasses in cups                       → 0.296735905 cup
+1 cup of monterey jack in grams              → 113 g
+100 g monterey jack in cups                  → 0.8849557522 cup
+1 cup of monterey jack cheese in grams       → 113 g
+100 g monterey jack cheese in cups           → 0.8849557522 cup
+1 cup of mozzarella in grams                 → 112 g
+100 g mozzarella in cups                     → 0.8928571429 cup
+1 cup of mozzarella cheese in grams          → 112 g
+100 g mozzarella cheese in cups              → 0.8928571429 cup
+1 cup of mulberries in grams                 → 140 g
+100 g mulberries in cups                     → 0.7142857143 cup
+1 cup of mung bean sprouts in grams          → 104 g
+100 g mung bean sprouts in cups              → 0.9615384615 cup
+1 cup of mung beans in grams                 → 207 g
+100 g mung beans in cups                     → 0.4830917874 cup
+1 cup of mushrooms in grams                  → 70 g
+100 g mushrooms in cups                      → 1.428571429 cup
+1 cup of mustard in grams                    → 249 g
+100 g mustard in cups                        → 0.4016064257 cup
+1 cup of mustard oil in grams                → 218 g
+100 g mustard oil in cups                    → 0.4587155963 cup
+1 cup of mustard powder in grams             → 100.8 g
+100 g mustard powder in cups                 → 0.9920634921 cup
+1 cup of natural yogurt in grams             → 245 g
+100 g natural yogurt in cups                 → 0.4081632653 cup
+1 cup of navy beans in grams                 → 208 g
+100 g navy beans in cups                     → 0.4807692308 cup
+1 cup of non fat milk in grams               → 245 g
+100 g non fat milk in cups                   → 0.4081632653 cup
+1 cup of non-fat milk in grams               → 245 g
+100 g non-fat milk in cups                   → 0.4081632653 cup
+1 cup of nonfat dry milk in grams            → 120 g
+100 g nonfat dry milk in cups                → 0.8333333333 cup
+1 cup of nonfat milk in grams                → 245 g
+100 g nonfat milk in cups                    → 0.4081632653 cup
+1 cup of nutmeg in grams                     → 112 g
+100 g nutmeg in cups                         → 0.8928571429 cup
+1 cup of oat bran in grams                   → 94 g
+100 g oat bran in cups                       → 1.063829787 cup
+1 cup of oat flour in grams                  → 104 g
+100 g oat flour in cups                      → 0.9615384615 cup
+1 cup of oat groats in grams                 → 156 g
+100 g oat groats in cups                     → 0.641025641 cup
+1 cup of oatmeal in grams                    → 81 g
+100 g oatmeal in cups                        → 1.234567901 cup
+1 cup of oats in grams                       → 81 g
+100 g oats in cups                           → 1.234567901 cup
+1 cup of oil in grams                        → 218 g
+100 g oil in cups                            → 0.4587155963 cup
+1 cup of okra in grams                       → 100 g
+100 g okra in cups                           → 1 cup
+1 cup of old-fashioned oats in grams         → 81 g
+100 g old-fashioned oats in cups             → 1.234567901 cup
+1 cup of olive oil in grams                  → 216 g
+100 g olive oil in cups                      → 0.462962963 cup
+1 cup of onion in grams                      → 160 g
+100 g onion in cups                          → 0.625 cup
+1 cup of onion powder in grams               → 110.4 g
+100 g onion powder in cups                   → 0.9057971014 cup
+1 cup of onions in grams                     → 160 g
+100 g onions in cups                         → 0.625 cup
+1 cup of orange juice in grams               → 248 g
+100 g orange juice in cups                   → 0.4032258065 cup
+1 cup of orange peel in grams                → 96 g
+100 g orange peel in cups                    → 1.041666667 cup
+1 cup of orange segments in grams            → 180 g
+100 g orange segments in cups                → 0.5555555556 cup
+1 cup of orange zest in grams                → 96 g
+100 g orange zest in cups                    → 1.041666667 cup
+1 cup of oranges in grams                    → 180 g
+100 g oranges in cups                        → 0.5555555556 cup
+1 cup of oregano in grams                    → 48 g
+100 g oregano in cups                        → 2.083333333 cup
+1 cup of oyster sauce in grams               → 288 g
+100 g oyster sauce in cups                   → 0.3472222222 cup
+1 cup of packed brown sugar in grams         → 220 g
+100 g packed brown sugar in cups             → 0.4545454545 cup
+1 cup of packed raisins in grams             → 165 g
+100 g packed raisins in cups                 → 0.6060606061 cup
+1 cup of palm oil in grams                   → 216 g
+100 g palm oil in cups                       → 0.462962963 cup
+1 cup of pancake syrup in grams              → 314 g
+100 g pancake syrup in cups                  → 0.3184713376 cup
+1 cup of paprika in grams                    → 108.8 g
+100 g paprika in cups                        → 0.9191176471 cup
+1 cup of parmesan in grams                   → 100 g
+100 g parmesan in cups                       → 1 cup
+1 cup of parmesan cheese in grams            → 100 g
+100 g parmesan cheese in cups                → 1 cup
+1 cup of parsley in grams                    → 60 g
+100 g parsley in cups                        → 1.666666667 cup
+1 cup of parsley flakes in grams             → 25.6 g
+100 g parsley flakes in cups                 → 3.90625 cup
+1 cup of passata in grams                    → 250 g
+100 g passata in cups                        → 0.4 cup
+1 cup of pasta shells in grams               → 64 g
+100 g pasta shells in cups                   → 1.5625 cup
+1 cup of peaches in grams                    → 154 g
+100 g peaches in cups                        → 0.6493506494 cup
+1 cup of peanut in grams                     → 146 g
+100 g peanut in cups                         → 0.6849315068 cup
+1 cup of peanut butter in grams              → 258 g
+100 g peanut butter in cups                  → 0.3875968992 cup
+1 cup of peanut flour in grams               → 60 g
+100 g peanut flour in cups                   → 1.666666667 cup
+1 cup of peanut oil in grams                 → 216 g
+100 g peanut oil in cups                     → 0.462962963 cup
+1 cup of peanuts in grams                    → 146 g
+100 g peanuts in cups                        → 0.6849315068 cup
+1 cup of pearl barley in grams               → 200 g
+100 g pearl barley in cups                   → 0.5 cup
+1 cup of pearled barley in grams             → 200 g
+100 g pearled barley in cups                 → 0.5 cup
+1 cup of pears in grams                      → 140 g
+100 g pears in cups                          → 0.7142857143 cup
+1 cup of peas in grams                       → 145 g
+100 g peas in cups                           → 0.6896551724 cup
+1 cup of pecan in grams                      → 109 g
+100 g pecan in cups                          → 0.9174311927 cup
+1 cup of pecan halves in grams               → 99 g
+100 g pecan halves in cups                   → 1.01010101 cup
+1 cup of pecans in grams                     → 109 g
+100 g pecans in cups                         → 0.9174311927 cup
+1 cup of penne in grams                      → 95 g
+100 g penne in cups                          → 1.052631579 cup
+1 cup of pepitas in grams                    → 129 g
+100 g pepitas in cups                        → 0.7751937984 cup
+1 cup of pepper in grams                     → 110.4 g
+100 g pepper in cups                         → 0.9057971014 cup
+1 cup of pesto in grams                      → 252 g
+100 g pesto in cups                          → 0.3968253968 cup
+1 cup of pignoli in grams                    → 135 g
+100 g pignoli in cups                        → 0.7407407407 cup
+1 cup of pine nuts in grams                  → 135 g
+100 g pine nuts in cups                      → 0.7407407407 cup
+1 cup of pineapple in grams                  → 165 g
+100 g pineapple in cups                      → 0.6060606061 cup
+1 cup of pineapple chunks in grams           → 165 g
+100 g pineapple chunks in cups               → 0.6060606061 cup
+1 cup of pineapple juice in grams            → 250 g
+100 g pineapple juice in cups                → 0.4 cup
+1 cup of pink lentils in grams               → 192 g
+100 g pink lentils in cups                   → 0.5208333333 cup
+1 cup of pinto beans in grams                → 193 g
+100 g pinto beans in cups                    → 0.518134715 cup
+1 cup of pistachio in grams                  → 123 g
+100 g pistachio in cups                      → 0.8130081301 cup
+1 cup of pistachio nuts in grams             → 123 g
+100 g pistachio nuts in cups                 → 0.8130081301 cup
+1 cup of pistachios in grams                 → 123 g
+100 g pistachios in cups                     → 0.8130081301 cup
+1 cup of pitted cherries in grams            → 154 g
+100 g pitted cherries in cups                → 0.6493506494 cup
+1 cup of plain flour in grams                → 125 g
+100 g plain flour in cups                    → 0.8 cup
+1 cup of plain yogurt in grams               → 245 g
+100 g plain yogurt in cups                   → 0.4081632653 cup
+1 cup of plums in grams                      → 165 g
+100 g plums in cups                          → 0.6060606061 cup
+1 cup of poi in grams                        → 240 g
+100 g poi in cups                            → 0.4166666667 cup
+1 cup of polenta in grams                    → 157 g
+100 g polenta in cups                        → 0.6369426752 cup
+1 cup of pomegranate arils in grams          → 174 g
+100 g pomegranate arils in cups              → 0.5747126437 cup
+1 cup of pomegranate juice in grams          → 249 g
+100 g pomegranate juice in cups              → 0.4016064257 cup
+1 cup of pomegranate seeds in grams          → 174 g
+100 g pomegranate seeds in cups              → 0.5747126437 cup
+1 cup of poppy seeds in grams                → 140.8 g
+100 g poppy seeds in cups                    → 0.7102272727 cup
+1 cup of porridge oats in grams              → 81 g
+100 g porridge oats in cups                  → 1.234567901 cup
+1 cup of potato flour in grams               → 160 g
+100 g potato flour in cups                   → 0.625 cup
+1 cup of potatoes in grams                   → 150 g
+100 g potatoes in cups                       → 0.6666666667 cup
+1 cup of poultry seasoning in grams          → 70.4 g
+100 g poultry seasoning in cups              → 1.420454545 cup
+1 cup of powdered egg in grams               → 85 g
+100 g powdered egg in cups                   → 1.176470588 cup
+1 cup of powdered milk in grams              → 120 g
+100 g powdered milk in cups                  → 0.8333333333 cup
+1 cup of powdered sugar in grams             → 120 g
+100 g powdered sugar in cups                 → 0.8333333333 cup
+1 cup of prepared mustard in grams           → 249 g
+100 g prepared mustard in cups               → 0.4016064257 cup
+1 cup of preserves in grams                  → 320 g
+100 g preserves in cups                      → 0.3125 cup
+1 cup of prunes in grams                     → 174 g
+100 g prunes in cups                         → 0.5747126437 cup
+1 cup of puffed millet in grams              → 21 g
+100 g puffed millet in cups                  → 4.761904762 cup
+1 cup of pumpkin in grams                    → 245 g
+100 g pumpkin in cups                        → 0.4081632653 cup
+1 cup of pumpkin leaves in grams             → 39 g
+100 g pumpkin leaves in cups                 → 2.564102564 cup
+1 cup of pumpkin pie spice in grams          → 89.6 g
+100 g pumpkin pie spice in cups              → 1.116071429 cup
+1 cup of pumpkin puree in grams              → 245 g
+100 g pumpkin puree in cups                  → 0.4081632653 cup
+1 cup of pumpkin seeds in grams              → 129 g
+100 g pumpkin seeds in cups                  → 0.7751937984 cup
+1 cup of purslane in grams                   → 43 g
+100 g purslane in cups                       → 2.325581395 cup
+1 cup of quick oats in grams                 → 81 g
+100 g quick oats in cups                     → 1.234567901 cup
+1 cup of quinoa in grams                     → 170 g
+100 g quinoa in cups                         → 0.5882352941 cup
+1 cup of raisins in grams                    → 145 g
+100 g raisins in cups                        → 0.6896551724 cup
+1 cup of rapeseed oil in grams               → 218 g
+100 g rapeseed oil in cups                   → 0.4587155963 cup
+1 cup of raspberries in grams                → 123 g
+100 g raspberries in cups                    → 0.8130081301 cup
+1 cup of raspberry in grams                  → 123 g
+100 g raspberry in cups                      → 0.8130081301 cup
+1 cup of raw sugar in grams                  → 202 g
+100 g raw sugar in cups                      → 0.495049505 cup
+1 cup of red currants in grams               → 112 g
+100 g red currants in cups                   → 0.8928571429 cup
+1 cup of red kidney beans in grams           → 184 g
+100 g red kidney beans in cups               → 0.5434782609 cup
+1 cup of red lentils in grams                → 192 g
+100 g red lentils in cups                    → 0.5208333333 cup
+1 cup of red wine in grams                   → 235.2 g
+100 g red wine in cups                       → 0.425170068 cup
+1 cup of red wine vinegar in grams           → 239 g
+100 g red wine vinegar in cups               → 0.4184100418 cup
+1 cup of reduced fat milk in grams           → 244 g
+100 g reduced fat milk in cups               → 0.4098360656 cup
+1 cup of reduced-fat milk in grams           → 244 g
+100 g reduced-fat milk in cups               → 0.4098360656 cup
+1 cup of rice in grams                       → 185 g
+100 g rice in cups                           → 0.5405405405 cup
+1 cup of rice bran in grams                  → 118 g
+100 g rice bran in cups                      → 0.8474576271 cup
+1 cup of rice bran oil in grams              → 218 g
+100 g rice bran oil in cups                  → 0.4587155963 cup
+1 cup of rice flour in grams                 → 158 g
+100 g rice flour in cups                     → 0.6329113924 cup
+1 cup of rice milk in grams                  → 240 g
+100 g rice milk in cups                      → 0.4166666667 cup
+1 cup of ricotta in grams                    → 248 g
+100 g ricotta in cups                        → 0.4032258065 cup
+1 cup of ricotta cheese in grams             → 248 g
+100 g ricotta cheese in cups                 → 0.4032258065 cup
+1 cup of roasted buckwheat in grams          → 164 g
+100 g roasted buckwheat in cups              → 0.6097560976 cup
+1 cup of roasted peanuts in grams            → 146 g
+100 g roasted peanuts in cups                → 0.6849315068 cup
+1 cup of rocket in grams                     → 20 g
+100 g rocket in cups                         → 5 cup
+1 cup of rolled oats in grams                → 81 g
+100 g rolled oats in cups                    → 1.234567901 cup
+1 cup of rosemary in grams                   → 52.8 g
+100 g rosemary in cups                       → 1.893939394 cup
+1 cup of rotini in grams                     → 96 g
+100 g rotini in cups                         → 1.041666667 cup
+1 cup of rum in grams                        → 222.4 g
+100 g rum in cups                            → 0.4496402878 cup
+1 cup of rye in grams                        → 169 g
+100 g rye in cups                            → 0.5917159763 cup
+1 cup of rye berries in grams                → 169 g
+100 g rye berries in cups                    → 0.5917159763 cup
+1 cup of rye flour in grams                  → 102 g
+100 g rye flour in cups                      → 0.9803921569 cup
+1 cup of safflower oil in grams              → 218 g
+100 g safflower oil in cups                  → 0.4587155963 cup
+1 cup of saffron in grams                    → 33.6 g
+100 g saffron in cups                        → 2.976190476 cup
+1 cup of sage in grams                       → 32 g
+100 g sage in cups                           → 3.125 cup
+1 cup of salsa in grams                      → 260 g
+100 g salsa in cups                          → 0.3846153846 cup
+1 cup of salt in grams                       → 292 g
+100 g salt in cups                           → 0.3424657534 cup
+1 cup of salted butter in grams              → 227 g
+100 g salted butter in cups                  → 0.4405286344 cup
+1 cup of sauerkraut in grams                 → 142 g
+100 g sauerkraut in cups                     → 0.7042253521 cup
+1 cup of schmaltz in grams                   → 205 g
+100 g schmaltz in cups                       → 0.487804878 cup
+1 cup of seasoned bread crumbs in grams      → 120 g
+100 g seasoned bread crumbs in cups          → 0.8333333333 cup
+1 cup of self raising flour in grams         → 125 g
+100 g self raising flour in cups             → 0.8 cup
+1 cup of self rising flour in grams          → 125 g
+100 g self rising flour in cups              → 0.8 cup
+1 cup of self-raising flour in grams         → 125 g
+100 g self-raising flour in cups             → 0.8 cup
+1 cup of self-rising flour in grams          → 125 g
+100 g self-rising flour in cups              → 0.8 cup
+1 cup of semisweet chocolate chips in grams  → 168 g
+100 g semisweet chocolate chips in cups      → 0.5952380952 cup
+1 cup of semolina in grams                   → 167 g
+100 g semolina in cups                       → 0.5988023952 cup
+1 cup of sesame oil in grams                 → 218 g
+100 g sesame oil in cups                     → 0.4587155963 cup
+1 cup of sesame paste in grams               → 240 g
+100 g sesame paste in cups                   → 0.4166666667 cup
+1 cup of sesame seeds in grams               → 144 g
+100 g sesame seeds in cups                   → 0.6944444444 cup
+1 cup of shallots in grams                   → 160 g
+100 g shallots in cups                       → 0.625 cup
+1 cup of sheep milk in grams                 → 245 g
+100 g sheep milk in cups                     → 0.4081632653 cup
+1 cup of sheep's milk in grams               → 245 g
+100 g sheep's milk in cups                   → 0.4081632653 cup
+1 cup of short grain rice in grams           → 200 g
+100 g short grain rice in cups               → 0.5 cup
+1 cup of short-grain rice in grams           → 200 g
+100 g short-grain rice in cups               → 0.5 cup
+1 cup of shortening in grams                 → 205 g
+100 g shortening in cups                     → 0.487804878 cup
+1 cup of shredded cabbage in grams           → 70 g
+100 g shredded cabbage in cups               → 1.428571429 cup
+1 cup of shredded carrots in grams           → 110 g
+100 g shredded carrots in cups               → 0.9090909091 cup
+1 cup of shredded cheddar in grams           → 113 g
+100 g shredded cheddar in cups               → 0.8849557522 cup
+1 cup of shredded cheese in grams            → 113 g
+100 g shredded cheese in cups                → 0.8849557522 cup
+1 cup of shredded coconut in grams           → 93 g
+100 g shredded coconut in cups               → 1.075268817 cup
+1 cup of shredded lettuce in grams           → 72 g
+100 g shredded lettuce in cups               → 1.388888889 cup
+1 cup of shredded mozzarella in grams        → 112 g
+100 g shredded mozzarella in cups            → 0.8928571429 cup
+1 cup of shredded swiss cheese in grams      → 108 g
+100 g shredded swiss cheese in cups          → 0.9259259259 cup
+1 cup of sifted icing sugar in grams         → 100 g
+100 g sifted icing sugar in cups             → 1 cup
+1 cup of sifted powdered sugar in grams      → 100 g
+100 g sifted powdered sugar in cups          → 1 cup
+1 cup of single cream in grams               → 240 g
+100 g single cream in cups                   → 0.4166666667 cup
+1 cup of skim milk in grams                  → 245 g
+100 g skim milk in cups                      → 0.4081632653 cup
+1 cup of skimmed milk in grams               → 245 g
+100 g skimmed milk in cups                   → 0.4081632653 cup
+1 cup of sliced almonds in grams             → 92 g
+100 g sliced almonds in cups                 → 1.086956522 cup
+1 cup of sliced apples in grams              → 109 g
+100 g sliced apples in cups                  → 0.9174311927 cup
+1 cup of sliced banana in grams              → 150 g
+100 g sliced banana in cups                  → 0.6666666667 cup
+1 cup of sliced bananas in grams             → 150 g
+100 g sliced bananas in cups                 → 0.6666666667 cup
+1 cup of sliced carrots in grams             → 122 g
+100 g sliced carrots in cups                 → 0.8196721311 cup
+1 cup of sliced mushrooms in grams           → 70 g
+100 g sliced mushrooms in cups               → 1.428571429 cup
+1 cup of sliced onions in grams              → 115 g
+100 g sliced onions in cups                  → 0.8695652174 cup
+1 cup of sliced peaches in grams             → 154 g
+100 g sliced peaches in cups                 → 0.6493506494 cup
+1 cup of sliced strawberries in grams        → 166 g
+100 g sliced strawberries in cups            → 0.6024096386 cup
+1 cup of slivered almonds in grams           → 108 g
+100 g slivered almonds in cups               → 0.9259259259 cup
+1 cup of smooth peanut butter in grams       → 258 g
+100 g smooth peanut butter in cups           → 0.3875968992 cup
+1 cup of sodium bicarbonate in grams         → 220.8 g
+100 g sodium bicarbonate in cups             → 0.4528985507 cup
+1 cup of sorghum in grams                    → 192 g
+100 g sorghum in cups                        → 0.5208333333 cup
+1 cup of sorghum flour in grams              → 121 g
+100 g sorghum flour in cups                  → 0.826446281 cup
+1 cup of sorghum syrup in grams              → 330 g
+100 g sorghum syrup in cups                  → 0.303030303 cup
+1 cup of sour cherries in grams              → 155 g
+100 g sour cherries in cups                  → 0.6451612903 cup
+1 cup of sour cream in grams                 → 230 g
+100 g sour cream in cups                     → 0.4347826087 cup
+1 cup of soy beans in grams                  → 186 g
+100 g soy beans in cups                      → 0.5376344086 cup
+1 cup of soy flour in grams                  → 84 g
+100 g soy flour in cups                      → 1.19047619 cup
+1 cup of soy milk in grams                   → 243 g
+100 g soy milk in cups                       → 0.4115226337 cup
+1 cup of soy sauce in grams                  → 255 g
+100 g soy sauce in cups                      → 0.3921568627 cup
+1 cup of soybean oil in grams                → 218 g
+100 g soybean oil in cups                    → 0.4587155963 cup
+1 cup of soybeans in grams                   → 186 g
+100 g soybeans in cups                       → 0.5376344086 cup
+1 cup of soymilk in grams                    → 243 g
+100 g soymilk in cups                        → 0.4115226337 cup
+1 cup of spearmint in grams                  → 91.2 g
+100 g spearmint in cups                      → 1.096491228 cup
+1 cup of spelt in grams                      → 174 g
+100 g spelt in cups                          → 0.5747126437 cup
+1 cup of spinach in grams                    → 30 g
+100 g spinach in cups                        → 3.333333333 cup
+1 cup of split peas in grams                 → 196 g
+100 g split peas in cups                     → 0.5102040816 cup
+1 cup of sprouted lentils in grams           → 77 g
+100 g sprouted lentils in cups               → 1.298701299 cup
+1 cup of sprouted mung beans in grams        → 104 g
+100 g sprouted mung beans in cups            → 0.9615384615 cup
+1 cup of sprouted peas in grams              → 120 g
+100 g sprouted peas in cups                  → 0.8333333333 cup
+1 cup of sprouted wheat in grams             → 108 g
+100 g sprouted wheat in cups                 → 0.9259259259 cup
+1 cup of sriracha in grams                   → 312 g
+100 g sriracha in cups                       → 0.3205128205 cup
+1 cup of sticky rice in grams                → 185 g
+100 g sticky rice in cups                    → 0.5405405405 cup
+1 cup of stock in grams                      → 240 g
+100 g stock in cups                          → 0.4166666667 cup
+1 cup of strawberries in grams               → 144 g
+100 g strawberries in cups                   → 0.6944444444 cup
+1 cup of strawberry in grams                 → 144 g
+100 g strawberry in cups                     → 0.6944444444 cup
+1 cup of string beans in grams               → 100 g
+100 g string beans in cups                   → 1 cup
+1 cup of strong flour in grams               → 137 g
+100 g strong flour in cups                   → 0.7299270073 cup
+1 cup of succotash in grams                  → 192 g
+100 g succotash in cups                      → 0.5208333333 cup
+1 cup of sugar in grams                      → 200 g
+100 g sugar in cups                          → 0.5 cup
+1 cup of sultanas in grams                   → 145 g
+100 g sultanas in cups                       → 0.6896551724 cup
+1 cup of sun dried tomatoes in grams         → 54 g
+100 g sun dried tomatoes in cups             → 1.851851852 cup
+1 cup of sun-dried tomatoes in grams         → 54 g
+100 g sun-dried tomatoes in cups             → 1.851851852 cup
+1 cup of sunflower oil in grams              → 218 g
+100 g sunflower oil in cups                  → 0.4587155963 cup
+1 cup of sunflower seed butter in grams      → 256 g
+100 g sunflower seed butter in cups          → 0.390625 cup
+1 cup of sunflower seeds in grams            → 140 g
+100 g sunflower seeds in cups                → 0.7142857143 cup
+1 cup of sushi rice in grams                 → 200 g
+100 g sushi rice in cups                     → 0.5 cup
+1 cup of sweet cherries in grams             → 154 g
+100 g sweet cherries in cups                 → 0.6493506494 cup
+1 cup of sweet corn in grams                 → 145 g
+100 g sweet corn in cups                     → 0.6896551724 cup
+1 cup of sweet peppers in grams              → 149 g
+100 g sweet peppers in cups                  → 0.6711409396 cup
+1 cup of sweet potato in grams               → 133 g
+100 g sweet potato in cups                   → 0.7518796992 cup
+1 cup of sweet potatoes in grams             → 133 g
+100 g sweet potatoes in cups                 → 0.7518796992 cup
+1 cup of sweetened condensed milk in grams   → 306 g
+100 g sweetened condensed milk in cups       → 0.3267973856 cup
+1 cup of swiss cheese in grams               → 108 g
+100 g swiss cheese in cups                   → 0.9259259259 cup
+1 cup of table cream in grams                → 240 g
+100 g table cream in cups                    → 0.4166666667 cup
+1 cup of table salt in grams                 → 292 g
+100 g table salt in cups                     → 0.3424657534 cup
+1 cup of tahini in grams                     → 240 g
+100 g tahini in cups                         → 0.4166666667 cup
+1 cup of tallow in grams                     → 205 g
+100 g tallow in cups                         → 0.487804878 cup
+1 cup of tap water in grams                  → 236.5882365 g
+100 g tap water in cups                      → 0.4226752838 cup
+1 cup of tapioca in grams                    → 152 g
+100 g tapioca in cups                        → 0.6578947368 cup
+1 cup of tapioca pearls in grams             → 152 g
+100 g tapioca pearls in cups                 → 0.6578947368 cup
+1 cup of tarragon in grams                   → 28.8 g
+100 g tarragon in cups                       → 3.472222222 cup
+1 cup of tea in grams                        → 237 g
+100 g tea in cups                            → 0.4219409283 cup
+1 cup of teff in grams                       → 193 g
+100 g teff in cups                           → 0.518134715 cup
+1 cup of tempeh in grams                     → 166 g
+100 g tempeh in cups                         → 0.6024096386 cup
+1 cup of thyme in grams                      → 43.2 g
+100 g thyme in cups                          → 2.314814815 cup
+1 cup of tofu in grams                       → 252 g
+100 g tofu in cups                           → 0.3968253968 cup
+1 cup of tomato in grams                     → 180 g
+100 g tomato in cups                         → 0.5555555556 cup
+1 cup of tomato juice in grams               → 243 g
+100 g tomato juice in cups                   → 0.4115226337 cup
+1 cup of tomato ketchup in grams             → 240 g
+100 g tomato ketchup in cups                 → 0.4166666667 cup
+1 cup of tomato paste in grams               → 264 g
+100 g tomato paste in cups                   → 0.3787878788 cup
+1 cup of tomato puree in grams               → 250 g
+100 g tomato puree in cups                   → 0.4 cup
+1 cup of tomato sauce in grams               → 245 g
+100 g tomato sauce in cups                   → 0.4081632653 cup
+1 cup of tomatoes in grams                   → 180 g
+100 g tomatoes in cups                       → 0.5555555556 cup
+1 cup of trail mix in grams                  → 150 g
+100 g trail mix in cups                      → 0.6666666667 cup
+1 cup of triticale in grams                  → 192 g
+100 g triticale in cups                      → 0.5208333333 cup
+1 cup of triticale flour in grams            → 130 g
+100 g triticale flour in cups                → 0.7692307692 cup
+1 cup of turbinado sugar in grams            → 202 g
+100 g turbinado sugar in cups                → 0.495049505 cup
+1 cup of turmeric in grams                   → 150.4 g
+100 g turmeric in cups                       → 0.664893617 cup
+1 cup of unpacked brown sugar in grams       → 145 g
+100 g unpacked brown sugar in cups           → 0.6896551724 cup
+1 cup of unsalted butter in grams            → 227 g
+100 g unsalted butter in cups                → 0.4405286344 cup
+1 cup of unsweetened chocolate in grams      → 132 g
+100 g unsweetened chocolate in cups          → 0.7575757576 cup
+1 cup of unsweetened cocoa in grams          → 86 g
+100 g unsweetened cocoa in cups              → 1.162790698 cup
+1 cup of vanilla in grams                    → 208 g
+100 g vanilla in cups                        → 0.4807692308 cup
+1 cup of vanilla extract in grams            → 208 g
+100 g vanilla extract in cups                → 0.4807692308 cup
+1 cup of vanilla ice cream in grams          → 214 g
+100 g vanilla ice cream in cups              → 0.4672897196 cup
+1 cup of vegetable broth in grams            → 221 g
+100 g vegetable broth in cups                → 0.4524886878 cup
+1 cup of vegetable oil in grams              → 218 g
+100 g vegetable oil in cups                  → 0.4587155963 cup
+1 cup of vegetable shortening in grams       → 205 g
+100 g vegetable shortening in cups           → 0.487804878 cup
+1 cup of vegetable stock in grams            → 221 g
+100 g vegetable stock in cups                → 0.4524886878 cup
+1 cup of vine leaves in grams                → 14 g
+100 g vine leaves in cups                    → 7.142857143 cup
+1 cup of vinegar in grams                    → 238 g
+100 g vinegar in cups                        → 0.4201680672 cup
+1 cup of vodka in grams                      → 222.4 g
+100 g vodka in cups                          → 0.4496402878 cup
+1 cup of walnut in grams                     → 117 g
+100 g walnut in cups                         → 0.8547008547 cup
+1 cup of walnut halves in grams              → 100 g
+100 g walnut halves in cups                  → 1 cup
+1 cup of walnut oil in grams                 → 218 g
+100 g walnut oil in cups                     → 0.4587155963 cup
+1 cup of walnuts in grams                    → 117 g
+100 g walnuts in cups                        → 0.8547008547 cup
+1 cup of water in grams                      → 236.5882365 g
+100 g water in cups                          → 0.4226752838 cup
+1 cup of watercress in grams                 → 34 g
+100 g watercress in cups                     → 2.941176471 cup
+1 cup of watermelon in grams                 → 152 g
+100 g watermelon in cups                     → 0.6578947368 cup
+1 cup of wheat in grams                      → 192 g
+100 g wheat in cups                          → 0.5208333333 cup
+1 cup of wheat berries in grams              → 192 g
+100 g wheat berries in cups                  → 0.5208333333 cup
+1 cup of wheat bran in grams                 → 58 g
+100 g wheat bran in cups                     → 1.724137931 cup
+1 cup of wheat flour in grams                → 125 g
+100 g wheat flour in cups                    → 0.8 cup
+1 cup of wheat germ in grams                 → 115 g
+100 g wheat germ in cups                     → 0.8695652174 cup
+1 cup of whey in grams                       → 246 g
+100 g whey in cups                           → 0.406504065 cup
+1 cup of whey powder in grams                → 145 g
+100 g whey powder in cups                    → 0.6896551724 cup
+1 cup of whipped butter in grams             → 151 g
+100 g whipped butter in cups                 → 0.6622516556 cup
+1 cup of whipped cream in grams              → 120 g
+100 g whipped cream in cups                  → 0.8333333333 cup
+1 cup of whipping cream in grams             → 238 g
+100 g whipping cream in cups                 → 0.4201680672 cup
+1 cup of whiskey in grams                    → 222.4 g
+100 g whiskey in cups                        → 0.4496402878 cup
+1 cup of whisky in grams                     → 222.4 g
+100 g whisky in cups                         → 0.4496402878 cup
+1 cup of white flour in grams                → 125 g
+100 g white flour in cups                    → 0.8 cup
+1 cup of white pepper in grams               → 113.6 g
+100 g white pepper in cups                   → 0.8802816901 cup
+1 cup of white rice in grams                 → 185 g
+100 g white rice in cups                     → 0.5405405405 cup
+1 cup of white rice flour in grams           → 158 g
+100 g white rice flour in cups               → 0.6329113924 cup
+1 cup of white sugar in grams                → 200 g
+100 g white sugar in cups                    → 0.5 cup
+1 cup of white vinegar in grams              → 238 g
+100 g white vinegar in cups                  → 0.4201680672 cup
+1 cup of white wine in grams                 → 235.2 g
+100 g white wine in cups                     → 0.425170068 cup
+1 cup of whole almonds in grams              → 143 g
+100 g whole almonds in cups                  → 0.6993006993 cup
+1 cup of whole eggs in grams                 → 243 g
+100 g whole eggs in cups                     → 0.4115226337 cup
+1 cup of whole grain flour in grams          → 120 g
+100 g whole grain flour in cups              → 0.8333333333 cup
+1 cup of whole milk in grams                 → 244 g
+100 g whole milk in cups                     → 0.4098360656 cup
+1 cup of whole milk powder in grams          → 128 g
+100 g whole milk powder in cups              → 0.78125 cup
+1 cup of whole mushrooms in grams            → 96 g
+100 g whole mushrooms in cups                → 1.041666667 cup
+1 cup of whole oats in grams                 → 156 g
+100 g whole oats in cups                     → 0.641025641 cup
+1 cup of whole strawberries in grams         → 144 g
+100 g whole strawberries in cups             → 0.6944444444 cup
+1 cup of whole wheat flour in grams          → 120 g
+100 g whole wheat flour in cups              → 0.8333333333 cup
+1 cup of whole-grain flour in grams          → 120 g
+100 g whole-grain flour in cups              → 0.8333333333 cup
+1 cup of whole-wheat flour in grams          → 120 g
+100 g whole-wheat flour in cups              → 0.8333333333 cup
+1 cup of wholemeal flour in grams            → 120 g
+100 g wholemeal flour in cups                → 0.8333333333 cup
+1 cup of wild rice in grams                  → 160 g
+100 g wild rice in cups                      → 0.625 cup
+1 cup of wine in grams                       → 236 g
+100 g wine in cups                           → 0.4237288136 cup
+1 cup of wine vinegar in grams               → 239 g
+100 g wine vinegar in cups                   → 0.4184100418 cup
+1 cup of worcestershire in grams             → 275 g
+100 g worcestershire in cups                 → 0.3636363636 cup
+1 cup of worcestershire sauce in grams       → 275 g
+100 g worcestershire sauce in cups           → 0.3636363636 cup
+1 cup of yeast in grams                      → 192 g
+100 g yeast in cups                          → 0.5208333333 cup
+1 cup of yellow mustard in grams             → 249 g
+100 g yellow mustard in cups                 → 0.4016064257 cup
+1 cup of yoghurt in grams                    → 245 g
+100 g yoghurt in cups                        → 0.4081632653 cup
+1 cup of yogurt in grams                     → 245 g
+100 g yogurt in cups                         → 0.4081632653 cup
+1 cup of zante currants in grams             → 144 g
+100 g zante currants in cups                 → 0.6944444444 cup
+1 cup of zucchini in grams                   → 124 g
+100 g zucchini in cups                       → 0.8064516129 cup

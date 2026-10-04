@@ -32,7 +32,7 @@ hours in a week                              → 168 hours
 12pt in px                                   → 16 px
 2 rem in px                                  → 32 px
 1 Kib in bits                                → 1,024 bit
-1 cup of flour in grams                      → <error: can't convert cup to g>
+1 cup of flour in grams                      → 125 g
 100 hp at 3000 rpm                           → 237.3636413 N·m
 1 quarter in months                          → 3 months
 

@@ -5,6 +5,7 @@ use crate::ast::{Direction, Expr, Format, Func, LineRef, Op, Rounding, Target, T
 use crate::error::{Error, Result, bail};
 use crate::lexer::Tok;
 use crate::number::Number;
+use crate::units::foods::Food;
 use crate::units::{Dim, Unit, registry};
 
 impl Parser<'_> {
@@ -265,6 +266,31 @@ impl Parser<'_> {
         Some((Expr::WithUnit(Expr::Number(*n).boxed(), unit.clone()), unit))
     }
 
+    /// The food an amount of weight or volume is of: "of flour" in "1 cup of flour",
+    /// "melted butter" in "200 g melted butter".
+    pub(super) fn food_after(&mut self, amount: &Expr) -> Option<Food> {
+        let dim = amount.edge_unit(true)?.dim();
+        if dim != Dim::MASS && dim != Dim::VOLUME {
+            return None;
+        }
+        let mut i = self.pos + usize::from(self.words_at(self.pos, &["of"]));
+        let (food, n) = loop {
+            // A variable named like a food is the variable.
+            if self.var_at(i).is_some() {
+                return None;
+            }
+            if let Some(found) = self.food_at(i) {
+                break found;
+            }
+            if !self.lower(i).is_some_and(|w| words::FOOD_STATES.contains(&w.as_str())) {
+                return None;
+            }
+            i += 1;
+        };
+        self.pos = i + n;
+        Some(food)
+    }
+
     /// A word in value position. `None` means the word is a comment.
     fn word(&mut self) -> Result<Option<Expr>> {
         let i = self.pos;
@@ -325,6 +351,10 @@ impl Parser<'_> {
         if let Some((expr, n)) = self.physical_constant(i) {
             self.pos += n;
             return Ok(Some(expr));
+        }
+        if let Some((food, n)) = self.density_at(i) {
+            self.pos += n;
+            return Ok(Some(density(food)));
         }
         if let Some(c) = words::constant(w) {
             self.pos += 1;
@@ -570,4 +600,13 @@ impl Parser<'_> {
     pub(super) fn formatted(expr: Expr, format: Format) -> Expr {
         Expr::Convert(expr.boxed(), Target::Format(format))
     }
+}
+
+/// A food's weight per volume, shown in g/cm³.
+fn density(food: Food) -> Expr {
+    let reg = registry();
+    let per_cup = reg.get("g").product(&reg.get("cup").pow(-1));
+    let per_cm3 = reg.get("g").product(&reg.get("cm").pow(-3));
+    let amount = Expr::WithUnit(Expr::Number(food.grams_per_cup).boxed(), per_cup);
+    Expr::Convert(amount.boxed(), Target::Unit(per_cm3))
 }

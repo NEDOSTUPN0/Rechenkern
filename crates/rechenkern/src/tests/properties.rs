@@ -41,6 +41,7 @@ static VOCABULARY: LazyLock<Vec<String>> = LazyLock::new(|| {
         .chain(words::DATE_PARTS.phrases())
         .chain(words::HOLIDAYS.phrases())
         .chain(words::SKY.phrases())
+        .chain(words::FOODS.phrases().step_by(5))
         .chain(words::KEYWORDS.iter().copied())
         .chain(registry().spellings())
         .chain(zones::place_names().into_iter().step_by(5));
@@ -242,6 +243,13 @@ fn convert(q: &Quantity, to: &Unit) -> crate::Result<Quantity> {
     let config = config();
     let rates = Rates::with_table(super::rates());
     let vars = HashMap::new();
-    let env = Env { config: &config, now: Now::new(&config), vars: &vars, lines: &[], rates: &rates };
+    let env = Env {
+        config: &config,
+        now: Now::new(&config),
+        vars: &vars,
+        lines: &[],
+        rates: &rates,
+        food_as: Cell::default(),
+    };
     env.convert_quantity(q, to)
 }

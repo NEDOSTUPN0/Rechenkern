@@ -1,13 +1,14 @@
 //! Vocabulary: keywords, number words, functions, months and holidays.
 
 use std::borrow::Cow;
-use std::sync::OnceLock;
+use std::sync::{LazyLock, OnceLock};
 
 use jiff::civil::Weekday;
 
 use crate::ast::{Format, Func, Holiday, Sky, Which};
 use crate::hash::TableMap;
 use crate::number::Number;
+use crate::units::foods::{self, Food};
 use crate::units::registry;
 
 /// Phrases and what they mean, found by their first word.
@@ -365,6 +366,15 @@ pub static SKY: Phrases<Sky> = Phrases::new(&[
     ("lunar day", Sky::LunarDay),
     ("moon day", Sky::LunarDay),
 ]);
+
+/// Foods by name: "1 cup of flour", "density of butter".
+pub static FOODS: LazyLock<Phrases<Food>> = LazyLock::new(|| Phrases::new(foods::all()));
+
+/// Words before a food that don't change what a cup of it weighs: "1 cup melted butter".
+pub const FOOD_STATES: &[&str] = &[
+    "fresh", "melted", "softened", "cold", "warm", "hot", "chilled", "unsalted", "salted", "organic", "raw",
+    "uncooked", "dry", "plain", "pure",
+];
 
 pub static HOLIDAYS: Phrases<Holiday> = Phrases::new(&[
     ("new year's eve", Holiday::NewYearsEve),

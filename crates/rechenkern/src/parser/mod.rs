@@ -543,6 +543,9 @@ impl<'a> Parser<'a> {
         let from_now =
             |expr: Expr, later: bool| Expr::binary(if later { Op::Add } else { Op::Sub }, time::now_for(&expr), expr);
         let mut expr = self.primary()?;
+        if let Some(food) = self.food_after(&expr) {
+            expr = Expr::Food(expr.boxed(), food);
+        }
         loop {
             let Some(tok) = self.cur() else { return Ok(expr) };
             // "$120/night" and "5 km per hour" are rates that bind tightly:
@@ -656,6 +659,7 @@ fn over_amount(n: &Expr, amount: &Expr) -> Option<Expr> {
             Some(Expr::WithUnit(Expr::binary(Op::Div, n.clone(), (**number).clone()).boxed(), unit.clone()))
         }
         Expr::Binary(Op::Per, amount, per) => Some(Expr::Binary(Op::Per, over_amount(n, amount)?.boxed(), per.clone())),
+        Expr::Food(amount, food) => Some(Expr::Food(over_amount(n, amount)?.boxed(), *food)),
         _ => None,
     }
 }

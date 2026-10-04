@@ -157,6 +157,12 @@ fn places() {
     snapshot("places", &table(lines));
 }
 
+#[test]
+fn foods() {
+    let lines = words::FOODS.phrases().flat_map(|f| [format!("1 cup of {f} in grams"), format!("100 g {f} in cups")]);
+    snapshot("foods", &table(lines));
+}
+
 /// Every `corpus/*.txt` file; a `corpus/sheets/*.txt` file is one sheet,
 /// where lines see the ones above them.
 #[test]

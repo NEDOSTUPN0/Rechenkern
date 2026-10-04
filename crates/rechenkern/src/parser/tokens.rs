@@ -5,6 +5,7 @@ use jiff::tz::TimeZone;
 use super::{Parser, words};
 use crate::ast::Func;
 use crate::lexer::{Tok, Token};
+use crate::units::foods::Food;
 use crate::units::{Dim, Unit, registry};
 use crate::zones::{self, Location};
 
@@ -147,7 +148,9 @@ impl<'a> Parser<'a> {
 
     /// Longest phrase from `table` starting at token `i`.
     pub(super) fn phrase_at<T: Copy>(&self, i: usize, table: &words::Phrases<T>) -> Option<(T, usize)> {
-        let first = self.toks.get(i)?.word()?;
+        let word = self.toks.get(i)?.word()?;
+        // "all-purpose flour": a word joined by hyphens is indexed by its first part.
+        let first = word.split('-').next().unwrap_or(word);
         let mut best: Option<(T, usize)> = None;
         for &(phrase, value) in table.starting_with(first) {
             if let Some(n) = self.phrase_len_at(i, phrase)
@@ -207,6 +210,27 @@ impl<'a> Parser<'a> {
             || self.place_converted_at(i).is_some()
             || self.sky_at(i).is_some()
             || self.place_sky_at(i).is_some()
+            || self.density_at(i).is_some()
+    }
+
+    /// A food named at token `i` and its length in tokens: "olive oil".
+    pub(super) fn food_at(&self, i: usize) -> Option<(Food, usize)> {
+        self.phrase_at(i, &words::FOODS)
+    }
+
+    /// "density of butter" or "butter density" at token `i`: the food and the phrase's length.
+    pub(super) fn density_at(&self, i: usize) -> Option<(Food, usize)> {
+        if self.words_at(i, &["density"]) {
+            let of = usize::from(self.words_at(i + 1, &["of"]));
+            let (food, n) = self.food_at(i + 1 + of)?;
+            return Some((food, 1 + of + n));
+        }
+        // Most lines don't say "density": skip looking up every word as a food.
+        if !self.toks[i..].iter().any(|t| t.is_word("density")) {
+            return None;
+        }
+        let (food, n) = self.food_at(i)?;
+        self.words_at(i + n, &["density"]).then_some((food, n + 1))
     }
 
     /// The token at `i` is a word that means nothing here.

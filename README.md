@@ -13,7 +13,7 @@ answer. It comes as a library and as a small command line tool.
 - **Small.** One Rust binary with no runtime to ship. Works offline; exchange rates are
   cached.
 - **Understands a lot.** Units, currencies, percentages, dates, time zones, rates,
-  compound interest, and notes with running totals and variables.
+  compound interest, cooking measures, and notes with running totals and variables.
 
 ## Examples
 
@@ -21,6 +21,7 @@ answer. It comes as a library and as a small command line tool.
 $20 for lunch + $15 for taxi + 15% tip          $40.25
 5 km in miles                                   3.106855961 mi
 180 cm in feet and inches                       5 ft 10.87 in
+1 cup of flour in grams                         125 g
 $50 in EUR, GBP                                 €43.00, £37.00
 20 is what % of 200                             10%
 $1,000 after 3 years at 7% compounding monthly  $1,232.93
@@ -159,6 +160,7 @@ SoulverCore.
 - Exchange rates: [fawazahmed0/exchange-api](https://github.com/fawazahmed0/exchange-api) (CC0)
 - Time zones: the IANA time zone database, through [jiff](https://github.com/BurntSushi/jiff)
 - Cities: [GeoNames](https://www.geonames.org/), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), filtered by `scripts/cities.py`
+- Foods: [USDA FoodData Central](https://fdc.nal.usda.gov/) SR Legacy, public domain, picked by `scripts/foods.py`
 
 ## License
 

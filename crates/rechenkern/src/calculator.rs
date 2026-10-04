@@ -151,6 +151,7 @@ impl Calculator {
             vars: &self.vars,
             lines: &self.lines,
             rates: &self.rates,
+            food_as: Default::default(),
         };
         // Pick the branch of "if ... then ... else ...".
         let mut stmt = &stmt;

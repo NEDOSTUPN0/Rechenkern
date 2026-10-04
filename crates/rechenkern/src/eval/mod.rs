@@ -7,6 +7,7 @@ mod time;
 
 pub(crate) use time::get as span_field;
 
+use std::cell::Cell;
 use std::collections::HashMap;
 
 use crate::ast::{Direction, Expr, Format, GrowthResult, LineRef, Op, Rounding, Target};
@@ -15,6 +16,7 @@ use crate::error::{Error, Result, bail};
 use crate::format::unit_text;
 use crate::number::Number;
 use crate::rates::Rates;
+use crate::units::foods::Food;
 use crate::units::{Dim, Unit, UnitId, registry};
 use crate::value::{Duration, Moment, MomentKind, Quantity, Value};
 
@@ -64,6 +66,9 @@ pub(crate) struct Env<'a> {
     pub vars: &'a HashMap<String, Value>,
     pub lines: &'a [Line],
     pub rates: &'a Rates,
+    /// Inside a conversion to a weight or a volume, amounts of food become that kind:
+    /// "1 cup of flour + 1 cup of sugar in grams".
+    pub food_as: Cell<Option<Dim>>,
 }
 
 impl Env<'_> {
@@ -71,9 +76,13 @@ impl Env<'_> {
     pub fn answer(&self, expr: &Expr) -> Result<(Value, Display)> {
         match expr {
             Expr::Convert(inner, target) => {
-                let (value, display) = self.answer(inner)?;
+                let saved = self.food_as.replace(weight_or_volume(target));
+                let answer = self.answer(inner);
+                self.food_as.set(saved);
+                let (value, display) = answer?;
                 self.convert(value, target, display)
             }
+            Expr::Food(inner, _) if self.food_as.get().is_none() => self.answer(inner),
             Expr::Composite(parts) => {
                 let value = self.composite(parts)?;
                 let display = match &value {
@@ -111,6 +120,10 @@ impl Env<'_> {
             Expr::Binary(op, a, b) => self.binary(*op, self.eval(a)?, self.eval(b)?)?,
             Expr::Composite(parts) => self.composite(parts)?,
             Expr::Noted(inner, _) => self.eval(inner)?,
+            Expr::Food(inner, food) => match self.food_as.get() {
+                Some(dim) => self.weigh_or_measure(self.eval(inner)?, *food, dim)?,
+                None => self.eval(inner)?,
+            },
             Expr::Call(func, args) => {
                 let args = args.iter().map(|a| self.eval(a)).collect::<Result<Vec<_>>>()?;
                 self.call(*func, args)?
@@ -310,6 +323,23 @@ impl Env<'_> {
         })
     }
 
+    /// An amount of food as a weight or a volume: its weight in grams or its volume in cups.
+    fn weigh_or_measure(&self, value: Value, food: Food, to: Dim) -> Result<Value> {
+        let Value::Quantity(q) = &value else { return Ok(value) };
+        let (gram, cup) = (registry().get("g"), registry().get("cup"));
+        Ok(match (q.unit.dim(), to) {
+            (Dim::MASS, Dim::VOLUME) => {
+                let grams = self.convert_quantity(q, &gram)?.number;
+                Value::Quantity(Quantity::new(grams / food.grams_per_cup, cup))
+            }
+            (Dim::VOLUME, Dim::MASS) => {
+                let cups = self.convert_quantity(q, &cup)?.number;
+                Value::Quantity(Quantity::new(cups * food.grams_per_cup, gram))
+            }
+            _ => value,
+        })
+    }
+
     fn to_unit(&self, value: Value, unit: &Unit) -> Result<Value> {
         // Days and longer count Monday to Friday dates; hours are hours of work.
         if unit.dim() == Dim::WORKDAY {
@@ -496,4 +526,14 @@ fn part_unit(expr: &Expr) -> Option<Unit> {
         Expr::WithUnit(_, u) => Some(u.clone()),
         _ => None,
     }
+}
+
+/// The weight or volume a conversion is to, which amounts of food take.
+fn weight_or_volume(target: &Target) -> Option<Dim> {
+    let dim = match target {
+        Target::Unit(unit) => unit.dim(),
+        Target::Units(units) => units.first()?.dim(),
+        _ => return None,
+    };
+    matches!(dim, Dim::MASS | Dim::VOLUME).then_some(dim)
 }

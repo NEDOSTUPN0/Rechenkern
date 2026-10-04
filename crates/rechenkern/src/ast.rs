@@ -5,6 +5,7 @@ use jiff::tz::TimeZone;
 
 use crate::number::Number;
 use crate::units::Unit;
+use crate::units::foods::Food;
 use crate::zones::Location;
 
 #[derive(Clone, Debug)]
@@ -40,6 +41,8 @@ pub enum Expr {
     Composite(Vec<Expr>),
     /// A value with a remark shown only when it is the whole answer.
     Noted(Box<Expr>, &'static str),
+    /// An amount of a food, which converts between weight and volume: `1 cup of flour`.
+    Food(Box<Expr>, Food),
     Call(Func, Vec<Expr>),
     Var(String),
     Line(LineRef),
@@ -115,6 +118,7 @@ impl Expr {
                 | Expr::Neg(e)
                 | Expr::Factorial(e)
                 | Expr::Noted(e, _)
+                | Expr::Food(e, _)
                 | Expr::InZone(e, _)
                 | Expr::Convert(e, _)
                 | Expr::Round(e, _) => e.contains(f),
@@ -129,7 +133,7 @@ impl Expr {
             Expr::Binary(Op::Per, ..) => None,
             Expr::Binary(_, a, b) => if last { b } else { a }.edge_unit(last),
             Expr::Composite(parts) => if last { parts.last() } else { parts.first() }?.edge_unit(last),
-            Expr::Neg(e) => e.edge_unit(last),
+            Expr::Neg(e) | Expr::Food(e, _) => e.edge_unit(last),
             _ => None,
         }
     }

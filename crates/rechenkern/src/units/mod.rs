@@ -1,6 +1,7 @@
 //! Units of measurement: definitions, compound units and lookup by name.
 
 mod dim;
+pub(crate) mod foods;
 mod table;
 
 use std::sync::LazyLock;

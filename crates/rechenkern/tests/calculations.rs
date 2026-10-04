@@ -383,8 +383,6 @@ fn units() {
         ("300 Nm at 3000 rpm", "94,247.77961 W"),
         ("100 kW at 3000 rpm", "318.3098862 N·m"),
         ("1 N·m in J", "1 J"),
-        ("1 cup of flour in grams", "<error: can't convert cup to g>"),
-        ("2 cups of flour in ml", "473.176473 mL"),
         ("10 kg of apples at $2/kg", "$20.00"),
         ("12 pt in mm", "4.233333333 mm"),
         ("2 rem in px", "32 px"),
@@ -527,6 +525,48 @@ fn units() {
         ("1 Mbit/(s·week)", "1 Mbit/(s·week)"),
         ("1 BTU·min", "1 BTU·min"),
         ("1 fl oz·°F", "1 fl oz·°F"),
+    ]);
+}
+
+#[test]
+fn cooking() {
+    check(&[
+        ("1 cup of flour in grams", "125 g"),
+        ("1 cup flour in g", "125 g"),
+        ("1 cup of all-purpose flour in grams", "125 g"),
+        ("200 g sugar in cups", "1 cup"),
+        ("200 grams of sugar to cups", "1 cup"),
+        ("1 tbsp butter in grams", "14.1875 g"),
+        ("250 g of butter in tbsp", "17.62114537 tbsp"),
+        ("1 kg of flour in cups", "8 cup"),
+        ("100 ml of honey in grams", "143.2869212 g"),
+        ("1 L of water in kg", "1 kg"),
+        ("1/2 cup of sugar in grams", "100 g"),
+        ("1 1/2 cups of sugar in grams", "300 g"),
+        ("1 cup 2 tbsp of sugar in grams", "225 g"),
+        ("2 x 1 cup of sugar in grams", "400 g"),
+        ("1 tsp salt in g", "6.083333333 g"),
+        ("1 cup of packed brown sugar in grams", "220 g"),
+        ("1 cup of unpacked brown sugar in grams", "145 g"),
+        ("1 cup melted butter in grams", "227 g"),
+        ("1 cup of half-and-half in grams", "242 g"),
+        ("1 cup of sliced almonds in grams", "92 g"),
+        ("1 cup of flour in ounces", "4.409245244 oz"),
+        ("1 cup of flour in grams in oz", "4.409245244 oz"),
+        // Amounts of several foods add up as weights or volumes.
+        ("1 cup of flour + 1 cup of sugar in grams", "325 g"),
+        ("1 cup of sugar + 100 g in grams", "300 g"),
+        ("100 g flour + 100 g sugar in cups", "1.3 cup"),
+        // Without a conversion the amount stays as written.
+        ("1 cup of flour", "1 cup"),
+        ("200 g of sugar", "200 g"),
+        ("2 cups of flour in ml", "473.176473 mL"),
+        ("10 kg of apples at $2/kg", "$20.00"),
+        ("1 cup of sugar + 100 g", "<error: can't combine cup and g>"),
+        ("1 cup of gravel in grams", "<error: can't convert cup to g>"),
+        ("density of butter", "0.9594728942 g/cm³"),
+        ("butter density", "0.9594728942 g/cm³"),
+        ("density of water in kg/m3", "1,000 kg/m³"),
     ]);
 }
 
