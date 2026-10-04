@@ -583,6 +583,8 @@ fn rates() {
         ("3 hours / day", "3 h/day"),
         ("$99 per week", "$99.00/week"),
         ("30 bottles / week", "30/week"),
+        // A power of a unit next to money stays in the rate.
+        ("1/(m²·EUR)", "1/(m²·EUR)"),
         ("$20/day + $300/week", "$440.00/week"),
         ("€30/day in €/month", "€913.11/month"),
         ("$50/week × 12 weeks", "$600.00"),

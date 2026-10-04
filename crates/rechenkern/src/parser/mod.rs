@@ -630,11 +630,16 @@ fn is_boolean(expr: &Expr) -> bool {
     )
 }
 
-/// A unit, or units multiplied as written: `day`, `(s·week)`.
+/// A unit, or units multiplied as written: `day`, `(s·week)`, `(kB²·AUD)`.
 fn unit_product(expr: &Expr) -> Option<Unit> {
     match expr {
         Expr::BareUnit(unit) => Some(unit.clone()),
         Expr::Binary(Op::Mul, a, b) => Some(unit_product(a)?.product(&unit_product(b)?)),
+        Expr::Binary(Op::Pow, a, b) => {
+            let Expr::Number(exp) = **b else { return None };
+            let exp = i8::try_from(exp.to_i64().filter(|_| exp.is_integer())?).ok().filter(|e| *e != 0)?;
+            Some(unit_product(a)?.pow(exp))
+        }
         _ => None,
     }
 }
