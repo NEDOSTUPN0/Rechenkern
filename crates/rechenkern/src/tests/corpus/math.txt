@@ -29,6 +29,11 @@ round 3.14159 to 2 dp
 round 56 down to nearest 10
 37 rounded up to next 10
 π rounded 3 dp
+pi to 40 dp
+round π down to 35 decimal places
+100 digits of pi
+first 30 decimals of pi
+1/7 to 20 dp
 3 squared
 3 to the power of 4
 3 raised to 9

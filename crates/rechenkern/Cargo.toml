@@ -13,6 +13,7 @@ jiff = "0.2.37"
 proptest = { version = "1.11.0", default-features = false, features = ["std"] }
 
 [dependencies]
+dashu-int = { version = "0.6.2", default-features = false, features = ["std"] }
 jiff = { version = "0.2.37", features = ["tzdb-bundle-always"] }
 rust_decimal = "1.43.0"
 serde_json = { version = "1.0.151", optional = true }

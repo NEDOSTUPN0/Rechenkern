@@ -1,7 +1,7 @@
 //! Whole-line phrases: percentage questions and proportions.
 
 use super::Parser;
-use crate::ast::{Expr, Format, Func, GrowthResult, Op, Target, TimeExpr};
+use crate::ast::{Direction, Expr, Format, Func, GrowthResult, Op, Target, TimeExpr};
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -20,6 +20,9 @@ impl Parser<'_> {
             return Ok(Some(expr));
         }
         if let Some(expr) = self.prime_check() {
+            return Ok(Some(expr));
+        }
+        if let Some(expr) = self.digits_of_pi() {
             return Ok(Some(expr));
         }
         // Every phrase below has one of these words.
@@ -353,6 +356,28 @@ impl Parser<'_> {
         };
         // Anything but a number there is ordinary text.
         n.ok().map(|n| Expr::Call(Func::IsPrime, vec![n]))
+    }
+
+    /// "100 digits of pi", "the first 1 million decimals of π": pi cut off after them.
+    fn digits_of_pi(&self) -> Option<Expr> {
+        let end = self.toks.len();
+        if !self.ends_with(&["of", "pi"]) && !self.ends_with(&["of", "π"]) {
+            return None;
+        }
+        let tails = [&["digits"][..], &["decimals"], &["decimal", "places"]];
+        let to = tails.into_iter().find_map(|t| end.checked_sub(2 + t.len()).filter(|&i| self.matches_at(i, t)))?;
+        let mut from = 0;
+        for w in ["the", "first"] {
+            if self.matches_at(from, &[w]) {
+                from += 1;
+            }
+        }
+        let Ok(Expr::Number(n)) = self.part(from, to) else { return None };
+        if !n.is_integer() || n.is_negative() {
+            return None;
+        }
+        let places = n.to_i64().and_then(|n| u32::try_from(n).ok()).unwrap_or(u32::MAX);
+        Some(Expr::Pi(places, Direction::Down))
     }
 
     /// What a share is taken of: the sum of a list after "with" ("10 is what % with 20, 30").

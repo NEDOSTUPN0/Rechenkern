@@ -40,6 +40,12 @@ pub enum Display {
     Note(&'static str),
     /// A duration as its first and last day: "1 Jul – 30 Sep 2026".
     Period,
+    /// Rounded to decimal places, all of them shown: "0.333333333333333".
+    Places(u32),
+    /// Rounded to significant digits, all of them shown.
+    Significant(u32),
+    /// Digits beyond what a number holds: pi to 1000 places.
+    Digits(String),
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -93,6 +99,12 @@ impl Env<'_> {
             }
             Expr::Noted(inner, note) => Ok((self.eval(inner)?, Display::Note(note))),
             Expr::Period(..) => Ok((self.eval(expr)?, Display::Period)),
+            Expr::Round(_, Rounding::Places(dp, _)) => Ok((self.eval(expr)?, Display::Places(*dp))),
+            Expr::Round(_, Rounding::Significant(digits)) => Ok((self.eval(expr)?, Display::Significant(*digits))),
+            Expr::Pi(places, dir) => {
+                let (value, text) = pi(*places, *dir)?;
+                Ok((value, Display::Digits(text)))
+            }
             _ => Ok((self.eval(expr)?, Display::Auto)),
         }
     }
@@ -145,6 +157,7 @@ impl Env<'_> {
             Expr::Sky { what, place, on } => self.sky(*what, place.as_ref(), on.as_deref())?,
             Expr::Convert(..) => self.answer(expr)?.0,
             Expr::Round(inner, rounding) => self.round(self.eval(inner)?, *rounding)?,
+            Expr::Pi(places, dir) => pi(*places, *dir)?.0,
             Expr::If { .. } => match self.branch(expr)? {
                 Some(e) => self.eval(e)?,
                 None => bail!("the condition isn't met"),
@@ -492,6 +505,13 @@ impl Env<'_> {
     }
 
     fn round(&self, value: Value, rounding: Rounding) -> Result<Value> {
+        match rounding {
+            Rounding::Places(dp, _) if dp > MAX_DIGITS => bail!("can't round to more than {MAX_DIGITS} decimal places"),
+            Rounding::Significant(n) if n > MAX_DIGITS => {
+                bail!("can't round to more than {MAX_DIGITS} significant digits")
+            }
+            _ => {}
+        }
         let round = |n: Number| match rounding {
             Rounding::Places(dp, dir) => round_places(n, dp, dir),
             Rounding::Significant(digits) => n.round_sig(digits),
@@ -507,6 +527,20 @@ impl Env<'_> {
             v => bail!("can't round {}", v.kind()),
         })
     }
+}
+
+/// Digits a number holds; only pi goes further.
+const MAX_DIGITS: u32 = 28;
+
+/// Pi to some places, as a number and as text with every digit.
+fn pi(places: u32, dir: Direction) -> Result<(Value, String)> {
+    if places > crate::pi::MAX_PLACES {
+        bail!("pi goes to at most {} decimal places", crate::pi::MAX_PLACES);
+    }
+    let text = crate::pi::text(places, dir);
+    // "3." and the 28 decimals a number holds.
+    let number = Number::parse(&text[..text.len().min(30)]).expect("digits of pi");
+    Ok((Value::number(number), text))
 }
 
 fn round_places(n: Number, dp: u32, dir: Direction) -> Number {

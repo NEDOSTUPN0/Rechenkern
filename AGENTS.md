@@ -61,6 +61,7 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 | `parser/words.rs` | Vocabulary tables (keywords, functions, months, holidays) |
 | `eval/` | Arithmetic on values, functions, dates and durations, the sun and moon |
 | `astro.rs` | Sunrise and sunset (NOAA), the moon's phases (Meeus, ch. 49) |
+| `pi.rs` | Pi to any number of places (Chudnovsky, binary splitting on `dashu-int`) |
 | `units/table.rs` | All unit definitions; `currency.rs` all currencies |
 | `units/foods.txt` | Food name -> grams in a cup (generated) |
 | `zones/places.txt` | Place name -> IANA zone; IANA city names are added automatically |
@@ -190,7 +191,13 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Clock-only answers show the date when it isn't today; `Moment::seconds`
   hides seconds of `now`.
 - Numbers show `Config::precision` significant digits (default 10) but never
-  round the whole part; currencies use their minor units.
+  round the whole part; currencies use their minor units. A rounding asks for
+  its own digits: `1/3 to 15 dp` shows all 15 (up to the 28 a number holds).
+- Pi goes further: `pi to 1000 dp`, `pi to 50 sf` round it, `100 digits of pi`
+  cuts it off (`Expr::Pi`), up to `pi::MAX_PLACES` (a million, about half a
+  second, worked out on up to 8 threads). The answer shows every digit
+  (`Display::Digits`); as a value it is a number like any other. Digits found
+  once are kept for the next line.
 - Numbers take both `10.50` and `10,50`: thousands come in groups of three, so
   only a lone separator before three digits (`1,500`, `1.500`) depends on
   `Config::decimal_comma` (CLI: from `LC_NUMERIC`/`LANG`), which also sets the

@@ -25,6 +25,7 @@ mod number;
 #[cfg(feature = "online")]
 pub mod online;
 mod parser;
+mod pi;
 mod rates;
 #[cfg(test)]
 mod tests;

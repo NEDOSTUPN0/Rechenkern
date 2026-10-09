@@ -267,11 +267,13 @@ impl Parser<'_> {
             self.pos = start;
             return Ok(None);
         };
-        let Some(count) = n.to_i64().filter(|n| (0..=28).contains(n)) else {
+        let n = *n;
+        self.pos += 1;
+        // "1 million digits"
+        let Some(count) = (n * self.scale_words()).to_i64().and_then(|n| u32::try_from(n).ok()) else {
             self.pos = start;
             return Ok(None);
         };
-        self.pos += 1;
         let w = self.lower(self.pos).unwrap_or_default();
         let significant = match w.as_str() {
             "dp" | "decimals" | "places" | "digits" => false,
@@ -279,7 +281,7 @@ impl Parser<'_> {
                 self.pos += 1;
                 self.eat_word("places");
                 self.eat_word("place");
-                return Ok(Some((Rounding::Places(count as u32, dir), None)));
+                return Ok(Some((Rounding::Places(count, dir), None)));
             }
             "sf" | "sig" | "significant" => true,
             _ => {
@@ -292,9 +294,9 @@ impl Parser<'_> {
             for w in ["figs", "figures", "figure", "digits"] {
                 self.eat_word(w);
             }
-            return Ok(Some((Rounding::Significant(count as u32), None)));
+            return Ok(Some((Rounding::Significant(count), None)));
         }
-        Ok(Some((Rounding::Places(count as u32, dir), None)))
+        Ok(Some((Rounding::Places(count, dir), None)))
     }
 
     /// Scale words after a number: "nearest 5 thousand".
@@ -432,6 +434,14 @@ fn rounded(expr: &Expr, rounding: Rounding, format: Option<Format>) -> Expr {
         Expr::Call(Func::Round, args) if args.len() == 1 => args[0].clone(),
         other => other.clone(),
     };
+    // Pi has every digit: "pi to 1000 dp".
+    if matches!(inner, Expr::Number(n) if Some(n) == words::constant("pi")) {
+        match rounding {
+            Rounding::Places(dp, dir) => return Expr::Pi(dp, dir),
+            Rounding::Significant(digits @ 1..) => return Expr::Pi(digits - 1, Direction::Nearest),
+            _ => {}
+        }
+    }
     let expr = Expr::Round(inner.boxed(), rounding);
     match format {
         Some(f) => Expr::Convert(expr.boxed(), Target::Format(f)),

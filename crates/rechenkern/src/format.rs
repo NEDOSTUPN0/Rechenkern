@@ -19,6 +19,12 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
         let separator = if config.decimal_comma { "; " } else { ", " };
         return values.iter().map(|v| render(v, &Display::Auto, config, now)).collect::<Vec<_>>().join(separator);
     }
+    if let Display::Digits(text) = display {
+        return if config.decimal_comma { text.replace('.', ",") } else { text.clone() };
+    }
+    if let Some(precision) = rounded_precision(value, display).filter(|&p| p > config.precision) {
+        return render(value, &Display::Auto, &Config { precision, ..config.clone() }, now);
+    }
     if let (Display::Period, Value::Duration(d)) = (display, value)
         && let Some(text) = period(d)
     {
@@ -31,6 +37,25 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
         Value::Duration(d) => duration(d),
         Value::Bool(b) => b.to_string(),
         Value::Text(t) => t.clone(),
+    }
+}
+
+/// Significant digits that show every digit a rounding asked for: 15 for "pi to 14 dp".
+fn rounded_precision(value: &Value, display: &Display) -> Option<u32> {
+    let n = match value {
+        Value::Quantity(q) => q.number,
+        Value::Percent(p) => *p,
+        _ => return None,
+    };
+    // Scientific notation keeps the configured precision.
+    let mag = n.magnitude();
+    if !(-9..21).contains(&mag) {
+        return None;
+    }
+    match display {
+        Display::Places(dp) => Some((mag + 1 + *dp as i32).max(1) as u32),
+        Display::Significant(digits) => Some(*digits),
+        _ => None,
     }
 }
 
@@ -167,7 +192,13 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         Display::Plain => {
             plain_digits(q.number, config.precision.max(20)).unwrap_or_else(|| scientific(q.number, config))
         }
-        Display::Auto | Display::Each(_) | Display::Note(_) | Display::Period => {
+        Display::Auto
+        | Display::Each(_)
+        | Display::Note(_)
+        | Display::Period
+        | Display::Places(_)
+        | Display::Significant(_)
+        | Display::Digits(_) => {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config);
             }

@@ -64,6 +64,8 @@ pub enum Expr {
     },
     Convert(Box<Expr>, Target),
     Round(Box<Expr>, Rounding),
+    /// Pi to any number of decimal places: `pi to 1000 dp`, `100 digits of pi`.
+    Pi(u32, Direction),
     /// `a if cond else b`; a missing branch means no answer.
     If {
         cond: Box<Expr>,
