@@ -134,6 +134,10 @@ impl Parser<'_> {
             // "2 in²" is square inches, not (2 in)².
             return Some(self.unit_exponent(registry().get(symbol)));
         }
+        if let Some(unit) = self.date_shorthand() {
+            self.pos += 1;
+            return Some(unit);
+        }
         let start = self.pos;
         let unit = self.unit_phrase(true)?;
         // "Model 3 $40k": a currency before a number is that number's.
@@ -142,6 +146,23 @@ impl Parser<'_> {
             return None;
         }
         Some(unit)
+    }
+
+    /// "w" and "y" glued to a number are weeks and years, as in "3w" and "1y 2mo";
+    /// "100w in kW" is watts.
+    fn date_shorthand(&self) -> Option<Unit> {
+        let tok = self.cur().filter(|t| !t.space_before)?;
+        let mut p = self.clone();
+        p.pos += 1;
+        let power = ["in", "to", "as", "into"].iter().any(|w| p.eat_word(w))
+            && p.unit_phrase(true).is_some_and(|u| u.dim() == Dim::POWER);
+        let symbol = match tok.word()? {
+            "w" if power => "W",
+            "w" => "wk",
+            "y" => "yr",
+            _ => return None,
+        };
+        Some(registry().get(symbol))
     }
 
     /// After a number, "in" means inches unless a conversion target follows.
