@@ -924,6 +924,18 @@ fn clock_times() {
 }
 
 #[test]
+fn distances() {
+    check(&[
+        ("distance from Tokyo to London", "9,558 km"),
+        ("Tokyo to London distance", "9,558 km"),
+        ("distance between Paris and Berlin", "878 km"),
+        ("distance from Paris to Berlin in miles", "545.5639068 mi"),
+        ("distance from Texas to Paris", "<error: don't know where exactly \"Texas\" is: name a city>"),
+        ("Tokyo to London", "19:30 BST"),
+    ]);
+}
+
+#[test]
 fn time_zones() {
     check(&[
         ("time in tokyo", "Thu, 24 Sep 2026 03:30 JST"),

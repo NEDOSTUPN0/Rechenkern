@@ -33,8 +33,12 @@ Fez time
 Qwertyville time
 dinner time
 what time is it
+// Distances
+distance between Tokyo and London
+Tokyo to London distance
+distance from JFK to LAX in miles
+
 // Not supported yet
 diff Tokyo London
 time in qld
 coordinates of Tokyo
-distance between Tokyo and London

@@ -96,7 +96,7 @@ impl Parser<'_> {
     }
 
     /// A place the sun can be seen from; regions and zone names have no single place.
-    fn located(&self, location: Option<Location>, from: usize, to: usize) -> Result<Location> {
+    pub(super) fn located(&self, location: Option<Location>, from: usize, to: usize) -> Result<Location> {
         match location {
             Some(location) => Ok(location),
             None => {

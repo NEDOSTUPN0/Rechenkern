@@ -313,6 +313,9 @@ impl Parser<'_> {
         if let Some(expr) = self.sky()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.distance()? {
+            return Ok(Some(expr));
+        }
         if let Some((zone, n, date_only)) = self.place_time_at(i) {
             self.pos += n;
             let now = Expr::Time(if date_only { TimeExpr::Today(0) } else { TimeExpr::Now });

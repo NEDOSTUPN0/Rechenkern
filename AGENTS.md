@@ -58,6 +58,7 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 | `parser/target.rs` | `in`/`to`/`as` targets and rounding |
 | `parser/phrases.rs` | Whole-line phrases: "20 is what % of 200", rule of three |
 | `parser/sky.rs` | Sun and moon phrases: "sunrise in Tokyo", "moon phase on May 1" |
+| `parser/distance.rs` | Distances between places: "distance from Tokyo to London" |
 | `parser/words.rs` | Vocabulary tables (keywords, functions, months, holidays) |
 | `eval/` | Arithmetic on values, functions, dates and durations, the sun and moon |
 | `astro.rs` | Sunrise and sunset (NOAA), the moon's phases (Meeus, ch. 49) |
@@ -214,6 +215,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   the date asked for; "tomorrow" counts from the place's today), rounded to
   the minute, and daylight is their difference. They agree with PyEphem within
   seconds; SoulverCore's are often a minute off.
+- Distances between places are great-circle distances from their coordinates,
+  rounded to the kilometer (`distance from Tokyo to London` = 9,558 km); like the
+  sun, they need a city or an airport.
 - Amounts of food convert between weight and volume only inside a conversion
   (`1 cup of flour in grams` = 125 g); without one they stay as written
   (`1 cup of flour` = 1 cup). Every food in the conversion takes the target's

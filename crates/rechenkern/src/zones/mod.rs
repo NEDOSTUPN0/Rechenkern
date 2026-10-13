@@ -211,6 +211,15 @@ pub fn locate(name: &str) -> Option<Location> {
     Some(Location { zone, latitude, longitude })
 }
 
+/// Great-circle distance between two places in kilometers, on a sphere of the Earth's mean radius.
+pub fn distance_km(a: &Location, b: &Location) -> f64 {
+    const EARTH_RADIUS_KM: f64 = 6371.0088;
+    let (lat1, lat2) = (a.latitude.to_radians(), b.latitude.to_radians());
+    let (dlat, dlon) = (lat2 - lat1, (b.longitude - a.longitude).to_radians());
+    let h = (dlat / 2.0).sin().powi(2) + lat1.cos() * lat2.cos() * (dlon / 2.0).sin().powi(2);
+    2.0 * EARTH_RADIUS_KM * h.sqrt().min(1.0).asin()
+}
+
 /// "America/Port-au-Prince" -> "port au prince", as hyphenated names are read.
 fn zone_city_name(id: &str) -> String {
     id.rsplit('/').next().unwrap_or(id).replace(['_', '-'], " ").to_lowercase()

@@ -39,8 +39,12 @@ Qwertyville time                             → <none>
 dinner time                                  → <none>
 what time is it                              → 14:30
 
+// Distances
+distance between Tokyo and London            → 9,558 km
+Tokyo to London distance                     → 9,558 km
+distance from JFK to LAX in miles            → 2,445.095641 mi
+
 // Not supported yet
 diff Tokyo London                            → <none>
 time in qld                                  → <error: unknown place "qld">
 coordinates of Tokyo                         → <error: unexpected "of">
-distance between Tokyo and London            → <error: unexpected "between">

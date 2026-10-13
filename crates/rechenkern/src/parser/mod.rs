@@ -3,6 +3,7 @@
 //! Words the parser doesn't know are skipped as comments, so
 //! `$20 for lunch + $15 for taxi` reads as `$20 + $15`.
 
+mod distance;
 mod phrases;
 mod primary;
 mod sky;
