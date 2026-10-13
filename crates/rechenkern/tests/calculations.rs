@@ -1013,6 +1013,8 @@ fn compound_growth() {
         ("20k after 6 months at 10% per month", "35,431.22"),
         ("$100 for 2 years at 1%/month", "$126.97"),
         ("$100 at 10% for 5 years", "$161.05"),
+        ("$1,000 at 5% compounded daily for 2 years", "$1,105.16"),
+        ("$1,000 at 5% for 2 years compounded daily", "$1,105.16"),
         ("interest on $100 at 10% for 5 years", "$61.05"),
         ("monthly repayment on $300,000 for 30 years at 6%", "$1,798.65"),
         ("weekly repayment on $10,000 at 5% for 5 years", "$43.40"),

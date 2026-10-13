@@ -227,12 +227,11 @@ impl Parser<'_> {
         };
         let compounding =
             ["compounding", "compounded", "compound"].iter().filter_map(|w| self.find(at + 1, &[w])).min();
-        let end = compounding.unwrap_or(self.toks.len());
-        // "for 3 years at 7%" or "at 7% for 3 years".
-        let (principal_end, time, mut rate_end) = match during < at {
-            true => (during, (during + 1, at), end),
-            false => (at, (during + 1, end), during),
-        };
+        // "for 3 years at 7%", "at 7% for 3 years", "at 5% compounded daily for 2 years":
+        // each part runs to the next one.
+        let stops = [Some(during), Some(at), compounding, Some(self.toks.len())];
+        let end_after = |from: usize| stops.iter().flatten().copied().filter(|&s| s > from).min().unwrap_or(from);
+        let (principal_end, time, mut rate_end) = (during.min(at), (during + 1, end_after(during)), end_after(at));
         // "10% per month" grows every month; plain rates are yearly.
         let mut period = registry().get("yr");
         let per = self
