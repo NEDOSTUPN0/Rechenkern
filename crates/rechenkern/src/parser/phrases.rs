@@ -13,6 +13,9 @@ impl Parser<'_> {
         if let Some(expr) = self.growth()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.annual_return()? {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.when_it_is()? {
             return Ok(Some(expr));
         }
@@ -280,6 +283,28 @@ impl Parser<'_> {
             }
             None => growth,
         }))
+    }
+
+    /// "annual return on $500 that grew to $1,000 over 5 years": the yearly growth rate.
+    fn annual_return(&self) -> Result<Option<Expr>> {
+        if !self.matches_at(0, &["annual", "return", "on"]) {
+            return Ok(None);
+        }
+        let Some(during) = ["over", "after", "in", "for"].iter().filter_map(|w| self.find(4, &[w])).min() else {
+            return Ok(None);
+        };
+        // The amount at the start, then at the end, with words around them.
+        let mut amounts = self.sub(3, during);
+        let start = amounts.additive()?;
+        amounts.eat_word("to");
+        let end = amounts.additive()?;
+        amounts.finish()?;
+        let reg = registry();
+        let years = Expr::Convert(self.part(during + 1, self.toks.len())?.boxed(), Target::Unit(reg.get("yr")));
+        let years = Self::formatted(years, Format::Number);
+        let one = || Expr::Number(Number::ONE);
+        let growth = Expr::binary(Op::Pow, Expr::binary(Op::Div, end, start), Expr::binary(Op::Div, one(), years));
+        Ok(Some(Self::formatted(Expr::binary(Op::Sub, growth, one()), Format::Percent)))
     }
 
     /// "if 30 is 20%, what is 50%" = 75, "20% is 30, what is 60" = 40%: a value known

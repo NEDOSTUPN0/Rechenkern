@@ -1053,6 +1053,9 @@ fn compound_growth() {
         ("total interest on $10,000 for 5 years at 5%", "$1,322.74"),
         ("monthly interest on $10,000 for 5 years at 5%", "$22.05"),
         ("monthly payment on $12,000 for 1 year at 0%", "$1,000.00"),
+        ("annual return on $500 that grew to $1,000 over 5 years", "14.8698355%"),
+        ("annual return on 500 invested 1000 returned after 5 years", "14.8698355%"),
+        ("annual return on $500 that grew to $1,000 over 6 months", "300%"),
     ]);
 }
 
