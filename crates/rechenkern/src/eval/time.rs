@@ -149,11 +149,11 @@ pub(super) fn split(seconds: Number, units: &[Unit]) -> Result<Span> {
     Ok(if negative { span.negate() } else { span })
 }
 
-/// A date without a year, maybe moved: "March 10", "March 10 + 1 day".
+/// A date without a year, maybe moved: "March 10", "March 10 + 1 day", "Christmas", "Q3".
 pub(super) fn yearless(e: &Expr) -> bool {
     match e {
-        Expr::Time(TimeExpr::Date { year: None, .. }) => true,
-        Expr::Binary(Op::Add, date, _) => yearless(date),
+        Expr::Time(TimeExpr::Date { year: None, .. } | TimeExpr::Holiday { year: None, .. }) => true,
+        Expr::Binary(Op::Add, date, _) | Expr::Period(date, _) => yearless(date),
         _ => false,
     }
 }
@@ -315,7 +315,16 @@ impl Env<'_> {
                     .ok_or_else(|| Error::new(format!("invalid date {month}/{day}")))?;
                 Ok(Value::Moment(self.date_moment(date)?))
             }
+            Expr::Time(TimeExpr::Holiday { holiday, year: None }) => {
+                let step = if after { 1 } else { -1 };
+                let date = (0..=1)
+                    .map(|k| holiday_date(*holiday, anchor.year() + step * k))
+                    .find(|d| d.as_ref().is_ok_and(|&d| if after { d >= anchor } else { d <= anchor }))
+                    .unwrap_or_else(|| holiday_date(*holiday, anchor.year() + step))?;
+                Ok(Value::Moment(self.date_moment(date)?))
+            }
             Expr::Binary(Op::Add, date, by) => self.add(self.date_near(date, anchor, after)?, self.eval(by)?),
+            Expr::Period(first, _) => self.date_near(first, anchor, after),
             e => self.endpoint(e),
         }
     }
