@@ -687,16 +687,18 @@ impl Parser<'_> {
         }
     }
 
-    /// A quarter at token `i`, whose word is `w`: `Q3`, `Q3 2026`, `Q3 of 2026`, `next quarter`.
+    /// A quarter or a season at token `i`, whose word is `w`: `Q3`, `Q3 2026`, `Q3 of 2026`,
+    /// `next quarter`, `summer 2020`.
     fn quarter_at(&self, i: usize, w: &str) -> Option<(Expr, Expr, usize)> {
-        let (first, n) = match (words::which(w), words::quarter(w)) {
+        let (first, n) = match (words::which(w), words::three_months(w)) {
             (Some(which), _) if self.words_at(i + 1, &["quarter"]) => (TimeExpr::Quarter(which), 2),
-            (_, Some(quarter)) => {
+            // "spring festival" is a holiday.
+            (_, Some(month)) if self.phrase_at(i, &words::HOLIDAYS).is_none() => {
                 let mut p = self.clone();
                 p.pos = i + 1 + usize::from(self.words_at(i + 1, &["of"]));
                 let year = p.year().map(|y| y as i16);
                 let n = if year.is_some() { p.pos - i } else { 1 };
-                (TimeExpr::Date { year, month: (quarter - 1) * 3 + 1, day: 1 }, n)
+                (TimeExpr::Date { year, month, day: 1 }, n)
             }
             _ => return None,
         };
@@ -722,7 +724,7 @@ impl Parser<'_> {
                     w.as_str(),
                     "now" | "today" | "tomorrow" | "yesterday" | "next" | "last" | "this" | "noon" | "midnight"
                 ) || words::month(&w).is_some()
-                    || words::quarter(&w).is_some()
+                    || words::three_months(&w).is_some()
                     || words::weekday(&w).is_some()
                     || p.phrase_at(p.pos, &words::HOLIDAYS).is_some()
                     || p.event_at(p.pos).is_some()

@@ -449,9 +449,20 @@ pub const EVENTS: &[Event] = &[Event {
     note: "probably",
 }];
 
-/// Quarter number for `q1` to `q4`.
-pub fn quarter(w: &str) -> Option<i8> {
-    w.strip_prefix('q').and_then(|q| q.parse().ok()).filter(|q| (1..=4).contains(q))
+/// First month of a quarter (`q1` to `q4`) or of a season, as meteorologists in the
+/// northern hemisphere count them: summer is June to August.
+pub fn three_months(w: &str) -> Option<i8> {
+    let season = match w {
+        "spring" => 3,
+        "summer" => 6,
+        "autumn" | "fall" => 9,
+        "winter" => 12,
+        _ => {
+            let quarter: i8 = w.strip_prefix('q').and_then(|q| q.parse().ok()).filter(|q| (1..=4).contains(q))?;
+            return Some((quarter - 1) * 3 + 1);
+        }
+    };
+    Some(season)
 }
 
 /// `next`, `last` or `this` before a period.

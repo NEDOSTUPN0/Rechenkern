@@ -197,7 +197,7 @@ impl<'a> Parser<'a> {
             || (words::ordinal_word(w).is_some() && self.words_at(i + 1, &["root"]))
             || words::constant(w).is_some()
             || words::month(w).is_some()
-            || (words::quarter(w).is_some() && self.quarter_starts(i))
+            || (words::three_months(w).is_some() && self.quarter_starts(i))
             || words::weekday(w).is_some()
             || words::is_line_word(w)
             || self.phrase_at(i, &words::FUNCTIONS).is_some()

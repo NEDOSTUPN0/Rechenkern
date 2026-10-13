@@ -158,7 +158,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   their first and last day, in a calculation they are their length (`Q3 in days` =
   92 days), and a range starts at their first day (`days until Q4`) or runs through
   them (`Q1 through Q2`). A quarter right before a value or a comment is a label
-  (`Q2 sales 600`, `Q3 $10k`).
+  (`Q2 sales 600`, `Q3 $10k`). Seasons work the same, as meteorologists in the
+  northern hemisphere count them (`summer 2020` is June to August, `winter 2026`
+  starts in December).
 - `start of`/`end of` a period is its first or last day (`end of Q3`, `start of
   next month`). Weeks start on Monday: `friday in 3 weeks` is the Friday of the
   week three weeks from now.
