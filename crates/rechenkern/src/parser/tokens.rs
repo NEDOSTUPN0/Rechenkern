@@ -268,10 +268,10 @@ impl<'a> Parser<'a> {
         // "A" is an article before a word ("A coffee"), amperes otherwise ("5 V/A").
         let article = matches!(word, "a" | "an")
             || (word == "A" && self.toks.get(i + 1).is_some_and(|t| t.word().is_some() && t.space_before));
-        // Units that are also words count only after a number, a slash or in a target:
-        // "there are 5", "PS: 5", but "$5/are".
+        // Units that are also words count only after a number, a slash, a product dot or
+        // in a target: "there are 5", "PS: 5", but "$5/are", "kcal·PS".
         let word_unit = word.eq_ignore_ascii_case("are") || word.eq_ignore_ascii_case("ares") || word == "PS";
-        let after_slash = i > 0 && self.toks[i - 1].is_sym("/");
+        let after_slash = i > 0 && (self.toks[i - 1].is_sym("/") || self.toks[i - 1].is_sym("*"));
         if word.eq_ignore_ascii_case("in") || (!after_number && (article || (word_unit && !after_slash))) {
             return None;
         }

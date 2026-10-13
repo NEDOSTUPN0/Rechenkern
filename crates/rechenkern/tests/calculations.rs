@@ -480,6 +480,7 @@ fn units() {
         ("1 acre in m2", "4,046.856422 m²"),
         ("1 are in m2", "100 m²"),
         ("$5/are", "$5.00/are"),
+        ("1 kcal·PS", "1 kcal·PS"),
         ("1 ha in ares", "100 ares"),
         ("there are 5 apples", "5"),
         ("1 ML in L", "1,000,000 L"),
