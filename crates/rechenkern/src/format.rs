@@ -428,7 +428,8 @@ fn duration(d: &Duration, config: &Config) -> String {
         let s = seconds.round_dp(3);
         let whole = s.trunc().to_i64().unwrap_or(0);
         let frac = s.fract();
-        let frac = if frac.is_zero() { String::new() } else { frac.to_string().trim_start_matches('0').to_string() };
+        let point = if config.decimal_comma { "," } else { "." };
+        let frac = if frac.is_zero() { String::new() } else { frac.to_string().replacen("0.", point, 1) };
         return format!("{sign}{:02}:{:02}:{whole:02}{frac}", total_minutes / 60, total_minutes % 60);
     }
     let names = [
@@ -449,7 +450,7 @@ fn duration(d: &Duration, config: &Config) -> String {
         .collect();
     if !seconds.is_zero() || parts.is_empty() {
         // Every digit there is, down to the nanosecond: "1 hour 0.000000001 seconds".
-        let text = plain_digits(seconds, 10).unwrap_or_default();
+        let text = group(&plain_digits(seconds, 10).unwrap_or_default(), config);
         parts.push(format!("{text} second{}", if seconds == Number::ONE { "" } else { "s" }));
     }
     format!("{sign}{}", parts.join(" "))

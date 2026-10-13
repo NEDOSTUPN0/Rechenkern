@@ -167,7 +167,8 @@ proptest! {
         let point = calculator(config()).calculate(&line);
         let comma = calculator(Config { decimal_comma: true, ..config() }).calculate(&line);
         match (point, comma) {
-            (Ok(Some(a)), Ok(Some(b))) if matches!(a.value(), Value::Quantity(_) | Value::Percent(_)) => {
+            // Text has numbers too: "5 – 10 kg".
+            (Ok(Some(a)), Ok(Some(b))) if !matches!(a.value(), Value::Moment(_) | Value::Bool(_)) => {
                 let swapped: String =
                     a.text().chars().map(|c| match c { '.' => ',', ',' => '.', c => c }).collect();
                 prop_assert_eq!(swapped.replace(". ", "; "), b.text());
