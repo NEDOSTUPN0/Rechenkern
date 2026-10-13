@@ -480,6 +480,11 @@ impl<'a> Parser<'a> {
                 self.pos += 1;
                 self.unary()
             }
+            // "!false", "!(1 > 2)"
+            Tok::Sym("!") => {
+                self.pos += 1;
+                Ok(Expr::Not(self.unary()?.boxed()))
+            }
             Tok::Sym("√") => {
                 self.pos += 1;
                 Ok(Expr::Call(Func::Sqrt, vec![self.unary()?]))
@@ -625,6 +630,7 @@ fn is_boolean(expr: &Expr) -> bool {
     matches!(
         expr,
         Expr::Bool(_)
+            | Expr::Not(_)
             | Expr::Call(Func::IsPrime, _)
             | Expr::Binary(Op::Eq | Op::Ne | Op::Lt | Op::Gt | Op::Le | Op::Ge | Op::And | Op::Or, ..)
     )

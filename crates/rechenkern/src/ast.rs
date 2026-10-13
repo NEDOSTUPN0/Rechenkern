@@ -36,6 +36,8 @@ pub enum Expr {
     Percent(Box<Expr>),
     Neg(Box<Expr>),
     Factorial(Box<Expr>),
+    /// `!true`: the opposite of a boolean.
+    Not(Box<Expr>),
     Binary(Op, Box<Expr>, Box<Expr>),
     /// Adjacent parts added together: `5 ft 3 in`, `1 hour 30 min`.
     Composite(Vec<Expr>),
@@ -119,6 +121,7 @@ impl Expr {
                 | Expr::Percent(e)
                 | Expr::Neg(e)
                 | Expr::Factorial(e)
+                | Expr::Not(e)
                 | Expr::Noted(e, _)
                 | Expr::Food(e, _)
                 | Expr::InZone(e, _)

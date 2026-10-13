@@ -124,6 +124,10 @@ impl Env<'_> {
             },
             Expr::Neg(inner) => self.negate(self.eval(inner)?)?,
             Expr::Factorial(inner) => functions::factorial(self.eval(inner)?)?,
+            Expr::Not(inner) => match self.eval(inner)? {
+                Value::Bool(b) => Value::Bool(!b),
+                v => bail!("can't take \"not\" of {}", v.kind()),
+            },
             // "Jan 1 - Mar 1" is a range, as "Jan 1 to Mar 1".
             Expr::Binary(Op::Sub, a, b) if time::yearless(a) && time::yearless(b) => {
                 let (a, b) = self.range_ends(a, b)?;
