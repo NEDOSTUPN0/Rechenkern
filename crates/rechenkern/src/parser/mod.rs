@@ -316,7 +316,21 @@ impl<'a> Parser<'a> {
             if swap && matches!(rhs, Expr::Time(TimeExpr::Now)) {
                 rhs = time::now_for(&lhs);
             }
+            // "5-10 kg", "20-30 minutes in hours": a range of amounts, when nothing else follows.
+            if tok.is_sym("-") && is_amount_range(&lhs, &rhs) && self.clone().value_ends() {
+                lhs = Expr::Range(lhs.boxed(), rhs.boxed());
+                continue;
+            }
             lhs = if swap { Expr::binary(op, rhs, lhs) } else { Expr::binary(op, lhs, rhs) };
+        }
+    }
+
+    /// Nothing but a conversion follows the value at the cursor.
+    fn value_ends(&mut self) -> bool {
+        match self.peek().map(|t| &t.tok) {
+            None | Some(Tok::Sym("->")) => true,
+            Some(Tok::Word(w)) => matches!(w.to_lowercase().as_str(), "in" | "to" | "as" | "into"),
+            _ => false,
         }
     }
 
@@ -634,6 +648,16 @@ fn text_weight(expr: &Expr) -> u8 {
         2
     } else {
         1
+    }
+}
+
+/// A smaller number before an amount, as in "5-10 kg"; money subtracts: "$10-20".
+fn is_amount_range(low: &Expr, high: &Expr) -> bool {
+    match (low, high) {
+        (Expr::Number(low), Expr::WithUnit(high, unit)) if !unit.is_money() => {
+            matches!(**high, Expr::Number(high) if *low < high)
+        }
+        _ => false,
     }
 }
 

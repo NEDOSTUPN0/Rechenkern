@@ -292,6 +292,12 @@ impl Parser<'_> {
                 }
                 return Ok(Some(Expr::binary(Op::Add, now_for(&amount), amount)));
             }
+            // "between 5 and 10 kg"
+            "between" if self.operand_follows(1) => {
+                self.pos += 1;
+                let [a, b] = self.pair()?;
+                return Ok(Some(Expr::Range(a.boxed(), b.boxed())));
+            }
             "from" if self.operand_follows(1) => {
                 self.pos += 1;
                 let start = self.additive()?;

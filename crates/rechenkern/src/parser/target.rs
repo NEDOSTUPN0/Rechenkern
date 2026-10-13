@@ -432,6 +432,11 @@ impl Parser<'_> {
             return Some(Target::Format(Format::Base(base as u8)));
         }
         if let Some(unit) = self.unit_expr(true) {
+            // "$10 to $20": an amount of money, not a currency to convert to.
+            if unit.is_money() && self.cur().is_some_and(|t| matches!(t.tok, Tok::Num(_))) {
+                self.pos = start;
+                return None;
+            }
             let mut units = vec![unit];
             loop {
                 let mut p = self.clone();

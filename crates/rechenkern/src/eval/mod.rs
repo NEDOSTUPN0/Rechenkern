@@ -81,6 +81,18 @@ impl Env<'_> {
     /// Evaluates a line, keeping how the answer should be shown.
     pub fn answer(&self, expr: &Expr) -> Result<(Value, Display)> {
         match expr {
+            // "20-30 minutes in hours": both ends of a range of amounts.
+            Expr::Convert(inner, target)
+                if let Expr::Range(a, b) = &**inner
+                    && let Some(ends) = self.amount_range(a, b)? =>
+            {
+                let [a, b] = ends.map(|q| self.convert(Value::Quantity(q), target, Display::Auto));
+                Ok((Value::Text(self.range_text(a?, b?)), Display::Auto))
+            }
+            Expr::Range(a, b) if let Some([a, b]) = self.amount_range(a, b)? => {
+                let text = self.range_text((Value::Quantity(a), Display::Auto), (Value::Quantity(b), Display::Auto));
+                Ok((Value::Text(text), Display::Auto))
+            }
             Expr::Convert(inner, target) => {
                 let saved = self.food_as.replace(weight_or_volume(target));
                 let answer = self.answer(inner);
@@ -176,6 +188,32 @@ impl Env<'_> {
                 self.growth(principal, time, rate, period, *compounds, *result)?
             }
         })
+    }
+
+    /// The ends of a range of amounts in one unit, as in "5-10 kg": a plain number
+    /// takes the other end's unit. `None` for anything else, such as dates.
+    fn amount_range(&self, a: &Expr, b: &Expr) -> Result<Option<[Quantity; 2]>> {
+        let Value::Quantity(mut a) = self.eval(a)? else { return Ok(None) };
+        let Value::Quantity(mut b) = self.eval(b)? else { return Ok(None) };
+        if a.unit.is_none() {
+            a.unit = b.unit.clone();
+        } else if b.unit.is_none() {
+            b.unit = a.unit.clone();
+        }
+        Ok((a.unit == b.unit).then_some([a, b]))
+    }
+
+    /// "5 – 10 kg"; the unit is written once when both ends have it.
+    fn range_text(&self, a: (Value, Display), b: (Value, Display)) -> String {
+        let high = crate::format::render(&b.0, &b.1, self.config, &self.now);
+        match (&a, &b) {
+            ((Value::Quantity(x), Display::Auto), (Value::Quantity(y), Display::Auto))
+                if x.unit == y.unit && !x.unit.is_money() =>
+            {
+                format!("{} – {high}", crate::format::number(x.number, self.config))
+            }
+            _ => format!("{} – {high}", crate::format::render(&a.0, &a.1, self.config, &self.now)),
+        }
     }
 
     /// The branch of `a if cond else b` to evaluate; `None` if there is none.

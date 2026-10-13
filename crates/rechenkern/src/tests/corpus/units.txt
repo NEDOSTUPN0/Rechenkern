@@ -39,3 +39,10 @@ hours in a week
 10 kg * 9.8 m/s^2
 5 km cast to miles
 2000 mAh * 3.7 V
+
+// Ranges of amounts
+5-10 kg
+5 - 10 kg in lb
+20-30 minutes in hours
+between 5 and 10 kg
+5-10 kg + 1 kg

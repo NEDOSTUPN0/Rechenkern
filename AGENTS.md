@@ -142,6 +142,10 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   = 22 hours); months and longer meet in the smaller unit (`1 year - 2 months`
   = 10 months). Seconds that come out of unit algebra (`3 GB / 10 MB/s`)
   become a duration too.
+- A smaller number before an amount, with nothing after but a conversion, is a
+  range (`5-10 kg`, `5 to 10 kg`, `between 5 and 10 kg` = "5 – 10 kg"); a
+  conversion converts both ends. In a calculation it subtracts (`5-10 kg * 2`
+  = -15 kg), and so does money (`$10-20`), as in SoulverCore. The answer is text.
 - `if … then … else …`, `x if cond`, `x unless cond`: a false condition with
   no `else` gives no answer (and assigns nothing).
 - Compound growth (`$1,000 after 3 years at 7% compounding monthly`) is a
