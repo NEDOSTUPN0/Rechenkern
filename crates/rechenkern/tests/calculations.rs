@@ -1069,6 +1069,7 @@ fn comments_and_labels() {
         ("max($10, $20)", "$20.00"),
         ("A coffee $5", "$5.00"),
         ("5:30 km/h", "05:30"),
+        ("Executed 4 tests, with 1 failure in 0.009 seconds", "0.009 seconds"),
     ]);
 }
 

@@ -130,6 +130,11 @@ impl<'a> Parser<'a> {
         let mut p = self.clone();
         p.pos = 0;
         while p.peek().is_some() {
+            // "1 failure in 0.009 seconds": the time taken, not a moment that far ahead.
+            if p.cur().is_some_and(|t| t.is_word("in")) {
+                p.pos += 1;
+                continue;
+            }
             let mut value = p.clone();
             match value.expr() {
                 // Units without a number are words here: "5 cats km", "5:30 km/h".
