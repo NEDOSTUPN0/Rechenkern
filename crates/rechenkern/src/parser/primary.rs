@@ -409,6 +409,12 @@ impl Parser<'_> {
             self.pos += 1;
             return Ok(Some(Expr::Number(n)));
         }
+        // "square meter in sq ft"
+        if matches!(w, "square" | "sq" | "cubic" | "cu")
+            && let Some(unit) = self.unit_phrase(false)
+        {
+            return Ok(Some(Expr::BareUnit(unit)));
+        }
         if let Some((unit, n)) = self.unit_at(i, false) {
             return self.bare_unit(unit, n).map(Some);
         }

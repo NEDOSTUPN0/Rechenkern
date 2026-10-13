@@ -185,6 +185,8 @@ impl<'a> Parser<'a> {
             || (matches!(w, "every" | "each") && self.counted_unit_at(i + 1))
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
+            // "sq ft", "cu m"
+            || (matches!(w, "sq" | "cu") && self.unit_at(i + 1, false).is_some())
             || (matches!(w, "through" | "thru") && self.date_starts(i + 1))
             || (matches!(w, "start" | "beginning" | "end") && self.period_bound_at(i).is_some())
             // "round 56 down": a direction only after "round".

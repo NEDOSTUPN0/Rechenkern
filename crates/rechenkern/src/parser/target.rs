@@ -50,7 +50,11 @@ impl Parser<'_> {
             && !unit.is_money()
             && self.operand_follows(0)
         {
-            let amount = self.bit_or()?;
+            // "square meters in sq ft": one of a unit, which may have a power.
+            let amount = match self.unit_phrase(true) {
+                Some(of) => Expr::BareUnit(of),
+                None => self.bit_or()?,
+            };
             return Ok(Some(Expr::Convert(amount.boxed(), Target::Unit(unit.clone()))));
         }
         if keyword == "to"

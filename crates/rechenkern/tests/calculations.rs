@@ -391,6 +391,10 @@ fn units() {
         ("meters in 10 km", "10,000 m"),
         ("days in 3 weeks", "21 days"),
         ("seconds in a day", "86,400 seconds"),
+        ("square meter in sq ft", "0.09290304 m²"),
+        ("a sq m in sq ft", "0.09290304 m²"),
+        ("cubic meter in cubic feet", "0.02831684659 m³"),
+        ("$3 per sq ft", "$3.00/ft²"),
         // An article before a unit is one of it.
         ("a day in hours", "24 hours"),
         ("an inch in cm", "2.54 cm"),
