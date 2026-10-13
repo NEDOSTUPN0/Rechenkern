@@ -128,7 +128,12 @@ impl Parser<'_> {
             }
         }
         // "4 to what power is 20", "4 with what exponent is 20"
-        for seq in [&["to", "what", "power", "is"][..], &["with", "what", "exponent", "is"][..]] {
+        for seq in [
+            &["to", "what", "power", "is"][..],
+            &["to", "what", "exponent", "is"],
+            &["with", "what", "exponent", "is"],
+            &["with", "what", "power", "is"],
+        ] {
             if let Some(at) = self.find(0, seq) {
                 let (a, b) = (self.part(at + seq.len(), end)?, self.part(0, at)?);
                 return Ok(Some(Expr::Call(crate::ast::Func::Log, vec![a, b])));

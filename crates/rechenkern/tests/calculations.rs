@@ -349,6 +349,8 @@ fn percentages() {
         ("81 is 9 to the power of what", "2"),
         ("9 to what power is 81", "2"),
         ("9 with what exponent is 81", "2"),
+        ("4 with what power is 20", "2.160964047"),
+        ("2 to what exponent is 8", "3"),
         ("2/3 of 600", "400"),
         ("50 is 1/5 of what", "250"),
         ("20/5 as multiplier", "4x"),
