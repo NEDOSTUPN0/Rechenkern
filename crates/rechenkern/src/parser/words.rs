@@ -114,13 +114,16 @@ pub fn scale_word(w: &str) -> Option<Number> {
     registry().lookup(w).is_none().then_some(n)
 }
 
-/// Letter suffixes glued to numbers: `5k`, `2.5M`, `10G`.
+/// Letter suffixes glued to numbers: `5k`, `2.5M`, `10G`; also Cyrillic
+/// (`5к`, `3М`) and Chinese (`5千`, `3万`).
 pub fn suffix_multiplier(w: &str) -> Option<Number> {
     Some(match w {
-        "k" => Number::pow10(3),
-        "M" => Number::pow10(6),
-        "G" => Number::pow10(9),
-        "T" => Number::pow10(12),
+        "k" | "к" | "К" | "千" => Number::pow10(3),
+        "万" => Number::pow10(4),
+        "M" | "М" => Number::pow10(6),
+        "亿" => Number::pow10(8),
+        "G" | "Г" => Number::pow10(9),
+        "T" | "Т" => Number::pow10(12),
         _ => return None,
     })
 }
