@@ -85,6 +85,12 @@ impl Parser<'_> {
             {
                 return Ok(Some(Expr::InZone(expr.clone().boxed(), zone.clone())));
             }
+            if let Target::Unit(unit) = &target
+                && unit.is_money()
+                && let Some(converted) = self.at_rate(expr, unit)?
+            {
+                return Ok(Some(converted));
+            }
             // "$100 in EUR on Jan 1, 2020" asks for that day's rate.
             let mut p = self.clone();
             if let Target::Unit(unit) = &target
@@ -109,6 +115,34 @@ impl Parser<'_> {
         }
         self.pos = start;
         Ok(None)
+    }
+
+    /// "$100 in EUR at 0.9", "100 AUD as USD at 1.50 AUD/USD": converted at the rate given.
+    fn at_rate(&mut self, expr: &Expr, to: &Unit) -> Result<Option<Expr>> {
+        let mut p = self.clone();
+        if !(p.eat_word("at") || p.eat_sym("@")) || !p.peek().is_some_and(|t| matches!(t.tok, Tok::Num(_))) {
+            return Ok(None);
+        }
+        let (rate, top, bottom) = match p.unary()? {
+            rate @ Expr::Number(_) => (rate, None, None),
+            Expr::Binary(Op::Per, a, b) => match (*a, *b) {
+                (Expr::WithUnit(rate, top), Expr::BareUnit(bottom)) => (*rate, Some(top), Some(bottom)),
+                _ => return Ok(None),
+            },
+            _ => return Ok(None),
+        };
+        // A rate with units says which way it goes: 1.50 AUD/USD is AUD per USD.
+        let from = expr.edge_unit(true).filter(|u| u.is_money());
+        let divide = match (top, bottom) {
+            (Some(top), Some(bottom)) if top == *to && from.is_none_or(|f| *f == bottom) => false,
+            (Some(top), Some(bottom)) if bottom == *to && from.is_none_or(|f| *f == top) => true,
+            (None, None) => false,
+            _ => bail!("the rate doesn't convert between these currencies"),
+        };
+        *self = p;
+        let amount = Expr::Convert(expr.clone().boxed(), Target::Format(Format::Number));
+        let op = if divide { Op::Div } else { Op::Mul };
+        Ok(Some(Expr::WithUnit(Expr::binary(op, amount, rate).boxed(), to.clone())))
     }
 
     /// Fails with a helpful message if words that aren't a known place follow.
