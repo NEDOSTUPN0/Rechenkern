@@ -366,6 +366,8 @@ pub enum Format {
     Hex,
     Binary,
     Octal,
+    /// Digits in another base: `255 in base 3`.
+    Base(u8),
     Decimal,
     Scientific,
     Fraction,

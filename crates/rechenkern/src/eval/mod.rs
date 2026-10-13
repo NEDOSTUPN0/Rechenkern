@@ -427,6 +427,13 @@ impl Env<'_> {
                     _ => bail!("only whole numbers can be shown in base {radix}"),
                 }
             }
+            // Other bases have no prefix to read back, so they are text.
+            Format::Base(base) => match &value {
+                Value::Quantity(q) if q.number.is_integer() && q.unit.is_none() => {
+                    (Value::Text(crate::format::digits_in_base(q.number, base.into())?), Display::Auto)
+                }
+                _ => bail!("only whole numbers can be shown in base {base}"),
+            },
             Format::Decimal => match value {
                 Value::Percent(p) => (Value::number(p / Number::from_i64(100)), Display::Auto),
                 v => (v, if matches!(display, Display::Plain) { display } else { Display::Auto }),

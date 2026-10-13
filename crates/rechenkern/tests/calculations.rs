@@ -152,6 +152,10 @@ fn bases_and_bits() {
         ("hex(99)", "0x63"),
         ("255 in base 16", "0xFF"),
         ("255 as base 2", "0b11111111"),
+        ("255 in base 3", "100110"),
+        ("255 to base 36", "73"),
+        ("-10 in base 3", "-101"),
+        ("2.5 in base 3", "<error: only whole numbers can be shown in base 3>"),
         ("255 in %", "25,500%"),
     ]);
 }

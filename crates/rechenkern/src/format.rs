@@ -145,6 +145,24 @@ pub(crate) fn radix(n: Number, radix: u32) -> Result<String> {
     Ok(if i < 0 { format!("-{digits}") } else { digits })
 }
 
+/// Digits of a whole number in any base from 2 to 36, without a prefix: `100110`.
+pub(crate) fn digits_in_base(n: Number, base: u32) -> Result<String> {
+    let Some(i) = n.to_i128() else { bail!("only whole numbers can be shown in base {base}") };
+    let mut abs = i.unsigned_abs();
+    let mut digits = Vec::new();
+    loop {
+        digits.push(char::from_digit((abs % base as u128) as u32, base).unwrap_or('?').to_ascii_uppercase());
+        abs /= base as u128;
+        if abs == 0 {
+            break;
+        }
+    }
+    if i < 0 {
+        digits.push('-');
+    }
+    Ok(digits.iter().rev().collect())
+}
+
 /// Closest simple fraction, like `1/3`.
 fn fraction(n: Number, config: &Config) -> String {
     if n.is_integer() {

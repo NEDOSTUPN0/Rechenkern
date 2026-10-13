@@ -349,6 +349,14 @@ impl Parser<'_> {
                 return Some(Target::Format(format));
             }
         }
+        // "in base 3", "to base 36"
+        if self.words_at(self.pos, &["base"])
+            && let Some(Tok::Num(n)) = self.toks.get(self.pos + 1).map(|t| &t.tok)
+            && let Some(base) = n.to_i64().filter(|b| (2..=36).contains(b) && n.is_integer())
+        {
+            self.pos += 2;
+            return Some(Target::Format(Format::Base(base as u8)));
+        }
         if let Some(unit) = self.unit_expr(true) {
             let mut units = vec![unit];
             loop {
