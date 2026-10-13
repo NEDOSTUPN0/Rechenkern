@@ -425,6 +425,12 @@ today as day of week                         → Wednesday
 255 in weekday                               → <error: a number has no weekday>
 0.75 as weekday                              → <error: a number has no weekday>
 today as weekday                             → Wednesday
+255 in pitch                                 → <error: only a frequency has a pitch, not a number>
+0.75 as pitch                                → <error: only a frequency has a pitch, not a number>
+today as pitch                               → <error: only a frequency has a pitch, not a date>
+255 in note                                  → <error: only a frequency has a pitch, not a number>
+0.75 as note                                 → <error: only a frequency has a pitch, not a number>
+today as note                                → <error: only a frequency has a pitch, not a date>
 
 // Constants and powers
 speed of light                               → 299,792,458 m/s

@@ -1847,6 +1847,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 hungarian forint in EUR                  → €1.13
 2.5 hungarian forints                        → 2.50 HUF
 2.5 hungarian forints in EUR                 → €1.13
+2.5 hz                                       → 2.5 Hz
 2.5 iceland krona                            → 3 ISK
 2.5 iceland krona in EUR                     → €1.13
 2.5 iceland kronas                           → 3 ISK
@@ -2042,6 +2043,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 kgs in EUR                               → €1.13
 2.5 khr                                      → 2.50 KHR
 2.5 khr in EUR                               → €1.13
+2.5 khz                                      → 2.5 kHz
+2.5 khz in Hz                                → 2,500 Hz
 2.5 kib                                      → 2.5 KiB
 2.5 kib in B                                 → 2,560 B
 2.5 kibibit                                  → 2.5 Kibit

@@ -494,6 +494,9 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
 
 /// Spellings added on top of the generated ones.
 const EXTRA: &[(&str, &str)] = &[
+    // Lowercase hertz; not "mhz", which would be millihertz.
+    ("hz", "Hz"),
+    ("khz", "kHz"),
     ("KB", "kB"),
     ("kb", "kB"),
     ("b", "bit"),

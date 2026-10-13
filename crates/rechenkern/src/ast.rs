@@ -387,6 +387,8 @@ pub enum Format {
     WeekNumber,
     DayOfYear,
     DayOfMonth,
+    /// The musical note nearest a frequency: `440 Hz as pitch` = A4.
+    Pitch,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

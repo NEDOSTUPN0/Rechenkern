@@ -316,6 +316,10 @@ impl Parser<'_> {
         if let Some(expr) = self.distance()? {
             return Ok(Some(expr));
         }
+        if let Some((hz, n)) = self.note_at(i) {
+            self.pos += n;
+            return Ok(Some(Expr::WithUnit(Expr::Number(Number::from_f64(hz)).boxed(), registry().get("Hz"))));
+        }
         if let Some((zone, n, date_only)) = self.place_time_at(i) {
             self.pos += n;
             let now = Expr::Time(if date_only { TimeExpr::Today(0) } else { TimeExpr::Now });
@@ -389,6 +393,53 @@ impl Parser<'_> {
             bail!("unknown function \"{}\"", self.toks[i].word().unwrap_or(w));
         }
         Ok(None)
+    }
+
+    /// A musical note converted to a frequency at token `i`: "C#4 in Hz", "Bb3 to Hz".
+    /// Its frequency in equal temperament from A4 = 440 Hz, and its length in tokens.
+    pub(super) fn note_at(&self, i: usize) -> Option<(f64, usize)> {
+        let tok = self.toks.get(i)?;
+        let word = tok.word()?;
+        let semitone = match word.chars().next()? {
+            'C' => 0,
+            'D' => 2,
+            'E' => 4,
+            'F' => 5,
+            'G' => 7,
+            'A' => 9,
+            'B' => 11,
+            _ => return None,
+        };
+        let rest = &word[1..];
+        // "C#4" and "B♭3" are a letter, a sign and an octave; "Bb3" and "A4" are one word.
+        let (shift, octave, n) = if rest.is_empty() {
+            let sign = self.src[tok.end..].chars().next()?;
+            let shift = match sign {
+                '#' | '♯' => 1,
+                '♭' => -1,
+                _ => return None,
+            };
+            let octave = self.toks.get(i + 1).filter(|t| t.start == tok.end + sign.len_utf8())?;
+            let Tok::Num(octave) = octave.tok else { return None };
+            (shift, octave.to_i64().filter(|_| octave.is_integer())?, 2)
+        } else {
+            let (shift, digits) = match rest.strip_prefix('b') {
+                Some(digits) => (-1, digits),
+                None => (0, rest),
+            };
+            (shift, digits.parse::<i64>().ok().filter(|_| digits.bytes().all(|b| b.is_ascii_digit()))?, 1)
+        };
+        if !(0..=10).contains(&octave) {
+            return None;
+        }
+        // Only before a frequency: "A4 paper" is a paper size.
+        let keyword = ["in", "to", "as", "into"].iter().any(|w| self.words_at(i + n, &[w]));
+        let hz = registry().get("Hz");
+        if !keyword || self.unit_at(i + n + 1, true).is_none_or(|(u, _)| u.dim() != hz.dim()) {
+            return None;
+        }
+        let midi = (octave + 1) * 12 + semitone + shift;
+        Some((440.0 * 2f64.powf((midi - 69) as f64 / 12.0), n))
     }
 
     /// `prev`, `line 3`, `sum`, `average`.

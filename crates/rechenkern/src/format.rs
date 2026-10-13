@@ -145,6 +145,17 @@ pub(crate) fn radix(n: Number, radix: u32) -> Result<String> {
     Ok(if i < 0 { format!("-{digits}") } else { digits })
 }
 
+/// The note nearest a frequency in equal temperament, from A4 = 440 Hz: "C#4".
+pub(crate) fn pitch(hz: f64) -> Result<String> {
+    const NAMES: [&str; 12] = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    let midi = (69.0 + 12.0 * (hz / 440.0).log2()).round();
+    if !(0.0..=131.0).contains(&midi) {
+        bail!("no musical note is that high or low");
+    }
+    let midi = midi as usize;
+    Ok(format!("{}{}", NAMES[midi % 12], midi / 12 - 1))
+}
+
 /// Digits of a whole number in any base from 2 to 36, without a prefix: `100110`.
 pub(crate) fn digits_in_base(n: Number, base: u32) -> Result<String> {
     let Some(i) = n.to_i128() else { bail!("only whole numbers can be shown in base {base}") };

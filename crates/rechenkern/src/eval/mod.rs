@@ -438,6 +438,13 @@ impl Env<'_> {
                 }
                 _ => bail!("only whole numbers can be shown in base {base}"),
             },
+            Format::Pitch => match &value {
+                Value::Quantity(q) if q.unit.dim() == Dim::FREQUENCY => {
+                    let hz = self.convert_quantity(q, &registry().get("Hz"))?.number.to_f64();
+                    (Value::Text(crate::format::pitch(hz)?), Display::Auto)
+                }
+                v => bail!("only a frequency has a pitch, not {}", v.kind()),
+            },
             Format::Decimal => match value {
                 Value::Percent(p) => (Value::number(p / Number::from_i64(100)), Display::Auto),
                 v => (v, if matches!(display, Display::Plain) { display } else { Display::Auto }),

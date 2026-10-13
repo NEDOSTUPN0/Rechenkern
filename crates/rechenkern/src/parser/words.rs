@@ -335,6 +335,8 @@ pub static FORMATS: Phrases<Format> = Phrases::new(&[
     ("day of the week", Format::Weekday),
     ("day of week", Format::Weekday),
     ("weekday", Format::Weekday),
+    ("pitch", Format::Pitch),
+    ("note", Format::Pitch),
 ]);
 
 /// Questions about a date: "week of year", "weekday on March 9".

@@ -211,6 +211,7 @@ impl<'a> Parser<'a> {
             || self.place_converted_at(i).is_some()
             || self.sky_at(i).is_some()
             || self.distance_at(i).is_some()
+            || self.note_at(i).is_some()
             || self.place_sky_at(i).is_some()
             || self.density_at(i).is_some()
     }
