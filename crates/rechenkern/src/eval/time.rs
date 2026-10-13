@@ -270,13 +270,15 @@ impl Env<'_> {
     pub(super) fn place_in_zone(&self, value: Value, zone: &TimeZone) -> Result<Moment> {
         match value {
             Value::Moment(m) => Ok(Moment { time: m.time.datetime().to_zoned(zone.clone())?, zoned: true, ..m }),
-            v => bail!("{} has no time zone", v.kind()),
+            v => bail!("only a date or a time can be in a time zone, not {}", v.kind()),
         }
     }
 
     /// "3pm in Tokyo": the same instant seen in another zone.
     pub(super) fn to_zone(&self, value: Value, zone: &TimeZone) -> Result<Moment> {
-        let Value::Moment(m) = value else { bail!("{} has no time zone", value.kind()) };
+        let Value::Moment(m) = value else {
+            bail!("only a date or a time can be in a time zone, not {}", value.kind())
+        };
         if m.kind == MomentKind::Date {
             // "date in Vancouver" is today's date over there.
             let date = if m.time.date() == self.today() {

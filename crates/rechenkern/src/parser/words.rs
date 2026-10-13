@@ -321,6 +321,7 @@ pub static FORMATS: Phrases<Format> = Phrases::new(&[
     ("time span", Format::Timespan),
     ("laptime", Format::Laptime),
     ("lap time", Format::Laptime),
+    ("hms", Format::Laptime),
     ("unix timestamp", Format::Timestamp),
     ("unix time stamp", Format::Timestamp),
     ("unix time", Format::Timestamp),

@@ -327,20 +327,20 @@ daylight                                     → <none>
 daylight in Tokyo                            → 12 hours 6 minutes
 daylight on March 21, 2027                   → 12 hours 11 minutes
 moon phase                                   → Waxing Gibbous
-moon phase in Tokyo                          → <error: text has no time zone>
+moon phase in Tokyo                          → <error: only a date or a time can be in a time zone, not text>
 moon phase on March 21, 2027                 → Full Moon
 moonphase                                    → Waxing Gibbous
-moonphase in Tokyo                           → <error: text has no time zone>
+moonphase in Tokyo                           → <error: only a date or a time can be in a time zone, not text>
 moonphase on March 21, 2027                  → Full Moon
 phase of the moon                            → Waxing Gibbous
-phase of the moon in Tokyo                   → <error: text has no time zone>
+phase of the moon in Tokyo                   → <error: only a date or a time can be in a time zone, not text>
 phase of the moon on March 21, 2027          → Full Moon
 lunar phase                                  → Waxing Gibbous
-lunar phase in Tokyo                         → <error: text has no time zone>
+lunar phase in Tokyo                         → <error: only a date or a time can be in a time zone, not text>
 lunar phase on March 21, 2027                → Full Moon
 lunar day                                    → 13
-lunar day in Tokyo                           → <error: a number has no time zone>
+lunar day in Tokyo                           → <error: only a date or a time can be in a time zone, not a number>
 lunar day on March 21, 2027                  → 14
 moon day                                     → 13
-moon day in Tokyo                            → <error: a number has no time zone>
+moon day in Tokyo                            → <error: only a date or a time can be in a time zone, not a number>
 moon day on March 21, 2027                   → 14

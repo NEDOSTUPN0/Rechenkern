@@ -383,6 +383,9 @@ today as laptime                             → <error: can't show a date as a 
 255 in lap time                              → <error: can't show a number as a time span>
 0.75 as lap time                             → <error: can't show a number as a time span>
 today as lap time                            → <error: can't show a date as a time span>
+255 in hms                                   → <error: can't show a number as a time span>
+0.75 as hms                                  → <error: can't show a number as a time span>
+today as hms                                 → Wed, 23 Sep 2026
 255 in unix timestamp                        → <error: can't make a timestamp from a number>
 0.75 as unix timestamp                       → <error: can't make a timestamp from a number>
 today as unix timestamp                      → 1790136000
