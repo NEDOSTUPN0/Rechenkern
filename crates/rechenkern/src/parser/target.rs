@@ -236,6 +236,14 @@ impl Parser<'_> {
                     if self.eat_ordinal() {
                         return Ok(Some((Rounding::Multiple(Number::ONE / *n, dir), Some(Format::Fraction))));
                     }
+                    // "nearest 1/4"
+                    if self.cur().is_some_and(|t| t.is_sym("/"))
+                        && let Some(Tok::Num(d)) = self.toks.get(self.pos + 1).map(|t| &t.tok)
+                        && !d.is_zero()
+                    {
+                        self.pos += 2;
+                        return Ok(Some((Rounding::Multiple(*n / *d, dir), None)));
+                    }
                     *n * self.scale_words()
                 }
                 Tok::Word(w) => {
