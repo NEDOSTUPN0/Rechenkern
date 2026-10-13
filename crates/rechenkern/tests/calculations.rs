@@ -399,6 +399,10 @@ fn units() {
         ("5.5 minutes as timespan", "5 minutes 30 seconds"),
         ("72 days as timespan", "10 weeks 2 days"),
         ("5.5 minutes as laptime", "00:05:30"),
+        ("5:30 min/km in min/mile", "8.851392 min/mi"),
+        ("5:30 in minutes", "330 minutes"),
+        ("1:30 hours in minutes", "90 minutes"),
+        ("9:30 to 17:00", "7 hours 30 minutes"),
         ("03:04:05 + 01:02:03", "04:06:08"),
         ("3h 5m 10s in seconds", "11,110 seconds"),
         ("1 GB in MB", "1,000 MB"),
@@ -997,7 +1001,7 @@ fn comments_and_labels() {
         ("3 km walk, 5 km run", "8 km"),
         ("max($10, $20)", "$20.00"),
         ("A coffee $5", "$5.00"),
-        ("5:30 min/km", "05:30"),
+        ("5:30 km/h", "05:30"),
     ]);
 }
 

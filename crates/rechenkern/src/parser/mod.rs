@@ -131,7 +131,7 @@ impl<'a> Parser<'a> {
         while p.peek().is_some() {
             let mut value = p.clone();
             match value.expr() {
-                // Units without a number are words here: "5 cats km", "5:30 min/km".
+                // Units without a number are words here: "5 cats km", "5:30 km/h".
                 Ok(expr) if value.pos > p.pos && unit_product(&expr).is_none() && !is_unit_rate(&expr) => {
                     values.push(expr);
                     p = value;

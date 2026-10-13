@@ -51,12 +51,37 @@ impl Parser<'_> {
                 vec![part(Number::from_i64(h as i64), "h"), part(Number::from_i64(m as i64), "min"), part(s, "s")];
             return Ok(Self::formatted(Expr::Composite(parts), Format::Laptime));
         }
+        if let (None, None) = (s, ampm)
+            && let Some(amount) = self.clock_as_duration(h, m)
+        {
+            return Ok(amount);
+        }
         let hour = to_24h(h as i64, ampm)?;
         if m >= 60 || s.is_some_and(|s| s >= Number::from_i64(60)) {
             bail!("invalid time {h}:{m:02}");
         }
         let clock = TimeExpr::Clock { hour, minute: m as i8, second: s.unwrap_or(Number::ZERO), on: None };
         self.clock_tail(clock)
+    }
+
+    /// `h:mm` as a length of time: `5:30 min/km` is 5 minutes 30 seconds a kilometer,
+    /// `5:30 in minutes` is 5 hours 30 minutes.
+    fn clock_as_duration(&mut self, h: u32, m: u32) -> Option<Expr> {
+        let reg = registry();
+        let time_unit = |i: usize| self.unit_at(i, true).filter(|(u, _)| u.dim() == Dim::TIME);
+        let converted = ["in", "to", "as", "into"].iter().any(|w| self.words_at(self.pos, &[w]));
+        let (unit, len) = match converted {
+            // "5:30 in minutes"
+            true => time_unit(self.pos + 1).map(|_| (reg.get("h"), 0))?,
+            false => time_unit(self.pos).filter(|(u, _)| *u == reg.get("h") || *u == reg.get("min"))?,
+        };
+        if m >= 60 {
+            return None;
+        }
+        self.pos += len;
+        let parts =
+            Expr::binary(Op::Add, Expr::Number(Number::from_i64(h.into())), Expr::Number(Number::ratio(m.into(), 60)));
+        Some(Expr::WithUnit(parts.boxed(), unit))
     }
 
     /// `3pm`, `11 am`.
