@@ -422,13 +422,28 @@ impl Lexer<'_> {
         }
         let third_at = second_at + second + 1;
         let third = self.digits(third_at);
-        let parts = [
+        let mut parts = [
             self.slice(self.i, self.i + first).parse().ok()?,
             self.slice(second_at, second_at + second).parse().ok()?,
             self.slice(third_at, third_at + third).parse().ok()?,
         ];
         let year_first = first == 4 && matches!(third, 1 | 2);
+        // "21/04/77" and "21-04-77": a two-digit year only when just one of the first two
+        // numbers can be the month, so "3/4/26" stays a division and "10-5-3" a subtraction.
+        // Dots always go day, month, year: "21.04.77".
+        let [a, b, _] = parts;
+        let one_month = (a > 12 && b <= 12) || (b > 12 && a <= 12);
+        let short_year = matches!(first, 1 | 2)
+            && third == 2
+            && (1..=31).contains(&a)
+            && (1..=31).contains(&b)
+            && match sep {
+                '/' | '-' => one_month,
+                '.' => first == 2 && second == 2 && b <= 12,
+                _ => false,
+            };
         let valid = match sep {
+            _ if short_year => true,
             '-' => year_first,
             // "2026/09/23", but "3600/60/60" is a division.
             '.' | '/' if year_first => (1..=12).contains(&parts[1]) && (1..=31).contains(&parts[2]),
@@ -438,6 +453,10 @@ impl Lexer<'_> {
         if !valid {
             return None;
         }
+        // As strptime reads them: 69 to 99 are the 1900s, 00 to 68 the 2000s.
+        if short_year {
+            parts[2] += if parts[2] >= 69 { 1900 } else { 2000 };
+        }
         let start = self.i;
         self.i = third_at + third;
         if sep == '-' && self.peek(0) == Some('T') && self.peek(1).is_some_and(|c| c.is_ascii_digit()) {
@@ -446,7 +465,12 @@ impl Lexer<'_> {
             }
             return Some(Tok::IsoDateTime(self.slice(start, self.i).to_string()));
         }
-        Some(Tok::Date { parts, sep: if year_first { '-' } else { sep } })
+        let sep = match () {
+            _ if year_first => '-',
+            _ if short_year && sep == '-' => '/',
+            _ => sep,
+        };
+        Some(Tok::Date { parts, sep })
     }
 
     /// `9:30`, `21:05:10`, `00:00:01.5`.

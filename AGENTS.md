@@ -181,6 +181,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   `of` (`3 quarters of an hour`).
 - Month = 30.436875 days, year = 365.2425 days (as in Soulver). Date
   arithmetic uses calendar spans (`Jan 31 + 1 month` = `Feb 29` in 2020).
+- Two-digit years count when the date can't be anything else: `21/04/77` (only
+  one of the first two numbers can be the month), `10.05.20`; `3/4/26` divides.
+  69 to 99 are the 1900s, 00 to 68 the 2000s, as strptime reads them.
 - A date without a year is this year unless that is more than 270 days away.
   Holidays without a year are the next occurrence. In a range the other end
   decides, as in SoulverCore: `Dec 1 to Jan 31` ends next year, `days since Dec 25`
