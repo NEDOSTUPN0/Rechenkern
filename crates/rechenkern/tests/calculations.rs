@@ -411,6 +411,8 @@ fn units() {
         ("72 days as timespan", "10 weeks 2 days"),
         ("5.5 minutes as laptime", "00:05:30"),
         ("3.5 hours as hms", "03:30:00"),
+        ("1,500hour 1ns", "1,500 hours 0.000000001 seconds"),
+        ("1500 hours 0.000000001 seconds", "1,500 hours 0.000000001 seconds"),
         ("3 nights in Paris", "<error: only a date or a time can be in a time zone, not time>"),
         ("5:30 min/km in min/mile", "8.851392 min/mi"),
         ("5:30 in minutes", "330 minutes"),

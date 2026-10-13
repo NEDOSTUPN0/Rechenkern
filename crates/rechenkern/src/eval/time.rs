@@ -115,9 +115,16 @@ pub(super) fn balance(seconds: Number, largest: Cal) -> Result<Span> {
         rest = rest - count * size;
         span = set(span, cal, count.to_i64().ok_or_else(|| Error::new("duration is too long"))?)?;
     }
-    let millis = (rest * Number::from_i64(1000)).round_dp(0).to_i64().unwrap_or(0);
-    span = set(span, Cal::Millisecond, millis)?;
+    span = with_fraction(span, rest)?;
     Ok(if negative { span.negate() } else { span })
+}
+
+/// Adds part of a second as milli-, micro- and nanoseconds.
+fn with_fraction(span: Span, fraction: Number) -> Result<Span> {
+    let nanos = (fraction * Number::pow10(9)).round_dp(0).to_i64().unwrap_or(0);
+    let span = set(span, Cal::Millisecond, nanos / 1_000_000)?;
+    let span = set(span, Cal::Microsecond, nanos / 1000 % 1000)?;
+    set(span, Cal::Nanosecond, nanos % 1000)
 }
 
 /// Splits seconds over the given units: "in hours and minutes".
@@ -138,8 +145,7 @@ pub(super) fn split(seconds: Number, units: &[Unit]) -> Result<Span> {
         rest = rest - count.floor() * *size;
         if last && *cal == Cal::Second {
             span = set(span, Cal::Second, count.floor().to_i64().unwrap_or(0))?;
-            let millis = (count.fract() * Number::from_i64(1000)).round_dp(0).to_i64().unwrap_or(0);
-            span = set(span, Cal::Millisecond, millis)?;
+            span = with_fraction(span, count.fract())?;
         } else {
             let whole = if last { count.round_dp(0) } else { count };
             span =
@@ -383,7 +389,9 @@ impl Env<'_> {
         let span = self.span_of(by)?;
         let span = if back { span.negate() } else { span };
         let time = m.time.checked_add(span)?;
-        let sub_day = [Cal::Hour, Cal::Minute, Cal::Second, Cal::Millisecond].iter().any(|&c| get(&span, c) != 0);
+        let sub_day = [Cal::Hour, Cal::Minute, Cal::Second, Cal::Millisecond, Cal::Microsecond, Cal::Nanosecond]
+            .iter()
+            .any(|&c| get(&span, c) != 0);
         let kind = if m.kind == MomentKind::Date && sub_day { MomentKind::DateTime } else { m.kind };
         Ok(Moment { time, kind, ..m.clone() })
     }

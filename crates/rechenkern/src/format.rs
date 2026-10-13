@@ -34,7 +34,7 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
         Value::Quantity(q) => quantity(q, display, config),
         Value::Percent(p) => format!("{}%", number(*p, config)),
         Value::Moment(m) => moment(m, config, now.get()),
-        Value::Duration(d) => duration(d),
+        Value::Duration(d) => duration(d, config),
         Value::Bool(b) => b.to_string(),
         Value::Text(t) => t.clone(),
     }
@@ -413,7 +413,7 @@ fn clock(time: &Zoned, h24: bool, seconds: bool) -> String {
     }
 }
 
-fn duration(d: &Duration) -> String {
+fn duration(d: &Duration, config: &Config) -> String {
     use jiff::Unit as Cal;
     let span = d.span.abs();
     let sign = if d.span.is_negative() { "-" } else { "" };
@@ -444,11 +444,12 @@ fn duration(d: &Duration) -> String {
         .filter(|(cal, _)| get(*cal) != 0)
         .map(|&(cal, name)| {
             let n = get(cal);
-            format!("{n} {name}{}", if n == 1 { "" } else { "s" })
+            format!("{} {name}{}", number(Number::from_i64(n), config), if n == 1 { "" } else { "s" })
         })
         .collect();
     if !seconds.is_zero() || parts.is_empty() {
-        let text = plain_digits(seconds.round_dp(3), 10).unwrap_or_default();
+        // Every digit there is, down to the nanosecond: "1 hour 0.000000001 seconds".
+        let text = plain_digits(seconds, 10).unwrap_or_default();
         parts.push(format!("{text} second{}", if seconds == Number::ONE { "" } else { "s" }));
     }
     format!("{sign}{}", parts.join(" "))
