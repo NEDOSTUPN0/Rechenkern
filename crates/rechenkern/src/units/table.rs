@@ -142,7 +142,20 @@ fn definitions() -> Vec<Def> {
             .spelled()
             .calendar(Cal::Second, 1),
         unit("min", "minute", Dim::TIME, "60").aliases(&["mins"]).spelled().calendar(Cal::Minute, 1),
-        unit("h", "hour", Dim::TIME, "3600").aliases(&["hr", "hrs"]).spelled().calendar(Cal::Hour, 1),
+        unit("h", "hour", Dim::TIME, "3600")
+            // Hours of work are hours: "40 work hours in workdays" = 5.
+            .aliases(&[
+                "hr",
+                "hrs",
+                "workhour",
+                "workhours",
+                "work hour",
+                "work hours",
+                "working hour",
+                "working hours",
+            ])
+            .spelled()
+            .calendar(Cal::Hour, 1),
         unit("d", "day", Dim::TIME, "86400").aliases(&["night", "nights"]).spelled().calendar(Cal::Day, 1),
         unit("wk", "week", Dim::TIME, "604800").aliases(&["wks"]).spelled().calendar(Cal::Week, 1),
         unit("fortnight", "fortnight", Dim::TIME, "1209600").spelled().calendar(Cal::Week, 2),
@@ -169,7 +182,16 @@ fn definitions() -> Vec<Def> {
             .spelled()
             .calendar(Cal::Year, 1000),
         unit("workday", "workday", Dim::WORKDAY, "1")
-            .aliases(&["workdays", "work day", "work days", "business day", "business days", "weekdays"])
+            .aliases(&[
+                "workdays",
+                "work day",
+                "work days",
+                "working day",
+                "working days",
+                "business day",
+                "business days",
+                "weekdays",
+            ])
             .spelled(),
         // Length
         unit("m", "meter", Dim::LENGTH, "1").aliases(&["metre", "metres"]).prefixes(LENGTH),

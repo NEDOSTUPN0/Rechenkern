@@ -810,6 +810,10 @@ fn dates() {
         ("$500/workday * 20 workdays", "$10,000.00"),
         // Hours are hours of work, 8 to a workday.
         ("40 hours in workdays", "5 workdays"),
+        ("40 workhours in workdays", "5 workdays"),
+        ("40 work hours in workdays", "5 workdays"),
+        ("5 working days in hours", "40 hours"),
+        ("working hours: 9am to 5pm", "8 hours"),
         ("4 hours in workdays", "0.5 workdays"),
         ("9am to 5pm in workdays", "1 workday"),
         ("3 workdays in hours", "24 hours"),
@@ -822,6 +826,7 @@ fn dates() {
         // Dates move by workdays, skipping weekends.
         ("today + 5 workdays", "Wed, 30 Sep 2026"),
         ("3 business days from today", "Mon, 28 Sep 2026"),
+        ("3 working days from today", "Mon, 28 Sep 2026"),
         ("5 workdays ago", "Wed, 16 Sep 2026"),
         ("Saturday + 1 workday", "Mon, 28 Sep 2026"),
         ("Saturday - 1 workday", "Fri, 25 Sep 2026"),

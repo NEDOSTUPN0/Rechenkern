@@ -3999,8 +3999,22 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 wks in s                                 → 1,512,000 seconds
 2.5 work day                                 → 2.5 workdays
 2.5 work days                                → 2.5 workdays
+2.5 work hour                                → 2.5 hours
+2.5 work hour in s                           → 9,000 seconds
+2.5 work hours                               → 2.5 hours
+2.5 work hours in s                          → 9,000 seconds
 2.5 workday                                  → 2.5 workdays
 2.5 workdays                                 → 2.5 workdays
+2.5 workhour                                 → 2.5 hours
+2.5 workhour in s                            → 9,000 seconds
+2.5 workhours                                → 2.5 hours
+2.5 workhours in s                           → 9,000 seconds
+2.5 working day                              → 2.5 workdays
+2.5 working days                             → 2.5 workdays
+2.5 working hour                             → 2.5 hours
+2.5 working hour in s                        → 9,000 seconds
+2.5 working hours                            → 2.5 hours
+2.5 working hours in s                       → 9,000 seconds
 2.5 wst                                      → 2.50 WST
 2.5 wst in EUR                               → €1.13
 2.5 xaf                                      → 3 XAF
