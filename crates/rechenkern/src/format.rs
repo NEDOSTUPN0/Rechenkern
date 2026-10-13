@@ -362,7 +362,13 @@ fn parts(q: &Quantity, units: &[Unit], config: &Config) -> String {
         if count.is_zero() && !out.is_empty() {
             continue;
         }
-        out.push(with_unit(&number(count, config), count, u));
+        let digits = number(count, config);
+        // "40° 26′ 46″": minutes and seconds of arc take their signs.
+        out.push(match u.single().map(|d| d.symbol.as_str()) {
+            Some("arcmin") => format!("{digits}′"),
+            Some("arcsec") => format!("{digits}″"),
+            _ => with_unit(&digits, count, u),
+        });
     }
     format!("{}{}", if negative { "-" } else { "" }, out.join(" "))
 }

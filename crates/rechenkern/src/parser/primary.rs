@@ -265,6 +265,11 @@ impl Parser<'_> {
         let unit = if last.dim() == Dim::TIME && p.cur().is_some_and(|t| t.word() == Some("m")) {
             p.pos += 1;
             registry().get("min")
+        // "40° 26′ 46″": after degrees, minutes and seconds of arc.
+        } else if last.dim() == Dim::ANGLE && p.cur().is_some_and(|t| t.is_sym("'") || t.is_sym("\"")) {
+            let arc = if p.cur().is_some_and(|t| t.is_sym("'")) { "arcmin" } else { "arcsec" };
+            p.pos += 1;
+            registry().get(arc)
         } else {
             p.number_unit()?
         };
