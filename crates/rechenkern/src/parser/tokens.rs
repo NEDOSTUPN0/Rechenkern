@@ -182,6 +182,7 @@ impl<'a> Parser<'a> {
             || self.article_unit_at(i)
             // "for 2 hours" and "split 4 ways" only matter before an amount.
             || (w == "for" && self.duration_at(i + 1))
+            || (matches!(w, "every" | "each") && self.counted_unit_at(i + 1))
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
             || (matches!(w, "through" | "thru") && self.date_starts(i + 1))
@@ -424,10 +425,20 @@ impl<'a> Parser<'a> {
         }
     }
 
-    /// "a day", "each month": an article and a unit at token `i`.
+    /// "a day", "each month": an article and a unit at token `i`, but not an amount
+    /// of money: "each $50".
     pub(super) fn article_unit_at(&self, i: usize) -> bool {
         self.toks.get(i).is_some_and(|t| ["a", "an", "each", "every"].iter().any(|w| t.is_word(w)))
-            && self.unit_at(i + 1, false).is_some()
+            && self.unit_at(i + 1, false).is_some_and(|(u, n)| {
+                !(u.is_money() && self.toks.get(i + 1 + n).is_some_and(|t| matches!(t.tok, Tok::Num(_))))
+            })
+    }
+
+    /// A number and a unit at token `i`: "2 weeks", "two weeks", "100 km".
+    pub(super) fn counted_unit_at(&self, i: usize) -> bool {
+        let number = self.toks.get(i).is_some_and(|t| matches!(t.tok, Tok::Num(_)))
+            || self.lower(i).is_some_and(|w| words::number_word(&w).is_some());
+        number && self.unit_at(i + 1, true).is_some()
     }
 
     /// A time amount starts at token `i`: "2 hours", "a year".

@@ -434,6 +434,13 @@ impl<'a> Parser<'a> {
         if self.cur().is_some_and(|t| t.is_word("times")) && self.article_unit_at(self.pos + 1) {
             return Some((Op::Per, 2));
         }
+        // "3 times every 2 days"
+        if self.cur().is_some_and(|t| t.is_word("times"))
+            && self.words_at(self.pos + 1, &["every"])
+            && self.counted_unit_at(self.pos + 2)
+        {
+            return Some((Op::Div, 2));
+        }
         let tok = self.peek()?;
         let next_is = |p: &Self, w: &str| p.toks.get(p.pos + 1).is_some_and(|t| t.is_word(w));
         Some(match &tok.tok {
@@ -448,6 +455,8 @@ impl<'a> Parser<'a> {
                 "multiplied" if next_is(self, "by") => (Op::Mul, 2),
                 "divided" if next_is(self, "by") => (Op::Div, 2),
                 "per" => (Op::Div, 1),
+                // "$50 every 2 weeks" is $25 a week.
+                "every" | "each" if self.counted_unit_at(self.pos + 1) => (Op::Div, 1),
                 "split" => (Op::Div, 1),
                 // "$24 a day for a year": a rate over a time span.
                 "for" if self.duration_at(self.pos + 1) => (Op::Mul, 1),
