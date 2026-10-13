@@ -1066,6 +1066,8 @@ fn sheets() {
     assert_eq!(sheet("monthly rent = $2,150\nmonthly rent / 4 people"), "$537.50");
     assert_eq!(sheet("discount = 10%\ncost = $550\ncost - discount"), "$495.00");
     assert_eq!(sheet("x = 5\nx += 3\nx * 2"), "16");
+    assert_eq!(sheet("x = 5\nx *= 2\nx"), "10");
+    assert_eq!(sheet("x = 10\nx /= 4"), "2.5");
     assert_eq!(sheet("10\n20\nsum"), "30");
     assert_eq!(sheet("$10\n$20\nsum\nsum in EUR"), "€27.00");
     assert_eq!(sheet("$10\n$20\nsum in EUR\nsum"), "$30.00");

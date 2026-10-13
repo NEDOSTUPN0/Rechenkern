@@ -153,7 +153,7 @@ impl<'a> Parser<'a> {
 
     /// `name = expr`, where the name is one or more words.
     fn assignment(&mut self) -> Result<Option<Stmt>> {
-        let Some(eq) = self.toks.iter().position(|t| matches!(t.tok, Tok::Sym("=" | "+=" | "-="))) else {
+        let Some(eq) = self.toks.iter().position(|t| matches!(t.tok, Tok::Sym("=" | "+=" | "-=" | "*=" | "/="))) else {
             return Ok(None);
         };
         let name_toks = &self.toks[..eq];
@@ -164,6 +164,8 @@ impl<'a> Parser<'a> {
         let op = match self.toks[eq].tok {
             Tok::Sym("+=") => Some(Op::Add),
             Tok::Sym("-=") => Some(Op::Sub),
+            Tok::Sym("*=") => Some(Op::Mul),
+            Tok::Sym("/=") => Some(Op::Div),
             _ => None,
         };
         let expr = self.sub(eq + 1, self.toks.len()).value()?;

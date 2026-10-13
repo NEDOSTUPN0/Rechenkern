@@ -11,7 +11,7 @@ use crate::zones::Location;
 #[derive(Clone, Debug)]
 pub enum Stmt {
     Expr(Expr),
-    /// `name = expr`, `name += expr`, `name -= expr`.
+    /// `name = expr`, `name += expr`, `name -= expr`, `name *= expr`, `name /= expr`.
     Assign {
         name: String,
         op: Option<Op>,
