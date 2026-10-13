@@ -85,6 +85,15 @@ impl Parser<'_> {
             {
                 return Ok(Some(Expr::InZone(expr.clone().boxed(), zone.clone())));
             }
+            // "$100 in EUR on Jan 1, 2020" asks for that day's rate.
+            let mut p = self.clone();
+            if let Target::Unit(unit) = &target
+                && unit.is_money()
+                && p.eat_word("on")
+                && p.date_starts(p.pos)
+            {
+                bail!("exchange rates for other days aren't known");
+            }
             return Ok(Some(Expr::Convert(expr.clone().boxed(), target)));
         }
         // "9am to 5pm", "March 1 to June 1".

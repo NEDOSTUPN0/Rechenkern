@@ -655,6 +655,8 @@ fn currencies() {
     check(&[
         ("10 usd to eur", "€9.00"),
         ("10 USD in EUR", "€9.00"),
+        ("$100 in EUR on Jan 1, 2020", "<error: exchange rates for other days aren't known>"),
+        ("1 USD in GBP on March 12", "<error: exchange rates for other days aren't known>"),
         ("$5k in eur", "€4,500.00"),
         ("€9 in dollars", "$10.00"),
         ("£8 in yen", "¥1,500"),
