@@ -73,7 +73,7 @@ fn single_symbol(c: char) -> Option<&'static str> {
         '-' | '−' | '–' => "-",
         '*' | '×' | '·' | '⋅' | '∙' => "*",
         '/' | '÷' | '∕' => "/",
-        '^' => "^",
+        '^' | 'ˆ' => "^",
         '%' => "%",
         '!' => "!",
         '(' | '[' | '{' | '（' => "(",
@@ -185,8 +185,8 @@ impl Lexer<'_> {
                     }
                     _ => self.push(Tok::Num(frac), start),
                 }
-            // "º" is a letter, but in "20 ºC" a degree sign.
-            } else if (c.is_alphabetic() && c != 'º') || c == '_' {
+            // "º" is a letter, but in "20 ºC" a degree sign; "ˆ" is a power, as "^".
+            } else if (c.is_alphabetic() && !matches!(c, 'º' | 'ˆ')) || c == '_' {
                 let tok = self.word();
                 self.push(tok, start);
             } else if CURRENCY_SIGNS.contains(c) || matches!(c, '℃' | '℉') {
@@ -255,7 +255,7 @@ impl Lexer<'_> {
         while let Some(c) = self.peek(0) {
             let apostrophe = matches!(c, '\'' | '’') && self.peek(1).is_some_and(char::is_alphabetic);
             // Not `is_alphanumeric`: "m²" is meters and a power.
-            if c.is_alphabetic() || c.is_ascii_digit() || c == '_' || apostrophe {
+            if (c.is_alphabetic() && c != 'ˆ') || c.is_ascii_digit() || c == '_' || apostrophe {
                 self.i += 1;
             } else {
                 break;
