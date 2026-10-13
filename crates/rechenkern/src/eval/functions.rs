@@ -8,7 +8,7 @@ use crate::config::AngleUnit;
 use crate::error::{Error, Result, bail};
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
-use crate::value::{Quantity, Value};
+use crate::value::{MomentKind, Quantity, Value};
 
 /// A plain number from a value; percentages count as fractions.
 fn plain(v: &Value, what: &str) -> Result<Number> {
@@ -213,6 +213,13 @@ impl Env<'_> {
             Midpoint => {
                 arity(2)?;
                 match (&args[0], &args[1]) {
+                    // Halfway between two dates is a date, half a day rounded up.
+                    (Value::Moment(a), Value::Moment(b)) if a.kind == MomentKind::Date && b.kind == a.kind => {
+                        let days = a.time.date().until((jiff::Unit::Day, b.time.date()))?.get_days() as i64;
+                        let half =
+                            Value::Quantity(Quantity::new(Number::ratio(days, 2).round_dp(0), registry().get("d")));
+                        Ok(Value::Moment(self.shift(a, &half, false)?))
+                    }
                     (Value::Moment(a), Value::Moment(_)) => {
                         let half =
                             self.div(self.sub(args[1].clone(), args[0].clone())?, Value::number(Number::from_i64(2)))?;

@@ -10,7 +10,7 @@ pub(crate) use time::get as span_field;
 use std::cell::Cell;
 use std::collections::HashMap;
 
-use crate::ast::{Direction, Expr, Format, GrowthResult, LineRef, Op, Rounding, Target};
+use crate::ast::{Direction, Expr, Format, Func, GrowthResult, LineRef, Op, Rounding, Target};
 use crate::config::{Config, Now};
 use crate::error::{Error, Result, bail};
 use crate::format::unit_text;
@@ -136,6 +136,11 @@ impl Env<'_> {
                 Some(dim) => self.weigh_or_measure(self.eval(inner)?, *food, dim)?,
                 None => self.eval(inner)?,
             },
+            // "halfway between Jan 1 and March 1": dates without a year are read as a range.
+            Expr::Call(Func::Midpoint, args) if args.len() == 2 && args.iter().any(time::yearless) => {
+                let (a, b) = self.range_ends(&args[0], &args[1])?;
+                self.call(Func::Midpoint, vec![a, b])?
+            }
             Expr::Call(func, args) => {
                 let args = args.iter().map(|a| self.eval(a)).collect::<Result<Vec<_>>>()?;
                 self.call(*func, args)?
