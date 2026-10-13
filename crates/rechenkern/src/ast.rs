@@ -309,6 +309,8 @@ pub enum TimeExpr {
         holiday: Holiday,
         year: Option<i16>,
     },
+    /// A date or holiday in this, next or last year: `April 21 next year`.
+    InYear(Box<TimeExpr>, Which),
     /// ISO 8601 timestamp text.
     Iso(String),
 }

@@ -207,7 +207,7 @@ impl Parser<'_> {
         *self = p;
         match year {
             Some(y) => date(y, month as i64, day).map(Some),
-            None => Ok(Some(Expr::Time(TimeExpr::Date { year: None, month, day: day as i8 }))),
+            None => Ok(Some(self.in_year(TimeExpr::Date { year: None, month, day: day as i8 }))),
         }
     }
 
@@ -235,7 +235,7 @@ impl Parser<'_> {
         *self = p;
         match year {
             Some(y) => date(y, month as i64, n).map(Some),
-            None => Ok(Some(Expr::Time(TimeExpr::Date { year: None, month, day: n as i8 }))),
+            None => Ok(Some(self.in_year(TimeExpr::Date { year: None, month, day: n as i8 }))),
         }
     }
 
@@ -252,6 +252,19 @@ impl Parser<'_> {
         }
         *self = p;
         Some(y)
+    }
+
+    /// A date without a year, maybe in a year named after it: "April 21 next year".
+    fn in_year(&mut self, date: TimeExpr) -> Expr {
+        let yearless = matches!(date, TimeExpr::Date { year: None, .. } | TimeExpr::Holiday { year: None, .. });
+        let which = self.lower(self.pos).and_then(|w| words::which(&w));
+        match which {
+            Some(which) if yearless && self.words_at(self.pos + 1, &["year"]) => {
+                self.pos += 2;
+                Expr::Time(TimeExpr::InYear(date.into(), which))
+            }
+            _ => Expr::Time(date),
+        }
     }
 
     /// Words about time at the cursor: now, today, next friday, christmas...
@@ -373,7 +386,7 @@ impl Parser<'_> {
         if let Some((holiday, n)) = self.phrase_at(self.pos, &words::HOLIDAYS) {
             self.pos += n;
             let year = self.year().map(|y| y as i16);
-            return Ok(Some(Expr::Time(TimeExpr::Holiday { holiday, year })));
+            return Ok(Some(self.in_year(TimeExpr::Holiday { holiday, year })));
         }
         if let Some((event, n)) = self.event_at(self.pos) {
             self.pos += n;

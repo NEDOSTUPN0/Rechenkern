@@ -244,6 +244,15 @@ impl Env<'_> {
                 };
                 self.date_moment(date)
             }
+            TimeExpr::InYear(date, which) => {
+                let year = today.year() + which.step() as i16;
+                let date = match **date {
+                    TimeExpr::Date { month, day, .. } => TimeExpr::Date { year: Some(year), month, day },
+                    TimeExpr::Holiday { holiday, .. } => TimeExpr::Holiday { holiday, year: Some(year) },
+                    ref other => other.clone(),
+                };
+                self.moment(&date)
+            }
             TimeExpr::Iso(text) => {
                 let time = if let Ok(z) = text.parse::<Zoned>() {
                     z
