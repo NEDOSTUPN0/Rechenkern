@@ -215,6 +215,11 @@ fn definitions() -> Vec<Def> {
         unit("px", "pixel", Dim::LENGTH, "1").scale(inch / Number::from_i64(96)),
         unit("pt", "typographic point", Dim::LENGTH, "1").scale(inch / Number::from_i64(72)),
         unit("em", "em", Dim::LENGTH, "1").scale(inch / Number::from_i64(6)),
+        // Pixels counted per inch of a screen or a print.
+        unit("ppi", "pixel per inch", Dim::LENGTH.pow(-1), "1")
+            .scale(Number::ONE / inch)
+            .plural("pixels per inch")
+            .aliases(&["PPI", "dpi", "DPI", "dots per inch"]),
         unit("rem", "rem", Dim::LENGTH, "1").scale(inch / Number::from_i64(6)),
         // Mass
         unit("g", "gram", Dim::MASS, "0.001").aliases(&["gramme", "grammes"]).prefixes(MASS),

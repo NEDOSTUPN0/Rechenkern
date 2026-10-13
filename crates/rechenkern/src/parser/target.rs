@@ -86,6 +86,11 @@ impl Parser<'_> {
                 return Ok(Some(Expr::InZone(expr.clone().boxed(), zone.clone())));
             }
             if let Target::Unit(unit) = &target
+                && let Some(converted) = self.at_density(expr, unit)
+            {
+                return Ok(Some(converted));
+            }
+            if let Target::Unit(unit) = &target
                 && unit.is_money()
                 && let Some(converted) = self.at_rate(expr, unit)?
             {
@@ -115,6 +120,32 @@ impl Parser<'_> {
         }
         self.pos = start;
         Ok(None)
+    }
+
+    /// "5 cm to px at 300 ppi", "1000 px in inches at 72 dpi": pixels at a density given.
+    fn at_density(&mut self, expr: &Expr, to: &Unit) -> Option<Expr> {
+        let reg = registry();
+        let (px, ppi, inch) = (reg.get("px"), reg.get("ppi"), reg.get("in"));
+        let mut p = self.clone();
+        if !(p.eat_word("at") || p.eat_sym("@")) || !p.peek().is_some_and(|t| matches!(t.tok, Tok::Num(_))) {
+            return None;
+        }
+        let density = p.unary().ok().filter(|d| d.edge_unit(true) == Some(&ppi))?;
+        let number = |e: Expr, unit: &Unit| {
+            Self::formatted(Expr::Convert(e.boxed(), Target::Unit(unit.clone())), Format::Number)
+        };
+        let dots = number(density, &ppi);
+        let from_px = expr.edge_unit(true) == Some(&px);
+        let converted = if *to == px && !from_px {
+            Expr::WithUnit(Expr::binary(Op::Mul, number(expr.clone(), &inch), dots).boxed(), px)
+        } else if from_px && *to != px && to.dim() == Dim::LENGTH {
+            let inches = Expr::WithUnit(Expr::binary(Op::Div, number(expr.clone(), &px), dots).boxed(), inch);
+            Expr::Convert(inches.boxed(), Target::Unit(to.clone()))
+        } else {
+            return None;
+        };
+        *self = p;
+        Some(converted)
     }
 
     /// "$100 in EUR at 0.9", "100 AUD as USD at 1.50 AUD/USD": converted at the rate given.

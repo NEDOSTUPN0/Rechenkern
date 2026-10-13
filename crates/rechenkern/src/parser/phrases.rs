@@ -13,6 +13,9 @@ impl Parser<'_> {
         if let Some(expr) = self.growth()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.screen_density()? {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.annual_return()? {
             return Ok(Some(expr));
         }
@@ -283,6 +286,41 @@ impl Parser<'_> {
             }
             None => growth,
         }))
+    }
+
+    /// "ppi of 5.5 inch at 1920x1080": the pixels per inch of a screen.
+    fn screen_density(&self) -> Result<Option<Expr>> {
+        if !(self.matches_at(0, &["ppi"]) || self.matches_at(0, &["dpi"])) {
+            return Ok(None);
+        }
+        let start = 1 + usize::from(self.matches_at(1, &["of"]));
+        let resolution = (start + 1..self.toks.len()).find_map(|i| Some((i, self.resolution_at(i)?)));
+        let Some((at, (width, height, n))) = resolution else {
+            return Ok(None);
+        };
+        if at + n != self.toks.len() {
+            return Ok(None);
+        }
+        let end = at - usize::from(self.matches_at(at - 1, &["at"]));
+        let reg = registry();
+        let inches = Expr::Convert(self.part(start, end)?.boxed(), Target::Unit(reg.get("in")));
+        let pixels = Expr::Call(Func::Sqrt, vec![Expr::Number(width * width + height * height)]);
+        let density = Expr::binary(Op::Div, pixels, Self::formatted(inches, Format::Number));
+        Ok(Some(Expr::WithUnit(density.boxed(), reg.get("ppi"))))
+    }
+
+    /// A screen resolution at token `i`: "1920x1080", "1920 x 1080"; its width, height and length.
+    fn resolution_at(&self, i: usize) -> Option<(Number, Number, usize)> {
+        let Tok::Num(width) = self.toks.get(i)?.tok else { return None };
+        let glued = self.toks.get(i + 1).filter(|t| !t.space_before).and_then(|t| t.word());
+        if let Some(height) = glued.and_then(|w| w.strip_prefix(['x', 'X'])).and_then(Number::parse) {
+            return Some((width, height, 2));
+        }
+        let times = self.toks.get(i + 1).is_some_and(|t| t.is_word("x") || t.is_sym("*"));
+        match self.toks.get(i + 2)?.tok {
+            Tok::Num(height) if times => Some((width, height, 3)),
+            _ => None,
+        }
     }
 
     /// "annual return on $500 that grew to $1,000 over 5 years": the yearly growth rate.

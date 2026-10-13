@@ -136,6 +136,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 DOP in EUR                               → €1.13
 2.5 DOT                                      → 2.5 DOT
 2.5 DOT in EUR                               → €1.13
+2.5 DPI                                      → 2.5 ppi
 2.5 DZD                                      → 2.50 DZD
 2.5 DZD in EUR                               → €1.13
 2.5 EB                                       → 2.5 EB
@@ -481,6 +482,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 PLN in EUR                               → €1.13
 2.5 POL                                      → 2.5 POL
 2.5 POL in EUR                               → €1.13
+2.5 PPI                                      → 2.5 ppi
 2.5 PS                                       → 2.5 PS
 2.5 PS in W                                  → 1,838.746875 W
 2.5 PYG                                      → 3 PYG
@@ -1396,6 +1398,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 dongs in EUR                             → €1.13
 2.5 dop                                      → 2.50 DOP
 2.5 dop in EUR                               → €1.13
+2.5 dots per inch                            → 2.5 ppi
+2.5 dpi                                      → 2.5 ppi
 2.5 dram                                     → 2.50 AMD
 2.5 dram in EUR                              → €1.13
 2.5 drams                                    → 2.50 AMD
@@ -3214,8 +3218,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 pints in L                               → 1.182941183 L
 2.5 pixel                                    → 2.5 px
 2.5 pixel in m                               → 0.0006614583333 m
+2.5 pixel per inch                           → 2.5 ppi
 2.5 pixels                                   → 2.5 px
 2.5 pixels in m                              → 0.0006614583333 m
+2.5 pixels per inch                          → 2.5 ppi
 2.5 pkr                                      → 2.50 PKR
 2.5 pkr in EUR                               → €1.13
 2.5 pln                                      → 2.50 PLN
@@ -3280,6 +3286,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 pounds-force in N                        → 11.12055404 N
 2.5 pounds-force per square inch             → 2.5 psi
 2.5 pounds-force per square inch in Pa       → 17,236.89323 Pa
+2.5 ppi                                      → 2.5 ppi
 2.5 ps                                       → 2.5 ps
 2.5 ps in s                                  → 2.5e-12 seconds
 2.5 psi                                      → 2.5 psi
