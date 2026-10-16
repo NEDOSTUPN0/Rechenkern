@@ -140,6 +140,7 @@ impl Calculator {
             lines: &self.lines,
             rates: &self.rates,
             food_as: Default::default(),
+            rate_date: Default::default(),
         };
         env.alternatives(answer)
     }
@@ -218,6 +219,7 @@ impl Calculator {
             lines: &self.lines,
             rates: &self.rates,
             food_as: Default::default(),
+            rate_date: Default::default(),
         };
         // Pick the branch of "if ... then ... else ...".
         let mut stmt = &stmt;

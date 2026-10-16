@@ -6,6 +6,8 @@ use std::fs;
 use std::path::PathBuf;
 use std::time::{Duration, SystemTime};
 
+use jiff::civil::Date;
+
 use crate::number::Number;
 use crate::rates::{RateProvider, RateTable};
 
@@ -74,6 +76,36 @@ impl OnlineRates {
     }
 }
 
+impl OnlineRates {
+    /// Where the rates of a past day are kept: next to the latest ones.
+    fn dated_cache(&self, date: Date) -> Option<PathBuf> {
+        let path = self.cache.as_ref()?;
+        Some(path.with_file_name(format!("rates-{date}.json")))
+    }
+
+    /// Rates of a past day: the currency API keeps them from March 2024, the
+    /// Frankfurter API (ECB reference rates) from 1999 for about 30 currencies.
+    fn download_on(&self, date: Date) -> Result<(String, RateTable), String> {
+        let sources = [
+            format!("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{date}/v1/currencies/usd.min.json"),
+            format!("https://{date}.currency-api.pages.dev/v1/currencies/usd.min.json"),
+            format!("https://api.frankfurter.dev/v1/{date}?base=USD"),
+        ];
+        let mut last_error = String::new();
+        for url in &sources {
+            let response = ureq::get(url).config().timeout_global(Some(self.timeout)).build().call();
+            match response.and_then(|mut r| r.body_mut().read_to_string()) {
+                Ok(text) => match parse(&text) {
+                    Some(table) => return Ok((text, table)),
+                    None => last_error = format!("unexpected response from {url}"),
+                },
+                Err(e) => last_error = e.to_string(),
+            }
+        }
+        Err(format!("can't download exchange rates for {date}: {last_error}"))
+    }
+}
+
 impl RateProvider for OnlineRates {
     fn rates(&self) -> Result<RateTable, String> {
         if let Some(table) = self.cached(true) {
@@ -82,14 +114,34 @@ impl RateProvider for OnlineRates {
         let downloaded = if self.offline { Err("offline and no cached exchange rates".into()) } else { self.refresh() };
         downloaded.or_else(|e| self.cached(false).ok_or(e))
     }
+
+    fn rates_on(&self, date: Date) -> Result<RateTable, String> {
+        let cache = self.dated_cache(date);
+        if let Some(table) = cache.as_ref().and_then(|p| parse(&fs::read_to_string(p).ok()?)) {
+            return Ok(table);
+        }
+        if self.offline {
+            return Err(format!("offline and no cached exchange rates for {date}"));
+        }
+        let (text, table) = self.download_on(date)?;
+        // A past day's rates never change.
+        if let Some(path) = cache {
+            if let Some(dir) = path.parent() {
+                let _ = fs::create_dir_all(dir);
+            }
+            let _ = fs::write(path, text);
+        }
+        Ok(table)
+    }
 }
 
-/// Parses `{"date": "...", "usd": {"eur": 0.92, ...}}`.
+/// Parses `{"date": "...", "usd": {"eur": 0.92, ...}}`, or Frankfurter's `{"rates": {"EUR": 0.92}}`.
 fn parse(text: &str) -> Option<RateTable> {
     let json: serde_json::Value = serde_json::from_str(text).ok()?;
     let mut table = RateTable::new();
     table.date = json.get("date").and_then(|d| d.as_str()).map(String::from);
-    for (code, rate) in json.get("usd")?.as_object()? {
+    let rates = json.get("usd").or_else(|| json.get("rates"))?;
+    for (code, rate) in rates.as_object()? {
         // Keep the JSON digits exactly instead of going through f64.
         if let Some(n) = Number::parse(&rate.to_string()) {
             table.insert(code, n);

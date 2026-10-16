@@ -77,6 +77,8 @@ pub(crate) struct Env<'a> {
     /// Inside a conversion to a weight or a volume, amounts of food become that kind:
     /// "1 cup of flour + 1 cup of sugar in grams".
     pub food_as: Cell<Option<Dim>>,
+    /// Inside `... on Jan 1, 2020`, exchange rates are that day's.
+    pub rate_date: Cell<Option<jiff::civil::Date>>,
 }
 
 impl Env<'_> {
@@ -112,6 +114,7 @@ impl Env<'_> {
                 Ok((value, display))
             }
             Expr::Noted(inner, note) => Ok((self.eval(inner)?, Display::Note(note))),
+            Expr::RatesOn(inner, date) => self.on_rates_of(date, || self.answer(inner)),
             Expr::Period(..) => Ok((self.eval(expr)?, Display::Period)),
             Expr::Round(_, Rounding::Places(dp, _)) => Ok((self.eval(expr)?, Display::Places(*dp))),
             Expr::Round(_, Rounding::Significant(digits)) => Ok((self.eval(expr)?, Display::Significant(*digits))),
@@ -178,7 +181,7 @@ impl Env<'_> {
             Expr::Period(first, length) => self.period(first, length)?,
             Expr::ZoneDiff(a, b) => self.zone_difference(&a.zone, &b.zone)?,
             Expr::Sky { what, place, on } => self.sky(*what, place.as_ref(), on.as_deref())?,
-            Expr::Convert(..) => self.answer(expr)?.0,
+            Expr::Convert(..) | Expr::RatesOn(..) => self.answer(expr)?.0,
             Expr::Round(inner, rounding) => self.round(self.eval(inner)?, *rounding)?,
             Expr::Pi(places, dir) => pi(*places, *dir)?.0,
             Expr::If { .. } => match self.branch(expr)? {
@@ -190,6 +193,18 @@ impl Env<'_> {
                 self.growth(principal, time, rate, period, *compounds, *result)?
             }
         })
+    }
+
+    /// Works out `f` with the exchange rates of the day `date` stands for.
+    pub(crate) fn on_rates_of<T>(&self, date: &Expr, f: impl FnOnce() -> Result<T>) -> Result<T> {
+        let day = match self.eval(date)? {
+            Value::Moment(m) => m.time.date(),
+            v => bail!("expected a date for the exchange rates, not {}", v.kind()),
+        };
+        let saved = self.rate_date.replace(Some(day));
+        let result = f();
+        self.rate_date.set(saved);
+        result
     }
 
     /// The ends of a range of amounts in one unit, as in "5-10 kg": a plain number
@@ -283,7 +298,15 @@ impl Env<'_> {
         let def = registry().def(id);
         match def.currency {
             // A cent's scale is its part of the dollar.
-            Some(c) => Ok(self.rates.usd_value(c.code)? * def.scale),
+            Some(c) => {
+                let usd = match self.rate_date.get() {
+                    Some(date) => self.rates.usd_value_on(c.code, date)?,
+                    None => {
+                        self.rates.usd_value(c.code, self.config.features.use_default_rates_for_unhandled_currencies)?
+                    }
+                };
+                Ok(usd * def.scale)
+            }
             // An em is the font size, 16 px unless the config says otherwise.
             None if matches!(def.symbol.as_str(), "em" | "rem") => {
                 Ok(def.scale * self.config.base_font_size / Number::from_i64(16))

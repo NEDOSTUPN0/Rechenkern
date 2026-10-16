@@ -77,6 +77,8 @@ pub enum Expr {
         on: Option<Box<Expr>>,
     },
     Convert(Box<Expr>, Target),
+    /// A conversion with the exchange rates of a day: `$100 in EUR on Jan 1, 2020`.
+    RatesOn(Box<Expr>, Box<Expr>),
     Round(Box<Expr>, Rounding),
     /// Pi to any number of decimal places: `pi to 1000 dp`, `100 digits of pi`.
     Pi(u32, Direction),
@@ -139,6 +141,7 @@ impl Expr {
                 | Expr::InZone(e, _)
                 | Expr::Convert(e, _)
                 | Expr::Round(e, _) => e.contains(f),
+                Expr::RatesOn(e, date) => e.contains(f) || date.contains(f),
                 _ => false,
             }
     }

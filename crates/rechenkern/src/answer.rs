@@ -301,6 +301,9 @@ impl Env<'_> {
 
     /// Evaluates a whole line, keeping the values its sides are made of.
     pub(crate) fn answer_line(&self, expr: &Expr) -> Result<(Value, Display, Parts)> {
+        if let Expr::RatesOn(inner, date) = expr {
+            return self.on_rates_of(date, || self.answer_line(inner));
+        }
         let mut parts = Parts::default();
         let (value, display) = match expr {
             Expr::Convert(inner, target) if !matches!(**inner, Expr::Range(..)) => {
@@ -368,6 +371,7 @@ impl Env<'_> {
 /// The form of a line from its top-level expression.
 fn form(expr: &Expr, value: &Value) -> Form {
     match expr {
+        Expr::RatesOn(inner, _) => form(inner, value),
         Expr::Convert(inner, Target::Zone(_)) => match &**inner {
             Expr::Time(TimeExpr::Now | TimeExpr::Today(0)) => Form::TimeAtPlace,
             _ => Form::TimeConversion,

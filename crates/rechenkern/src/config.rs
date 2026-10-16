@@ -212,6 +212,15 @@ pub struct Features {
     pub misplaced_thousands_separator: MisplacedSeparator,
     /// Links and email addresses are comments: `https://example.com`, `me@example.com`.
     pub url_detection: bool,
+    /// The rates that come with the engine stand in for currencies the rate provider
+    /// doesn't know, and for no rates at all.
+    pub use_default_rates_for_unhandled_currencies: bool,
+    /// `$100 in EUR on Jan 1, 2020` asks the rate provider for that day's rates.
+    pub historical_currency_queries: bool,
+    /// Places the engine doesn't know are asked from the place provider.
+    pub dynamic_place_queries: bool,
+    /// Weather on other days than today is asked from the weather provider.
+    pub historical_weather_queries: bool,
     /// A dash between spaces ends a label, as a colon does: `Coffee - 12.50` is 12.50.
     pub dash_separated_labels: bool,
     /// A list marker starting a line is no value: `1. `, `a) `, `- `, `• `.
@@ -240,6 +249,10 @@ impl Default for Features {
             in_ambiguity_prefer_something_to_nothing: true,
             misplaced_thousands_separator: MisplacedSeparator::DecimalPoint,
             url_detection: true,
+            use_default_rates_for_unhandled_currencies: true,
+            historical_currency_queries: true,
+            dynamic_place_queries: true,
+            historical_weather_queries: true,
             dash_separated_labels: false,
             list_marker_parsing: true,
             ordinal_label_parsing: false,

@@ -260,6 +260,7 @@ fn convert(q: &Quantity, to: &Unit) -> crate::Result<Quantity> {
         lines: &[],
         rates: &rates,
         food_as: Cell::default(),
+        rate_date: Cell::default(),
     };
     env.convert_quantity(q, to)
 }

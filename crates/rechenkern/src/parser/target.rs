@@ -110,14 +110,12 @@ impl Parser<'_> {
             {
                 return Ok(Some(converted));
             }
-            // "$100 in EUR on Jan 1, 2020" asks for that day's rate.
-            let mut p = self.clone();
+            // "$100 in EUR on Jan 1, 2020", "$100 in EUR 2020-01-01": that day's rate.
             if let Target::Unit(unit) = &target
                 && unit.is_money()
-                && p.eat_word("on")
-                && p.date_starts(p.pos)
+                && let Some(date) = self.rates_date()?
             {
-                bail!("exchange rates for other days aren't known");
+                return Ok(Some(Expr::RatesOn(Expr::Convert(expr.clone().boxed(), target).boxed(), date.boxed())));
             }
             return Ok(Some(Expr::Convert(expr.clone().boxed(), target)));
         }
@@ -506,6 +504,21 @@ impl Parser<'_> {
 }
 
 impl Parser<'_> {
+    /// The day of the exchange rates after a currency conversion: "on Jan 1, 2020".
+    fn rates_date(&mut self) -> Result<Option<Expr>> {
+        let mut p = self.clone();
+        p.eat_word("on");
+        if !p.date_starts(p.pos) {
+            return Ok(None);
+        }
+        if !self.config().features.historical_currency_queries {
+            bail!("exchange rates of other days are turned off");
+        }
+        let date = p.unary()?;
+        *self = p;
+        Ok(Some(date))
+    }
+
     /// The config lets lines use this kind of conversion.
     pub(super) fn converter_allowed(&self, converter: Converter) -> bool {
         let features = &self.config().features;

@@ -284,6 +284,14 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Exchange rates: fawazahmed0 currency API (CC0), jsDelivr with a Cloudflare
   mirror as fallback. Rates are units per USD. Cache: `~/.cache/rechenkern/rates.json`,
   refreshed after 6 hours; a stale cache is used when offline.
+- Rates of past days (`$100 in EUR on Jan 1, 2020`, `RateProvider::rates_on`):
+  the same API keeps dated snapshots from March 2024; earlier days come from the
+  Frankfurter API (ECB reference rates, about 30 currencies since 1999). Each day
+  is cached for good as `rates-YYYY-MM-DD.json` next to `rates.json`.
+- Bundled rates: `src/data/rates.txt`, a snapshot of the same API made by
+  `scripts/rates.py`. They fill in currencies a provider lacks and stand in when
+  there are no rates at all (`Features::use_default_rates_for_unhandled_currencies`).
+  Refresh them now and then.
 - Time zones: jiff with the system tzdb (bundled copy as fallback). Countries
   map to their capital's zone.
 - Places, in lookup order: `zones/places.txt` (hand-picked: countries, states,
