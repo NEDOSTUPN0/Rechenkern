@@ -286,9 +286,11 @@ impl Sheet {
         self.update(from.min(to), &[])
     }
 
+    /// Marks how line `i` answers. Subtotals below may now take other lines, so every
+    /// line from it is worked out again.
     pub fn set_behaviour(&mut self, i: usize, behaviour: Behaviour) -> Vec<usize> {
         self.lines[i].behaviour = behaviour;
-        self.update(i, &[i])
+        self.update(i, &[])
     }
 
     pub fn set_highlight(&mut self, i: usize, portion: Portion, color: Option<Color>) {
@@ -476,6 +478,8 @@ impl Sheet {
                 }
                 if !same_assignment(&old.assigned, &effects.assigned) {
                     changed_names.extend(old.assigned.iter().chain(&effects.assigned).map(|(n, _)| n.clone()));
+                    // Subtotals and statistics leave out lines that set a variable.
+                    changed_lines.insert(i);
                 }
                 // A function worked out again may work differently: its callers follow.
                 changed_names.extend(old.defined.iter().chain(&effects.defined).map(|(n, _)| n.clone()));

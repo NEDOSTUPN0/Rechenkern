@@ -1572,6 +1572,12 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 fortnight in s                           → 3,024,000 seconds
 2.5 fortnights                               → 2.5 fortnights
 2.5 fortnights in s                          → 3,024,000 seconds
+2.5 fps                                      → 2.5 fps
+2.5 fps in Hz                                → 2.5 Hz
+2.5 frame per second                         → 2.5 fps
+2.5 frame per second in Hz                   → 2.5 Hz
+2.5 frames per second                        → 2.5 fps
+2.5 frames per second in Hz                  → 2.5 Hz
 2.5 franc                                    → 2.50 CHF
 2.5 franc in EUR                             → €1.13
 2.5 francs                                   → 2.50 CHF

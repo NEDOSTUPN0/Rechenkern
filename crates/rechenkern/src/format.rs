@@ -8,16 +8,12 @@ use crate::error::{Result, bail};
 use crate::eval::Display;
 use crate::number::Number;
 use crate::units::{Unit, UnitId, registry};
-use crate::value::{Duration, Moment, MomentKind, Quantity, Value};
+use crate::value::{Cadence, Coordinates, Duration, Moment, MomentKind, Quantity, Timecode, Value};
 use crate::zones;
 
 pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &Now) -> String {
     if let Display::Note(note) = display {
         return format!("{} ({note})", render(value, &Display::Auto, config, now));
-    }
-    if let Display::Each(values) = display {
-        let separator = if config.decimal_comma { "; " } else { ", " };
-        return values.iter().map(|v| render(v, &Display::Auto, config, now)).collect::<Vec<_>>().join(separator);
     }
     if let Display::Digits(text) = display {
         return if config.decimal_comma { text.replace('.', ",") } else { text.clone() };
@@ -43,6 +39,81 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
         Value::Duration(d) => duration(d, config),
         Value::Bool(b) => b.to_string(),
         Value::Text(t) => t.clone(),
+        Value::Range(a, b) => range(a, b, config, now),
+        Value::List(values) => {
+            let separator = if config.decimal_comma { "; " } else { ", " };
+            values.iter().map(|v| render(v, &Display::Auto, config, now)).collect::<Vec<_>>().join(separator)
+        }
+        Value::Pitch(p) => p.name(),
+        Value::Coordinates(c) if matches!(display, Display::Dms) => coordinates_dms(c, config),
+        Value::Coordinates(c) => coordinates(c, config),
+        Value::Resolution(r) => format!("{}x{}", r.width, r.height),
+        Value::Timecode(t) => timecode(t),
+        Value::Cadence(c) => cadence(c, config),
+    }
+}
+
+/// "5 – 10 kg"; the unit is written once when both ends have it.
+fn range(a: &Value, b: &Value, config: &Config, now: &Now) -> String {
+    let high = render(b, &Display::Auto, config, now);
+    match (a, b) {
+        (Value::Quantity(x), Value::Quantity(y)) if x.unit == y.unit && !x.unit.is_money() => {
+            format!("{} – {high}", number(x.number, config))
+        }
+        _ => format!("{} – {high}", render(a, &Display::Auto, config, now)),
+    }
+}
+
+/// "35.6895° N, 139.6917° E", to four decimals.
+pub(crate) fn coordinates(c: &Coordinates, config: &Config) -> String {
+    let part = |degrees: f64, positive: char, negative: char| {
+        let text = number(Number::from_f64(degrees.abs()).round_dp(4), config);
+        format!("{text}° {}", if degrees < 0.0 { negative } else { positive })
+    };
+    format!("{}, {}", part(c.latitude, 'N', 'S'), part(c.longitude, 'E', 'W'))
+}
+
+/// "35° 41′ 22.2″ N, 139° 41′ 30.12″ E".
+fn coordinates_dms(c: &Coordinates, config: &Config) -> String {
+    let part = |degrees: f64, positive: char, negative: char| {
+        let abs = degrees.abs();
+        let whole = abs.floor();
+        let minutes = ((abs - whole) * 60.0).floor();
+        let seconds = Number::from_f64(((abs - whole) * 60.0 - minutes) * 60.0).round_dp(2);
+        let hemisphere = if degrees < 0.0 { negative } else { positive };
+        format!("{whole}° {minutes}′ {}″ {hemisphere}", number(seconds, config))
+    };
+    format!("{}, {}", part(c.latitude, 'N', 'S'), part(c.longitude, 'E', 'W'))
+}
+
+/// "00:00:04:04": hours, minutes, seconds and frames.
+fn timecode(t: &Timecode) -> String {
+    let fps = t.fps.to_f64().max(1.0);
+    let per_second = fps.round() as i64;
+    let seconds = (t.frames as f64 / fps).floor() as i64;
+    let frames = t.frames - (seconds as f64 * fps).round() as i64;
+    let sign = if t.frames < 0 { "-" } else { "" };
+    let s = seconds.abs();
+    format!("{sign}{:02}:{:02}:{:02}:{:02}", s / 3600, s / 60 % 60, s % 60, frames.abs().min(per_second - 1))
+}
+
+/// "every 2 weeks", "every day", "every 2 weeks, 7 times until Thu, 31 Dec 2026".
+fn cadence(c: &Cadence, config: &Config) -> String {
+    let span = duration(&Duration::new(c.every), config);
+    let every = match span.strip_prefix("1 ") {
+        Some(unit) => format!("every {unit}"),
+        None => format!("every {span}"),
+    };
+    match c.until {
+        Some(until) => {
+            let count = c.dates().len();
+            format!(
+                "{every}, {count} time{} until {}",
+                if count == 1 { "" } else { "s" },
+                until.strftime("%a, %-d %b %Y")
+            )
+        }
+        None => every,
     }
 }
 
@@ -237,17 +308,6 @@ pub(crate) fn radix(n: Number, radix: u32) -> Result<String> {
     Ok(if i < 0 { format!("-{digits}") } else { digits })
 }
 
-/// The note nearest a frequency in equal temperament, from A4 = 440 Hz: "C#4".
-pub(crate) fn pitch(hz: f64) -> Result<String> {
-    const NAMES: [&str; 12] = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    let midi = (69.0 + 12.0 * (hz / 440.0).log2()).round();
-    if !(0.0..=131.0).contains(&midi) {
-        bail!("no musical note is that high or low");
-    }
-    let midi = midi as usize;
-    Ok(format!("{}{}", NAMES[midi % 12], midi / 12 - 1))
-}
-
 /// Digits of a whole number in any base from 2 to 36, without a prefix: `100110`.
 pub(crate) fn digits_in_base(n: Number, base: u32) -> Result<String> {
     let Some(i) = n.to_i128() else { bail!("only whole numbers can be shown in base {base}") };
@@ -320,19 +380,34 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
             scaled(q.number, config, true, None).unwrap_or_else(|| number(q.number, config))
         }
         Display::Auto
-        | Display::Each(_)
         | Display::Note(_)
         | Display::Period
+        | Display::Dms
         | Display::Places(_)
         | Display::Significant(_)
         | Display::Digits(_) => {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config, false);
             }
+            if let Some(text) = pace(q, config) {
+                return text;
+            }
             number(q.number, config)
         }
     };
     with_unit(&digits, q.number, &q.unit)
+}
+
+/// Minutes per a length as a runner reads it: "5:30 min/km".
+fn pace(q: &Quantity, config: &Config) -> Option<String> {
+    let [(minutes, 1), (length, -1)] = *q.unit.factors() else { return None };
+    let reg = registry();
+    if reg.def(minutes).symbol != "min" || reg.def(length).dim != crate::units::Dim::LENGTH || q.number.is_negative() {
+        return None;
+    }
+    let seconds = (q.number * Number::from_i64(60)).round_dp(0).to_i64()?;
+    let digits = group(&(seconds / 60).to_string(), config);
+    Some(format!("{digits}:{:02} {}", seconds % 60, unit_text(&q.unit, true)))
 }
 
 /// Joins digits and unit: "5 km", "90°", "30/week".

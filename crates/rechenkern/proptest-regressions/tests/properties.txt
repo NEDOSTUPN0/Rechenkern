@@ -9,3 +9,5 @@ cc f077b72d9c5230f8c5bad1c1b19dafefb380a956d622b3d0c682a82177461c0e # shrinks to
 cc 42171ad75c7cef2f2b180e4ef2db03928823b4d9992cd2b5022a0e1e165f32ea # shrinks to lines = ["-:for sqrt"]
 cc db38afe2be294f3d10ee7957fcce54462c47632f27d250a12f94628d746c6094 # shrinks to line = "940^101(APT"
 cc 06e86b1557cf03564ef7882970e1b0590f316f30b7afd9e42a6c544e7d4108d5 # shrinks to lines = ["sqrt", "sqrt", "sqrt", "sqrt", "sqrt", "sqrt", "sqrt"], edits = [Insert(7, "")]
+cc fa2e4ac0b60a595dc0f780dd46f1100c5f27b5b5bed40d0beab9c6e2538f8132 # shrinks to lines = ["x += 1", "sqrt", "x = 2 km", "sqrt", "sqrt"], edits = [Behaviour(1, 1), Move(17, 0), Set(6, "3 km")]
+cc 54837c99ac3ac78cd6c868e3b528af2bae844da108523b0562a13a0d6fb8be26 # shrinks to lines = ["datebif", "sqrt", "sqrt"], edits = [Behaviour(11, 1), Set(4, "sum"), Insert(0, "A"), Insert(0, "sqrt"), Behaviour(8, 1)]

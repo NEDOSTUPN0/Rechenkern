@@ -234,7 +234,16 @@ proptest! {
         let Ok(Some(first)) = calc.calculate(&line) else { return Ok(()) };
         // Text is a name ("Wednesday"), not a value; a period shows its first and
         // last day, which read as the time between them.
-        prop_assume!(!matches!(first.value(), Value::Text(_)) && !first.text().contains(" – "));
+        prop_assume!(!matches!(
+            first.value(),
+            Value::Text(_)
+                | Value::Range(..)
+                | Value::List(_)
+                | Value::Pitch(_)
+                | Value::Coordinates(_)
+                | Value::Timecode(_)
+                | Value::Cadence(_)
+        ) && !first.text().contains(" – "));
         // Money times a unit that isn't a rate, as in "A$1.00 Mbps", has no way to be written.
         let money = |&(id, e): &(crate::units::UnitId, i8)| e > 0 && registry().def(id).currency.is_some();
         let unwritten = |q: &Quantity| q.unit.factors().iter().any(money) && q.unit.factors().iter().filter(|f| f.1 > 0).count() > 1;

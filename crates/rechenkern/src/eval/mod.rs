@@ -37,8 +37,6 @@ pub enum Display {
     Parts(Vec<Unit>),
     /// No thousands separators, e.g. for timestamps.
     Plain,
-    /// Several conversions of one value: "€9.00, ¥1,500".
-    Each(Vec<Value>),
     /// A remark after the value: "Thu, 19 Nov 2026 (probably)".
     Note(std::borrow::Cow<'static, str>),
     /// A duration as its first and last day: "1 Jul – 30 Sep 2026".
@@ -49,6 +47,8 @@ pub enum Display {
     Significant(u32),
     /// Digits beyond what a number holds: pi to 1000 places.
     Digits(String),
+    /// Coordinates in degrees, minutes and seconds.
+    Dms,
     /// With the scale the line wrote, while the answer stays exact with it: "$2.5M".
     Scaled,
 }
@@ -102,11 +102,10 @@ impl Env<'_> {
                     && let Some(ends) = self.amount_range(a, b)? =>
             {
                 let [a, b] = ends.map(|q| self.convert(Value::Quantity(q), target, Display::Auto));
-                Ok((Value::Text(self.range_text(a?, b?)), Display::Auto))
+                Ok((Value::Range(a?.0.into(), b?.0.into()), Display::Auto))
             }
             Expr::Range(a, b) if let Some([a, b]) = self.amount_range(a, b)? => {
-                let text = self.range_text((Value::Quantity(a), Display::Auto), (Value::Quantity(b), Display::Auto));
-                Ok((Value::Text(text), Display::Auto))
+                Ok((Value::Range(Value::Quantity(a).into(), Value::Quantity(b).into()), Display::Auto))
             }
             Expr::Convert(inner, target) => {
                 let saved = self.food_as.replace(weight_or_volume(target));
@@ -185,6 +184,43 @@ impl Env<'_> {
                 self.vars.get(name).cloned().ok_or_else(|| Error::new(format!("unknown variable {name}")))?
             }
             Expr::Line(line) => self.line(*line)?,
+            Expr::Cadence { every, start, until } => {
+                let every = self.span_of(&self.eval(every)?)?;
+                let day = |e: &Expr| match self.eval(e)? {
+                    Value::Moment(m) => Ok(m.time.date()),
+                    v => bail!("expected a date, not {}", v.kind()),
+                };
+                let start = match start {
+                    Some(e) => day(e)?,
+                    None => self.today(),
+                };
+                let until = until.as_deref().map(day).transpose()?;
+                Value::Cadence(crate::value::Cadence { every, start, until })
+            }
+            Expr::SalesTax { amount, rate, part } => {
+                let rate = match self.eval(rate)? {
+                    Value::Percent(p) => p / Number::from_i64(100),
+                    v => bail!("expected a tax rate in percent, not {}", v.kind()),
+                };
+                let factor = match part {
+                    crate::ast::TaxPart::Tax => rate / (Number::ONE + rate),
+                    crate::ast::TaxPart::Net => Number::ONE / (Number::ONE + rate),
+                    crate::ast::TaxPart::Gross => Number::ONE + rate,
+                };
+                self.mul(self.eval(amount)?, Value::number(factor))?
+            }
+            Expr::Pace(distance, time) => {
+                let Value::Quantity(distance) = self.eval(distance)? else { bail!("a pace needs a distance") };
+                let minutes = self.seconds(&self.eval(time)?)? / Number::from_i64(60);
+                let unit = registry().get("min").product(&distance.unit.pow(-1));
+                Value::Quantity(Quantity::new(minutes / distance.number, unit))
+            }
+            Expr::Resolution(width, height) => {
+                Value::Resolution(crate::value::Resolution { width: *width, height: *height })
+            }
+            Expr::Coordinates(latitude, longitude) => {
+                Value::Coordinates(crate::value::Coordinates { latitude: *latitude, longitude: *longitude })
+            }
             Expr::Apply(name, args) => self.apply(name, args)?,
             Expr::Time(t) => Value::Moment(self.moment(t)?),
             Expr::InZone(inner, zone) => Value::Moment(self.place_in_zone(self.eval(inner)?, &zone.zone)?),
@@ -237,19 +273,6 @@ impl Env<'_> {
             b.unit = a.unit.clone();
         }
         Ok((a.unit == b.unit).then_some([a, b]))
-    }
-
-    /// "5 – 10 kg"; the unit is written once when both ends have it.
-    fn range_text(&self, a: (Value, Display), b: (Value, Display)) -> String {
-        let high = crate::format::render(&b.0, &b.1, self.config, &self.now);
-        match (&a, &b) {
-            ((Value::Quantity(x), Display::Auto), (Value::Quantity(y), Display::Auto))
-                if x.unit == y.unit && !x.unit.is_money() =>
-            {
-                format!("{} – {high}", crate::format::number(x.number, self.config))
-            }
-            _ => format!("{} – {high}", crate::format::render(&a.0, &a.1, self.config, &self.now)),
-        }
     }
 
     /// The branch of `a if cond else b` to evaluate; `None` if there is none.
@@ -606,6 +629,16 @@ impl Env<'_> {
             }
             Value::Quantity(q) => Ok(Value::Quantity(self.convert_quantity(&q, unit)?)),
             Value::Duration(d) => Ok(Value::Quantity(self.duration_in(&d, unit)?)),
+            // "100 frames at 24 fps in seconds"
+            Value::Timecode(t) if unit.dim() == Dim::TIME => {
+                let seconds = Quantity::new(Number::from_i64(t.frames) / t.fps, registry().get("s"));
+                Ok(Value::Quantity(self.convert_quantity(&seconds, unit)?))
+            }
+            // "A4 in Hz"
+            Value::Pitch(p) if unit.dim() == Dim::FREQUENCY => {
+                let hz = Quantity::new(Number::from_f64(p.hz()), registry().get("Hz"));
+                Ok(Value::Quantity(self.convert_quantity(&hz, unit)?))
+            }
             Value::Percent(p) if unit.is_none() => Ok(Value::number(p / Number::from_i64(100))),
             v => bail!("can't convert {} to {}", v.kind(), unit_text(unit, true)),
         }
@@ -616,7 +649,7 @@ impl Env<'_> {
         // Currencies don't split: "in EUR, JPY" converts to each.
         if units.iter().any(Unit::is_money) {
             let values: Vec<Value> = units.iter().map(|u| self.to_unit(value.clone(), u)).collect::<Result<_>>()?;
-            return Ok((values[0].clone(), Display::Each(values)));
+            return Ok((Value::List(values), Display::Auto));
         }
         let time = units.iter().all(|u| u.dim() == Dim::TIME);
         let q = match value {
@@ -657,10 +690,46 @@ impl Env<'_> {
                 }
                 _ => bail!("only whole numbers can be shown in base {base}"),
             },
-            Format::Pitch => match &value {
+            Format::Midi => match &value {
+                Value::Pitch(p) => (Value::number(Number::from_i64(p.midi as i64)), Display::Auto),
                 Value::Quantity(q) if q.unit.dim() == Dim::FREQUENCY => {
                     let hz = self.convert_quantity(q, &registry().get("Hz"))?.number.to_f64();
-                    (Value::Text(crate::format::pitch(hz)?), Display::Auto)
+                    (Value::number(Number::from_i64(crate::value::Pitch::of_hz(hz).midi as i64)), Display::Auto)
+                }
+                v => bail!("only a note or a frequency has a MIDI number, not {}", v.kind()),
+            },
+            Format::Dms => match value {
+                Value::Coordinates(c) => (Value::Coordinates(c), Display::Dms),
+                Value::Quantity(q) if q.unit.is_none() || q.unit.dim() == Dim::ANGLE => {
+                    let degrees = self.convert_quantity(&q, &registry().get("°"))?;
+                    let parts = ["°", "arcmin", "arcsec"].map(|u| registry().get(u)).to_vec();
+                    (Value::Quantity(degrees), Display::Parts(parts))
+                }
+                v => bail!("only an angle or coordinates have degrees, minutes and seconds, not {}", v.kind()),
+            },
+            Format::Megapixels => match value {
+                Value::Resolution(r) => {
+                    let pixels = Number::from_i64(r.width as i64 * r.height as i64);
+                    (
+                        Value::Text(format!("{} MP", crate::format::number(pixels / Number::pow10(6), self.config))),
+                        Display::Auto,
+                    )
+                }
+                v => bail!("only a resolution has megapixels, not {}", v.kind()),
+            },
+            Format::Frames => match value {
+                Value::Timecode(t) => (Value::number(Number::from_i64(t.frames)), Display::Auto),
+                v => bail!("only a timecode has frames, not {}", v.kind()),
+            },
+            Format::Pitch => match &value {
+                Value::Pitch(_) => (value, Display::Auto),
+                Value::Quantity(q) if q.unit.dim() == Dim::FREQUENCY => {
+                    let hz = self.convert_quantity(q, &registry().get("Hz"))?.number.to_f64();
+                    let pitch = crate::value::Pitch::of_hz(hz);
+                    if !(0..=131).contains(&pitch.midi) {
+                        bail!("no musical note is that high or low");
+                    }
+                    (Value::Pitch(pitch), Display::Auto)
                 }
                 v => bail!("only a frequency has a pitch, not {}", v.kind()),
             },
@@ -677,6 +746,9 @@ impl Env<'_> {
                 Some(n) => (Value::number(n), Display::Multiplier),
                 None => bail!("can't show {} as a multiplier", value.kind()),
             },
+            Format::Number if let Value::Resolution(r) = &value => {
+                (Value::number(Number::from_i64(r.width as i64 * r.height as i64)), Display::Auto)
+            }
             Format::Number => match &value {
                 Value::Duration(d) => (Value::number(self.duration_in(d, &registry().get("s"))?.number), Display::Auto),
                 _ => match number_of(&value) {

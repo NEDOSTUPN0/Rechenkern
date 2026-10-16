@@ -131,7 +131,18 @@ impl Env<'_> {
                 add(AlternativeKind::Iso8601, format(Format::Iso));
                 add(AlternativeKind::Timestamp, format(Format::Timestamp));
             }
-            Value::Bool(_) | Value::Text(_) => {}
+            Value::Pitch(p) => {
+                let hz = crate::value::Quantity::new(Number::from_f64(p.hz()), crate::units::registry().get("Hz"));
+                add(AlternativeKind::Unit, Ok((Value::Quantity(hz), Display::Auto)));
+            }
+            Value::Bool(_)
+            | Value::Text(_)
+            | Value::Range(..)
+            | Value::List(_)
+            | Value::Coordinates(_)
+            | Value::Resolution(_)
+            | Value::Timecode(_)
+            | Value::Cadence(_) => {}
         }
         out
     }

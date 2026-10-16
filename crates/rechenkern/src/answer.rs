@@ -113,9 +113,14 @@ impl Answer {
     /// What later lines get for this answer: the value, or the value as shown if the
     /// config says references take the formatted value.
     pub(crate) fn reference(&self) -> Value {
+        // Several currencies at once: later lines take the first.
+        let value = match &self.value {
+            Value::List(values) if !values.is_empty() => &values[0],
+            value => value,
+        };
         match self.config.formatting.references_take_formatted_value {
-            true => format::shown(&self.value, &self.display, &self.config),
-            false => self.value.clone(),
+            true => format::shown(value, &self.display, &self.config),
+            false => value.clone(),
         }
     }
 
@@ -531,6 +536,10 @@ fn format_caption(format: Format) -> Option<String> {
         Format::DayOfYear => "Day of the Year",
         Format::DayOfMonth => "Day of the Month",
         Format::Pitch => "Pitch",
+        Format::Midi => "MIDI Note",
+        Format::Dms => "Degrees, Minutes and Seconds",
+        Format::Megapixels => "Megapixels",
+        Format::Frames => "Frames",
     };
     Some(name.to_string())
 }

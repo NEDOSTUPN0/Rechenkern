@@ -47,7 +47,7 @@ $900 on the 5                                → $900.00
 // Known differences from SoulverCore
 Rent $900 due on the 5th                     → $900.00
 2 hours of work at $50/hour                  → $100.00
-5 km run in 30 minutes                       → 30 minutes
+5 km run in 30 minutes                       → 6:00 min/km
 5 km/h coffee 3 km/h                         → 3 km/h
 3pm cats June 5                              → Fri, 5 Jun 2026
 10% + 5                                      → 510%

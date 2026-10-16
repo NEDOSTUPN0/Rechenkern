@@ -346,6 +346,18 @@ impl Env<'_> {
 
     /// "30 hours at $30/hour" multiplies, "$500 at $20/hour" divides.
     fn at(&self, a: Value, b: Value) -> Result<Value> {
+        // Frames or a time at a frame rate make a timecode: "100 frames at 24 fps".
+        if let Value::Quantity(rate) = &b
+            && rate.unit.single().is_some_and(|d| d.symbol == "fps")
+        {
+            let frames = match &a {
+                Value::Quantity(q) if q.unit.is_none() => q.number,
+                Value::Timecode(t) => Number::from_i64(t.frames) * rate.number / t.fps,
+                _ => self.seconds(&a)? * rate.number,
+            };
+            let frames = frames.round_dp(0).to_i64().ok_or_else(|| crate::Error::new("too many frames"))?;
+            return Ok(Value::Timecode(crate::value::Timecode { frames, fps: rate.number }));
+        }
         if let (Value::Quantity(x), Value::Quantity(speed)) = (&a, &b)
             && speed.unit.dim() == Dim::FREQUENCY
             && let Some(turned) = self.turning(x, speed)?

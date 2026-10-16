@@ -354,6 +354,7 @@ fn definitions() -> Vec<Def> {
         unit("Hz", "hertz", Dim::FREQUENCY, "1")
             .plural("hertz")
             .prefixes(&[KILO, MEGA, GIGA, TERA, MILLI, MICRO, NANO]),
+        unit("fps", "frame per second", Dim::FREQUENCY, "1").plural("frames per second"),
         unit("rpm", "revolution per minute", Dim::FREQUENCY, "1")
             .plural("revolutions per minute")
             .scale(Number::ratio(1, 60)),

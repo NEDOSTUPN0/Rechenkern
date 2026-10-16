@@ -373,6 +373,15 @@ pub static FORMATS: Phrases<Format> = Phrases::new(&[
     ("weekday", Format::Weekday),
     ("pitch", Format::Pitch),
     ("note", Format::Pitch),
+    ("midi", Format::Midi),
+    ("midi note", Format::Midi),
+    ("dms", Format::Dms),
+    ("degrees minutes seconds", Format::Dms),
+    ("degrees minutes and seconds", Format::Dms),
+    ("megapixels", Format::Megapixels),
+    ("megapixel", Format::Megapixels),
+    ("mp", Format::Megapixels),
+    ("frames", Format::Frames),
 ]);
 
 /// Questions about a date: "week of year", "weekday on March 9".
@@ -587,6 +596,14 @@ pub fn weekday(w: &str) -> Option<(Weekday, bool)> {
         "sun" => (Sunday, true),
         _ => return None,
     })
+}
+
+/// Words that make a whole line a cadence: "daily", "monthly".
+pub fn is_cadence_word(w: &str) -> bool {
+    matches!(
+        w,
+        "hourly" | "daily" | "weekly" | "biweekly" | "fortnightly" | "monthly" | "quarterly" | "yearly" | "annually"
+    )
 }
 
 /// Words that refer to earlier answers.

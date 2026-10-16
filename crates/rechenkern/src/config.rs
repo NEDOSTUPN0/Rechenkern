@@ -229,6 +229,8 @@ pub struct Features {
     pub ordinal_label_parsing: bool,
     /// `4 out of 10` is the fraction 2/5 instead of 40%.
     pub proper_fraction_parsing: bool,
+    /// A line that is a repeating time is a cadence: `every 2 weeks until Dec 31`, `daily`.
+    pub cadence_parsing: bool,
     pub time_zones: TimeZoneOptions,
     pub dates: DateOptions,
     pub comments: CommentOptions,
@@ -257,6 +259,7 @@ impl Default for Features {
             list_marker_parsing: true,
             ordinal_label_parsing: false,
             proper_fraction_parsing: false,
+            cadence_parsing: true,
             time_zones: TimeZoneOptions::default(),
             dates: DateOptions::default(),
             comments: CommentOptions::default(),
@@ -296,7 +299,10 @@ pub enum Converter {
     Iso8601,
     /// `as weekday`, `as week number`, `as day of year`.
     DatePart,
+    /// `as pitch`, `as midi`.
     Pitch,
+    /// `as dms`.
+    Dms,
 }
 
 /// What a thousands separator before more than three digits means, as in `1,0000`.

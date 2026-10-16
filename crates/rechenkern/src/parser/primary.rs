@@ -3,7 +3,7 @@
 use super::{Parser, words};
 use crate::ast::{Direction, Expr, Format, Func, LineRef, Op, Rounding, Target, TimeExpr};
 use crate::error::{Error, Result, bail};
-use crate::lexer::Tok;
+use crate::lexer::{Tok, Token};
 use crate::number::Number;
 use crate::units::foods::Food;
 use crate::units::{Dim, Unit, registry};
@@ -66,6 +66,9 @@ impl Parser<'_> {
     }
 
     fn number(&mut self, n: Number) -> Result<Expr> {
+        if let Some(resolution) = self.resolution(n) {
+            return Ok(resolution);
+        }
         if let Some(date) = self.day_first_date(n)? {
             return self.date_tail(date);
         }
@@ -82,6 +85,29 @@ impl Parser<'_> {
             return Ok(Expr::Number(value));
         }
         self.quantity(Expr::Number(value))
+    }
+
+    /// "1920x1080" right after the width: a resolution. Both sides are 100 or more, so
+    /// "3x4" stays a multiplication.
+    fn resolution(&mut self, width: Number) -> Option<Expr> {
+        let side =
+            |n: Number| n.to_i64().filter(|&v| n.is_integer() && (100..=1_000_000).contains(&v)).map(|v| v as u32);
+        let width = side(width)?;
+        let tok = self.cur().filter(|t| !t.space_before)?;
+        let height = match &tok.tok {
+            Tok::Word(w) => {
+                w.strip_prefix(['x', 'X']).filter(|d| d.bytes().all(|b| b.is_ascii_digit()))?.parse().ok()?
+            }
+            // "1920×1080"
+            Tok::Sym("*") if self.src[tok.start..].starts_with('×') => match self.toks.get(self.pos + 1) {
+                Some(Token { tok: Tok::Num(h), space_before: false, .. }) => side(*h)?,
+                _ => return None,
+            },
+            _ => return None,
+        };
+        side(Number::from_i64(height as i64))?;
+        self.pos += if matches!(tok.tok, Tok::Word(_)) { 1 } else { 2 };
+        Some(Expr::Resolution(width, height))
     }
 
     /// Applies `5k`, `2.5 million`, `3 dozen`, `two thirds`; money allows `$5m`, `$2B`.
@@ -363,6 +389,9 @@ impl Parser<'_> {
         if let Some(expr) = self.sky()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.coordinates()? {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.distance()? {
             return Ok(Some(expr));
         }
@@ -506,7 +535,10 @@ impl Parser<'_> {
         // Only before a frequency: "A4 paper" is a paper size.
         let keyword = ["in", "to", "as", "into"].iter().any(|w| self.words_at(i + n, &[w]));
         let hz = registry().get("Hz");
-        if !keyword || self.unit_at(i + n + 1, true).is_none_or(|(u, _)| u.dim() != hz.dim()) {
+        let frequency = self.unit_at(i + n + 1, true).is_some_and(|(u, _)| u.dim() == hz.dim());
+        let note =
+            self.phrase_at(i + n + 1, &words::FORMATS).is_some_and(|(f, _)| matches!(f, Format::Midi | Format::Pitch));
+        if !keyword || !(frequency || note) {
             return None;
         }
         let midi = (octave + 1) * 12 + semitone + shift;

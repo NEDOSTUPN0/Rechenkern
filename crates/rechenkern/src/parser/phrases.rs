@@ -1,7 +1,7 @@
 //! Whole-line phrases: percentage questions and proportions.
 
 use super::Parser;
-use crate::ast::{Direction, Expr, Format, Func, GrowthResult, Op, Target, TimeExpr};
+use crate::ast::{Direction, Expr, Format, Func, GrowthResult, Op, Target, TaxPart, TimeExpr};
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -10,6 +10,12 @@ use crate::units::{Dim, registry};
 impl Parser<'_> {
     /// Tries phrases such as "20 is what % of 200" on the whole line.
     pub(super) fn phrase(&mut self) -> Result<Option<Expr>> {
+        if let Some(expr) = self.cadence()? {
+            return Ok(Some(expr));
+        }
+        if let Some(expr) = self.sales_tax()? {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.inflation()? {
             return Ok(Some(expr));
         }
@@ -405,6 +411,100 @@ impl Parser<'_> {
             }
             _ => Ok(None),
         }
+    }
+
+    /// A whole line that repeats: "every 2 weeks", "every other day", "daily", with
+    /// "from" a day and "until" another in either order.
+    fn cadence(&self) -> Result<Option<Expr>> {
+        const EVERY: &[(&str, &str, i64)] = &[
+            ("hourly", "hour", 1),
+            ("daily", "day", 1),
+            ("weekly", "week", 1),
+            ("biweekly", "week", 2),
+            ("fortnightly", "week", 2),
+            ("monthly", "month", 1),
+            ("quarterly", "month", 3),
+            ("yearly", "year", 1),
+            ("annually", "year", 1),
+        ];
+        if !self.config().features.cadence_parsing || self.toks.is_empty() {
+            return Ok(None);
+        }
+        let amount = |n: i64, unit: crate::units::Unit| Expr::WithUnit(Expr::Number(Number::from_i64(n)).boxed(), unit);
+        let first = self.lower(0).unwrap_or_default();
+        let (every, mut at) = if let Some(&(_, unit, n)) = EVERY.iter().find(|(w, _, _)| *w == first) {
+            (amount(n, registry().lookup(unit).expect("a unit of time")), 1)
+        } else if first == "every" {
+            // "every other day", "every 2 weeks", "every week"
+            let (n, at) = match &self.toks.get(1).map(|t| &t.tok) {
+                Some(Tok::Num(n)) if n.is_integer() => (n.to_i64().unwrap_or(1), 2),
+                _ if self.words_at(1, &["other"]) => (2, 2),
+                _ => (1, 1),
+            };
+            let Some((unit, len)) = self.unit_at(at, true).filter(|(u, _)| u.dim() == Dim::TIME) else {
+                return Ok(None);
+            };
+            (amount(n, unit), at + len)
+        } else {
+            return Ok(None);
+        };
+        let end = self.toks.len();
+        let (mut start, mut until) = (None, None);
+        while at < end {
+            let any = |words: &[&str]| words.iter().any(|w| self.words_at(at, &[w]));
+            let slot =
+                match (any(&["from", "starting", "beginning"]), any(&["until", "till", "through", "to", "ending"])) {
+                    (true, _) if start.is_none() => &mut start,
+                    (_, true) if until.is_none() => &mut until,
+                    _ => return Ok(None),
+                };
+            let stop = ["from", "starting", "beginning", "until", "till", "through", "ending"]
+                .iter()
+                .filter_map(|w| self.find(at + 1, &[w]))
+                .min()
+                .unwrap_or(end);
+            *slot = Some(self.part(at + 1, stop)?.boxed());
+            at = stop;
+        }
+        Ok(Some(Expr::Cadence { every: every.boxed(), start, until }))
+    }
+
+    /// "8% vat in $108" (the tax in a price), "$108 before 8% tax" (the price without it),
+    /// "$100 with 8% tax" (the price with it).
+    fn sales_tax(&self) -> Result<Option<Expr>> {
+        const TAXES: &[&[&str]] = &[&["sales", "tax"], &["tax"], &["vat"], &["gst"], &["hst"], &["mwst"], &["iva"]];
+        let end = self.toks.len();
+        let tax_at = |k: usize| TAXES.iter().find(|t| self.words_at(k, t)).map(|t| t.len());
+        let Some((t, n)) = (2..end).find_map(|k| Some((k, tax_at(k).filter(|_| self.toks[k - 1].is_sym("%"))?))) else {
+            return Ok(None);
+        };
+        let pct = t - 2;
+        if !matches!(self.toks[pct].tok, Tok::Num(_)) {
+            return Ok(None);
+        }
+        let rate = self.part(pct, t)?.boxed();
+        let after = t + n;
+        // "8% vat in $108", "10% sales tax off $110", "8% tax on $100"
+        let lead = [("in", TaxPart::Tax), ("off", TaxPart::Net), ("on", TaxPart::Gross)];
+        if pct == 0
+            && let Some(&(_, part)) = lead.iter().find(|(w, _)| self.words_at(after, &[w]))
+        {
+            let amount = self.part(after + 1, end)?.boxed();
+            return Ok(Some(Expr::SalesTax { amount, rate, part }));
+        }
+        if after != end || pct < 2 {
+            return Ok(None);
+        }
+        let joint = &self.toks[pct - 1];
+        let word = joint.word().map(str::to_lowercase).unwrap_or_default();
+        let part = match word.as_str() {
+            "before" | "without" | "ex" | "excluding" | "excl" | "less" | "minus" => TaxPart::Net,
+            _ if joint.is_sym("-") => TaxPart::Net,
+            "with" | "including" | "incl" | "plus" | "after" => TaxPart::Gross,
+            _ if joint.is_sym("+") => TaxPart::Gross,
+            _ => return Ok(None),
+        };
+        Ok(Some(Expr::SalesTax { amount: self.part(0, pct - 1)?.boxed(), rate, part }))
     }
 
     fn find_sym(&self, from: usize, sym: &str) -> Option<usize> {

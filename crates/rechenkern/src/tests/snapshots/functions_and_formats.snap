@@ -434,6 +434,33 @@ today as pitch                               → <error: only a frequency has a 
 255 in note                                  → <error: only a frequency has a pitch, not a number>
 0.75 as note                                 → <error: only a frequency has a pitch, not a number>
 today as note                                → <error: only a frequency has a pitch, not a date>
+255 in midi                                  → <error: only a note or a frequency has a MIDI number, not a number>
+0.75 as midi                                 → <error: only a note or a frequency has a MIDI number, not a number>
+today as midi                                → <error: only a note or a frequency has a MIDI number, not a date>
+255 in midi note                             → <error: only a note or a frequency has a MIDI number, not a number>
+0.75 as midi note                            → <error: only a note or a frequency has a MIDI number, not a number>
+today as midi note                           → <error: only a note or a frequency has a MIDI number, not a date>
+255 in dms                                   → 255°
+0.75 as dms                                  → 45′
+today as dms                                 → <error: only an angle or coordinates have degrees, minutes and seconds, not a date>
+255 in degrees minutes seconds               → 255°
+0.75 as degrees minutes seconds              → 45′
+today as degrees minutes seconds             → <error: only an angle or coordinates have degrees, minutes and seconds, not a date>
+255 in degrees minutes and seconds           → 255°
+0.75 as degrees minutes and seconds          → 45′
+today as degrees minutes and seconds         → <error: only an angle or coordinates have degrees, minutes and seconds, not a date>
+255 in megapixels                            → <error: only a resolution has megapixels, not a number>
+0.75 as megapixels                           → <error: only a resolution has megapixels, not a number>
+today as megapixels                          → <error: only a resolution has megapixels, not a date>
+255 in megapixel                             → <error: only a resolution has megapixels, not a number>
+0.75 as megapixel                            → <error: only a resolution has megapixels, not a number>
+today as megapixel                           → <error: only a resolution has megapixels, not a date>
+255 in mp                                    → <error: only a resolution has megapixels, not a number>
+0.75 as mp                                   → <error: only a resolution has megapixels, not a number>
+today as mp                                  → <error: only a resolution has megapixels, not a date>
+255 in frames                                → <error: only a timecode has frames, not a number>
+0.75 as frames                               → <error: only a timecode has frames, not a number>
+today as frames                              → <error: only a timecode has frames, not a date>
 
 // Constants and powers
 speed of light                               → 299,792,458 m/s

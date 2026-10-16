@@ -47,4 +47,4 @@ distance from JFK to LAX in miles            → 2,445.095641 mi
 // Not supported yet
 diff Tokyo London                            → <none>
 time in qld                                  → <error: unknown place "qld">
-coordinates of Tokyo                         → <error: unexpected "of">
+coordinates of Tokyo                         → 35.69° N, 139.69° E

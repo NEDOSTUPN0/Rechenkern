@@ -184,6 +184,8 @@ impl<'a> Parser<'a> {
             // "for 2 hours" and "split 4 ways" only matter before an amount.
             || (w == "for" && self.duration_at(i + 1))
             || (matches!(w, "every" | "each") && self.counted_unit_at(i + 1))
+            // "daily", "monthly until June": a cadence, as a whole line.
+            || (i == 0 && words::is_cadence_word(w) && self.config().features.cadence_parsing)
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
             // "sq ft", "cu m"
@@ -216,6 +218,7 @@ impl<'a> Parser<'a> {
             || self.sky_at(i).is_some()
             || self.weather_at(i).is_some()
             || self.distance_at(i).is_some()
+            || self.coordinates_at(i).is_some()
             || self.note_at(i).is_some()
             || self.place_sky_at(i).is_some()
             || self.density_at(i).is_some()

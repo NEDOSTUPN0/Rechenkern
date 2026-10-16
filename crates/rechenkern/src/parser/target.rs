@@ -65,6 +65,13 @@ impl Parser<'_> {
         {
             return Ok(Some(rounded(expr, rounding, format)));
         }
+        // "10 km in 50 minutes": a pace.
+        if keyword == "in"
+            && expr.edge_unit(true).is_some_and(|u| u.dim() == Dim::LENGTH)
+            && let Some(amount) = self.time_amount()
+        {
+            return Ok(Some(Expr::Pace(expr.clone().boxed(), amount.boxed())));
+        }
         // "time in Tokyo in 3 hours", "time in 3 hours": the time that much later.
         if keyword == "in"
             && is_moment(expr)
@@ -580,7 +587,9 @@ fn converter(target: &Target) -> Converter {
             Format::Date => Converter::Date,
             Format::Iso => Converter::Iso8601,
             Format::Weekday | Format::WeekNumber | Format::DayOfYear | Format::DayOfMonth => Converter::DatePart,
-            Format::Pitch => Converter::Pitch,
+            Format::Pitch | Format::Midi => Converter::Pitch,
+            Format::Dms => Converter::Dms,
+            Format::Megapixels | Format::Frames => Converter::Number,
         },
     }
 }

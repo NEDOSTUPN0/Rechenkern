@@ -99,6 +99,24 @@ pub enum Expr {
         place: Option<Location>,
         on: Option<Box<Expr>>,
     },
+    /// A time that repeats: `every 2 weeks until Dec 31`.
+    Cadence {
+        every: Box<Expr>,
+        start: Option<Box<Expr>>,
+        until: Option<Box<Expr>>,
+    },
+    /// A price and the sales tax in it: `8% vat in $108`, `$108 before 8% tax`.
+    SalesTax {
+        amount: Box<Expr>,
+        rate: Box<Expr>,
+        part: TaxPart,
+    },
+    /// Minutes for each unit of a distance: `10 km in 50 minutes` is 5:00 min/km.
+    Pace(Box<Expr>, Box<Expr>),
+    /// A place on Earth: `coordinates of Tokyo`.
+    Coordinates(f64, f64),
+    /// A size in pixels: `1920x1080`.
+    Resolution(u32, u32),
     Convert(Box<Expr>, Target),
     /// A conversion with the exchange rates of a day: `$100 in EUR on Jan 1, 2020`.
     RatesOn(Box<Expr>, Box<Expr>),
@@ -136,6 +154,17 @@ pub enum Expr {
         compounds: Option<i64>,
         result: GrowthResult,
     },
+}
+
+/// What a sales tax phrase asks for.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TaxPart {
+    /// The tax in a price.
+    Tax,
+    /// The price without the tax.
+    Net,
+    /// The price with the tax.
+    Gross,
 }
 
 /// What a placeholder of a host's phrase matched.
@@ -451,6 +480,14 @@ pub enum Format {
     DayOfMonth,
     /// The musical note nearest a frequency: `440 Hz as pitch` = A4.
     Pitch,
+    /// The MIDI number of a note: `A4 as midi` = 69.
+    Midi,
+    /// Degrees, minutes and seconds of an angle or coordinates: 40° 26′ 46″.
+    Dms,
+    /// Millions of pixels of a resolution.
+    Megapixels,
+    /// Frames of a timecode.
+    Frames,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

@@ -418,7 +418,7 @@ fn units() {
         ("1,500hour 1ns", "1,500 hours 0.000000001 seconds"),
         ("1500 hours 0.000000001 seconds", "1,500 hours 0.000000001 seconds"),
         ("3 nights in Paris", "<error: only a date or a time can be in a time zone, not time>"),
-        ("5:30 min/km in min/mile", "8.851392 min/mi"),
+        ("5:30 min/km in min/mile", "8:51 min/mi"),
         ("5:30 in minutes", "330 minutes"),
         ("1:30 hours in minutes", "90 minutes"),
         ("9:30 to 17:00", "7 hours 30 minutes"),
@@ -1246,4 +1246,40 @@ fn odd_input_never_panics() {
     ] {
         let _ = calc.calculate(line);
     }
+}
+
+#[test]
+fn typed_results() {
+    check(&[
+        ("5-10 kg", "5 – 10 kg"),
+        ("$10 in EUR, JPY", "€9.00, ¥1,500"),
+        ("440 Hz as pitch", "A4"),
+        ("A4 as midi", "69"),
+        ("C#5 as midi", "73"),
+        ("440 Hz in midi", "69"),
+        ("40.446 as dms", "40° 26′ 45.6″"),
+        ("coordinates of Tokyo", "35.69° N, 139.69° E"),
+        ("Tokyo coordinates as dms", "35° 41′ 24″ N, 139° 41′ 24″ E"),
+        ("latitude of London", "51.51°"),
+        ("1920x1080", "1920x1080"),
+        ("1920×1080 in megapixels", "2.0736 MP"),
+        ("1920x1080 as number", "2,073,600"),
+        ("3x4", "3"),
+        ("10 km in 50 minutes", "5:00 min/km"),
+        ("6 min/km in min/mile", "9:39 min/mi"),
+        ("8% vat in $108", "$8.00"),
+        ("$108 before 8% tax", "$100.00"),
+        ("$108 - 8% vat", "$100.00"),
+        ("$100 with 8% tax", "$108.00"),
+        ("10% sales tax off $110", "$100.00"),
+        ("8% tax on $100", "$108.00"),
+        ("100 frames at 24 fps", "00:00:04:04"),
+        ("1 hour 2 minutes at 25 fps", "01:02:00:00"),
+        ("100 frames at 24 fps in seconds", "4.166666667 seconds"),
+        ("every 2 weeks", "every 2 weeks"),
+        ("daily", "every day"),
+        ("every other day until Sep 30", "every 2 days, 4 times until Wed, 30 Sep 2026"),
+        ("every 2 weeks from Oct 1 until Dec 31", "every 2 weeks, 7 times until Thu, 31 Dec 2026"),
+        ("$50 every 2 weeks", "$25.00/week"),
+    ]);
 }

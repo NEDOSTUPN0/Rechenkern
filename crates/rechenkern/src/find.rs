@@ -313,7 +313,7 @@ fn value_kinds(expr: &Expr, value: &Value, interval: bool) -> Vec<DataKind> {
         Value::Duration(d) if d.laptime => vec![DataKind::Laptime, DataKind::Duration],
         Value::Duration(_) => vec![DataKind::Duration],
         Value::Bool(_) => vec![DataKind::Boolean],
-        Value::Text(_) => Vec::new(),
+        _ => Vec::new(),
     }
 }
 

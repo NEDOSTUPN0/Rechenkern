@@ -136,3 +136,20 @@ fn alternative_results() {
         ["Date Wednesday, 23 September 2026 15:00", "Iso8601 2026-09-23T15:00:00-04:00", "Timestamp 1790190000"]
     );
 }
+
+#[test]
+fn typed_values() {
+    use rechenkern::Value;
+    let value = |line: &str| calculator().calculate(line).unwrap().unwrap().value().clone();
+    assert!(matches!(value("5-10 kg"), Value::Range(..)));
+    assert!(matches!(value("10 usd in eur, gbp"), Value::List(v) if v.len() == 2));
+    assert!(matches!(value("440 Hz as pitch"), Value::Pitch(p) if p.midi == 69));
+    assert!(matches!(value("coordinates of Tokyo"), Value::Coordinates(c) if c.latitude > 35.0));
+    assert!(matches!(value("1920x1080"), Value::Resolution(r) if r.width == 1920 && r.height == 1080));
+    assert!(matches!(value("100 frames at 24 fps"), Value::Timecode(t) if t.frames == 100));
+    let Value::Cadence(c) = value("every 2 weeks until Oct 31") else { panic!("not a cadence") };
+    assert_eq!(c.dates().len(), 3);
+    let Value::Duration(span) = value("Jan 1 to Mar 1") else { panic!("not a span") };
+    assert_eq!(span.start().unwrap().date().to_string(), "2026-01-01");
+    assert_eq!(span.end().unwrap().date().to_string(), "2026-03-01");
+}

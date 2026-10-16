@@ -191,6 +191,18 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Subtotals, grand totals and running totals or budgets are marks the host sets
   (`Behaviour`); the text of a subtotal line is only its caption.
 
+## Typed results
+
+- Values beyond numbers and dates have types of their own, as SoulverCore's
+  `EvaluationResult`: `Value::Range` (`5-10 kg`), `List` (`$10 in EUR, JPY`; later
+  lines take the first), `Pitch`, `Coordinates`, `Resolution` (`1920x1080`, both
+  sides 100 or more), `Timecode` (`100 frames at 24 fps`), `Cadence` (`every 2 weeks
+  until Dec 31`, a whole line). A span between dates is a `Duration` with
+  `start()`/`end()`.
+- Minutes per a length are a pace, written `m:ss min/km`, which reads back.
+- Sales tax: `8% vat in $108` is the tax in a price, `$108 before 8% tax` (or
+  `- 8% vat`) the price without it; a tax word after the percentage makes it so.
+
 ## Semantics worth knowing
 
 - Addition of different units: the larger unit wins; for money and rates the

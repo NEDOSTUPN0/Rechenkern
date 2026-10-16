@@ -55,6 +55,88 @@ impl Duration {
     pub fn new(span: Span) -> Duration {
         Duration { span, anchor: None, laptime: false }
     }
+
+    /// Where a span between two dates starts: `Jan 1 to Mar 1`, `Q3 2026`.
+    pub fn start(&self) -> Option<civil::DateTime> {
+        self.anchor
+    }
+
+    /// Where it ends.
+    pub fn end(&self) -> Option<civil::DateTime> {
+        self.anchor?.checked_add(self.span).ok()
+    }
+}
+
+/// A musical note in equal temperament, A4 = 440 Hz.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Pitch {
+    /// The MIDI note number: 69 is A4.
+    pub midi: i32,
+}
+
+impl Pitch {
+    /// The nearest note to a frequency.
+    pub fn of_hz(hz: f64) -> Pitch {
+        Pitch { midi: (69.0 + 12.0 * (hz / 440.0).log2()).round() as i32 }
+    }
+
+    pub fn hz(self) -> f64 {
+        440.0 * 2f64.powf((self.midi - 69) as f64 / 12.0)
+    }
+
+    /// "A4", "C#5".
+    pub fn name(self) -> String {
+        const NAMES: [&str; 12] = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        format!("{}{}", NAMES[self.midi.rem_euclid(12) as usize], self.midi.div_euclid(12) - 1)
+    }
+}
+
+/// A place on Earth, in degrees north and east.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Coordinates {
+    pub latitude: f64,
+    pub longitude: f64,
+}
+
+/// A size in pixels: 1920x1080.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Resolution {
+    pub width: u32,
+    pub height: u32,
+}
+
+/// Frames at a frame rate, written as a timecode: 00:00:04:04.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Timecode {
+    pub frames: i64,
+    /// Frames a second.
+    pub fps: Number,
+}
+
+/// Something that happens again and again: every 2 weeks, until a day if it ends.
+#[derive(Clone, Debug)]
+pub struct Cadence {
+    /// The time between two times.
+    pub every: Span,
+    /// The first time, and the days it happens on up to `until`.
+    pub start: civil::Date,
+    pub until: Option<civil::Date>,
+}
+
+impl Cadence {
+    /// The days it happens on, up to `until` (at most a thousand); none without an end.
+    pub fn dates(&self) -> Vec<civil::Date> {
+        let Some(until) = self.until else { return Vec::new() };
+        let mut dates = Vec::new();
+        for k in 0..1000i64 {
+            let Ok(step) = self.every.checked_mul(k) else { break };
+            match self.start.checked_add(step) {
+                Ok(day) if day <= until => dates.push(day),
+                _ => break,
+            }
+        }
+        dates
+    }
 }
 
 /// The result of a calculation.
@@ -67,6 +149,15 @@ pub enum Value {
     Duration(Duration),
     Bool(bool),
     Text(String),
+    /// From one value to another: `5 – 10 kg`.
+    Range(Box<Value>, Box<Value>),
+    /// Several answers at once: `$10 in EUR, JPY`.
+    List(Vec<Value>),
+    Pitch(Pitch),
+    Coordinates(Coordinates),
+    Resolution(Resolution),
+    Timecode(Timecode),
+    Cadence(Cadence),
 }
 
 impl Value {
@@ -87,6 +178,15 @@ impl Value {
             }
             (Value::Bool(a), Value::Bool(b)) => a == b,
             (Value::Text(a), Value::Text(b)) => a == b,
+            (Value::Range(a1, a2), Value::Range(b1, b2)) => a1.same_as(b1) && a2.same_as(b2),
+            (Value::List(a), Value::List(b)) => a.len() == b.len() && a.iter().zip(b).all(|(a, b)| a.same_as(b)),
+            (Value::Pitch(a), Value::Pitch(b)) => a == b,
+            (Value::Coordinates(a), Value::Coordinates(b)) => a == b,
+            (Value::Resolution(a), Value::Resolution(b)) => a == b,
+            (Value::Timecode(a), Value::Timecode(b)) => a == b,
+            (Value::Cadence(a), Value::Cadence(b)) => {
+                a.every.fieldwise() == b.every.fieldwise() && a.start == b.start && a.until == b.until
+            }
             _ => false,
         }
     }
@@ -101,6 +201,13 @@ impl Value {
             Value::Duration(_) => "a duration".into(),
             Value::Bool(_) => "a boolean".into(),
             Value::Text(_) => "text".into(),
+            Value::Range(..) => "a range".into(),
+            Value::List(_) => "a list".into(),
+            Value::Pitch(_) => "a note".into(),
+            Value::Coordinates(_) => "coordinates".into(),
+            Value::Resolution(_) => "a resolution".into(),
+            Value::Timecode(_) => "a timecode".into(),
+            Value::Cadence(_) => "a cadence".into(),
         }
     }
 }

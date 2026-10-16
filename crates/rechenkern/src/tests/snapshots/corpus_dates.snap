@@ -76,7 +76,7 @@ days until March                             → <error: expected a value at the
 year %                                       → <error: can't make time a percentage>
 3 days ago at 5pm                            → <error: can't multiply a date by a date>
 3.5 hours as hms                             → 03:30:00
-10 km in 50 minutes                          → 50 minutes
+10 km in 50 minutes                          → 5:00 min/km
 midday                                       → <none>
 previous monday                              → <error: no previous answer>
 NYE                                          → <none>

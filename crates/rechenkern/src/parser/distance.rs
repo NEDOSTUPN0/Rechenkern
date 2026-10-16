@@ -51,3 +51,60 @@ impl Parser<'_> {
         Ok(Some(Expr::WithUnit(Expr::Number(Number::from_f64(km)).boxed(), registry().get("km"))))
     }
 }
+
+/// What a coordinates phrase asks for.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) enum Geo {
+    Coordinates,
+    Latitude,
+    Longitude,
+}
+
+const GEO_WORDS: &[(&str, Geo)] = &[
+    ("coordinates", Geo::Coordinates),
+    ("gps", Geo::Coordinates),
+    ("latitude", Geo::Latitude),
+    ("longitude", Geo::Longitude),
+];
+
+impl Parser<'_> {
+    /// "coordinates of Tokyo", "latitude of Paris", "Tokyo coordinates" at token `i`: what it
+    /// asks, where the place's name is, and its length in tokens.
+    pub(super) fn coordinates_at(&self, i: usize) -> Option<(Geo, (usize, usize), usize)> {
+        let geo = |k: usize| {
+            let w = self.lower(k)?;
+            GEO_WORDS.iter().find(|(word, _)| *word == w).map(|&(_, g)| g)
+        };
+        if let Some(what) = geo(i) {
+            // "gps coordinates of"
+            let mut k = i + 1 + usize::from(what == Geo::Coordinates && self.words_at(i + 1, &["coordinates"]));
+            if !(self.words_at(k, &["of"]) || self.words_at(k, &["for"])) {
+                return None;
+            }
+            k += 1;
+            let (_, n) = self.place_at(k)?;
+            return Some((what, (k, k + n), k + n - i));
+        }
+        // Looking up places is slow: first see if a coordinates word follows at all.
+        if !(i + 1..=i + zones::MAX_WORDS).any(|k| geo(k).is_some()) {
+            return None;
+        }
+        let (_, n) = self.place_at(i)?;
+        let what = geo(i + n)?;
+        Some((what, (i, i + n), n + 1))
+    }
+
+    /// The coordinates, latitude or longitude of a place at the cursor.
+    pub(super) fn coordinates(&mut self) -> Result<Option<Expr>> {
+        let Some((what, (from, to), n)) = self.coordinates_at(self.pos) else { return Ok(None) };
+        let (location, _) = self.location_at(from).expect("coordinates_at found a place");
+        let place = self.located(location, from, to)?;
+        self.pos += n;
+        let degrees = |d: f64| Expr::WithUnit(Expr::Number(Number::from_f64(d)).boxed(), registry().get("°"));
+        Ok(Some(match what {
+            Geo::Coordinates => Expr::Coordinates(place.latitude, place.longitude),
+            Geo::Latitude => degrees(place.latitude),
+            Geo::Longitude => degrees(place.longitude),
+        }))
+    }
+}
