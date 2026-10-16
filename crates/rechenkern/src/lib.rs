@@ -21,6 +21,7 @@ pub mod currency;
 mod custom;
 mod error;
 mod eval;
+mod find;
 mod format;
 mod hash;
 mod inflation;
@@ -50,6 +51,7 @@ pub use config::{
 };
 pub use custom::{CustomPlace, CustomUnit, PlaceProvider, UnitSystem};
 pub use error::{Error, Result};
+pub use find::{DataKind, Found, Scanner};
 pub use inflation::InflationProvider;
 pub use number::Number;
 pub use parser::highlight::{Highlight, TokenKind};

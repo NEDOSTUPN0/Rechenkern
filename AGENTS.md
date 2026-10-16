@@ -54,6 +54,7 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 | `alternatives.rs` | `Calculator::alternatives`: the answer in hex, as a fraction, in other units, a date as ISO 8601 |
 | `sheet/` | `Sheet`: lines that answer together, recalculated where an edit reaches; subtotals, statistics, undo, exports and archives |
 | `json.rs` | Just enough JSON for sheet exports and archives |
+| `find.rs` | `Calculator::find`, `date_for`, `date_interval_for`, `Scanner`: data in text (`parser::values_in`) |
 | `number.rs` | `Number`: exact `rust_decimal` with `f64` fallback for huge/tiny values |
 | `lexer.rs` | Raw tokens; words stay raw, the parser decides their meaning |
 | `parser/mod.rs` | Statements and precedence climbing |

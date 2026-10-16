@@ -36,6 +36,8 @@ pub struct Scope<'a> {
     pub scaled: Cell<bool>,
     /// Finds places the engine doesn't know, if the host can.
     pub places: &'a dyn Fn(&str) -> Option<CustomPlace>,
+    /// Weather phrases are read: off when looking for data in text.
+    pub weather: bool,
 }
 
 /// Parses one line; `None` means the line has nothing to calculate.
@@ -52,6 +54,46 @@ pub fn parse(src: &str, scope: &Scope) -> Result<Option<Stmt>> {
         bail!("dates are turned off");
     }
     Ok(stmt)
+}
+
+/// The values written in a text, one by one, with their byte ranges: "We sold 130
+/// copies yesterday" has 130 and yesterday. A range of dates is one value.
+pub fn values_in(src: &str, scope: &Scope) -> Vec<(std::ops::Range<usize>, Expr)> {
+    let mut tokens = lexer::lex(src, scope.config);
+    if tokens::has_hyphenated_words(&tokens) {
+        tokens = Parser::new(src, &tokens, scope).with_hyphenated_words();
+    }
+    let p = Parser::new(src, &tokens, scope);
+    let mut found = Vec::new();
+    let mut i = 0;
+    while i < tokens.len() {
+        let mut start = p.clone();
+        start.pos = i;
+        start.skip_noise();
+        let Some(first) = start.cur() else { break };
+        if first.is_sym(")") || first.is_sym(",") {
+            i = start.pos + 1;
+            continue;
+        }
+        // A range of dates, "March 3 to March 10", or one value: "68.3 °F", "this sunday".
+        let mut range = start.clone();
+        let mut one = start.clone();
+        let parsed = match range.expr() {
+            Ok(expr @ (Expr::Range(..) | Expr::Period(..))) => Some((expr, range.pos)),
+            _ => one.unary().ok().map(|expr| (expr, one.pos)),
+        };
+        match parsed {
+            Some((expr, end)) if end > start.pos && unit_product(&expr).is_none() && !is_unit_rate(&expr) => {
+                // Comment words read past at the end aren't part of it: "130 copies", but "30k" is.
+                let last =
+                    (start.pos..end).rev().find(|&k| !p.comment_at(k) || !tokens[k].space_before).unwrap_or(start.pos);
+                found.push((tokens[start.pos].start..tokens[last].end, expr));
+                i = end;
+            }
+            _ => i = start.pos + 1,
+        }
+    }
+    found
 }
 
 #[derive(Clone)]

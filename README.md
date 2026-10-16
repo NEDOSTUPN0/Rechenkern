@@ -126,6 +126,10 @@ sheet.set_text("rent = $1,500\nfood = $400\nrent + food");
 assert_eq!(sheet.set_line(1, "food = $600"), [1, 2]);
 ```
 
+It also reads data out of text: `calc.find("We sold 130 copies yesterday",
+&[DataKind::Number, DataKind::Date])`, `calc.date_for("Tom's party this sunday")`,
+or one piece after another with `calc.scanner(text)`.
+
 Exchange rates come from a `RateProvider` you set on the calculator. The `online`
 feature adds one that downloads rates and caches them on disk.
 

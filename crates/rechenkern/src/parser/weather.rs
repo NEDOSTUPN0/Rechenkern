@@ -9,6 +9,9 @@ impl Parser<'_> {
     /// A weather phrase at token `i`: what it asks and the length of its words. Only the
     /// weather itself goes without a place; "high" and "low" need one: "low in Paris".
     pub(super) fn weather_at(&self, i: usize) -> Option<(WeatherQuery, usize)> {
+        if !self.scope.weather {
+            return None;
+        }
         if let Some((what, n)) = self.phrase_at(i, &words::WEATHER) {
             let place_follows = ["in", "at", "for"].iter().any(|w| self.words_at(i + n, &[w]));
             return (what == WeatherQuery::Summary || place_follows).then_some((what, n));

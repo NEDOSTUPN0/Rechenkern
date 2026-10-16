@@ -31,8 +31,8 @@ pub struct Calculator {
     config: Arc<Config>,
     /// The custom units of the config, looked up once.
     units: OnceCell<std::result::Result<CustomUnits, Error>>,
-    vars: HashMap<String, Value>,
-    lines: Vec<Line>,
+    pub(crate) vars: HashMap<String, Value>,
+    pub(crate) lines: Vec<Line>,
     rates: Rates,
     inflation: Option<Box<dyn InflationProvider>>,
     places: Option<Box<dyn PlaceProvider>>,
@@ -242,9 +242,25 @@ impl Calculator {
             units: self.units().unwrap_or(&empty),
             scaled: Cell::new(false),
             places: &|name| self.find_place(name),
+            weather: true,
         };
         out.extend(parser::highlight::highlight(body, start + trimmed.len() - body.len(), &scope));
         out
+    }
+
+    /// The values written in a text, with the variables known now.
+    pub(crate) fn values_in(&self, text: &str) -> Vec<(std::ops::Range<usize>, Expr)> {
+        let is_var = |name: &str| self.vars.contains_key(name);
+        let empty = CustomUnits::default();
+        let scope = Scope {
+            config: &self.config,
+            is_var: &is_var,
+            units: self.units().unwrap_or(&empty),
+            scaled: Cell::new(false),
+            places: &|_| None,
+            weather: false,
+        };
+        parser::values_in(text, &scope)
     }
 
     /// Calculates every line of a text from scratch.
@@ -279,6 +295,7 @@ impl Calculator {
             units: self.units().unwrap_or(&empty),
             scaled: Cell::new(false),
             places: &|name| self.find_place(name),
+            weather: true,
         };
         match parser::parse(&line[..at], &scope) {
             Ok(None) => at + dash,
@@ -309,6 +326,7 @@ impl Calculator {
             units: self.units()?,
             scaled: Cell::new(false),
             places: &find_place,
+            weather: true,
         };
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
         let env = self.env(vars, lines);

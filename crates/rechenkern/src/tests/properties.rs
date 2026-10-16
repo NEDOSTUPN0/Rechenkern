@@ -179,6 +179,10 @@ proptest! {
                 prop_assert!(line.get(h.range.clone()).is_some(), "{:?} in {line:?}", h.range);
                 end = h.range.end;
             }
+            use crate::DataKind::*;
+            for found in calc.find(line, &[DateInterval, Date, Money, Length, Quantity, Number, City, Place, Url, Hashtag]) {
+                prop_assert!(line.get(found.range.clone()).is_some(), "{:?} in {line:?}", found.range);
+            }
             if let Ok(Some(answer)) = calc.calculate(line) {
                 let _ = (answer.source(), answer.target(), answer.note(), answer.copy_text());
             }
