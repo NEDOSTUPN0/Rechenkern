@@ -39,6 +39,7 @@ pub use calculator::Calculator;
 pub use config::{AngleUnit, Config, DateOrder};
 pub use error::{Error, Result};
 pub use number::Number;
+pub use parser::highlight::{Highlight, TokenKind};
 pub use rates::{RateProvider, RateTable};
 pub use value::{Duration, Moment, MomentKind, Quantity, Value};
-pub use zones::Place;
+pub use zones::{Place, PlaceKind};

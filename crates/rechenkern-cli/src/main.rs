@@ -6,7 +6,7 @@ use std::process::ExitCode;
 
 use clap::{Parser, ValueEnum};
 use rechenkern::online::OnlineRates;
-use rechenkern::{AngleUnit, Answer, Calculator, Config, DateOrder, Side};
+use rechenkern::{AngleUnit, Answer, Calculator, Config, DateOrder, Highlight, Side};
 use rustyline::error::ReadlineError;
 
 #[derive(Parser)]
@@ -21,7 +21,7 @@ struct Args {
     /// Print each line next to its answer.
     #[arg(short, long)]
     annotate: bool,
-    /// Print one JSON object per line: {"input", "answer", "error", "form", "source", "target", "note", "copy"}.
+    /// Print one JSON object per line: {"input", "answer", "error", "form", "source", "target", "note", "copy", "tokens"}.
     #[arg(long)]
     json: bool,
     /// Significant digits in answers.
@@ -84,7 +84,8 @@ fn main() -> ExitCode {
     if !args.expression.is_empty() {
         let line = args.expression.join(" ");
         if args.json {
-            println!("{}", json_line(&line, calc.calculate(&line)));
+            let tokens = calc.highlight(&line);
+            println!("{}", json_line(&line, calc.calculate(&line), &tokens));
             return ExitCode::SUCCESS;
         }
         return match calc.calculate(&line) {
@@ -106,8 +107,10 @@ fn main() -> ExitCode {
     };
     match text {
         Ok(text) if args.json => {
-            for (line, result) in text.lines().zip(calc.calculate_sheet(&text)) {
-                println!("{}", json_line(line, result));
+            calc.clear();
+            for line in text.lines() {
+                let tokens = calc.highlight(line);
+                println!("{}", json_line(line, calc.calculate(line), &tokens));
             }
             ExitCode::SUCCESS
         }
@@ -118,7 +121,7 @@ fn main() -> ExitCode {
 
 /// `{"input": ..., "answer": ..., "error": ...}` for scripts and launchers, with the
 /// form of the line, its two sides and the text to copy when there is an answer.
-fn json_line(input: &str, result: rechenkern::Result<Option<Answer>>) -> serde_json::Value {
+fn json_line(input: &str, result: rechenkern::Result<Option<Answer>>, tokens: &[Highlight]) -> serde_json::Value {
     let (answer, error) = match result {
         Ok(answer) => (answer, None),
         Err(e) => (None, Some(e.to_string())),
@@ -136,6 +139,16 @@ fn json_line(input: &str, result: rechenkern::Result<Option<Answer>>) -> serde_j
         }
         json["copy"] = answer.copy_text().into();
     }
+    // Offsets count characters, as hosts index strings.
+    let chars = |byte: usize| input[..byte].chars().count();
+    let tokens: Vec<_> = tokens
+        .iter()
+        .map(|t| {
+            let (start, end) = (chars(t.range.start), chars(t.range.end));
+            serde_json::json!({ "text": &input[t.range.clone()], "kind": t.kind.name(), "start": start, "end": end })
+        })
+        .collect();
+    json["tokens"] = tokens.into();
     json
 }
 

@@ -109,8 +109,12 @@ assert_eq!(source.label.as_deref(), Some("Kilometers"));
 assert_eq!(target.text, "310.6855961 mi");
 ```
 
+`Calculator::highlight` tells what each part of a line is (number, unit, converter,
+city, comment...) for syntax highlighting.
+
 `--json` prints the same: `form`, `source` and `target` (`text`, `label`), `note`
-("+1 day" when a time lands on another date) and `copy`, the answer without its zone.
+("+1 day" when a time lands on another date), `copy`, the answer without its zone,
+and `tokens` (`text`, `kind`, `start`, `end` in characters).
 
 Exchange rates come from a `RateProvider` you set on the calculator. The `online`
 feature adds one that downloads rates and caches them on disk.

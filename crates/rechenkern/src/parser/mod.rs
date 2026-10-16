@@ -4,6 +4,7 @@
 //! `$20 for lunch + $15 for taxi` reads as `$20 + $15`.
 
 mod distance;
+pub(crate) mod highlight;
 mod phrases;
 mod primary;
 mod sky;

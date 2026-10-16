@@ -105,11 +105,18 @@ fn count(counter: &'static std::thread::LocalKey<Cell<u64>>) -> u64 {
 proptest! {
     #![proptest_config(runner())]
 
-    /// No line makes the calculator panic, alone or in a sheet, nor writing its sides.
+    /// No line makes the calculator panic, alone or in a sheet, nor highlighting it or writing its sides.
     #[test]
     fn no_panics(lines in prop::collection::vec(line(), 1..6)) {
         let mut calc = calculator(config());
         for line in &lines {
+            // Highlights are in order, apart and on character boundaries.
+            let mut end = 0;
+            for h in calc.highlight(line) {
+                prop_assert!(h.range.start >= end && h.range.start < h.range.end, "{:?} in {line:?}", h.range);
+                prop_assert!(line.get(h.range.clone()).is_some(), "{:?} in {line:?}", h.range);
+                end = h.range.end;
+            }
             if let Ok(Some(answer)) = calc.calculate(line) {
                 let _ = (answer.source(), answer.target(), answer.note(), answer.copy_text());
             }

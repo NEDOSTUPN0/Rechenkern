@@ -33,6 +33,7 @@ const SKIPPED_PREFIXES: &[&str] = &[
 struct Listed {
     /// IANA zone id, or a fixed offset in POSIX form.
     zone: String,
+    kind: PlaceKind,
     /// Written in capitals: "PST", "LAX", "UK".
     upper: bool,
     /// Latitude and longitude of a listed city, if `cities.txt` doesn't have them.
@@ -43,16 +44,16 @@ struct Listed {
 
 impl Listed {
     fn new(zone: String, coordinates: Option<(f64, f64)>) -> Listed {
-        Listed { zone, upper: false, coordinates, loaded: OnceLock::new() }
+        Listed { zone, kind: PlaceKind::City, upper: false, coordinates, loaded: OnceLock::new() }
     }
 
     /// Reads "Europe/London" or "Europe/London 51.38 -2.36".
-    fn parse(text: &str, upper: bool) -> Listed {
+    fn parse(text: &str, kind: PlaceKind, upper: bool) -> Listed {
         let mut fields = text.split_whitespace();
         let zone = fields.next().unwrap_or_default().to_string();
         let mut number = || fields.next()?.parse::<f64>().ok();
         let coordinates = number().zip(number());
-        Listed { upper, ..Listed::new(zone, coordinates) }
+        Listed { kind, upper, ..Listed::new(zone, coordinates) }
     }
 
     fn time_zone(&self) -> Option<TimeZone> {
@@ -66,19 +67,29 @@ const ACRONYMS: &[&str] = &["drc", "uae", "uk", "usa", "us", "dc", "nyc"];
 /// Lowercase place name -> its zone.
 static INDEX: LazyLock<TableMap<String, Listed>> = LazyLock::new(|| {
     let mut index = TableMap::default();
-    // Abbreviations and airport codes are written in capitals.
-    let mut codes = false;
+    // Each section of the file holds one kind of place.
+    let mut kind = PlaceKind::City;
     for line in PLACES.lines().map(str::trim).filter(|l| !l.is_empty()) {
         if let Some(heading) = line.strip_prefix("# ") {
-            codes = heading.starts_with("Abbreviations")
-                || heading.starts_with("Airports")
-                || (codes && !heading.starts_with(char::is_uppercase));
+            kind = match heading.split(['.', ' ']).next().unwrap_or_default() {
+                "Abbreviations" => PlaceKind::TimeZone,
+                "Countries" => PlaceKind::Country,
+                "US" | "Canadian" | "Australian" => PlaceKind::Region,
+                "Cities" => PlaceKind::City,
+                "Airports" => PlaceKind::Airport,
+                _ => kind,
+            };
             continue;
         }
         if let Some((name, rest)) = line.split_once('=') {
             let name = name.trim();
-            let upper = ACRONYMS.contains(&name) || (codes && name.len() <= 5 && !name.contains(' ') && name != "zulu");
-            index.insert(name.to_string(), Listed::parse(rest, upper));
+            // Abbreviations and airport codes are written in capitals.
+            let code = matches!(kind, PlaceKind::TimeZone | PlaceKind::Airport)
+                && name.len() <= 5
+                && !name.contains(' ')
+                && name != "zulu";
+            let upper = code || ACRONYMS.contains(&name);
+            index.insert(name.to_string(), Listed::parse(rest, kind, upper));
         }
     }
     // Cities from the zone database itself: "Asia/Almaty" -> "almaty". The
@@ -201,36 +212,55 @@ pub fn find(name: &str) -> Option<TimeZone> {
     city(name).and_then(|c| TimeZone::get(c.zone).ok())
 }
 
+/// What kind of place a name is.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PlaceKind {
+    City,
+    Country,
+    /// A state or province: "Texas", "Ontario".
+    Region,
+    Airport,
+    /// A zone abbreviation or offset: "PST", "UTC+5".
+    TimeZone,
+}
+
 /// A place a line names: its time zone and how to show its name.
 #[derive(Clone, Debug)]
 pub struct Place {
     /// For captions: "Paris", "PST", "UTC+5:30".
     pub name: String,
     pub zone: TimeZone,
+    pub kind: PlaceKind,
 }
 
 impl Place {
     /// A place written as `written` in a line: "tokyo" is shown as "Tokyo", "pst" as "PST".
     pub(crate) fn written(written: &str, zone: TimeZone) -> Place {
-        let key = written.replace('-', " ").to_lowercase();
-        let name = match INDEX.get(&key) {
+        let listed = INDEX.get(&written.replace('-', " ").to_lowercase());
+        let name = match listed {
             Some(listed) if listed.upper => written.to_uppercase(),
             _ if written.chars().any(char::is_uppercase) => written.to_string(),
             _ => title_case(written),
         };
-        Place { name, zone }
+        Place { name, zone, kind: listed.map_or(PlaceKind::City, |l| l.kind) }
+    }
+
+    /// A fixed offset from UTC: "UTC+5:30".
+    pub(crate) fn offset(zone: TimeZone) -> Option<Place> {
+        let name = offset_label(zone.to_fixed_offset().ok()?);
+        Some(Place { name, zone, kind: PlaceKind::TimeZone })
     }
 
     /// The place a zone stands for: "New York" for America/New_York, "UTC+5" for a fixed offset.
     pub fn of_zone(zone: &TimeZone) -> Place {
-        let name = match zone.iana_name() {
-            Some("UTC" | "Etc/UTC" | "Etc/GMT") => "UTC".to_string(),
+        let (name, kind) = match zone.iana_name() {
             Some(id) if id.contains('/') && !id.starts_with("Etc/") => {
-                id.rsplit('/').next().unwrap_or(id).replace('_', " ")
+                (id.rsplit('/').next().unwrap_or(id).replace('_', " "), PlaceKind::City)
             }
-            _ => offset_label(zone.to_offset(jiff::Timestamp::now())),
+            Some("UTC" | "Etc/UTC" | "Etc/GMT") => ("UTC".to_string(), PlaceKind::TimeZone),
+            _ => (offset_label(zone.to_offset(jiff::Timestamp::now())), PlaceKind::TimeZone),
         };
-        Place { name, zone: zone.clone() }
+        Place { name, zone: zone.clone(), kind }
     }
 }
 

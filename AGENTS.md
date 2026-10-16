@@ -60,6 +60,7 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 | `parser/phrases.rs` | Whole-line phrases: "20 is what % of 200", rule of three |
 | `parser/sky.rs` | Sun and moon phrases: "sunrise in Tokyo", "moon phase on May 1" |
 | `parser/distance.rs` | Distances between places: "distance from Tokyo to London" |
+| `parser/highlight.rs` | `Calculator::highlight`: what each part of a line is, for editors (a pass of its own, off the hot path) |
 | `parser/words.rs` | Vocabulary tables (keywords, functions, months, holidays) |
 | `eval/` | Arithmetic on values, functions, dates and durations, the sun and moon |
 | `astro.rs` | Sunrise and sunset (NOAA), the moon's phases (Meeus, ch. 49) |

@@ -743,7 +743,7 @@ impl Parser<'_> {
     /// A time zone at token `i`: place, abbreviation or `UTC+5`.
     pub(super) fn zone_at(&self, i: usize) -> Option<(Place, usize)> {
         let (place, mut n) = match self.offset_zone_at(i) {
-            Some((zone, n)) => (Place { name: zones::offset_label(zone.to_fixed_offset().ok()?), zone }, n),
+            Some((zone, n)) => (Place::offset(zone)?, n),
             None => self.named_place_at(i)?,
         };
         if self.toks.get(i + n).is_some_and(|t| t.is_word("time")) {

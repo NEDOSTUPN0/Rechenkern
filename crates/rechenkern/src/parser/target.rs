@@ -293,7 +293,7 @@ impl Parser<'_> {
     }
 
     /// `2 dp`, `3 decimal places`, `4 sf`, `nearest 10`, `nearest thousand`, `nearest 16th`.
-    fn rounding(&mut self, dir: Direction) -> Result<Option<(Rounding, Option<Format>)>> {
+    pub(super) fn rounding(&mut self, dir: Direction) -> Result<Option<(Rounding, Option<Format>)>> {
         let start = self.pos;
         self.eat_word("the");
         // "up to next 10", "down to last 10"; "to next 10" rounds up.

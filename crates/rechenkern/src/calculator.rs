@@ -8,6 +8,7 @@ use crate::ast::{Expr, LineRef, Stmt};
 use crate::config::{Config, Now};
 use crate::error::Result;
 use crate::eval::{Env, Line, LineKind};
+use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::{self, Scope};
 use crate::rates::{RateProvider, RateTable, Rates};
 use crate::value::Value;
@@ -108,6 +109,29 @@ impl Calculator {
         };
         self.lines.push(Line { value, kind });
         result.map(|r| r.map(|(answer, _)| answer))
+    }
+
+    /// What each part of a line is, for syntax highlighting; ranges are in bytes.
+    /// Variables are the ones known now, as for the next line calculated.
+    pub fn highlight(&self, line: &str) -> Vec<Highlight> {
+        let start = line.len() - line.trim_start().len();
+        let trimmed = line.trim();
+        if trimmed.starts_with('#') {
+            return vec![Highlight { range: start..start + trimmed.len(), kind: TokenKind::Heading }];
+        }
+        if trimmed.is_empty() || (trimmed.len() >= 3 && trimmed.chars().all(|c| c == '-')) {
+            return Vec::new();
+        }
+        let body = strip_label(trimmed);
+        let mut out = Vec::new();
+        let label = trimmed[..trimmed.len() - body.len()].trim_end();
+        if !label.is_empty() {
+            out.push(Highlight { range: start..start + label.len(), kind: TokenKind::Label });
+        }
+        let is_var = |name: &str| self.vars.contains_key(name);
+        let scope = Scope { config: &self.config, is_var: &is_var };
+        out.extend(parser::highlight::highlight(body, start + trimmed.len() - body.len(), &scope));
+        out
     }
 
     /// Calculates every line of a text from scratch.
