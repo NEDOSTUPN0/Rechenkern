@@ -48,6 +48,14 @@ impl CustomPlace {
     }
 }
 
+/// Places a host finds by name, as SoulverCore's `PlaceDataProvider`: asked where a line
+/// expects a place the engine doesn't know (`time in Smallville`, `sunrise in Smallville`),
+/// once per name.
+pub trait PlaceProvider: Send + Sync {
+    /// The place `name` (as written in the line) stands for, if there is one.
+    fn place(&self, name: &str) -> Option<CustomPlace>;
+}
+
 /// What generic names like "gallon", "cup" and "ton" mean, as in SoulverCore.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum UnitSystem {

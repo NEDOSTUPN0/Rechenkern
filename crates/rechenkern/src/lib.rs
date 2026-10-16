@@ -45,7 +45,7 @@ pub use config::{
     Formatting, MisplacedSeparator, Notation, ResultConversions, ScalarSystem, Scale, SymbolPosition, TimeZoneOptions,
     TimespanStyle, ZoneCodeCorrection,
 };
-pub use custom::{CustomPlace, CustomUnit, UnitSystem};
+pub use custom::{CustomPlace, CustomUnit, PlaceProvider, UnitSystem};
 pub use error::{Error, Result};
 pub use inflation::InflationProvider;
 pub use number::Number;

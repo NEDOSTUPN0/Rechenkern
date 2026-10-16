@@ -160,3 +160,67 @@ mod tests {
         assert_eq!(table.get("btc").unwrap().to_string(), "0.0000158");
     }
 }
+
+/// Places found by name with the Open-Meteo geocoding API (GeoNames data, CC BY 4.0;
+/// the API is free for non-commercial use). Answers are kept in a disk cache, misses too.
+#[derive(Clone, Debug)]
+pub struct OnlinePlaces {
+    pub cache: Option<PathBuf>,
+    /// Never download; only read the cache.
+    pub offline: bool,
+    pub timeout: Duration,
+}
+
+impl OnlinePlaces {
+    pub fn new(cache: Option<PathBuf>) -> OnlinePlaces {
+        OnlinePlaces { cache, offline: false, timeout: Duration::from_secs(5) }
+    }
+
+    fn read_cache(&self) -> serde_json::Map<String, serde_json::Value> {
+        let text = self.cache.as_ref().and_then(|p| fs::read_to_string(p).ok());
+        text.and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default()
+    }
+
+    fn lookup(&self, name: &str) -> Result<Option<serde_json::Value>, String> {
+        let url = "https://geocoding-api.open-meteo.com/v1/search";
+        let response = ureq::get(url)
+            .query("name", name)
+            .query("count", "1")
+            .query("language", "en")
+            .query("format", "json")
+            .config()
+            .timeout_global(Some(self.timeout))
+            .build()
+            .call();
+        let text = response.and_then(|mut r| r.body_mut().read_to_string()).map_err(|e| e.to_string())?;
+        let json: serde_json::Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+        Ok(json.get("results").and_then(|r| r.get(0)).cloned())
+    }
+}
+
+impl crate::PlaceProvider for OnlinePlaces {
+    fn place(&self, name: &str) -> Option<crate::CustomPlace> {
+        let key = name.to_lowercase();
+        let mut cache = self.read_cache();
+        let found = match cache.get(&key) {
+            Some(found) => found.clone(),
+            None if self.offline => return None,
+            None => {
+                // A failed download is no answer, so it is asked again next time.
+                let found = self.lookup(name).ok()?.unwrap_or(serde_json::Value::Null);
+                cache.insert(key, found.clone());
+                if let Some(path) = &self.cache {
+                    if let Some(dir) = path.parent() {
+                        let _ = fs::create_dir_all(dir);
+                    }
+                    let _ = fs::write(path, serde_json::Value::Object(cache).to_string());
+                }
+                found
+            }
+        };
+        let zone = jiff::tz::TimeZone::get(found.get("timezone")?.as_str()?).ok()?;
+        let coordinates = found.get("latitude")?.as_f64().zip(found.get("longitude")?.as_f64());
+        let name = found.get("name")?.as_str()?.to_string();
+        Some(crate::CustomPlace { name, zone, coordinates })
+    }
+}

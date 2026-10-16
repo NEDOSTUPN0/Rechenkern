@@ -7,7 +7,7 @@ use crate::error::{Result, bail};
 use crate::lexer::{Tok, Token};
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
-use crate::zones::{self, Place};
+use crate::zones::{self, Location, Place, PlaceKind};
 
 impl Parser<'_> {
     /// One conversion step after `expr`, or `None` if there is none.
@@ -127,6 +127,10 @@ impl Parser<'_> {
         // "time in Qwertyville": a time zone was asked for, but the place is unknown.
         // After "to" only a clock time asks for a zone: "time to go" does not.
         let asks_zone = if keyword == "to" { is_clock(expr) } else { is_moment(expr) };
+        if asks_zone && let Some((place, _, n)) = self.found_place(self.pos) {
+            self.pos += n;
+            return Ok(Some(Expr::Convert(expr.clone().boxed(), Target::Zone(place))));
+        }
         if asks_zone {
             self.unknown_place()?;
         }
@@ -189,6 +193,31 @@ impl Parser<'_> {
     }
 
     /// Fails with a helpful message if words that aren't a known place follow.
+    /// A place the host's provider finds for the words at `i` (after an article), longest
+    /// first, with where it is and its length in tokens: "Smallville" in "time in Smallville".
+    pub(super) fn found_place(&self, i: usize) -> Option<(Place, Option<Location>, usize)> {
+        if !self.config().features.dynamic_place_queries {
+            return None;
+        }
+        let mut start = i;
+        while self.lower(start).is_some_and(|w| matches!(w.as_str(), "a" | "an" | "the")) {
+            start += 1;
+        }
+        let (words, ends) = self.name_words(start);
+        let count = (0..words.len()).take_while(|&k| !self.significant(start + k)).count().min(3);
+        (1..=count).rev().find_map(|n| {
+            let end = ends[n - 1];
+            let name = &self.src[self.toks[start].start..self.toks[end - 1].end];
+            let found = (self.scope.places)(name)?;
+            let location = found.coordinates.map(|(latitude, longitude)| Location {
+                zone: found.zone.clone(),
+                latitude,
+                longitude,
+            });
+            Some((Place { name: found.name, zone: found.zone, kind: PlaceKind::City }, location, end - i))
+        })
+    }
+
     pub(super) fn unknown_place(&self) -> Result<()> {
         let mut i = self.pos;
         while self.lower(i).is_some_and(|w| matches!(w.as_str(), "a" | "an" | "the")) {

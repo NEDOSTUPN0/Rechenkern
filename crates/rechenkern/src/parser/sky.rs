@@ -90,6 +90,11 @@ impl Parser<'_> {
         if what.is_sun() && place.is_none() && ["in", "at"].iter().any(|w| self.words_at(self.pos, &[w])) {
             let mut p = self.clone();
             p.pos += 1;
+            if let Some((_, location, n)) = p.found_place(p.pos) {
+                let location = self.located(location, p.pos, p.pos + n)?;
+                self.pos = p.pos + n;
+                return Ok(Some(Expr::Sky { what, place: Some(location), on }));
+            }
             p.unknown_place()?;
         }
         Ok(Some(Expr::Sky { what, place, on }))

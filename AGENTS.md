@@ -295,6 +295,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Inflation: `src/data/cpi.txt`, the US CPI-U (BLS, public domain) made by
   `scripts/cpi.py`: annual averages, and the months of the year without one. Now is
   the latest month; a host's `InflationProvider` gives other currencies.
+- Places the engine doesn't know: a host's `PlaceProvider`, asked only where a line
+  expects a place (`time in X`, `3pm in X`, `sunrise in X`), once per name per
+  calculator. The CLI's is `online::OnlinePlaces`: the Open-Meteo geocoding API
+  (GeoNames data, CC BY 4.0; free for non-commercial use), cached in
+  `~/.cache/rechenkern/places.json`, misses too.
 - Time zones: jiff with the system tzdb (bundled copy as fallback). Countries
   map to their capital's zone.
 - Places, in lookup order: `zones/places.txt` (hand-picked: countries, states,

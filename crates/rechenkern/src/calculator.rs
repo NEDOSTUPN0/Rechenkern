@@ -1,6 +1,6 @@
 //! The calculator: evaluates lines one after another, like a notepad.
 
-use std::cell::{Cell, OnceCell};
+use std::cell::{Cell, OnceCell, RefCell};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -8,7 +8,7 @@ use crate::alternatives::Alternative;
 use crate::answer::Answer;
 use crate::ast::{Expr, LineRef, Stmt};
 use crate::config::{Config, Now};
-use crate::custom::CustomUnits;
+use crate::custom::{CustomPlace, CustomUnits, PlaceProvider};
 use crate::error::{Error, Result};
 use crate::eval::{Display, Env, Line, LineKind};
 use crate::inflation::InflationProvider;
@@ -34,6 +34,9 @@ pub struct Calculator {
     lines: Vec<Line>,
     rates: Rates,
     inflation: Option<Box<dyn InflationProvider>>,
+    places: Option<Box<dyn PlaceProvider>>,
+    /// What the place provider said for each name asked.
+    found_places: RefCell<HashMap<String, Option<CustomPlace>>>,
 }
 
 impl Default for Calculator {
@@ -55,6 +58,8 @@ impl Calculator {
             lines: Vec::new(),
             rates: Rates::default(),
             inflation: None,
+            places: None,
+            found_places: RefCell::default(),
         }
     }
 
@@ -84,6 +89,24 @@ impl Calculator {
     /// newer ones; the bundled US index is used otherwise.
     pub fn set_inflation_provider(&mut self, provider: impl InflationProvider + 'static) {
         self.inflation = Some(Box::new(provider));
+    }
+
+    /// Where places the engine doesn't know are looked up: `time in Smallville`.
+    pub fn set_place_provider(&mut self, provider: impl PlaceProvider + 'static) {
+        self.places = Some(Box::new(provider));
+        self.found_places.borrow_mut().clear();
+    }
+
+    /// A place from the provider, asked once per name.
+    fn find_place(&self, name: &str) -> Option<CustomPlace> {
+        let provider = self.places.as_ref()?;
+        let key = name.to_lowercase();
+        if let Some(found) = self.found_places.borrow().get(&key) {
+            return found.clone();
+        }
+        let found = provider.place(name);
+        self.found_places.borrow_mut().insert(key, found.clone());
+        found
     }
 
     pub fn set_rates(&mut self, table: RateTable) {
@@ -179,6 +202,7 @@ impl Calculator {
             is_var: &is_var,
             units: self.units().unwrap_or(&empty),
             scaled: Cell::new(false),
+            places: &|name| self.find_place(name),
         };
         out.extend(parser::highlight::highlight(body, start + trimmed.len() - body.len(), &scope));
         out
@@ -210,6 +234,7 @@ impl Calculator {
             is_var: &is_var,
             units: self.units().unwrap_or(&empty),
             scaled: Cell::new(false),
+            places: &|name| self.find_place(name),
         };
         match parser::parse(&line[..at], &scope) {
             Ok(None) => at + dash,
@@ -220,7 +245,14 @@ impl Calculator {
     /// Parses and evaluates; the flag marks `sum`/`total` lines.
     fn evaluate(&mut self, line: &str) -> Result<Option<(Answer, bool)>> {
         let is_var = |name: &str| self.vars.contains_key(name);
-        let scope = Scope { config: &self.config, is_var: &is_var, units: self.units()?, scaled: Cell::new(false) };
+        let find_place = |name: &str| self.find_place(name);
+        let scope = Scope {
+            config: &self.config,
+            is_var: &is_var,
+            units: self.units()?,
+            scaled: Cell::new(false),
+            places: &find_place,
+        };
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
         let env = Env {
             config: &self.config,

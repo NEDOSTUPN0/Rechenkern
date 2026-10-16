@@ -21,7 +21,7 @@ use jiff::tz::TimeZone;
 
 use crate::ast::{Expr, Func, Op, Stmt, TimeExpr};
 use crate::config::Config;
-use crate::custom::CustomUnits;
+use crate::custom::{CustomPlace, CustomUnits};
 use crate::error::{Error, Result, bail};
 use crate::lexer::{self, Tok, Token};
 use crate::units::Unit;
@@ -33,6 +33,8 @@ pub struct Scope<'a> {
     pub units: &'a CustomUnits,
     /// Set when the line writes a number with a scale: `5M`, `2 billion`.
     pub scaled: Cell<bool>,
+    /// Finds places the engine doesn't know, if the host can.
+    pub places: &'a dyn Fn(&str) -> Option<CustomPlace>,
 }
 
 /// Parses one line; `None` means the line has nothing to calculate.

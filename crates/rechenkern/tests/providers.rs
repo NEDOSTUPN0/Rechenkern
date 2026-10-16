@@ -128,3 +128,38 @@ fn inflation() {
         ],
     );
 }
+
+/// Knows Smallville, which keeps Tokyo's time, and counts how often it is asked.
+struct Atlas(std::sync::atomic::AtomicUsize);
+
+impl rechenkern::PlaceProvider for Atlas {
+    fn place(&self, name: &str) -> Option<rechenkern::CustomPlace> {
+        self.0.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let mut place = rechenkern::CustomPlace::new("Smallville", TimeZone::get("Asia/Tokyo").unwrap());
+        place.coordinates = Some((35.68, 139.77));
+        name.eq_ignore_ascii_case("smallville").then_some(place)
+    }
+}
+
+#[test]
+fn places_from_a_provider() {
+    let mut calc = Calculator::with_config(config());
+    answers(&mut calc, &[("time in Smallville", "<error: unknown place \"Smallville\", did you mean \"Millville\"?>")]);
+    calc.set_place_provider(Atlas(Default::default()));
+    answers(
+        &mut calc,
+        &[
+            ("time in Smallville", "Thu, 24 Sep 2026 03:30 JST"),
+            ("3pm in smallville", "Thu, 24 Sep 2026 04:00 JST"),
+            ("sunrise in Smallville", "Thu, 24 Sep 2026 05:30 JST"),
+            ("time in Gotham", "<error: unknown place \"Gotham\", did you mean \"Gotha\"?>"),
+            ("Smallville $5", "$5.00"),
+        ],
+    );
+    let answer = calc.calculate("time in smallville").unwrap().unwrap();
+    assert_eq!(answer.target().unwrap().label.as_deref(), Some("Smallville"));
+    let features = Features { dynamic_place_queries: false, ..Features::default() };
+    let mut calc = Calculator::with_config(Config { features, ..config() });
+    calc.set_place_provider(Atlas(Default::default()));
+    answers(&mut calc, &[("time in Smallville", "<error: unknown place \"Smallville\", did you mean \"Millville\"?>")]);
+}

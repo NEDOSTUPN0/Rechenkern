@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{Parser, ValueEnum};
-use rechenkern::online::OnlineRates;
+use rechenkern::online::{OnlinePlaces, OnlineRates};
 use rechenkern::{
     AngleUnit, Answer, Calculator, Config, DateOrder, Formatting, Highlight, Notation, Number, Side, UnitSystem,
 };
@@ -109,6 +109,10 @@ fn main() -> ExitCode {
     };
     let mut calc = Calculator::with_config(config);
     calc.set_rate_provider(rates);
+    calc.set_place_provider(OnlinePlaces {
+        offline: args.offline,
+        ..OnlinePlaces::new(dirs::cache_dir().map(|d| d.join("rechenkern/places.json")))
+    });
 
     if !args.expression.is_empty() {
         let line = args.expression.join(" ");
