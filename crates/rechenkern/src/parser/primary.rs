@@ -405,6 +405,21 @@ impl Parser<'_> {
             return self.root_of_degree(Number::from_i64(degree));
         }
         // Without arguments "min" may be minutes: "1 BTU·min".
+        // A function defined in a line: "area(3, 4)".
+        if self.toks.get(i + 1).is_some_and(|t| t.is_sym("(") && !t.space_before) && (self.scope.is_function)(w) {
+            self.pos += 2;
+            let saved = std::mem::replace(&mut self.in_list, true);
+            let mut args = Vec::new();
+            while !self.at_sym(")") {
+                args.push(self.expr()?);
+                if !self.eat_sym(",") {
+                    break;
+                }
+            }
+            self.in_list = saved;
+            self.eat_sym(")");
+            return Ok(Some(Expr::Apply(w.to_string(), args)));
+        }
         if let Some((func, n)) = self.function_at(i)
             && let Some(call) = self.call(func, n)?
         {

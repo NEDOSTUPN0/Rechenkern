@@ -36,6 +36,8 @@ pub enum Form {
     DateShift,
     /// The time between two dates: `days until christmas`.
     DateInterval,
+    /// One of the host's phrases: `tip on $50`.
+    CustomFunction,
     /// Anything else with an answer: `2+2*3`, `20% of 150`.
     Calculation,
     /// A lone value read back: `5 km`, `today`.
@@ -52,6 +54,7 @@ impl Form {
             Form::TimeDifference => "time_difference",
             Form::DateShift => "date_shift",
             Form::DateInterval => "date_interval",
+            Form::CustomFunction => "custom_function",
             Form::Calculation => "calculation",
             Form::Value => "value",
         }
@@ -199,7 +202,7 @@ impl Answer {
                 let end = parts.end.clone()?;
                 Some((self.side(start, &Display::Auto), self.side(end, &Display::Auto), None))
             }
-            Form::Calculation | Form::Value => None,
+            Form::Calculation | Form::CustomFunction | Form::Value => None,
         }
     }
 
@@ -383,6 +386,7 @@ impl Env<'_> {
 fn form(expr: &Expr, value: &Value) -> Form {
     match expr {
         Expr::RatesOn(inner, _) => form(inner, value),
+        Expr::Custom { .. } => Form::CustomFunction,
         Expr::Convert(inner, Target::Zone(_)) => match &**inner {
             Expr::Time(TimeExpr::Now | TimeExpr::Today(0)) => Form::TimeAtPlace,
             _ => Form::TimeConversion,

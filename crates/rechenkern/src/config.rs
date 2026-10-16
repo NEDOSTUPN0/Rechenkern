@@ -5,7 +5,7 @@ use std::cell::OnceCell;
 use jiff::tz::TimeZone;
 use jiff::{Timestamp, Zoned, civil};
 
-use crate::custom::{CustomPlace, CustomUnit, UnitSystem};
+use crate::custom::{CustomFunction, CustomPlace, CustomType, CustomUnit, UnitSystem};
 
 use crate::number::Number;
 
@@ -380,6 +380,8 @@ pub struct Config {
     pub angle_unit: AngleUnit,
     /// Working hours in a workday, for `40 hours in workdays`.
     pub hours_per_workday: Number,
+    /// The first day of a week: `start of week`, `this friday`.
+    pub week_start: civil::Weekday,
     /// Days off besides weekends, skipped when counting workdays.
     pub holidays: Vec<civil::Date>,
     /// What "gallon", "cup" and "ton" mean.
@@ -390,6 +392,10 @@ pub struct Config {
     pub custom_units: Vec<CustomUnit>,
     /// Places of the host's own; they win over built-in places of the same name.
     pub custom_places: Vec<CustomPlace>,
+    /// Phrases of the host's own, worked out by its handlers.
+    pub custom_functions: Vec<CustomFunction>,
+    /// Words the host's placeholders match.
+    pub custom_types: Vec<CustomType>,
     pub features: Features,
     pub formatting: Formatting,
     /// Local time zone; `None` uses the system zone.
@@ -409,11 +415,14 @@ impl Default for Config {
             dollar: "USD".into(),
             angle_unit: AngleUnit::Radians,
             hours_per_workday: Number::from_i64(8),
+            week_start: civil::Weekday::Monday,
             holidays: Vec::new(),
             unit_system: UnitSystem::CustomaryUs,
             base_font_size: Number::from_i64(16),
             custom_units: Vec::new(),
             custom_places: Vec::new(),
+            custom_functions: Vec::new(),
+            custom_types: Vec::new(),
             features: Features::default(),
             formatting: Formatting::default(),
             time_zone: None,
@@ -423,6 +432,72 @@ impl Default for Config {
 }
 
 impl Config {
+    /// Settings as people in a locale expect them, as SoulverCore's `standardWith(locale:)`:
+    /// "de_DE" writes `1.234,50 €` with 24-hour clocks and metric cups, "en_US" `$1,234.50`
+    /// with dates month first and weeks from Sunday. Only English words are read either way.
+    pub fn for_locale(locale: &str) -> Config {
+        let locale = locale.split(['.', '@']).next().unwrap_or_default().replace('-', "_");
+        let (lang, region) = locale.split_once('_').unwrap_or((&locale, ""));
+        let (lang, region) = (lang.to_lowercase(), region.to_uppercase());
+        let mut config = Config::default();
+        const COMMA: &[&str] = &[
+            "az", "be", "bg", "bs", "ca", "cs", "da", "de", "el", "es", "et", "eu", "fi", "fr", "gl", "hr", "hu", "hy",
+            "id", "is", "it", "ka", "kk", "ky", "lt", "lv", "mk", "nb", "nl", "nn", "no", "pl", "pt", "ro", "ru", "sk",
+            "sl", "sq", "sr", "sv", "tr", "uk", "uz", "vi",
+        ];
+        // Regions that use a decimal point despite the language.
+        const POINT: &[&str] = &["CH", "MX", "US", "PR"];
+        config.decimal_comma = COMMA.contains(&lang.as_str()) && !POINT.contains(&region.as_str());
+        let twelve_hours = ["US", "CA", "AU", "NZ", "IN", "PH", "PK", "EG", "SA"];
+        config.clock_24h = !(lang == "en" && twelve_hours.contains(&region.as_str()));
+        if region == "US" || region == "PH" {
+            config.date_order = DateOrder::MonthFirst;
+        }
+        config.unit_system = match region.as_str() {
+            "US" | "LR" | "MM" => UnitSystem::CustomaryUs,
+            "GB" => UnitSystem::Imperial,
+            _ => UnitSystem::Metric,
+        };
+        let sunday = ["US", "CA", "JP", "BR", "MX", "IL", "IN", "PH", "KR", "TW", "HK", "ZA", "AU", "SA"];
+        if sunday.contains(&region.as_str()) {
+            config.week_start = civil::Weekday::Sunday;
+        }
+        let currency = local_currency(&region);
+        // "$" is the local dollar: Canadian in Canada.
+        if let Some(code) =
+            currency.filter(|c| crate::currency::find(c).is_some_and(|c| c.symbol.is_some_and(|s| s.ends_with('$'))))
+        {
+            config.dollar = code.to_string();
+        }
+        // Most of Europe writes the symbol after the amount: "5,00 €".
+        let after = [
+            "de", "fr", "es", "it", "pt", "fi", "sk", "sl", "lt", "lv", "et", "el", "pl", "cs", "hu", "ru", "uk", "sv",
+            "da", "nb", "no", "nn", "is", "ro", "bg", "hr", "sr", "kk",
+        ];
+        if let Some(code) = currency
+            && after.contains(&lang.as_str())
+            && let Some(found) = crate::currency::find(code)
+        {
+            let symbol = match code {
+                "SEK" | "NOK" | "DKK" | "ISK" => "kr",
+                "PLN" => "zł",
+                "CZK" => "Kč",
+                "HUF" => "Ft",
+                "RON" => "lei",
+                "BGN" => "лв.",
+                "CHF" => "CHF",
+                _ => found.symbol.unwrap_or(found.code),
+            };
+            let symbol = CurrencySymbol {
+                code: code.to_string(),
+                symbol: symbol.to_string(),
+                position: SymbolPosition::AfterWithSpace,
+            };
+            config.formatting.symbols.push(symbol);
+        }
+        config
+    }
+
     /// As SoulverCore's `unformatted` preferences: every digit, no separators, currency codes.
     pub fn unformatted(self) -> Config {
         let formatting = Formatting {
@@ -476,4 +551,49 @@ impl<'a> Now<'a> {
             self.config.now()
         })
     }
+}
+
+/// The currency of a country, by its ISO code.
+fn local_currency(region: &str) -> Option<&'static str> {
+    const EURO: &[&str] = &[
+        "AT", "BE", "CY", "DE", "EE", "ES", "FI", "FR", "GR", "HR", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PT",
+        "SI", "SK",
+    ];
+    if EURO.contains(&region) {
+        return Some("EUR");
+    }
+    Some(match region {
+        "US" => "USD",
+        "GB" => "GBP",
+        "CA" => "CAD",
+        "AU" => "AUD",
+        "NZ" => "NZD",
+        "CH" => "CHF",
+        "JP" => "JPY",
+        "CN" => "CNY",
+        "IN" => "INR",
+        "RU" => "RUB",
+        "UA" => "UAH",
+        "KZ" => "KZT",
+        "PL" => "PLN",
+        "CZ" => "CZK",
+        "HU" => "HUF",
+        "RO" => "RON",
+        "BG" => "BGN",
+        "SE" => "SEK",
+        "NO" => "NOK",
+        "DK" => "DKK",
+        "IS" => "ISK",
+        "TR" => "TRY",
+        "BR" => "BRL",
+        "MX" => "MXN",
+        "AR" => "ARS",
+        "ZA" => "ZAR",
+        "KR" => "KRW",
+        "SG" => "SGD",
+        "HK" => "HKD",
+        "TW" => "TWD",
+        "IL" => "ILS",
+        _ => return None,
+    })
 }

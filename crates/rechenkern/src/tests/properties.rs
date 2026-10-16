@@ -101,6 +101,10 @@ fn line() -> impl Strategy<Value = String> {
 /// Lines of a sheet: random ones, and ones that set and read variables and earlier lines.
 fn sheet_line() -> impl Strategy<Value = String> {
     const SHEET: &[&str] = &[
+        "dbl(a) = a * 2",
+        "dbl(a) = a + x",
+        "dbl(3)",
+        "dbl(x) + 1",
         "x = 5",
         "x = 2 km",
         "y = x * 2",
@@ -357,6 +361,8 @@ fn convert(q: &Quantity, to: &Unit) -> crate::Result<Quantity> {
         config: &config,
         now: Now::new(&config),
         vars: &vars,
+        functions: &HashMap::new(),
+        depth: Cell::default(),
         lines: &[],
         rates: &rates,
         food_as: Cell::default(),

@@ -9,6 +9,7 @@ use crate::error::{Error, Result};
 use crate::hash::TableMap;
 use crate::number::Number;
 use crate::units::{self, Dim, Unit, UnitDef, registry};
+use crate::value::Value;
 
 /// A unit of the host's own, worth an amount of a known one: a smoot is 1.7018 m.
 #[derive(Clone, Debug, PartialEq)]
@@ -182,4 +183,97 @@ pub(crate) fn parse_unit(text: &str) -> Option<Unit> {
         }
     }
     (!unit.is_none()).then_some(unit)
+}
+
+/// Works out a custom function from the values its placeholders matched.
+pub type FunctionHandler = std::sync::Arc<dyn Fn(&[Value]) -> std::result::Result<Value, String> + Send + Sync>;
+
+/// A phrase of the host's own, as SoulverCore's `CustomFunction`: `tip on __money`,
+/// `__money split __number ways`. A line that is the whole phrase calls the handler with
+/// the values of its placeholders, in order:
+///
+/// - `__number`: a plain number; `__percentage`; `__money`; `__date`; `__duration`
+/// - `__amount` (or `__unit_expression`): an amount with any unit
+/// - `__unit`: a unit's name, as one of it: "in __unit"
+/// - `__place`: a place's name, as text
+/// - `__value`: anything
+/// - a `CustomType`'s placeholder: one of its words, as text
+#[derive(Clone)]
+pub struct CustomFunction {
+    pub prototype: String,
+    /// Other phrases for the same function.
+    pub aliases: Vec<String>,
+    pub handler: FunctionHandler,
+}
+
+impl CustomFunction {
+    pub fn new(
+        prototype: &str,
+        handler: impl Fn(&[Value]) -> std::result::Result<Value, String> + Send + Sync + 'static,
+    ) -> CustomFunction {
+        CustomFunction { prototype: prototype.into(), aliases: Vec::new(), handler: std::sync::Arc::new(handler) }
+    }
+}
+
+impl std::fmt::Debug for CustomFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.debug_struct("CustomFunction").field("prototype", &self.prototype).field("aliases", &self.aliases).finish()
+    }
+}
+
+/// Words a custom placeholder matches, as SoulverCore's `CustomType`: `__airline` for
+/// "QF", "BA" and "Qantas".
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CustomType {
+    /// "__airline".
+    pub placeholder: String,
+    pub words: Vec<String>,
+}
+
+/// One part of a prototype phrase.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) enum Slot {
+    /// A word, number or symbol written as is.
+    Literal(crate::lexer::Tok),
+    Placeholder(SlotKind),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum SlotKind {
+    Number,
+    Amount,
+    Money,
+    Percentage,
+    Date,
+    Duration,
+    Unit,
+    Place,
+    Value,
+    /// A `CustomType`, by index.
+    Type(usize),
+}
+
+/// The parts of a prototype phrase, or `None` for an unknown placeholder.
+pub(crate) fn slots(prototype: &str, types: &[CustomType]) -> Option<Vec<Slot>> {
+    let config = crate::Config::default();
+    crate::lexer::lex(prototype, &config)
+        .into_iter()
+        .map(|t| {
+            let text = &prototype[t.start..t.end];
+            let Some(name) = text.strip_prefix("__") else { return Some(Slot::Literal(t.tok)) };
+            let kind = match name {
+                "number" => SlotKind::Number,
+                "amount" | "unit_expression" => SlotKind::Amount,
+                "money" | "currency_expression" => SlotKind::Money,
+                "percentage" | "percent" => SlotKind::Percentage,
+                "date" => SlotKind::Date,
+                "duration" | "timespan" => SlotKind::Duration,
+                "unit" => SlotKind::Unit,
+                "place" => SlotKind::Place,
+                "value" | "any" => SlotKind::Value,
+                _ => SlotKind::Type(types.iter().position(|t| t.placeholder == text)?),
+            };
+            Some(Slot::Placeholder(kind))
+        })
+        .collect()
 }

@@ -43,15 +43,15 @@ struct Args {
     /// Order of day and month in dates like 03/04/2026 [default: from locale].
     #[arg(long, value_enum)]
     date_order: Option<Order>,
-    /// Currency meant by "$".
-    #[arg(long, default_value = "USD")]
-    dollar: String,
+    /// Currency meant by "$" [default: from locale, else USD].
+    #[arg(long)]
+    dollar: Option<String>,
     /// Trigonometry takes degrees instead of radians.
     #[arg(long)]
     degrees: bool,
-    /// What "gallon", "cup" and "ton" mean.
-    #[arg(long, value_enum, default_value_t = System::Us)]
-    unit_system: System,
+    /// What "gallon", "cup" and "ton" mean [default: from locale].
+    #[arg(long, value_enum)]
+    unit_system: Option<System>,
     /// Pixels in an em or rem.
     #[arg(long, default_value_t = 16)]
     font_size: u32,
@@ -214,22 +214,29 @@ fn config(args: &Args) -> Result<Config, String> {
         Some(name) => Some(jiff::tz::TimeZone::get(name).map_err(|e| format!("unknown time zone {name}: {e}"))?),
         None => None,
     };
+    // Numbers follow LC_NUMERIC, dates LC_TIME, the rest LANG.
+    let locale = |vars: &[&str]| vars.iter().find_map(|v| std::env::var(v).ok().filter(|s| !s.is_empty()));
+    let base = Config::for_locale(&locale(&["LC_ALL", "LANG"]).unwrap_or_default());
+    let numbers = Config::for_locale(&locale(&["LC_ALL", "LC_NUMERIC", "LANG"]).unwrap_or_default());
+    let times = Config::for_locale(&locale(&["LC_ALL", "LC_TIME", "LANG"]).unwrap_or_default());
     Ok(Config {
         precision: args.precision.clamp(1, 28),
         thousands_separators: !args.no_separators,
-        decimal_comma: locale_decimal_comma(),
-        clock_24h: !args.twelve_hour,
+        decimal_comma: numbers.decimal_comma,
+        clock_24h: !args.twelve_hour && times.clock_24h,
         date_order: match args.date_order {
             Some(Order::Dmy) => DateOrder::DayFirst,
             Some(Order::Mdy) => DateOrder::MonthFirst,
-            None => locale_date_order(),
+            None => times.date_order,
         },
-        dollar: args.dollar.to_uppercase(),
+        week_start: times.week_start,
+        dollar: args.dollar.as_deref().map_or(base.dollar.clone(), str::to_uppercase),
         angle_unit: if args.degrees { AngleUnit::Degrees } else { AngleUnit::Radians },
         unit_system: match args.unit_system {
-            System::Us => UnitSystem::CustomaryUs,
-            System::Imperial => UnitSystem::Imperial,
-            System::Metric => UnitSystem::Metric,
+            Some(System::Us) => UnitSystem::CustomaryUs,
+            Some(System::Imperial) => UnitSystem::Imperial,
+            Some(System::Metric) => UnitSystem::Metric,
+            None => base.unit_system,
         },
         base_font_size: Number::from_i64(args.font_size.into()),
         formatting: Formatting {
@@ -239,35 +246,11 @@ fn config(args: &Args) -> Result<Config, String> {
                 Scales::On => Notation::On,
                 Scales::Off => Notation::Off,
             },
-            ..Formatting::default()
+            ..numbers.formatting
         },
         time_zone,
         ..Config::default()
     })
-}
-
-/// US locales write the month first.
-fn locale_date_order() -> DateOrder {
-    let locale = ["LC_ALL", "LC_TIME", "LANG"].iter().find_map(|v| std::env::var(v).ok().filter(|s| !s.is_empty()));
-    match locale {
-        Some(l) if l.starts_with("en_US") => DateOrder::MonthFirst,
-        _ => DateOrder::DayFirst,
-    }
-}
-
-/// Most of continental Europe and Latin America write `1.234,5`.
-fn locale_decimal_comma() -> bool {
-    const COMMA: &[&str] = &[
-        "az", "be", "bg", "bs", "ca", "cs", "da", "de", "el", "es", "et", "eu", "fi", "fr", "gl", "hr", "hu", "hy",
-        "id", "is", "it", "ka", "kk", "ky", "lt", "lv", "mk", "nb", "nl", "nn", "no", "pl", "pt", "ro", "ru", "sk",
-        "sl", "sq", "sr", "sv", "tr", "uk", "uz", "vi",
-    ];
-    // Regions that use a decimal point despite the language.
-    const POINT: &[&str] = &["de_CH", "it_CH", "es_MX", "es_US", "es_PR"];
-    let var = |name: &str| std::env::var(name).ok().filter(|s| !s.is_empty());
-    let Some(locale) = ["LC_ALL", "LC_NUMERIC", "LANG"].iter().find_map(|v| var(v)) else { return false };
-    let lang = locale.split(['_', '.', '@']).next().unwrap_or_default();
-    COMMA.contains(&lang) && !POINT.iter().any(|p| locale.starts_with(p))
 }
 
 /// Calculates a whole text; each input line gets one output line.

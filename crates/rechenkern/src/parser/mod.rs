@@ -3,6 +3,7 @@
 //! Words the parser doesn't know are skipped as comments, so
 //! `$20 for lunch + $15 for taxi` reads as `$20 + $15`.
 
+mod custom;
 mod distance;
 pub(crate) mod highlight;
 mod inflation;
@@ -31,6 +32,8 @@ use crate::units::Unit;
 pub struct Scope<'a> {
     pub config: &'a Config,
     pub is_var: &'a dyn Fn(&str) -> bool,
+    /// A function defined in an earlier line: `area` after `area(w, h) = w * h`.
+    pub is_function: &'a dyn Fn(&str) -> bool,
     pub units: &'a CustomUnits,
     /// Set when the line writes a number with a scale: `5M`, `2 billion`.
     pub scaled: Cell<bool>,
@@ -171,9 +174,10 @@ impl<'a> Parser<'a> {
             let (then, otherwise) = if negate { (other, value) } else { (value, other) };
             return Ok(Expr::If { cond, then, otherwise });
         }
-        let phrase = match self.config().features.word_functions {
-            true => self.phrase()?,
-            false => None,
+        let phrase = match self.custom_function()? {
+            Some(expr) => Some(expr),
+            None if self.config().features.word_functions => self.phrase()?,
+            None => None,
         };
         let in_text = self.config().features.in_ambiguity_prefer_something_to_nothing;
         match phrase {
@@ -224,6 +228,9 @@ impl<'a> Parser<'a> {
         if !self.config().features.variable_declarations {
             return Ok(None);
         }
+        if let Some(function) = self.function_definition()? {
+            return Ok(Some(function));
+        }
         let Some(eq) = self.toks.iter().position(|t| matches!(t.tok, Tok::Sym("=" | "+=" | "-=" | "*=" | "/="))) else {
             return Ok(None);
         };
@@ -241,6 +248,49 @@ impl<'a> Parser<'a> {
         };
         let expr = self.sub(eq + 1, self.toks.len()).value()?;
         Ok(Some(Stmt::Assign { name, op, expr }))
+    }
+
+    /// "area(w, h) = w * h": a name, its parameters in parentheses, "=" and the body.
+    fn function_definition(&mut self) -> Result<Option<Stmt>> {
+        let toks = self.toks;
+        let Some(name) = toks.first().and_then(Token::word) else { return Ok(None) };
+        if !toks.get(1).is_some_and(|t| t.is_sym("(") && !t.space_before) {
+            return Ok(None);
+        }
+        let Some(close) = toks.iter().position(|t| t.is_sym(")")) else { return Ok(None) };
+        if !toks.get(close + 1).is_some_and(|t| t.is_sym("=")) {
+            return Ok(None);
+        }
+        let mut params = Vec::new();
+        for (k, tok) in toks[2..close].iter().enumerate() {
+            match (k % 2, tok.word()) {
+                (0, Some(word)) => params.push(word.to_lowercase()),
+                (1, None) if tok.is_sym(",") => {}
+                _ => return Ok(None),
+            }
+        }
+        let name = name.to_lowercase();
+        if self.phrase_at(0, &words::FUNCTIONS).is_some_and(|(_, n)| n == 1) {
+            bail!("{name} is a function already");
+        }
+        if words::KEYWORDS.contains(&name.as_str()) || self.unit_at(0, false).is_some() {
+            bail!("{name} means something already");
+        }
+        // The parameters are variables in the body; so is the function itself, for recursion.
+        let outer = self.scope;
+        let is_var = |n: &str| params.iter().any(|p| p == n) || (outer.is_var)(n);
+        let is_function = |n: &str| n == name || (outer.is_function)(n);
+        let scope = Scope {
+            config: outer.config,
+            is_var: &is_var,
+            is_function: &is_function,
+            units: outer.units,
+            scaled: Cell::new(false),
+            places: outer.places,
+            weather: outer.weather,
+        };
+        let body = Parser::new(self.src, &toks[close + 2..], &scope).value()?;
+        Ok(Some(Stmt::Function { name, params, body }))
     }
 
     /// Fails if meaningful tokens are left over.

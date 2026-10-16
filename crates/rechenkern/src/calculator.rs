@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use crate::alternatives::Alternative;
 use crate::answer::Answer;
-use crate::ast::{Expr, LineRef, Stmt};
+use crate::ast::{Expr, LineRef, Stmt, UserFunction};
 use crate::config::{Config, Now};
 use crate::custom::{CustomPlace, CustomUnits, PlaceProvider};
 use crate::error::{Error, Result};
@@ -31,7 +31,7 @@ pub struct Calculator {
     config: Arc<Config>,
     /// The custom units of the config, looked up once.
     units: OnceCell<std::result::Result<CustomUnits, Error>>,
-    pub(crate) vars: HashMap<String, Value>,
+    pub(crate) names: Names,
     pub(crate) lines: Vec<Line>,
     rates: Rates,
     inflation: Option<Box<dyn InflationProvider>>,
@@ -56,7 +56,7 @@ impl Calculator {
         Calculator {
             config: Arc::new(config),
             units: OnceCell::new(),
-            vars: HashMap::new(),
+            names: Names::default(),
             lines: Vec::new(),
             rates: Rates::default(),
             inflation: None,
@@ -127,29 +127,24 @@ impl Calculator {
     }
 
     pub fn variable(&self, name: &str) -> Option<&Value> {
-        self.vars.get(&name.to_lowercase())
+        self.names.vars.get(&name.to_lowercase())
     }
 
     pub fn set_variable(&mut self, name: &str, value: Value) {
-        self.vars.insert(name.to_lowercase(), value);
+        self.names.vars.insert(name.to_lowercase(), value);
     }
 
     /// Forgets variables and earlier lines.
     pub fn clear(&mut self) {
-        self.vars.clear();
+        self.names = Names::default();
         self.lines.clear();
     }
 
     /// Calculates one line. `Ok(None)` means there is nothing to calculate,
     /// like a heading, a comment or plain text.
     pub fn calculate(&mut self, line: &str) -> Result<Option<Answer>> {
-        let (result, effects) = self.run(line, &self.vars, &self.lines, false);
-        if effects.clears_vars {
-            self.vars.clear();
-        }
-        if let Some((name, value)) = effects.assigned {
-            self.vars.insert(name, value);
-        }
+        let (result, effects) = self.run(line, &self.names, &self.lines, false);
+        self.names.apply(&effects);
         self.lines.push(effects.line);
         result
     }
@@ -160,24 +155,29 @@ impl Calculator {
     pub(crate) fn run(
         &self,
         line: &str,
-        vars: &HashMap<String, Value>,
+        names: &Names,
         lines: &[Line],
         track: bool,
     ) -> (Result<Option<Answer>>, Effects) {
         let trimmed = line.trim();
         let kind = line_kind(trimmed);
-        let mut effects =
-            Effects { line: Line { value: None, kind }, assigned: None, clears_vars: false, reads: Reads::default() };
+        let mut effects = Effects {
+            line: Line { value: None, kind },
+            assigned: None,
+            defined: None,
+            clears_vars: false,
+            reads: Reads::default(),
+        };
         if kind != LineKind::Value {
             effects.clears_vars = kind == LineKind::Divider && self.config.features.dividers_reset_variable_scope;
             return (Ok(None), effects);
         }
-        let names = RefCell::new(Vec::new());
-        let names = track.then_some(&names);
-        let body = &trimmed[self.label_end(trimmed, vars, names)..];
-        let result = self.evaluate(body, vars, lines, names, &mut effects);
-        if let Some(names) = names {
-            effects.reads.names.extend(names.take());
+        let asked = RefCell::new(Vec::new());
+        let asked = track.then_some(&asked);
+        let body = &trimmed[self.label_end(trimmed, names, asked)..];
+        let result = self.evaluate(body, names, lines, asked, &mut effects);
+        if let Some(asked) = asked {
+            effects.reads.names.extend(asked.take());
         }
         let result = result.map(|answer| {
             answer.map(|(answer, is_total)| {
@@ -193,15 +193,17 @@ impl Calculator {
 
     /// The answer written other ways: in hex, as a fraction, in other units, a date as ISO 8601.
     pub fn alternatives(&self, answer: &Answer) -> Vec<Alternative> {
-        self.env(&self.vars, &self.lines).alternatives(answer)
+        self.env(&self.names, &self.lines).alternatives(answer)
     }
 
     /// Everything a calculation after `lines` can see.
-    pub(crate) fn env<'a>(&'a self, vars: &'a HashMap<String, Value>, lines: &'a [Line]) -> Env<'a> {
+    pub(crate) fn env<'a>(&'a self, names: &'a Names, lines: &'a [Line]) -> Env<'a> {
         Env {
             config: &self.config,
             now: Now::new(&self.config),
-            vars,
+            vars: &names.vars,
+            functions: &names.functions,
+            depth: Default::default(),
             lines,
             rates: &self.rates,
             food_as: Default::default(),
@@ -215,11 +217,11 @@ impl Calculator {
     /// What each part of a line is, for syntax highlighting; ranges are in bytes.
     /// Variables are the ones known now, as for the next line calculated.
     pub fn highlight(&self, line: &str) -> Vec<Highlight> {
-        self.highlight_with(line, &self.vars)
+        self.highlight_with(line, &self.names)
     }
 
     /// Highlights a line that sees these variables.
-    pub(crate) fn highlight_with(&self, line: &str, vars: &HashMap<String, Value>) -> Vec<Highlight> {
+    pub(crate) fn highlight_with(&self, line: &str, names: &Names) -> Vec<Highlight> {
         let start = line.len() - line.trim_start().len();
         let trimmed = line.trim();
         if line_kind(trimmed) == LineKind::Heading {
@@ -228,38 +230,55 @@ impl Calculator {
         if line_kind(trimmed) != LineKind::Value {
             return Vec::new();
         }
-        let body = &trimmed[self.label_end(trimmed, vars, None)..];
+        let body = &trimmed[self.label_end(trimmed, names, None)..];
         let mut out = Vec::new();
         let label = trimmed[..trimmed.len() - body.len()].trim_end();
         if !label.is_empty() {
             out.push(Highlight { range: start..start + label.len(), kind: TokenKind::Label });
         }
-        let is_var = |name: &str| vars.contains_key(name);
+        let is_var = |name: &str| names.vars.contains_key(name);
+        let is_function = |name: &str| names.functions.contains_key(name);
         let empty = CustomUnits::default();
-        let scope = Scope {
-            config: &self.config,
-            is_var: &is_var,
-            units: self.units().unwrap_or(&empty),
-            scaled: Cell::new(false),
-            places: &|name| self.find_place(name),
-            weather: true,
-        };
+        let places = |name: &str| self.find_place(name);
+        let scope = self.scope(&is_var, &is_function, &places, self.units().unwrap_or(&empty), true);
         out.extend(parser::highlight::highlight(body, start + trimmed.len() - body.len(), &scope));
         out
     }
 
+    /// The values the placeholders of one of these phrases match in a text, as SoulverCore's
+    /// `functionParametersIn`: `"$90 split 3 ways"` and `"__money split __number ways"` give
+    /// $90 and 3. `None` if no phrase matches the whole text.
+    pub fn function_parameters(&self, text: &str, prototypes: &[&str]) -> Option<Vec<Value>> {
+        let mut config = (*self.config).clone();
+        config.custom_functions = prototypes
+            .iter()
+            .map(|p| crate::custom::CustomFunction::new(p, |values| Ok(Value::Text(format!("{}", values.len())))))
+            .collect();
+        let mut probe = Calculator::with_config(config);
+        probe.names = self.names.clone();
+        let is_var = |name: &str| probe.names.vars.contains_key(name);
+        let is_function = |name: &str| probe.names.functions.contains_key(name);
+        let empty = CustomUnits::default();
+        let scope = probe.scope(&is_var, &is_function, &|_| None, probe.units().unwrap_or(&empty), true);
+        let Ok(Some(Stmt::Expr(Expr::Custom { args, .. }))) = parser::parse(text, &scope) else { return None };
+        let env = probe.env(&probe.names, &[]);
+        args.iter()
+            .map(|arg| match arg {
+                crate::ast::CustomArg::Expr(expr, _) => env.eval(expr).ok(),
+                crate::ast::CustomArg::Unit(unit) => {
+                    Some(Value::Quantity(crate::value::Quantity::new(crate::Number::ONE, unit.clone())))
+                }
+                crate::ast::CustomArg::Text(text) => Some(Value::Text(text.clone())),
+            })
+            .collect()
+    }
+
     /// The values written in a text, with the variables known now.
     pub(crate) fn values_in(&self, text: &str) -> Vec<(std::ops::Range<usize>, Expr)> {
-        let is_var = |name: &str| self.vars.contains_key(name);
+        let is_var = |name: &str| self.names.vars.contains_key(name);
+        let is_function = |name: &str| self.names.functions.contains_key(name);
         let empty = CustomUnits::default();
-        let scope = Scope {
-            config: &self.config,
-            is_var: &is_var,
-            units: self.units().unwrap_or(&empty),
-            scaled: Cell::new(false),
-            places: &|_| None,
-            weather: false,
-        };
+        let scope = self.scope(&is_var, &is_function, &|_| None, self.units().unwrap_or(&empty), false);
         parser::values_in(text, &scope)
     }
 
@@ -271,7 +290,7 @@ impl Calculator {
 
     /// Where the expression starts after a label: "Rent: $1,500", or "Coffee - $5" if the
     /// config reads dashes as labels.
-    fn label_end(&self, line: &str, vars: &HashMap<String, Value>, names: Option<&RefCell<Vec<String>>>) -> usize {
+    fn label_end(&self, line: &str, names: &Names, asked: Option<&RefCell<Vec<String>>>) -> usize {
         let features = &self.config.features;
         let colon = if features.comments.labels { line.len() - strip_label(line).len() } else { 0 };
         if colon > 0 || !features.dash_separated_labels {
@@ -282,21 +301,11 @@ impl Calculator {
         else {
             return 0;
         };
-        let is_var = |name: &str| {
-            if let Some(names) = names {
-                names.borrow_mut().push(name.to_string());
-            }
-            vars.contains_key(name)
-        };
+        let is_var = |name: &str| names.asks(asked, name, false);
+        let is_function = |name: &str| names.asks(asked, name, true);
         let empty = CustomUnits::default();
-        let scope = Scope {
-            config: &self.config,
-            is_var: &is_var,
-            units: self.units().unwrap_or(&empty),
-            scaled: Cell::new(false),
-            places: &|name| self.find_place(name),
-            weather: true,
-        };
+        let places = |name: &str| self.find_place(name);
+        let scope = self.scope(&is_var, &is_function, &places, self.units().unwrap_or(&empty), true);
         match parser::parse(&line[..at], &scope) {
             Ok(None) => at + dash,
             _ => 0,
@@ -308,29 +317,24 @@ impl Calculator {
     fn evaluate(
         &self,
         line: &str,
-        vars: &HashMap<String, Value>,
+        names: &Names,
         lines: &[Line],
-        names: Option<&RefCell<Vec<String>>>,
+        asked: Option<&RefCell<Vec<String>>>,
         effects: &mut Effects,
     ) -> Result<Option<(Answer, bool)>> {
-        let is_var = |name: &str| {
-            if let Some(names) = names {
-                names.borrow_mut().push(name.to_string());
-            }
-            vars.contains_key(name)
-        };
-        let find_place = |name: &str| self.find_place(name);
-        let scope = Scope {
-            config: &self.config,
-            is_var: &is_var,
-            units: self.units()?,
-            scaled: Cell::new(false),
-            places: &find_place,
-            weather: true,
-        };
+        let is_var = |name: &str| names.asks(asked, name, false);
+        let is_function = |name: &str| names.asks(asked, name, true);
+        let places = |name: &str| self.find_place(name);
+        let scope = self.scope(&is_var, &is_function, &places, self.units()?, true);
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
-        let env = self.env(vars, lines);
-        let result = self.evaluate_stmt(&stmt, &env, &scope, vars);
+        // "area(w, h) = w * h" defines a function and has no answer.
+        if let Stmt::Function { name, params, body } = stmt {
+            let function = UserFunction { params, body };
+            effects.defined = Some((name, Arc::new(function)));
+            return Ok(None);
+        }
+        let env = self.env(names, lines);
+        let result = self.evaluate_stmt(&stmt, &env, &scope, &names.vars);
         let mut reads = env.reads.take();
         reads.clock = env.now.peek().is_some();
         effects.reads = reads;
@@ -357,7 +361,7 @@ impl Calculator {
             }
         }
         let (expr, value, display, parts, is_total, name) = match stmt {
-            Stmt::If { .. } => unreachable!("branches are resolved above"),
+            Stmt::If { .. } | Stmt::Function { .. } => unreachable!("branches and functions are dealt with above"),
             Stmt::Expr(expr) => {
                 let Some(expr) = env.branch(expr)? else { return Ok(None) };
                 let (value, display, parts) = env.answer_line(expr)?;
@@ -390,6 +394,48 @@ impl Calculator {
         let assigned = name.map(|name| (name, answer.reference()));
         Ok(Some((answer, is_total, assigned)))
     }
+
+    /// The parser's view of the calculator, with closures that answer its questions.
+    fn scope<'a>(
+        &'a self,
+        is_var: &'a dyn Fn(&str) -> bool,
+        is_function: &'a dyn Fn(&str) -> bool,
+        places: &'a dyn Fn(&str) -> Option<CustomPlace>,
+        units: &'a CustomUnits,
+        weather: bool,
+    ) -> Scope<'a> {
+        Scope { config: &self.config, is_var, is_function, units, scaled: Cell::new(false), places, weather }
+    }
+}
+
+/// The variables and functions lines have set, which later lines see.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct Names {
+    pub vars: HashMap<String, Value>,
+    pub functions: HashMap<String, Arc<UserFunction>>,
+}
+
+impl Names {
+    /// Takes in what a line set: a variable, a function, or a clean slate after a divider.
+    pub fn apply(&mut self, effects: &Effects) {
+        if effects.clears_vars {
+            *self = Names::default();
+        }
+        if let Some((name, value)) = &effects.assigned {
+            self.vars.insert(name.clone(), value.clone());
+        }
+        if let Some((name, function)) = &effects.defined {
+            self.functions.insert(name.clone(), function.clone());
+        }
+    }
+
+    /// Whether `name` is a variable (or a function), noting the question in `asked`.
+    fn asks(&self, asked: Option<&RefCell<Vec<String>>>, name: &str, function: bool) -> bool {
+        if let Some(asked) = asked {
+            asked.borrow_mut().push(name.to_string());
+        }
+        if function { self.functions.contains_key(name) } else { self.vars.contains_key(name) }
+    }
 }
 
 /// What a line did besides answering: what later lines see of it, and what it read.
@@ -398,6 +444,8 @@ pub(crate) struct Effects {
     pub line: Line,
     /// A variable set: `rent = $1,500`.
     pub assigned: Option<(String, Value)>,
+    /// A function defined: `area(w, h) = w * h`.
+    pub defined: Option<(String, Arc<UserFunction>)>,
     /// A divider that forgets the variables above it.
     pub clears_vars: bool,
     pub reads: Reads,
@@ -413,6 +461,15 @@ pub(crate) struct Reads {
     pub lines: Vec<usize>,
     /// The current time.
     pub clock: bool,
+}
+
+impl Reads {
+    /// Takes in what a call read.
+    pub fn merge(&mut self, other: Reads) {
+        self.names.extend(other.names);
+        self.lines.extend(other.lines);
+        self.clock |= other.clock;
+    }
 }
 
 /// What kind of line the text is, before calculating it.

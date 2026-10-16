@@ -106,7 +106,7 @@ impl Calculator {
                 take(Found { kind, text: text[range.clone()].to_string(), range, value: None, end: None, place: None });
             }
         }
-        let env = self.env(&self.vars, &self.lines);
+        let env = self.env(&self.names, &self.lines);
         for (range, expr) in self.values_in(text) {
             let Ok((value, end)) = (match &expr {
                 Expr::Range(a, b) => env.range_ends(a, b).map(|(a, b)| (a, Some(b))),

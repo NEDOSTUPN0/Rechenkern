@@ -204,6 +204,7 @@ impl<'a> Parser<'a> {
             || words::weekday(w).is_some()
             || words::is_line_word(w)
             || self.function_at(i).is_some()
+            || (self.scope.is_function)(w)
             || self.phrase_at(i, &words::HOLIDAYS).is_some()
             || self.event_at(i).is_some()
             || self.phrase_at(i, &words::DATE_PARTS).is_some()
@@ -624,7 +625,15 @@ impl<'a> Parser<'a> {
 
     /// Removes parentheses that hold comments: "$999 (for iPhone 16)".
     pub(super) fn without_comment_groups(&self) -> Vec<Token> {
-        if !self.config().features.comments.brackets {
+        // "area(w, h) = w * h" names parameters, and its body may use them in calls.
+        let definition = self.toks.first().is_some_and(|t| t.word().is_some())
+            && self.toks.get(1).is_some_and(|t| t.is_sym("(") && !t.space_before)
+            && self
+                .toks
+                .iter()
+                .position(|t| t.is_sym(")"))
+                .is_some_and(|c| self.toks.get(c + 1).is_some_and(|t| t.is_sym("=")));
+        if !self.config().features.comments.brackets || definition {
             return self.toks.to_vec();
         }
         let mut keep = vec![true; self.toks.len()];

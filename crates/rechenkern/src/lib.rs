@@ -49,7 +49,7 @@ pub use config::{
     Formatting, MisplacedSeparator, Notation, ResultConversions, ScalarSystem, Scale, SymbolPosition, TimeZoneOptions,
     TimespanStyle, ZoneCodeCorrection,
 };
-pub use custom::{CustomPlace, CustomUnit, PlaceProvider, UnitSystem};
+pub use custom::{CustomFunction, CustomPlace, CustomType, CustomUnit, FunctionHandler, PlaceProvider, UnitSystem};
 pub use error::{Error, Result};
 pub use find::{DataKind, Found, Scanner};
 pub use inflation::InflationProvider;

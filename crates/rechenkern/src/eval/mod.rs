@@ -75,6 +75,10 @@ pub(crate) struct Env<'a> {
     pub config: &'a Config,
     pub now: Now<'a>,
     pub vars: &'a HashMap<String, Value>,
+    /// Functions defined in earlier lines.
+    pub functions: &'a HashMap<String, std::sync::Arc<crate::ast::UserFunction>>,
+    /// How deep calls of those functions go, to stop endless recursion.
+    pub depth: Cell<u32>,
     pub lines: &'a [Line],
     pub rates: &'a Rates,
     /// Inside a conversion to a weight or a volume, amounts of food become that kind:
@@ -181,6 +185,7 @@ impl Env<'_> {
                 self.vars.get(name).cloned().ok_or_else(|| Error::new(format!("unknown variable {name}")))?
             }
             Expr::Line(line) => self.line(*line)?,
+            Expr::Apply(name, args) => self.apply(name, args)?,
             Expr::Time(t) => Value::Moment(self.moment(t)?),
             Expr::InZone(inner, zone) => Value::Moment(self.place_in_zone(self.eval(inner)?, &zone.zone)?),
             Expr::Range(a, b) => {
@@ -198,6 +203,7 @@ impl Env<'_> {
                 Some(e) => self.eval(e)?,
                 None => bail!("the condition isn't met"),
             },
+            Expr::Custom { function, args } => self.custom_function(*function, args)?,
             Expr::Inflation { amount, from, to, rate } => {
                 self.inflation(self.eval(amount)?, *from, *to, rate.as_deref())?
             }
@@ -260,6 +266,72 @@ impl Env<'_> {
             Value::Percent(p) => !p.is_zero(),
             v => bail!("{} is neither true nor false", v.kind()),
         })
+    }
+
+    /// A function defined in an earlier line, with its parameters set to the arguments.
+    fn apply(&self, name: &str, args: &[Expr]) -> Result<Value> {
+        self.reads.borrow_mut().names.push(name.to_string());
+        let function = self.functions.get(name).ok_or_else(|| Error::new(format!("unknown function \"{name}\"")))?;
+        if args.len() != function.params.len() {
+            bail!("{name} takes {} values, not {}", function.params.len(), args.len());
+        }
+        if self.depth.get() >= 64 {
+            bail!("{name} calls itself too deep");
+        }
+        let mut vars = self.vars.clone();
+        for (param, arg) in function.params.iter().zip(args) {
+            vars.insert(param.clone(), self.eval(arg)?);
+        }
+        let inner = Env {
+            config: self.config,
+            now: crate::config::Now::new(self.config),
+            vars: &vars,
+            functions: self.functions,
+            depth: Cell::new(self.depth.get() + 1),
+            lines: self.lines,
+            rates: self.rates,
+            food_as: Cell::new(None),
+            rate_date: Cell::new(self.rate_date.get()),
+            inflation: self.inflation,
+            weather: self.weather,
+            reads: Default::default(),
+        };
+        let result = inner.eval(&function.body);
+        self.reads.borrow_mut().merge(inner.reads.take());
+        result
+    }
+
+    /// One of the host's phrases, worked out by its handler.
+    fn custom_function(&self, function: usize, args: &[crate::ast::CustomArg]) -> Result<Value> {
+        use crate::ast::CustomArg;
+        use crate::custom::SlotKind;
+        let custom = &self.config.custom_functions[function];
+        let values = args
+            .iter()
+            .map(|arg| match arg {
+                CustomArg::Unit(unit) => Ok(Value::Quantity(Quantity::new(Number::ONE, unit.clone()))),
+                CustomArg::Text(text) => Ok(Value::Text(text.clone())),
+                CustomArg::Expr(expr, kind) => {
+                    let value = self.eval(expr)?;
+                    let fits = match (kind, &value) {
+                        (SlotKind::Number, Value::Quantity(q)) => q.unit.is_none(),
+                        (SlotKind::Amount, Value::Quantity(q)) => !q.unit.is_none(),
+                        (SlotKind::Money, Value::Quantity(q)) => q.unit.is_money(),
+                        (SlotKind::Percentage, Value::Percent(_)) => true,
+                        (SlotKind::Date, Value::Moment(_)) => true,
+                        (SlotKind::Duration, Value::Duration(_)) => true,
+                        (SlotKind::Duration, Value::Quantity(q)) => q.unit.dim() == Dim::TIME,
+                        (SlotKind::Value, _) => true,
+                        _ => false,
+                    };
+                    match fits {
+                        true => Ok(value),
+                        false => bail!("\"{}\" needs another kind of value than {}", custom.prototype, value.kind()),
+                    }
+                }
+            })
+            .collect::<Result<Vec<_>>>()?;
+        (custom.handler)(&values).map_err(Error::new)
     }
 
     /// `amount` in prices of year `to` instead of year `from` (`None` is now): by the consumer

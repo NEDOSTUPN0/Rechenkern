@@ -213,13 +213,15 @@ impl Env<'_> {
                     None => bail!("invalid date {month}/{day}"),
                 }
             }
-            TimeExpr::Weekday(weekday, which) => self.date_moment(weekday_date(today, *weekday, *which)?),
+            TimeExpr::Weekday(weekday, which) => {
+                self.date_moment(weekday_date(today, *weekday, *which, self.config.week_start)?)
+            }
             TimeExpr::Period(unit, which) => {
                 self.date_moment(today.checked_add(set(Span::new(), *unit, which.step())?)?)
             }
             TimeExpr::PeriodStart(unit, which) => {
                 let first = match unit {
-                    Cal::Week => today.checked_sub(days(today.weekday().to_monday_zero_offset() as i64))?,
+                    Cal::Week => today.checked_sub(days(day_in_week(today.weekday(), self.config.week_start)))?,
                     Cal::Month => today.first_of_month(),
                     _ => today.first_of_year(),
                 };
@@ -581,16 +583,21 @@ fn add_workdays(date: Date, n: i64, holidays: &[Date]) -> Result<Date> {
     Ok(day)
 }
 
-fn weekday_date(today: Date, weekday: Weekday, which: Option<Which>) -> Result<Date> {
+fn weekday_date(today: Date, weekday: Weekday, which: Option<Which>, week_start: Weekday) -> Result<Date> {
     Ok(match which {
         None if today.weekday() == weekday => today,
         None | Some(Which::Next) => today.nth_weekday(1, weekday)?,
         Some(Which::Last) => today.nth_weekday(-1, weekday)?,
         Some(Which::This) => {
-            let offset = weekday.to_monday_zero_offset() - today.weekday().to_monday_zero_offset();
-            today.checked_add(days(offset as i64))?
+            let offset = day_in_week(weekday, week_start) - day_in_week(today.weekday(), week_start);
+            today.checked_add(days(offset))?
         }
     })
+}
+
+/// Days from the start of the week to `day`: Monday is 0 in weeks from Monday.
+fn day_in_week(day: Weekday, week_start: Weekday) -> i64 {
+    (day.to_monday_zero_offset() as i64 - week_start.to_monday_zero_offset() as i64).rem_euclid(7)
 }
 
 fn holiday_date(holiday: Holiday, year: i16) -> Result<Date> {

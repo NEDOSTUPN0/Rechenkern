@@ -122,3 +122,26 @@ fn holidays() {
         ],
     );
 }
+
+#[test]
+fn weeks_and_locales() {
+    // Wednesday 23 September 2026.
+    answers(config(), &[("start of week", "Mon, 21 Sep 2026"), ("this sunday", "Sun, 27 Sep 2026")]);
+    let sunday = Config { week_start: jiff::civil::Weekday::Sunday, ..config() };
+    answers(sunday, &[("start of week", "Sun, 20 Sep 2026"), ("this sunday", "Sun, 20 Sep 2026")]);
+
+    let german = Config::for_locale("de_DE.UTF-8");
+    assert!(german.decimal_comma && german.clock_24h);
+    assert_eq!((german.unit_system, german.week_start), (UnitSystem::Metric, jiff::civil::Weekday::Monday));
+    answers(
+        Config { now: config().now, time_zone: config().time_zone, ..german },
+        &[("€5 + €2.5", "7,50 €"), ("1 cup in mL", "250 mL")],
+    );
+    let american = Config::for_locale("en_US");
+    assert!(!american.decimal_comma && !american.clock_24h);
+    assert_eq!((american.unit_system, american.week_start), (UnitSystem::CustomaryUs, jiff::civil::Weekday::Sunday));
+    let canadian = Config::for_locale("en-CA");
+    assert_eq!(canadian.dollar, "CAD");
+    assert_eq!(Config::for_locale("en_GB").unit_system, UnitSystem::Imperial);
+    assert!(!Config::for_locale("de_CH").decimal_comma);
+}

@@ -17,6 +17,12 @@ pub enum Stmt {
         op: Option<Op>,
         expr: Expr,
     },
+    /// `area(w, h) = w * h`: a function for later lines.
+    Function {
+        name: String,
+        params: Vec<String>,
+        body: Expr,
+    },
     /// `if cond then stmt else stmt`.
     If {
         cond: Expr,
@@ -25,12 +31,19 @@ pub enum Stmt {
     },
 }
 
+/// A function defined in a line: its parameters and what it works out.
+#[derive(Clone, Debug)]
+pub struct UserFunction {
+    pub params: Vec<String>,
+    pub body: Expr,
+}
+
 impl Stmt {
     /// Some part of it is a date or a time: `today`, `3pm`, `time in Tokyo`.
     pub fn has_dates(&self) -> bool {
         let dated = |e: &Expr| matches!(e, Expr::Time(_) | Expr::InZone(..) | Expr::ZoneDiff(..) | Expr::Sky { .. });
         match self {
-            Stmt::Expr(e) | Stmt::Assign { expr: e, .. } => e.contains(&dated),
+            Stmt::Expr(e) | Stmt::Assign { expr: e, .. } | Stmt::Function { body: e, .. } => e.contains(&dated),
             Stmt::If { cond, then, otherwise } => {
                 cond.contains(&dated) || then.has_dates() || otherwise.as_ref().is_some_and(|s| s.has_dates())
             }
@@ -59,6 +72,8 @@ pub enum Expr {
     /// An amount of a food, which converts between weight and volume: `1 cup of flour`.
     Food(Box<Expr>, Food),
     Call(Func, Vec<Expr>),
+    /// A call of a function defined in a line: `area(3, 4)`.
+    Apply(String, Vec<Expr>),
     Var(String),
     Line(LineRef),
     Time(TimeExpr),
@@ -104,6 +119,11 @@ pub enum Expr {
         to: Option<i16>,
         rate: Option<Box<Expr>>,
     },
+    /// One of the host's phrases, by its index in `Config::custom_functions`.
+    Custom {
+        function: usize,
+        args: Vec<CustomArg>,
+    },
     /// Compound growth: `$1,000 after 3 years at 7% compounding monthly`,
     /// or a loan paid back monthly: `total repayment on $10,000 for 5 years at 5%`.
     Growth {
@@ -116,6 +136,15 @@ pub enum Expr {
         compounds: Option<i64>,
         result: GrowthResult,
     },
+}
+
+/// What a placeholder of a host's phrase matched.
+#[derive(Clone, Debug)]
+pub enum CustomArg {
+    /// A value, and the kind the placeholder asks for.
+    Expr(Expr, crate::custom::SlotKind),
+    Unit(Unit),
+    Text(String),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

@@ -10,7 +10,7 @@ pub use export::{HtmlColors, HtmlOptions, TextOptions, TextStyle};
 
 use crate::answer::{Answer, Parts};
 use crate::ast::{Expr, Func, LineRef};
-use crate::calculator::{Calculator, Effects, Reads};
+use crate::calculator::{Calculator, Effects, Names, Reads};
 use crate::config::Config;
 use crate::error::{Error, Result};
 use crate::eval::{Display, Env, Line, LineKind};
@@ -110,6 +110,7 @@ impl SheetLine {
             effects: Effects {
                 line: Line { value: None, kind: LineKind::Blank },
                 assigned: None,
+                defined: None,
                 clears_vars: false,
                 reads: Reads::default(),
             },
@@ -321,11 +322,16 @@ impl Sheet {
 
     /// The variables line `i` sees: the ones set above it.
     pub fn variables_at(&self, i: usize) -> HashMap<String, Value> {
-        let mut vars = HashMap::new();
+        self.names_at(i).vars
+    }
+
+    /// The variables and functions line `i` sees.
+    fn names_at(&self, i: usize) -> Names {
+        let mut names = Names::default();
         for line in &self.lines[..i.min(self.lines.len())] {
-            apply(&mut vars, &line.effects);
+            names.apply(&line.effects);
         }
-        vars
+        names
     }
 
     /// The variables after the last line.
@@ -335,7 +341,7 @@ impl Sheet {
 
     /// What each part of line `i` is, for syntax highlighting.
     pub fn highlights(&self, i: usize) -> Vec<Highlight> {
-        self.calc.highlight_with(&self.lines[i].text, &self.variables_at(i))
+        self.calc.highlight_with(&self.lines[i].text, &self.names_at(i))
     }
 
     /// Calls `f` with the indexes of the lines worked out after every change.
@@ -403,8 +409,8 @@ impl Sheet {
             Statistic::Gcd => Func::Gcd,
             Statistic::StandardDeviation => Func::StdDev,
         };
-        let vars = HashMap::new();
-        let env = self.calc.env(&vars, &[]);
+        let names = Names::default();
+        let env = self.calc.env(&names, &[]);
         Some(env.call(func, values).map(|value| answer_of(&env, value)))
     }
 
@@ -445,7 +451,7 @@ impl Sheet {
     }
 
     fn update_from(&mut self, from: usize, dirty: &[usize], all_from: usize) -> Vec<usize> {
-        let mut vars = HashMap::new();
+        let mut names = Names::default();
         let mut above: Vec<Line> = Vec::with_capacity(self.lines.len());
         let mut changed_lines = HashSet::new();
         let mut changed_names = HashSet::new();
@@ -459,7 +465,7 @@ impl Sheet {
                     && (line.effects.reads.lines.iter().any(|l| changed_lines.contains(l))
                         || line.effects.reads.names.iter().any(|n| changed_names.contains(n))));
             if needed {
-                let (answer, effects) = self.work_out(i, &vars, &above);
+                let (answer, effects) = self.work_out(i, &names, &above);
                 let old = &self.lines[i].effects;
                 if old.line.kind != effects.line.kind || old.clears_vars != effects.clears_vars {
                     // Totals and "prev" below may now take other lines.
@@ -471,13 +477,15 @@ impl Sheet {
                 if !same_assignment(&old.assigned, &effects.assigned) {
                     changed_names.extend(old.assigned.iter().chain(&effects.assigned).map(|(n, _)| n.clone()));
                 }
+                // A function worked out again may work differently: its callers follow.
+                changed_names.extend(old.defined.iter().chain(&effects.defined).map(|(n, _)| n.clone()));
                 let line = &mut self.lines[i];
                 line.answer = answer;
                 line.effects = effects;
                 updated.push(i);
             }
             let effects = &self.lines[i].effects;
-            apply(&mut vars, effects);
+            names.apply(effects);
             above.push(effects.line.clone());
         }
         self.running_totals();
@@ -493,16 +501,16 @@ impl Sheet {
     }
 
     /// The answer of line `i` after the lines `above`, with the variables they left.
-    fn work_out(&self, i: usize, vars: &HashMap<String, Value>, above: &[Line]) -> (Result<Option<Answer>>, Effects) {
+    fn work_out(&self, i: usize, names: &Names, above: &[Line]) -> (Result<Option<Answer>>, Effects) {
         let line = &self.lines[i];
         match line.behaviour {
-            Behaviour::Subtotal | Behaviour::GrandTotal => self.subtotal(i, vars, above),
-            _ => self.calc.run(&line.text, vars, above, true),
+            Behaviour::Subtotal | Behaviour::GrandTotal => self.subtotal(i, names, above),
+            _ => self.calc.run(&line.text, names, above, true),
         }
     }
 
     /// A subtotal or grand total line: the sum of the lines it takes.
-    fn subtotal(&self, i: usize, vars: &HashMap<String, Value>, above: &[Line]) -> (Result<Option<Answer>>, Effects) {
+    fn subtotal(&self, i: usize, names: &Names, above: &[Line]) -> (Result<Option<Answer>>, Effects) {
         let grand = self.lines[i].behaviour == Behaviour::GrandTotal;
         let start = (0..i)
             .rev()
@@ -519,7 +527,7 @@ impl Sheet {
             })
             .collect();
         let values: Vec<Value> = taken.iter().filter_map(|&k| above[k].value.clone()).collect();
-        let env = self.calc.env(vars, above);
+        let env = self.calc.env(names, above);
         let answer = match values.is_empty() {
             true => Ok(Value::number(crate::Number::ZERO)),
             false => env.call(Func::Sum, values),
@@ -528,6 +536,7 @@ impl Sheet {
         let effects = Effects {
             line: Line { value: answer.as_ref().ok().map(Answer::reference), kind: LineKind::Total },
             assigned: None,
+            defined: None,
             clears_vars: false,
             reads: Reads { names: Vec::new(), lines: (start..i).collect(), clock: false },
         };
@@ -536,7 +545,7 @@ impl Sheet {
 
     /// Running totals and budgets, from each line that starts one to the next blank line or heading.
     fn running_totals(&mut self) {
-        let vars = HashMap::new();
+        let names = Names::default();
         let mut current: Option<(Behaviour, Option<Value>)> = None;
         for i in 0..self.lines.len() {
             let line = &self.lines[i];
@@ -546,7 +555,7 @@ impl Sheet {
                 current = None;
             }
             let value = line.effects.line.value.clone();
-            let env = self.calc.env(&vars, &[]);
+            let env = self.calc.env(&names, &[]);
             let running = match (&mut current, value) {
                 (Some((kind, total)), Some(value)) => {
                     let next = match (total.take(), *kind) {
@@ -568,16 +577,6 @@ impl Sheet {
 fn answer_of(env: &Env, value: Value) -> Answer {
     let config = std::sync::Arc::new(env.config.clone());
     env.describe(&Expr::Line(LineRef::Sum), value, Display::Auto, Parts::default(), &config)
-}
-
-/// What a line leaves for the lines below: its variable, or no variables after a divider.
-fn apply(vars: &mut HashMap<String, Value>, effects: &Effects) {
-    if effects.clears_vars {
-        vars.clear();
-    }
-    if let Some((name, value)) = &effects.assigned {
-        vars.insert(name.clone(), value.clone());
-    }
 }
 
 fn same_line(a: &Line, b: &Line) -> bool {

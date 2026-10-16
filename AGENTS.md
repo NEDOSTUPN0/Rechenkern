@@ -154,6 +154,16 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   names: custom units first, then built-in ones as the unit system reads them
   (`UnitSystem::adapt`: an imperial "gallon", a metric "cup"; "us gallon" stays).
 
+- Host phrases (`Config::custom_functions`): a line that is the whole prototype
+  (`tip on __money`) calls the handler; placeholders are parsed as values between
+  the literal words (`parser/custom.rs`), custom types match listed words.
+- Functions in lines: `area(w, h) = w * h` defines one (`Stmt::Function`), kept with
+  the variables in `calculator::Names`; calls are `Expr::Apply`. Names of built-in
+  functions, keywords and units can't be taken. A definition line keeps its
+  parentheses (they aren't comment groups).
+- `Config::for_locale("de_DE")` sets what a locale expects: decimal comma, clock,
+  date order, unit system, week start, the local dollar and where the currency
+  symbol goes. The CLI starts from it (`LANG`, `LC_NUMERIC`, `LC_TIME`).
 - `Config::features` turns parts of the language off or reads them another way, as
   SoulverCore's `EngineFeatureFlags` (units, dates, phrases, conversions,
   comments, labels, list markers, zone codes, date guesses...). The defaults keep
