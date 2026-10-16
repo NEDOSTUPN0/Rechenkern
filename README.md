@@ -151,10 +151,10 @@ build). The Soulver app may understand more than the engine alone.
 | "Did you mean" for misspelled places             |     ✓      |        ✗         |
 | Several currencies at once: `$50 in EUR, GBP`    |     ✓      |        ✗         |
 | Both decimal styles: `10,50` and `10.50`         |     ✓      |        ✗         |
-| `cast`, angles in DMS and hours                  |     ✗      |        ✓         |
-| Inflation, cooking by density, music, timecode   |     ✗      |        ✓         |
+| `cast`, angles in hours                          |     ✗      |        ✓         |
+| Inflation, cooking by density, music, timecode   |     ✓      |        ✓         |
 | Languages                                        |  English   |   English + 8    |
-| API for custom units and functions               |     ✗      |        ✓         |
+| API for custom units, functions, sheets, data    |     ✓      |        ✓         |
 | Command line tool                                |     ✓      |        ✗         |
 | Runtime to ship                                  |    none    | Swift (on Linux) |
 | Source                                           | open, MIT  |      closed      |
