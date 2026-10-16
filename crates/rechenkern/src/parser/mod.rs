@@ -20,6 +20,7 @@ use jiff::tz::TimeZone;
 
 use crate::ast::{Expr, Func, Op, Stmt, TimeExpr};
 use crate::config::Config;
+use crate::custom::CustomUnits;
 use crate::error::{Error, Result, bail};
 use crate::lexer::{self, Tok, Token};
 use crate::units::Unit;
@@ -28,6 +29,7 @@ use crate::units::Unit;
 pub struct Scope<'a> {
     pub config: &'a Config,
     pub is_var: &'a dyn Fn(&str) -> bool,
+    pub units: &'a CustomUnits,
 }
 
 /// Parses one line; `None` means the line has nothing to calculate.

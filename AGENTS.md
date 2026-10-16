@@ -50,6 +50,7 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 | Module | Role |
 | --- | --- |
 | `answer.rs` | `Answer`: the value, its text, the line's `Form` and the two sides of a conversion (built lazily) |
+| `custom.rs` | What hosts add: `CustomUnit` (registered after the built-in units), `CustomPlace`, `UnitSystem` |
 | `number.rs` | `Number`: exact `rust_decimal` with `f64` fallback for huge/tiny values |
 | `lexer.rs` | Raw tokens; words stay raw, the parser decides their meaning |
 | `parser/mod.rs` | Statements and precedence climbing |
@@ -137,6 +138,17 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Captions: units by their plural name in title case ("Miles per Hour"),
   currencies by `Currency::plural` ("US Dollars"), places as written
   (`zones::Place`: "Paris", "PST", "JFK") and the home zone by its city.
+
+## Customization
+
+- `Config` holds what SoulverCore's `EngineCustomization` does: custom units and
+  places, holidays (days off for workdays), the unit system, the font size of
+  `em`, hours per workday.
+- Custom units get ids after the built-in ones (`units::define`, never freed);
+  only the calculator whose config lists them can spell them
+  (`Scope::units`). `Parser::lookup_unit` is the one way the parser reads unit
+  names: custom units first, then built-in ones as the unit system reads them
+  (`UnitSystem::adapt`: an imperial "gallon", a metric "cup"; "us gallon" stays).
 
 ## Semantics worth knowing
 

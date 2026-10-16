@@ -6,7 +6,7 @@ use std::process::ExitCode;
 
 use clap::{Parser, ValueEnum};
 use rechenkern::online::OnlineRates;
-use rechenkern::{AngleUnit, Answer, Calculator, Config, DateOrder, Highlight, Side};
+use rechenkern::{AngleUnit, Answer, Calculator, Config, DateOrder, Highlight, Number, Side, UnitSystem};
 use rustyline::error::ReadlineError;
 
 #[derive(Parser)]
@@ -42,6 +42,12 @@ struct Args {
     /// Trigonometry takes degrees instead of radians.
     #[arg(long)]
     degrees: bool,
+    /// What "gallon", "cup" and "ton" mean.
+    #[arg(long, value_enum, default_value_t = System::Us)]
+    unit_system: System,
+    /// Pixels in an em or rem.
+    #[arg(long, default_value_t = 16)]
+    font_size: u32,
     /// Local time zone, e.g. America/New_York [default: system].
     #[arg(long)]
     tz: Option<String>,
@@ -51,6 +57,13 @@ struct Args {
     /// Download fresh exchange rates and exit.
     #[arg(long)]
     update_rates: bool,
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum System {
+    Us,
+    Imperial,
+    Metric,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -169,6 +182,12 @@ fn config(args: &Args) -> Result<Config, String> {
         },
         dollar: args.dollar.to_uppercase(),
         angle_unit: if args.degrees { AngleUnit::Degrees } else { AngleUnit::Radians },
+        unit_system: match args.unit_system {
+            System::Us => UnitSystem::CustomaryUs,
+            System::Imperial => UnitSystem::Imperial,
+            System::Metric => UnitSystem::Metric,
+        },
+        base_font_size: Number::from_i64(args.font_size.into()),
         time_zone,
         ..Config::default()
     })

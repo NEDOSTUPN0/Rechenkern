@@ -1,12 +1,14 @@
 //! The calculator: evaluates lines one after another, like a notepad.
 
+use std::cell::OnceCell;
 use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::answer::Answer;
 use crate::ast::{Expr, LineRef, Stmt};
 use crate::config::{Config, Now};
-use crate::error::Result;
+use crate::custom::CustomUnits;
+use crate::error::{Error, Result};
 use crate::eval::{Env, Line, LineKind};
 use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::{self, Scope};
@@ -24,6 +26,8 @@ use crate::value::Value;
 /// ```
 pub struct Calculator {
     config: Arc<Config>,
+    /// The custom units of the config, looked up once.
+    units: OnceCell<std::result::Result<CustomUnits, Error>>,
     vars: HashMap<String, Value>,
     lines: Vec<Line>,
     rates: Rates,
@@ -41,7 +45,13 @@ impl Calculator {
     }
 
     pub fn with_config(config: Config) -> Calculator {
-        Calculator { config: Arc::new(config), vars: HashMap::new(), lines: Vec::new(), rates: Rates::default() }
+        Calculator {
+            config: Arc::new(config),
+            units: OnceCell::new(),
+            vars: HashMap::new(),
+            lines: Vec::new(),
+            rates: Rates::default(),
+        }
     }
 
     pub fn config(&self) -> &Config {
@@ -49,7 +59,13 @@ impl Calculator {
     }
 
     pub fn config_mut(&mut self) -> &mut Config {
+        self.units = OnceCell::new();
         Arc::make_mut(&mut self.config)
+    }
+
+    /// The custom units of the config.
+    fn units(&self) -> Result<&CustomUnits> {
+        self.units.get_or_init(|| CustomUnits::build(&self.config.custom_units)).as_ref().map_err(Clone::clone)
     }
 
     /// Where exchange rates come from; asked once, on the first conversion.
@@ -129,7 +145,8 @@ impl Calculator {
             out.push(Highlight { range: start..start + label.len(), kind: TokenKind::Label });
         }
         let is_var = |name: &str| self.vars.contains_key(name);
-        let scope = Scope { config: &self.config, is_var: &is_var };
+        let empty = CustomUnits::default();
+        let scope = Scope { config: &self.config, is_var: &is_var, units: self.units().unwrap_or(&empty) };
         out.extend(parser::highlight::highlight(body, start + trimmed.len() - body.len(), &scope));
         out
     }
@@ -143,7 +160,7 @@ impl Calculator {
     /// Parses and evaluates; the flag marks `sum`/`total` lines.
     fn evaluate(&mut self, line: &str) -> Result<Option<(Answer, bool)>> {
         let is_var = |name: &str| self.vars.contains_key(name);
-        let scope = Scope { config: &self.config, is_var: &is_var };
+        let scope = Scope { config: &self.config, is_var: &is_var, units: self.units()? };
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
         let env = Env {
             config: &self.config,

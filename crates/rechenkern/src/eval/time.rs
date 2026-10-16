@@ -383,7 +383,7 @@ impl Env<'_> {
             let Some(n) = q.number.to_i64().filter(|_| q.number.is_integer() && q.unit.single().is_some()) else {
                 bail!("only whole workdays can be added to a date");
             };
-            let date = add_workdays(m.time.date(), if back { -n } else { n })?;
+            let date = add_workdays(m.time.date(), if back { -n } else { n }, &self.config.holidays)?;
             return Ok(Moment { time: m.time.with().date(date).build()?, ..m.clone() });
         }
         let span = self.span_of(by)?;
@@ -503,7 +503,8 @@ impl Env<'_> {
             }
             day = day.tomorrow()?;
         }
-        Ok(Number::from_i64(count))
+        let holidays = self.config.holidays.iter().filter(|&&h| start <= h && h < end && !is_weekend(h));
+        Ok(Number::from_i64(count - holidays.count() as i64))
     }
 
     /// The unit with its workdays written as hours of work, and the factor for
@@ -551,18 +552,25 @@ fn is_weekend(date: Date) -> bool {
     matches!(date.weekday(), Weekday::Saturday | Weekday::Sunday)
 }
 
-/// Moves `n` workdays from `date`, skipping weekends: Friday + 1 is Monday.
-fn add_workdays(date: Date, n: i64) -> Result<Date> {
+/// Moves `n` workdays from `date`, skipping weekends and holidays: Friday + 1 is Monday.
+fn add_workdays(date: Date, n: i64, holidays: &[Date]) -> Result<Date> {
     let step = days(n.signum());
+    let off = |day: Date| is_weekend(day) || holidays.contains(&day);
     let mut day = date;
-    // From a weekend, count from the workday behind it: Saturday + 1 is Monday.
-    while n != 0 && is_weekend(day) {
+    // From a day off, count from the workday behind it: Saturday + 1 is Monday.
+    while n != 0 && off(day) {
         day = day.checked_sub(step)?;
     }
-    day = day.checked_add(Span::new().try_weeks(n / 5)?)?;
-    for _ in 0..(n % 5).abs() {
+    // Whole weeks at once when only weekends are off.
+    let rest = if holidays.is_empty() {
+        day = day.checked_add(Span::new().try_weeks(n / 5)?)?;
+        n % 5
+    } else {
+        n
+    };
+    for _ in 0..rest.abs() {
         day = day.checked_add(step)?;
-        while is_weekend(day) {
+        while off(day) {
             day = day.checked_add(step)?;
         }
     }

@@ -4,7 +4,7 @@ mod dim;
 pub(crate) mod foods;
 mod table;
 
-use std::sync::LazyLock;
+use std::sync::{LazyLock, PoisonError, RwLock};
 
 pub use dim::Dim;
 
@@ -205,13 +205,38 @@ pub struct Registry {
 
 static REGISTRY: LazyLock<Registry> = LazyLock::new(table::build);
 
+/// Units hosts defined, numbered after the built-in ones. They are never removed,
+/// so their definitions live as long as the program.
+static CUSTOM: RwLock<Vec<&'static UnitDef>> = RwLock::new(Vec::new());
+
+/// Adds a unit after the built-in ones, or finds the same one added before.
+pub(crate) fn define(def: UnitDef) -> Option<UnitId> {
+    let builtin = registry().defs.len();
+    let mut custom = CUSTOM.write().unwrap_or_else(PoisonError::into_inner);
+    let same = |d: &&UnitDef| {
+        (&d.symbol, &d.name, &d.plural, d.dim, d.scale, d.spelled, d.currency.map(|c| c.code))
+            == (&def.symbol, &def.name, &def.plural, def.dim, def.scale, def.spelled, def.currency.map(|c| c.code))
+    };
+    let index = match custom.iter().position(same) {
+        Some(i) => i,
+        None => {
+            custom.push(Box::leak(Box::new(def)));
+            custom.len() - 1
+        }
+    };
+    UnitId::try_from(builtin + index).ok()
+}
+
 pub fn registry() -> &'static Registry {
     &REGISTRY
 }
 
 impl Registry {
     pub fn def(&self, id: UnitId) -> &UnitDef {
-        &self.defs[id as usize]
+        match self.defs.get(id as usize) {
+            Some(def) => def,
+            None => CUSTOM.read().unwrap_or_else(PoisonError::into_inner)[id as usize - self.defs.len()],
+        }
     }
 
     /// Looks up a unit spelling such as "km", "Kilometres", "m2" or "light years".

@@ -266,7 +266,7 @@ impl Parser<'_> {
         let Tok::Num(amount) = self.toks.get(self.pos + 1)?.tok else { return None };
         let (per, n) = self.unit_at(self.pos + 2, true)?;
         let symbol = format!("{}/{amount}{}", unit.single()?.symbol, per.single()?.symbol);
-        let unit = registry().lookup(&symbol)?;
+        let unit = self.lookup_unit(&symbol)?;
         self.pos += 2 + n;
         Some(unit)
     }

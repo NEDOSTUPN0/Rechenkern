@@ -282,6 +282,10 @@ impl Env<'_> {
         match def.currency {
             // A cent's scale is its part of the dollar.
             Some(c) => Ok(self.rates.usd_value(c.code)? * def.scale),
+            // An em is the font size, 16 px unless the config says otherwise.
+            None if matches!(def.symbol.as_str(), "em" | "rem") => {
+                Ok(def.scale * self.config.base_font_size / Number::from_i64(16))
+            }
             None => Ok(def.scale),
         }
     }

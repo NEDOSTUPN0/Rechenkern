@@ -2605,6 +2605,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 metric horsepower in W                   → 1,838.746875 W
 2.5 metric hp                                → 2.5 PS
 2.5 metric hp in W                           → 1,838.746875 W
+2.5 metric tablespoon                        → 2.5 metric tbsp
+2.5 metric tablespoon in L                   → 0.0375 L
+2.5 metric tablespoons                       → 2.5 metric tbsp
+2.5 metric tablespoons in L                  → 0.0375 L
+2.5 metric tbsp                              → 2.5 metric tbsp
+2.5 metric tbsp in L                         → 0.0375 L
+2.5 metric teaspoon                          → 2.5 metric tsp
+2.5 metric teaspoon in L                     → 0.0125 L
+2.5 metric teaspoons                         → 2.5 metric tsp
+2.5 metric teaspoons in L                    → 0.0125 L
 2.5 metric ton                               → 2.5 t
 2.5 metric ton in kg                         → 2,500 kg
 2.5 metric tonne                             → 2.5 t
@@ -2613,6 +2623,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 metric tonnes in kg                      → 2,500 kg
 2.5 metric tons                              → 2.5 t
 2.5 metric tons in kg                        → 2,500 kg
+2.5 metric tsp                               → 2.5 metric tsp
+2.5 metric tsp in L                          → 0.0125 L
 2.5 mexican peso                             → MX$2.50
 2.5 mexican peso in EUR                      → €1.13
 2.5 mexican pesos                            → MX$2.50

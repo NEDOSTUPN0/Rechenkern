@@ -3,7 +3,9 @@
 use std::cell::OnceCell;
 
 use jiff::tz::TimeZone;
-use jiff::{Timestamp, Zoned};
+use jiff::{Timestamp, Zoned, civil};
+
+use crate::custom::{CustomPlace, CustomUnit, UnitSystem};
 
 use crate::number::Number;
 
@@ -41,6 +43,16 @@ pub struct Config {
     pub angle_unit: AngleUnit,
     /// Working hours in a workday, for `40 hours in workdays`.
     pub hours_per_workday: Number,
+    /// Days off besides weekends, skipped when counting workdays.
+    pub holidays: Vec<civil::Date>,
+    /// What "gallon", "cup" and "ton" mean.
+    pub unit_system: UnitSystem,
+    /// Pixels in an `em` or `rem`.
+    pub base_font_size: Number,
+    /// Units of the host's own.
+    pub custom_units: Vec<CustomUnit>,
+    /// Places of the host's own; they win over built-in places of the same name.
+    pub custom_places: Vec<CustomPlace>,
     /// Local time zone; `None` uses the system zone.
     pub time_zone: Option<TimeZone>,
     /// Fixed current time, mostly for tests; `None` uses the clock.
@@ -58,6 +70,11 @@ impl Default for Config {
             dollar: "USD".into(),
             angle_unit: AngleUnit::Radians,
             hours_per_workday: Number::from_i64(8),
+            holidays: Vec::new(),
+            unit_system: UnitSystem::CustomaryUs,
+            base_font_size: Number::from_i64(16),
+            custom_units: Vec::new(),
+            custom_places: Vec::new(),
             time_zone: None,
             now: None,
         }

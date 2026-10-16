@@ -4,10 +4,11 @@ use jiff::tz::TimeZone;
 
 use super::{Parser, words};
 use crate::ast::Func;
+use crate::custom::CustomPlace;
 use crate::lexer::{Tok, Token};
 use crate::units::foods::Food;
 use crate::units::{Dim, Unit, registry};
-use crate::zones::{self, Location, Place};
+use crate::zones::{self, Location, Place, PlaceKind};
 
 /// Words glued by a hyphen are somewhere in the tokens: "x-ray".
 pub(super) fn has_hyphenated_words(toks: &[Token]) -> bool {
@@ -249,7 +250,7 @@ impl<'a> Parser<'a> {
         if tok.is_sym("°") {
             // "°C" or a lone degree sign.
             if let Some(next) = self.toks.get(i + 1).filter(|t| !t.space_before).and_then(Token::word)
-                && let Some(u) = registry().lookup(&format!("°{next}"))
+                && let Some(u) = self.lookup_unit(&format!("°{next}"))
             {
                 return Some((u, 2));
             }
@@ -259,7 +260,7 @@ impl<'a> Parser<'a> {
         if word == "$" {
             // "$AUD": the code says which dollar.
             if let Some(next) = self.toks.get(i + 1).filter(|t| !t.space_before).and_then(Token::word)
-                && let Some(u) = registry().lookup(next).filter(Unit::is_money)
+                && let Some(u) = self.lookup_unit(next).filter(Unit::is_money)
             {
                 return Some((u, 2));
             }
@@ -281,10 +282,10 @@ impl<'a> Parser<'a> {
         {
             return None;
         }
-        let (text, ends) = self.joined_words(i, registry().max_words(), false);
+        let (text, ends) = self.joined_words(i, registry().max_words().max(self.scope.units.max_words), false);
         ends.iter()
             .rev()
-            .find_map(|&(end, n)| Some((registry().lookup(&text[..end])?, n)))
+            .find_map(|&(end, n)| Some((self.lookup_unit(&text[..end])?, n)))
             .or_else(|| self.time_power_at(i))
     }
 
@@ -299,8 +300,18 @@ impl<'a> Parser<'a> {
             '3' => 3,
             _ => return None,
         };
-        let unit = registry().lookup(&word[..word.len() - 1]).filter(|u| u.dim() == Dim::TIME)?;
+        let unit = self.lookup_unit(&word[..word.len() - 1]).filter(|u| u.dim() == Dim::TIME)?;
         Some((unit.pow(exp), 1))
+    }
+
+    /// A unit spelled `text`: the host's own units first, then built-in ones as
+    /// the unit system reads them.
+    pub(super) fn lookup_unit(&self, text: &str) -> Option<Unit> {
+        if let Some(unit) = self.scope.units.lookup(text) {
+            return Some(unit);
+        }
+        let unit = registry().lookup(text)?;
+        Some(self.config().unit_system.adapt(text, unit))
     }
 
     pub(super) fn dollar(&self) -> Unit {
@@ -333,7 +344,8 @@ impl<'a> Parser<'a> {
         let (words, ends) = self.name_words(i);
         let mut text = words.join(" ");
         for n in (1..=words.len()).rev() {
-            if let Some(zone) = zones::find(&text) {
+            let custom = || self.custom_place(&text).map(|p| p.zone.clone());
+            if let Some(zone) = custom().or_else(|| zones::find(&text)) {
                 return Some((text, zone, ends[n - 1] - i));
             }
             text.truncate(text.len().saturating_sub(words[n - 1].len() + 1));
@@ -345,7 +357,20 @@ impl<'a> Parser<'a> {
     /// A region has a zone but no single place: "Texas" gives `(None, 1)`.
     pub(super) fn location_at(&self, i: usize) -> Option<(Option<Location>, usize)> {
         let (name, _, n) = self.place_name_at(i)?;
-        Some((zones::locate(&name), n))
+        let location = match self.custom_place(&name) {
+            Some(place) => place.coordinates.map(|(latitude, longitude)| Location {
+                zone: place.zone.clone(),
+                latitude,
+                longitude,
+            }),
+            None => zones::locate(&name),
+        };
+        Some((location, n))
+    }
+
+    /// The host's place of this name (lowercase).
+    fn custom_place(&self, name: &str) -> Option<&CustomPlace> {
+        self.config().custom_places.iter().find(|p| p.name.to_lowercase() == name)
     }
 
     /// Up to `MAX_WORDS` lowercase words from token `i`, and the token index after each.
@@ -368,7 +393,11 @@ impl<'a> Parser<'a> {
     /// The place at token `i` with its name as written.
     pub(super) fn named_place_at(&self, i: usize) -> Option<(Place, usize)> {
         let (zone, n) = self.place_at(i)?;
-        Some((Place::written(&self.src[self.toks[i].start..self.toks[i + n - 1].end], zone), n))
+        let written = &self.src[self.toks[i].start..self.toks[i + n - 1].end];
+        if let Some(custom) = self.custom_place(&written.replace('-', " ").to_lowercase()) {
+            return Some((Place { name: custom.name.clone(), zone, kind: PlaceKind::City }, n));
+        }
+        Some((Place::written(written, zone), n))
     }
 
     /// "Tokyo time", "Tokyo local time" or "Paris date".

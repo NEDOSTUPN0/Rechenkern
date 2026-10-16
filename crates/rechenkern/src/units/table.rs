@@ -249,6 +249,8 @@ fn definitions() -> Vec<Def> {
         unit("imp pt", "imperial pint", Dim::VOLUME, "0.00056826125").aliases(&["uk pint", "uk pints"]),
         unit("cup", "cup", Dim::VOLUME, "0.0002365882365").aliases(&["us cup", "us cups"]),
         unit("metric cup", "metric cup", Dim::VOLUME, "0.00025"),
+        unit("metric tbsp", "metric tablespoon", Dim::VOLUME, "0.000015"),
+        unit("metric tsp", "metric teaspoon", Dim::VOLUME, "0.000005"),
         unit("fl oz", "fluid ounce", Dim::VOLUME, "0.0000295735295625").aliases(&[
             "floz",
             "fl. oz",
