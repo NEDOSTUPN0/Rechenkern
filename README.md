@@ -95,6 +95,23 @@ let answer = calc.calculate("3 hours 30 minutes in minutes").unwrap().unwrap();
 assert_eq!(answer.to_string(), "210 minutes");
 ```
 
+An answer also tells what the line asked, with both sides of a conversion and their
+long names, ready for an answer card:
+
+```rust
+use rechenkern::{Calculator, Form};
+
+let mut calc = Calculator::new();
+let answer = calc.calculate("500 km to mi").unwrap().unwrap();
+assert_eq!(answer.form(), Form::Conversion);
+let (source, target) = (answer.source().unwrap(), answer.target().unwrap());
+assert_eq!(source.label.as_deref(), Some("Kilometers"));
+assert_eq!(target.text, "310.6855961 mi");
+```
+
+`--json` prints the same: `form`, `source` and `target` (`text`, `label`), `note`
+("+1 day" when a time lands on another date) and `copy`, the answer without its zone.
+
 Exchange rates come from a `RateProvider` you set on the calculator. The `online`
 feature adds one that downloads rates and caches them on disk.
 

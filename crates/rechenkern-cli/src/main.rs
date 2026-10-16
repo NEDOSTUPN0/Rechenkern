@@ -6,7 +6,7 @@ use std::process::ExitCode;
 
 use clap::{Parser, ValueEnum};
 use rechenkern::online::OnlineRates;
-use rechenkern::{AngleUnit, Answer, Calculator, Config, DateOrder};
+use rechenkern::{AngleUnit, Answer, Calculator, Config, DateOrder, Side};
 use rustyline::error::ReadlineError;
 
 #[derive(Parser)]
@@ -21,7 +21,7 @@ struct Args {
     /// Print each line next to its answer.
     #[arg(short, long)]
     annotate: bool,
-    /// Print one JSON object per line: {"input", "answer", "error"}.
+    /// Print one JSON object per line: {"input", "answer", "error", "form", "source", "target", "note", "copy"}.
     #[arg(long)]
     json: bool,
     /// Significant digits in answers.
@@ -116,13 +116,27 @@ fn main() -> ExitCode {
     }
 }
 
-/// `{"input": ..., "answer": ..., "error": ...}` for scripts and launchers.
+/// `{"input": ..., "answer": ..., "error": ...}` for scripts and launchers, with the
+/// form of the line, its two sides and the text to copy when there is an answer.
 fn json_line(input: &str, result: rechenkern::Result<Option<Answer>>) -> serde_json::Value {
     let (answer, error) = match result {
-        Ok(answer) => (answer.map(|a| a.to_string()), None),
+        Ok(answer) => (answer, None),
         Err(e) => (None, Some(e.to_string())),
     };
-    serde_json::json!({ "input": input, "answer": answer, "error": error })
+    let mut json = serde_json::json!({ "input": input, "answer": answer.as_ref().map(Answer::text), "error": error });
+    if let Some(answer) = &answer {
+        json["form"] = answer.form().name().into();
+        let side = |side: &Side| serde_json::json!({ "text": side.text, "label": side.label });
+        if let (Some(source), Some(target)) = (answer.source(), answer.target()) {
+            json["source"] = side(source);
+            json["target"] = side(target);
+        }
+        if let Some(note) = answer.note() {
+            json["note"] = note.into();
+        }
+        json["copy"] = answer.copy_text().into();
+    }
+    json
 }
 
 fn config(args: &Args) -> Result<Config, String> {

@@ -33,6 +33,8 @@ const SKIPPED_PREFIXES: &[&str] = &[
 struct Listed {
     /// IANA zone id, or a fixed offset in POSIX form.
     zone: String,
+    /// Written in capitals: "PST", "LAX", "UK".
+    upper: bool,
     /// Latitude and longitude of a listed city, if `cities.txt` doesn't have them.
     coordinates: Option<(f64, f64)>,
     /// The zone, loaded on first use.
@@ -41,16 +43,16 @@ struct Listed {
 
 impl Listed {
     fn new(zone: String, coordinates: Option<(f64, f64)>) -> Listed {
-        Listed { zone, coordinates, loaded: OnceLock::new() }
+        Listed { zone, upper: false, coordinates, loaded: OnceLock::new() }
     }
 
     /// Reads "Europe/London" or "Europe/London 51.38 -2.36".
-    fn parse(text: &str) -> Listed {
+    fn parse(text: &str, upper: bool) -> Listed {
         let mut fields = text.split_whitespace();
         let zone = fields.next().unwrap_or_default().to_string();
         let mut number = || fields.next()?.parse::<f64>().ok();
         let coordinates = number().zip(number());
-        Listed::new(zone, coordinates)
+        Listed { upper, ..Listed::new(zone, coordinates) }
     }
 
     fn time_zone(&self) -> Option<TimeZone> {
@@ -58,12 +60,25 @@ impl Listed {
     }
 }
 
+/// Place names outside the abbreviations that are written in capitals.
+const ACRONYMS: &[&str] = &["drc", "uae", "uk", "usa", "us", "dc", "nyc"];
+
 /// Lowercase place name -> its zone.
 static INDEX: LazyLock<TableMap<String, Listed>> = LazyLock::new(|| {
     let mut index = TableMap::default();
-    for line in PLACES.lines().map(str::trim).filter(|l| !l.is_empty() && !l.starts_with('#')) {
+    // Abbreviations and airport codes are written in capitals.
+    let mut codes = false;
+    for line in PLACES.lines().map(str::trim).filter(|l| !l.is_empty()) {
+        if let Some(heading) = line.strip_prefix("# ") {
+            codes = heading.starts_with("Abbreviations")
+                || heading.starts_with("Airports")
+                || (codes && !heading.starts_with(char::is_uppercase));
+            continue;
+        }
         if let Some((name, rest)) = line.split_once('=') {
-            index.insert(name.trim().to_string(), Listed::parse(rest));
+            let name = name.trim();
+            let upper = ACRONYMS.contains(&name) || (codes && name.len() <= 5 && !name.contains(' ') && name != "zulu");
+            index.insert(name.to_string(), Listed::parse(rest, upper));
         }
     }
     // Cities from the zone database itself: "Asia/Almaty" -> "almaty". The
@@ -186,6 +201,39 @@ pub fn find(name: &str) -> Option<TimeZone> {
     city(name).and_then(|c| TimeZone::get(c.zone).ok())
 }
 
+/// A place a line names: its time zone and how to show its name.
+#[derive(Clone, Debug)]
+pub struct Place {
+    /// For captions: "Paris", "PST", "UTC+5:30".
+    pub name: String,
+    pub zone: TimeZone,
+}
+
+impl Place {
+    /// A place written as `written` in a line: "tokyo" is shown as "Tokyo", "pst" as "PST".
+    pub(crate) fn written(written: &str, zone: TimeZone) -> Place {
+        let key = written.replace('-', " ").to_lowercase();
+        let name = match INDEX.get(&key) {
+            Some(listed) if listed.upper => written.to_uppercase(),
+            _ if written.chars().any(char::is_uppercase) => written.to_string(),
+            _ => title_case(written),
+        };
+        Place { name, zone }
+    }
+
+    /// The place a zone stands for: "New York" for America/New_York, "UTC+5" for a fixed offset.
+    pub fn of_zone(zone: &TimeZone) -> Place {
+        let name = match zone.iana_name() {
+            Some("UTC" | "Etc/UTC" | "Etc/GMT") => "UTC".to_string(),
+            Some(id) if id.contains('/') && !id.starts_with("Etc/") => {
+                id.rsplit('/').next().unwrap_or(id).replace('_', " ")
+            }
+            _ => offset_label(zone.to_offset(jiff::Timestamp::now())),
+        };
+        Place { name, zone: zone.clone() }
+    }
+}
+
 /// A place on Earth, for the sun: `sunrise in Tokyo`.
 #[derive(Clone, Debug)]
 pub struct Location {
@@ -295,15 +343,20 @@ fn edit_distance(a: &str, b: &[char], limit: usize, row: &mut Vec<usize>) -> usi
     row[b.len()]
 }
 
-/// "new york" -> "New York".
+/// "new york" -> "New York", "aix-en-provence" -> "Aix-en-Provence".
 fn title_case(name: &str) -> String {
-    name.split(' ')
-        .map(|w| {
-            let mut chars = w.chars();
-            chars.next().map_or(String::new(), |c| c.to_uppercase().chain(chars).collect())
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
+    const SMALL: &[&str] =
+        &["de", "del", "der", "di", "du", "da", "do", "dos", "en", "la", "le", "of", "on", "sur", "upon"];
+    let mut out = String::with_capacity(name.len());
+    for (i, word) in name.split_inclusive([' ', '-']).enumerate() {
+        let bare = word.trim_end_matches([' ', '-']);
+        let mut chars = word.chars();
+        match chars.next() {
+            Some(c) if i == 0 || !SMALL.contains(&bare) => out.extend(c.to_uppercase().chain(chars)),
+            _ => out.push_str(word),
+        }
+    }
+    out
 }
 
 /// A zone with a fixed UTC offset in seconds.

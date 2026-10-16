@@ -3,7 +3,7 @@
 mod arith;
 mod functions;
 mod sky;
-mod time;
+pub(crate) mod time;
 
 pub(crate) use time::get as span_field;
 
@@ -168,13 +168,13 @@ impl Env<'_> {
             }
             Expr::Line(line) => self.line(*line)?,
             Expr::Time(t) => Value::Moment(self.moment(t)?),
-            Expr::InZone(inner, zone) => Value::Moment(self.place_in_zone(self.eval(inner)?, zone)?),
+            Expr::InZone(inner, zone) => Value::Moment(self.place_in_zone(self.eval(inner)?, &zone.zone)?),
             Expr::Range(a, b) => {
                 let (a, b) = self.range_ends(a, b)?;
                 self.range(a, b)?
             }
             Expr::Period(first, length) => self.period(first, length)?,
-            Expr::ZoneDiff(a, b) => self.zone_difference(a, b)?,
+            Expr::ZoneDiff(a, b) => self.zone_difference(&a.zone, &b.zone)?,
             Expr::Sky { what, place, on } => self.sky(*what, place.as_ref(), on.as_deref())?,
             Expr::Convert(..) => self.answer(expr)?.0,
             Expr::Round(inner, rounding) => self.round(self.eval(inner)?, *rounding)?,
@@ -367,7 +367,7 @@ impl Env<'_> {
         }
     }
 
-    fn convert(&self, value: Value, target: &Target, display: Display) -> Result<(Value, Display)> {
+    pub(crate) fn convert(&self, value: Value, target: &Target, display: Display) -> Result<(Value, Display)> {
         Ok(match target {
             Target::Unit(unit) => (self.to_unit(value, unit)?, Display::Auto),
             Target::Units(units) => self.to_parts(value, units)?,
@@ -378,7 +378,7 @@ impl Env<'_> {
                 };
                 (self.to_unit(value, &unit)?, Display::Auto)
             }
-            Target::Zone(zone) => (Value::Moment(self.to_zone(value, zone)?), Display::Auto),
+            Target::Zone(zone) => (Value::Moment(self.to_zone(value, &zone.zone)?), Display::Auto),
             Target::Format(format) => self.to_format(value, *format, display)?,
         })
     }
@@ -624,7 +624,7 @@ fn part_unit(expr: &Expr) -> Option<Unit> {
 }
 
 /// The weight or volume a conversion is to, which amounts of food take.
-fn weight_or_volume(target: &Target) -> Option<Dim> {
+pub(crate) fn weight_or_volume(target: &Target) -> Option<Dim> {
     let dim = match target {
         Target::Unit(unit) => unit.dim(),
         Target::Units(units) => units.first()?.dim(),

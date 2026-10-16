@@ -374,25 +374,29 @@ fn parts(q: &Quantity, units: &[Unit], config: &Config) -> String {
 }
 
 fn moment(m: &Moment, config: &Config, now: &Zoned) -> String {
-    let local = now.with_time_zone(now.time_zone().clone());
     let kind = match m.kind {
         // A clock time on another day shows the date too.
-        MomentKind::Clock if m.time.date() != local.date() => MomentKind::DateTime,
+        MomentKind::Clock if m.time.date() != now.date() => MomentKind::DateTime,
         k => k,
     };
-    let date = m.time.strftime("%a, %-d %b %Y").to_string();
-    let clock = clock(&m.time, config.clock_24h, m.seconds);
-    let mut text = match kind {
-        MomentKind::Date => date,
-        MomentKind::Clock => clock,
-        MomentKind::DateTime => format!("{date} {clock}"),
-    };
+    let mut text = moment_text(m, kind, config);
     let other_zone = m.time.time_zone().iana_name() != now.time_zone().iana_name();
     if kind != MomentKind::Date && (m.zoned || other_zone) {
         text.push(' ');
         text.push_str(&zones::label(&m.time));
     }
     text
+}
+
+/// A date, a clock time or both, without the zone.
+pub(crate) fn moment_text(m: &Moment, kind: MomentKind, config: &Config) -> String {
+    let date = || m.time.strftime("%a, %-d %b %Y").to_string();
+    let clock = || clock(&m.time, config.clock_24h, m.seconds);
+    match kind {
+        MomentKind::Date => date(),
+        MomentKind::Clock => clock(),
+        MomentKind::DateTime => format!("{} {}", date(), clock()),
+    }
 }
 
 /// The first and last day of an anchored duration: "1 Jul – 30 Sep 2026".

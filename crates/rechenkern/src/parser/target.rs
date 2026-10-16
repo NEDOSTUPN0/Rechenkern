@@ -6,7 +6,7 @@ use crate::error::{Result, bail};
 use crate::lexer::{Tok, Token};
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
-use crate::zones;
+use crate::zones::{self, Place};
 
 impl Parser<'_> {
     /// One conversion step after `expr`, or `None` if there is none.
@@ -456,7 +456,7 @@ impl Parser<'_> {
         if matches!(self.lower(self.pos).as_deref(), Some("local" | "here")) {
             self.pos += 1;
             self.eat_word("time");
-            return Some(Target::Zone(self.config().local_zone()));
+            return Some(Target::Zone(Place::of_zone(&self.config().local_zone())));
         }
         if let Some((zone, n)) = self.zone_at(self.pos) {
             self.pos += n;

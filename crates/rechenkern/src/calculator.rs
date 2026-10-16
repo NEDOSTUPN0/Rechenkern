@@ -1,40 +1,16 @@
 //! The calculator: evaluates lines one after another, like a notepad.
 
 use std::collections::HashMap;
-use std::fmt;
+use std::sync::Arc;
 
+use crate::answer::Answer;
 use crate::ast::{Expr, LineRef, Stmt};
 use crate::config::{Config, Now};
 use crate::error::Result;
 use crate::eval::{Env, Line, LineKind};
-use crate::format;
 use crate::parser::{self, Scope};
 use crate::rates::{RateProvider, RateTable, Rates};
 use crate::value::Value;
-
-/// The result of a line.
-#[derive(Clone, Debug)]
-pub struct Answer {
-    value: Value,
-    text: String,
-}
-
-impl Answer {
-    pub fn value(&self) -> &Value {
-        &self.value
-    }
-
-    /// The formatted answer, e.g. "€9.20".
-    pub fn text(&self) -> &str {
-        &self.text
-    }
-}
-
-impl fmt::Display for Answer {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(&self.text)
-    }
-}
 
 /// Evaluates natural language math.
 ///
@@ -46,7 +22,7 @@ impl fmt::Display for Answer {
 /// assert_eq!(calc.calculate("20% of 50 km").unwrap().unwrap().text(), "10 km");
 /// ```
 pub struct Calculator {
-    config: Config,
+    config: Arc<Config>,
     vars: HashMap<String, Value>,
     lines: Vec<Line>,
     rates: Rates,
@@ -64,7 +40,7 @@ impl Calculator {
     }
 
     pub fn with_config(config: Config) -> Calculator {
-        Calculator { config, vars: HashMap::new(), lines: Vec::new(), rates: Rates::default() }
+        Calculator { config: Arc::new(config), vars: HashMap::new(), lines: Vec::new(), rates: Rates::default() }
     }
 
     pub fn config(&self) -> &Config {
@@ -72,7 +48,7 @@ impl Calculator {
     }
 
     pub fn config_mut(&mut self) -> &mut Config {
-        &mut self.config
+        Arc::make_mut(&mut self.config)
     }
 
     /// Where exchange rates come from; asked once, on the first conversion.
@@ -126,7 +102,7 @@ impl Calculator {
         let result = self.evaluate(strip_label(trimmed));
         let (value, kind) = match &result {
             Ok(Some((answer, is_total))) => {
-                (Some(answer.value.clone()), if *is_total { LineKind::Total } else { LineKind::Value })
+                (Some(answer.value().clone()), if *is_total { LineKind::Total } else { LineKind::Value })
             }
             _ => (None, LineKind::Value),
         };
@@ -162,18 +138,18 @@ impl Calculator {
                 None => return Ok(None),
             }
         }
-        let (value, display, is_total, name) = match stmt {
+        let (expr, value, display, parts, is_total, name) = match stmt {
             Stmt::If { .. } => unreachable!("branches are resolved above"),
             Stmt::Expr(expr) => {
                 let Some(expr) = env.branch(expr)? else { return Ok(None) };
-                let (value, display) = env.answer(expr)?;
+                let (value, display, parts) = env.answer_line(expr)?;
                 // "sum in EUR" and "average" are totals too.
                 let is_total = expr.contains(&|e| matches!(e, Expr::Line(LineRef::Sum | LineRef::Average)));
-                (value, display, is_total, None)
+                (expr, value, display, parts, is_total, None)
             }
             Stmt::Assign { name, op, expr } => {
                 let Some(expr) = env.branch(expr)? else { return Ok(None) };
-                let (mut value, display) = env.answer(expr)?;
+                let (mut value, display, parts) = env.answer_line(expr)?;
                 if let Some(op) = op {
                     let old = self
                         .vars
@@ -182,7 +158,7 @@ impl Calculator {
                         .ok_or_else(|| crate::Error::new(format!("unknown variable {name}")))?;
                     value = env.binary(*op, old, value)?;
                 }
-                (value, display, false, Some(name.clone()))
+                (expr, value, display, parts, false, Some(name.clone()))
             }
         };
         if let Value::Quantity(crate::value::Quantity { number, .. }) | Value::Percent(number) = &value
@@ -190,12 +166,12 @@ impl Calculator {
         {
             return Err(crate::Error::new("result is too large"));
         }
-        let text = format::render(&value, &display, &self.config, &env.now);
+        let answer = env.describe(expr, value, display, parts, &self.config);
         drop(env);
         if let Some(name) = name {
-            self.vars.insert(name, value.clone());
+            self.vars.insert(name, answer.value().clone());
         }
-        Ok(Some((Answer { value, text }, is_total)))
+        Ok(Some((answer, is_total)))
     }
 }
 

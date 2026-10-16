@@ -105,12 +105,14 @@ fn count(counter: &'static std::thread::LocalKey<Cell<u64>>) -> u64 {
 proptest! {
     #![proptest_config(runner())]
 
-    /// No line makes the calculator panic, alone or in a sheet.
+    /// No line makes the calculator panic, alone or in a sheet, nor writing its sides.
     #[test]
     fn no_panics(lines in prop::collection::vec(line(), 1..6)) {
         let mut calc = calculator(config());
         for line in &lines {
-            let _ = calc.calculate(line);
+            if let Ok(Some(answer)) = calc.calculate(line) {
+                let _ = (answer.source(), answer.target(), answer.note(), answer.copy_text());
+            }
         }
     }
 

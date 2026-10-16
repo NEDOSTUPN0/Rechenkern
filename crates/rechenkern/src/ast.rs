@@ -1,12 +1,11 @@
 //! Syntax tree of a parsed line.
 
 use jiff::civil::Weekday;
-use jiff::tz::TimeZone;
 
 use crate::number::Number;
 use crate::units::Unit;
 use crate::units::foods::Food;
-use crate::zones::Location;
+use crate::zones::{Location, Place};
 
 #[derive(Clone, Debug)]
 pub enum Stmt {
@@ -50,13 +49,13 @@ pub enum Expr {
     Line(LineRef),
     Time(TimeExpr),
     /// Interprets a clock time in a zone: `3pm Tokyo`.
-    InZone(Box<Expr>, TimeZone),
+    InZone(Box<Expr>, Place),
     /// Time between two moments: `9am to 5pm`.
     Range(Box<Expr>, Box<Expr>),
     /// A calendar period, its first day and length: `Q3 2026`.
     Period(Box<Expr>, Box<Expr>),
     /// Difference between the UTC offsets of two zones.
-    ZoneDiff(TimeZone, TimeZone),
+    ZoneDiff(Place, Place),
     /// The sun or the moon: `sunrise in Tokyo`, `moon phase on May 1`. Without
     /// a place the sun is the local zone's city's; without a date it is today.
     Sky {
@@ -362,7 +361,7 @@ pub enum Target {
     Units(Vec<Unit>),
     /// The same rate over another period: `$1,000/month in per week`.
     Per(Unit),
-    Zone(TimeZone),
+    Zone(Place),
     Format(Format),
 }
 

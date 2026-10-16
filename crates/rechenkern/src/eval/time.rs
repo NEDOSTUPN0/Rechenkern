@@ -156,7 +156,7 @@ pub(super) fn split(seconds: Number, units: &[Unit]) -> Result<Span> {
 }
 
 /// A date without a year, maybe moved: "March 10", "March 10 + 1 day", "Christmas", "Q3".
-pub(super) fn yearless(e: &Expr) -> bool {
+pub(crate) fn yearless(e: &Expr) -> bool {
     match e {
         Expr::Time(TimeExpr::Date { year: None, .. } | TimeExpr::Holiday { year: None, .. }) => true,
         Expr::Binary(Op::Add, date, _) | Expr::Period(date, _) => yearless(date),
@@ -299,7 +299,7 @@ impl Env<'_> {
 
     /// The two ends of a range. A date without a year is read next to the other end:
     /// "Dec 1 to Jan 31" ends next year, "days since Dec 25" starts last year.
-    pub(super) fn range_ends(&self, a: &Expr, b: &Expr) -> Result<(Value, Value)> {
+    pub(crate) fn range_ends(&self, a: &Expr, b: &Expr) -> Result<(Value, Value)> {
         if yearless(b) {
             let start = self.endpoint(a)?;
             let end = match &start {
@@ -361,7 +361,7 @@ impl Env<'_> {
         self.range(first, end)
     }
 
-    pub(super) fn range(&self, a: Value, b: Value) -> Result<Value> {
+    pub(crate) fn range(&self, a: Value, b: Value) -> Result<Value> {
         match (a, b) {
             (Value::Moment(a), Value::Moment(b)) => Ok(Value::Duration(self.between(&a, &b, true)?)),
             (a, b) => bail!("can't make a range from {} to {}", a.kind(), b.kind()),

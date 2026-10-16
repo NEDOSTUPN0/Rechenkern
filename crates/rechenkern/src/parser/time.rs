@@ -9,7 +9,7 @@ use crate::error::{Result, bail};
 use crate::lexer::Tok;
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
-use crate::zones;
+use crate::zones::{self, Place};
 
 /// "now" for sub-day amounts, "today" for days and longer: `3 days ago` is a date.
 pub(super) fn now_for(expr: &Expr) -> Expr {
@@ -559,7 +559,7 @@ impl Parser<'_> {
             }
             if !and {
                 self.pos = next;
-                return Ok(Expr::ZoneDiff(self.config().local_zone(), a));
+                return Ok(Expr::ZoneDiff(Place::of_zone(&self.config().local_zone()), a));
             }
         }
         let [a, b] = self.pair()?;
@@ -741,12 +741,15 @@ impl Parser<'_> {
     }
 
     /// A time zone at token `i`: place, abbreviation or `UTC+5`.
-    pub(super) fn zone_at(&self, i: usize) -> Option<(TimeZone, usize)> {
-        let (zone, mut n) = self.offset_zone_at(i).or_else(|| self.place_at(i))?;
+    pub(super) fn zone_at(&self, i: usize) -> Option<(Place, usize)> {
+        let (place, mut n) = match self.offset_zone_at(i) {
+            Some((zone, n)) => (Place { name: zones::offset_label(zone.to_fixed_offset().ok()?), zone }, n),
+            None => self.named_place_at(i)?,
+        };
         if self.toks.get(i + n).is_some_and(|t| t.is_word("time")) {
             n += 1;
         }
-        Some((zone, n))
+        Some((place, n))
     }
 
     /// `UTC+5`, `GMT-3:30`.

@@ -49,6 +49,7 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 
 | Module | Role |
 | --- | --- |
+| `answer.rs` | `Answer`: the value, its text, the line's `Form` and the two sides of a conversion (built lazily) |
 | `number.rs` | `Number`: exact `rust_decimal` with `f64` fallback for huge/tiny values |
 | `lexer.rs` | Raw tokens; words stay raw, the parser decides their meaning |
 | `parser/mod.rs` | Statements and precedence climbing |
@@ -122,6 +123,19 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   (`Expr::Food`): `1 cup of flour`, `200 g sugar`, `1 cup melted butter`
   (`words::FOOD_STATES` don't change the weight). Food words stay comments
   everywhere else; a variable of the same name wins.
+
+## Answers
+
+- `Answer::form()` says what the top-level expression asks, as SoulverCore's
+  `TokenListForm` (`conversion`, `time_at_place`, `date_shift`...). A conversion
+  inside math (`5 km in mi + 1`) is a plain calculation.
+- `Env::answer_line` keeps the values the sides are made of while the line is
+  calculated (the source of a conversion, the ends of a range); `source()`,
+  `target()`, `note()` and `copy_text()` write them on first use, so lines that
+  nobody asks about cost nothing extra.
+- Captions: units by their plural name in title case ("Miles per Hour"),
+  currencies by `Currency::plural` ("US Dollars"), places as written
+  (`zones::Place`: "Paris", "PST", "JFK") and the home zone by its city.
 
 ## Semantics worth knowing
 

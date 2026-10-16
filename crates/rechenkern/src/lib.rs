@@ -11,6 +11,7 @@
 //! assert_eq!(answer.to_string(), "210 minutes");
 //! ```
 
+mod answer;
 mod ast;
 mod astro;
 mod calculator;
@@ -33,9 +34,11 @@ pub mod units;
 mod value;
 mod zones;
 
-pub use calculator::{Answer, Calculator};
+pub use answer::{Answer, Form, Side};
+pub use calculator::Calculator;
 pub use config::{AngleUnit, Config, DateOrder};
 pub use error::{Error, Result};
 pub use number::Number;
 pub use rates::{RateProvider, RateTable};
 pub use value::{Duration, Moment, MomentKind, Quantity, Value};
+pub use zones::Place;

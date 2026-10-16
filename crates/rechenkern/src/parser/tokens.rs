@@ -7,7 +7,7 @@ use crate::ast::Func;
 use crate::lexer::{Tok, Token};
 use crate::units::foods::Food;
 use crate::units::{Dim, Unit, registry};
-use crate::zones::{self, Location};
+use crate::zones::{self, Location, Place};
 
 /// Words glued by a hyphen are somewhere in the tokens: "x-ray".
 pub(super) fn has_hyphenated_words(toks: &[Token]) -> bool {
@@ -365,9 +365,15 @@ impl<'a> Parser<'a> {
         (words, ends)
     }
 
+    /// The place at token `i` with its name as written.
+    pub(super) fn named_place_at(&self, i: usize) -> Option<(Place, usize)> {
+        let (zone, n) = self.place_at(i)?;
+        Some((Place::written(&self.src[self.toks[i].start..self.toks[i + n - 1].end], zone), n))
+    }
+
     /// "Tokyo time", "Tokyo local time" or "Paris date".
-    pub(super) fn place_time_at(&self, i: usize) -> Option<(TimeZone, usize, bool)> {
-        let (tz, mut n) = self.place_at(i)?;
+    pub(super) fn place_time_at(&self, i: usize) -> Option<(Place, usize, bool)> {
+        let (tz, mut n) = self.named_place_at(i)?;
         if self.words_at(i + n, &["local"]) {
             n += 1;
         }
@@ -376,8 +382,8 @@ impl<'a> Parser<'a> {
     }
 
     /// A place followed by a zone conversion: "PST to EST", "Tokyo in London".
-    pub(super) fn place_converted_at(&self, i: usize) -> Option<(TimeZone, usize)> {
-        let (tz, n) = self.place_at(i)?;
+    pub(super) fn place_converted_at(&self, i: usize) -> Option<(Place, usize)> {
+        let (tz, n) = self.named_place_at(i)?;
         let next = self.toks.get(i + n)?;
         let is_keyword = next.is_sym("->") || ["in", "to", "into"].iter().any(|w| next.is_word(w));
         (is_keyword && self.zone_at(i + n + 1).is_some()).then_some((tz, n))

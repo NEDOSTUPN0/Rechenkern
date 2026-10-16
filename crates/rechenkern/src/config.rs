@@ -89,6 +89,16 @@ impl<'a> Now<'a> {
         Now { config, time: OnceCell::new() }
     }
 
+    /// Fixed at a time read earlier.
+    pub fn at(config: &'a Config, time: Zoned) -> Now<'a> {
+        Now { config, time: OnceCell::from(time) }
+    }
+
+    /// The time, if the line read it.
+    pub fn peek(&self) -> Option<&Zoned> {
+        self.time.get()
+    }
+
     pub fn get(&self) -> &Zoned {
         self.time.get_or_init(|| {
             #[cfg(test)]
