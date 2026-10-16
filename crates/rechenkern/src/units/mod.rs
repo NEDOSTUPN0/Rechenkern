@@ -268,7 +268,6 @@ impl Registry {
     }
 
     /// Every spelling of every unit, sorted.
-    #[cfg(test)]
     pub(crate) fn spellings(&self) -> Vec<&str> {
         let mut all: Vec<&str> = self.exact.keys().chain(self.folded.keys()).map(String::as_str).collect();
         all.sort_unstable();

@@ -25,7 +25,6 @@ impl<T> Phrases<T> {
     }
 
     /// All phrases, in table order.
-    #[cfg(test)]
     pub fn phrases(&self) -> impl Iterator<Item = &'static str> {
         self.entries.iter().map(|(phrase, _)| *phrase)
     }
@@ -54,6 +53,30 @@ impl<T> Phrases<T> {
         };
         index.get(key.as_ref()).into_iter().flatten().map(|&k| &self.entries[k])
     }
+}
+
+/// Every word and phrase the engine knows, lowercase: functions, units, places,
+/// holidays, formats, keywords. For autocompletion.
+pub fn known_words() -> impl Iterator<Item = &'static str> {
+    static WORDS: std::sync::LazyLock<Vec<String>> = std::sync::LazyLock::new(|| {
+        let mut words: Vec<String> = FUNCTIONS
+            .phrases()
+            .chain(FORMATS.phrases())
+            .chain(DATE_PARTS.phrases())
+            .chain(HOLIDAYS.phrases())
+            .chain(SKY.phrases())
+            .chain(WEATHER.phrases())
+            .chain(KEYWORDS.iter().copied())
+            .chain(registry().spellings())
+            .chain(crate::zones::place_names())
+            .map(str::to_lowercase)
+            .filter(|w| w.chars().any(char::is_alphabetic))
+            .collect();
+        words.sort();
+        words.dedup();
+        words
+    });
+    WORDS.iter().map(String::as_str)
 }
 
 /// Words the expression parser acts on. Anything unknown is ignored as a comment.

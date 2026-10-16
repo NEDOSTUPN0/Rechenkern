@@ -134,7 +134,6 @@ fn cities() -> impl Iterator<Item = (&'static str, &'static str)> {
 }
 
 /// Names of listed places and IANA zone cities, sorted.
-#[cfg(test)]
 pub(crate) fn place_names() -> Vec<&'static str> {
     let mut names: Vec<&str> = INDEX.keys().map(String::as_str).collect();
     names.sort_unstable();

@@ -8,3 +8,4 @@ cc 88fca3c122ab7c5df582c6f0c25bdbb9c24b19df34d92f17f15487656baecc47 # shrinks to
 cc f077b72d9c5230f8c5bad1c1b19dafefb380a956d622b3d0c682a82177461c0e # shrinks to line = "2.5k*avalanche 1e3"
 cc 42171ad75c7cef2f2b180e4ef2db03928823b4d9992cd2b5022a0e1e165f32ea # shrinks to lines = ["-:for sqrt"]
 cc db38afe2be294f3d10ee7957fcce54462c47632f27d250a12f94628d746c6094 # shrinks to line = "940^101(APT"
+cc 06e86b1557cf03564ef7882970e1b0590f316f30b7afd9e42a6c544e7d4108d5 # shrinks to lines = ["sqrt", "sqrt", "sqrt", "sqrt", "sqrt", "sqrt", "sqrt"], edits = [Insert(7, "")]

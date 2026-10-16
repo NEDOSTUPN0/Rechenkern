@@ -74,6 +74,23 @@ impl Value {
         Value::Quantity(Quantity::plain(n))
     }
 
+    /// The same value, written the same way: for sheets, to tell which answers changed.
+    pub fn same_as(&self, other: &Value) -> bool {
+        match (self, other) {
+            (Value::Quantity(a), Value::Quantity(b)) => a == b,
+            (Value::Percent(a), Value::Percent(b)) => a == b,
+            (Value::Moment(a), Value::Moment(b)) => {
+                a.time == b.time && a.kind == b.kind && a.zoned == b.zoned && a.seconds == b.seconds
+            }
+            (Value::Duration(a), Value::Duration(b)) => {
+                a.span.fieldwise() == b.span.fieldwise() && a.anchor == b.anchor && a.laptime == b.laptime
+            }
+            (Value::Bool(a), Value::Bool(b)) => a == b,
+            (Value::Text(a), Value::Text(b)) => a == b,
+            _ => false,
+        }
+    }
+
     /// Short description of the value's kind for error messages.
     pub fn kind(&self) -> String {
         match self {

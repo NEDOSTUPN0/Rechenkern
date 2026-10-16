@@ -24,6 +24,7 @@ mod eval;
 mod format;
 mod hash;
 mod inflation;
+mod json;
 mod lexer;
 mod number;
 #[cfg(feature = "online")]
@@ -31,6 +32,7 @@ pub mod online;
 mod parser;
 mod pi;
 mod rates;
+mod sheet;
 #[cfg(test)]
 mod tests;
 pub mod units;
@@ -51,7 +53,11 @@ pub use error::{Error, Result};
 pub use inflation::InflationProvider;
 pub use number::Number;
 pub use parser::highlight::{Highlight, TokenKind};
-pub use rates::{RateProvider, RateTable};
+pub use rates::{RateProvider, RateTable, bundled_rates};
+pub use sheet::{
+    Alignment, Behaviour, Checkpoint, Color, Delta, HtmlColors, HtmlOptions, ObserverId, Portion, Sheet, SheetLine,
+    Statistic, TextOptions, TextStyle,
+};
 pub use value::{Duration, Moment, MomentKind, Quantity, Value};
 pub use weather::{Weather, WeatherProvider, WeatherQuery, WeatherRequest, condition as weather_condition};
 pub use zones::{Place, PlaceKind};

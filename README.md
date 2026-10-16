@@ -116,6 +116,16 @@ city, comment...) for syntax highlighting.
 ("+1 day" when a time lands on another date), `copy`, the answer without its zone,
 and `tokens` (`text`, `kind`, `start`, `end` in characters).
 
+A `Sheet` keeps lines that answer together, as in a notes app: an edit works out
+again only the lines that depend on it, and a sheet can be saved, undone, summed up
+and written as text, JSON or HTML.
+
+```rust
+let mut sheet = rechenkern::Sheet::default();
+sheet.set_text("rent = $1,500\nfood = $400\nrent + food");
+assert_eq!(sheet.set_line(1, "food = $600"), [1, 2]);
+```
+
 Exchange rates come from a `RateProvider` you set on the calculator. The `online`
 feature adds one that downloads rates and caches them on disk.
 

@@ -131,6 +131,17 @@ impl Answer {
         self.sides()?.2.as_deref()
     }
 
+    /// The answer with every digit, no thousands separators and currency codes, as
+    /// SoulverCore's unformatted results.
+    pub fn unformatted_text(&self) -> String {
+        let config = (*self.config).clone().unformatted();
+        let now = match &self.now {
+            Some(time) => Now::at(&config, time.clone()),
+            None => Now::new(&config),
+        };
+        format::render(&self.value, &Display::Auto, &config, &now)
+    }
+
     /// The answer for the clipboard, without a time zone or a remark: "21:53" for "21:53 CEST".
     pub fn copy_text(&self) -> String {
         match (&self.value, &self.display) {

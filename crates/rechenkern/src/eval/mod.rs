@@ -84,6 +84,8 @@ pub(crate) struct Env<'a> {
     pub rate_date: Cell<Option<jiff::civil::Date>>,
     pub inflation: Option<&'a dyn InflationProvider>,
     pub weather: Option<&'a dyn WeatherProvider>,
+    /// What the line read, for sheets that recalculate only what changed.
+    pub reads: std::cell::RefCell<crate::calculator::Reads>,
 }
 
 impl Env<'_> {
@@ -175,6 +177,7 @@ impl Env<'_> {
             Expr::Var(name) => {
                 #[cfg(test)]
                 crate::tests::SHEET_READS.with(|reads| reads.set(reads.get() + 1));
+                self.reads.borrow_mut().names.push(name.clone());
                 self.vars.get(name).cloned().ok_or_else(|| Error::new(format!("unknown variable {name}")))?
             }
             Expr::Line(line) => self.line(*line)?,
@@ -420,15 +423,32 @@ impl Env<'_> {
         crate::tests::SHEET_READS.with(|reads| reads.set(reads.get() + 1));
         match line {
             LineRef::Previous => {
-                self.lines.iter().rev().find_map(|l| l.value.clone()).ok_or_else(|| Error::new("no previous answer"))
+                let found = self.lines.iter().enumerate().rev().find_map(|(i, l)| Some((i, l.value.clone()?)));
+                let mut reads = self.reads.borrow_mut();
+                // Every line passed on the way up: one of them may get an answer.
+                reads.lines.extend(found.as_ref().map_or(0, |&(i, _)| i)..self.lines.len());
+                found.map(|(_, v)| v).ok_or_else(|| Error::new("no previous answer"))
             }
-            LineRef::Line(n) => self
-                .lines
-                .get(n - 1)
-                .and_then(|l| l.value.clone())
-                .ok_or_else(|| Error::new(format!("line {n} has no answer"))),
+            LineRef::Line(n) => {
+                self.reads.borrow_mut().lines.push(n - 1);
+                self.lines
+                    .get(n - 1)
+                    .and_then(|l| l.value.clone())
+                    .ok_or_else(|| Error::new(format!("line {n} has no answer")))
+            }
             LineRef::Sum | LineRef::Average => {
                 // Totals right above take the same lines: "sum", then "sum in EUR" or "average".
+                let first = self.lines.len()
+                    - self
+                        .lines
+                        .iter()
+                        .rev()
+                        .skip_while(|l| l.kind == LineKind::Total)
+                        .take_while(|l| l.kind == LineKind::Value)
+                        .count()
+                    - self.lines.iter().rev().take_while(|l| l.kind == LineKind::Total).count();
+                // The line that ends the block counts too: it may stop being a heading.
+                self.reads.borrow_mut().lines.extend(first.saturating_sub(1)..self.lines.len());
                 let mut block: Vec<Value> = self
                     .lines
                     .iter()

@@ -143,68 +143,98 @@ impl Calculator {
     /// Calculates one line. `Ok(None)` means there is nothing to calculate,
     /// like a heading, a comment or plain text.
     pub fn calculate(&mut self, line: &str) -> Result<Option<Answer>> {
-        let trimmed = line.trim();
-        let kind = if trimmed.is_empty() {
-            LineKind::Blank
-        } else if trimmed.starts_with('#') {
-            LineKind::Heading
-        } else if trimmed.len() >= 3 && trimmed.chars().all(|c| c == '-') {
-            LineKind::Divider
-        } else {
-            LineKind::Value
-        };
-        if kind != LineKind::Value {
-            if kind == LineKind::Divider && self.config.features.dividers_reset_variable_scope {
-                self.vars.clear();
-            }
-            self.lines.push(Line { value: None, kind });
-            return Ok(None);
+        let (result, effects) = self.run(line, &self.vars, &self.lines, false);
+        if effects.clears_vars {
+            self.vars.clear();
         }
-        let result = self.evaluate(&trimmed[self.label_end(trimmed)..]);
-        let (value, kind) = match &result {
-            Ok(Some((answer, is_total))) => {
-                (Some(answer.reference()), if *is_total { LineKind::Total } else { LineKind::Value })
-            }
-            _ => (None, LineKind::Value),
-        };
-        self.lines.push(Line { value, kind });
-        result.map(|r| r.map(|(answer, _)| answer))
+        if let Some((name, value)) = effects.assigned {
+            self.vars.insert(name, value);
+        }
+        self.lines.push(effects.line);
+        result
+    }
+
+    /// Calculates a line after the `lines` above it, with the variables they left,
+    /// without changing the calculator. With `track`, the names the parser asks about
+    /// are kept in the effects too.
+    pub(crate) fn run(
+        &self,
+        line: &str,
+        vars: &HashMap<String, Value>,
+        lines: &[Line],
+        track: bool,
+    ) -> (Result<Option<Answer>>, Effects) {
+        let trimmed = line.trim();
+        let kind = line_kind(trimmed);
+        let mut effects =
+            Effects { line: Line { value: None, kind }, assigned: None, clears_vars: false, reads: Reads::default() };
+        if kind != LineKind::Value {
+            effects.clears_vars = kind == LineKind::Divider && self.config.features.dividers_reset_variable_scope;
+            return (Ok(None), effects);
+        }
+        let names = RefCell::new(Vec::new());
+        let names = track.then_some(&names);
+        let body = &trimmed[self.label_end(trimmed, vars, names)..];
+        let result = self.evaluate(body, vars, lines, names, &mut effects);
+        if let Some(names) = names {
+            effects.reads.names.extend(names.take());
+        }
+        let result = result.map(|answer| {
+            answer.map(|(answer, is_total)| {
+                effects.line = Line {
+                    value: Some(answer.reference()),
+                    kind: if is_total { LineKind::Total } else { LineKind::Value },
+                };
+                answer
+            })
+        });
+        (result, effects)
     }
 
     /// The answer written other ways: in hex, as a fraction, in other units, a date as ISO 8601.
     pub fn alternatives(&self, answer: &Answer) -> Vec<Alternative> {
-        let env = Env {
+        self.env(&self.vars, &self.lines).alternatives(answer)
+    }
+
+    /// Everything a calculation after `lines` can see.
+    pub(crate) fn env<'a>(&'a self, vars: &'a HashMap<String, Value>, lines: &'a [Line]) -> Env<'a> {
+        Env {
             config: &self.config,
             now: Now::new(&self.config),
-            vars: &self.vars,
-            lines: &self.lines,
+            vars,
+            lines,
             rates: &self.rates,
             food_as: Default::default(),
             rate_date: Default::default(),
             inflation: self.inflation.as_deref(),
             weather: self.weather.as_deref(),
-        };
-        env.alternatives(answer)
+            reads: Default::default(),
+        }
     }
 
     /// What each part of a line is, for syntax highlighting; ranges are in bytes.
     /// Variables are the ones known now, as for the next line calculated.
     pub fn highlight(&self, line: &str) -> Vec<Highlight> {
+        self.highlight_with(line, &self.vars)
+    }
+
+    /// Highlights a line that sees these variables.
+    pub(crate) fn highlight_with(&self, line: &str, vars: &HashMap<String, Value>) -> Vec<Highlight> {
         let start = line.len() - line.trim_start().len();
         let trimmed = line.trim();
-        if trimmed.starts_with('#') {
+        if line_kind(trimmed) == LineKind::Heading {
             return vec![Highlight { range: start..start + trimmed.len(), kind: TokenKind::Heading }];
         }
-        if trimmed.is_empty() || (trimmed.len() >= 3 && trimmed.chars().all(|c| c == '-')) {
+        if line_kind(trimmed) != LineKind::Value {
             return Vec::new();
         }
-        let body = &trimmed[self.label_end(trimmed)..];
+        let body = &trimmed[self.label_end(trimmed, vars, None)..];
         let mut out = Vec::new();
         let label = trimmed[..trimmed.len() - body.len()].trim_end();
         if !label.is_empty() {
             out.push(Highlight { range: start..start + label.len(), kind: TokenKind::Label });
         }
-        let is_var = |name: &str| self.vars.contains_key(name);
+        let is_var = |name: &str| vars.contains_key(name);
         let empty = CustomUnits::default();
         let scope = Scope {
             config: &self.config,
@@ -225,7 +255,7 @@ impl Calculator {
 
     /// Where the expression starts after a label: "Rent: $1,500", or "Coffee - $5" if the
     /// config reads dashes as labels.
-    fn label_end(&self, line: &str) -> usize {
+    fn label_end(&self, line: &str, vars: &HashMap<String, Value>, names: Option<&RefCell<Vec<String>>>) -> usize {
         let features = &self.config.features;
         let colon = if features.comments.labels { line.len() - strip_label(line).len() } else { 0 };
         if colon > 0 || !features.dash_separated_labels {
@@ -236,7 +266,12 @@ impl Calculator {
         else {
             return 0;
         };
-        let is_var = |name: &str| self.vars.contains_key(name);
+        let is_var = |name: &str| {
+            if let Some(names) = names {
+                names.borrow_mut().push(name.to_string());
+            }
+            vars.contains_key(name)
+        };
         let empty = CustomUnits::default();
         let scope = Scope {
             config: &self.config,
@@ -251,9 +286,22 @@ impl Calculator {
         }
     }
 
-    /// Parses and evaluates; the flag marks `sum`/`total` lines.
-    fn evaluate(&mut self, line: &str) -> Result<Option<(Answer, bool)>> {
-        let is_var = |name: &str| self.vars.contains_key(name);
+    /// Parses and evaluates; the flag marks `sum`/`total` lines. Names the parser asks
+    /// about go to `names`, a variable set and what the line read to `effects`.
+    fn evaluate(
+        &self,
+        line: &str,
+        vars: &HashMap<String, Value>,
+        lines: &[Line],
+        names: Option<&RefCell<Vec<String>>>,
+        effects: &mut Effects,
+    ) -> Result<Option<(Answer, bool)>> {
+        let is_var = |name: &str| {
+            if let Some(names) = names {
+                names.borrow_mut().push(name.to_string());
+            }
+            vars.contains_key(name)
+        };
         let find_place = |name: &str| self.find_place(name);
         let scope = Scope {
             config: &self.config,
@@ -263,19 +311,26 @@ impl Calculator {
             places: &find_place,
         };
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
-        let env = Env {
-            config: &self.config,
-            now: Now::new(&self.config),
-            vars: &self.vars,
-            lines: &self.lines,
-            rates: &self.rates,
-            food_as: Default::default(),
-            rate_date: Default::default(),
-            inflation: self.inflation.as_deref(),
-            weather: self.weather.as_deref(),
-        };
+        let env = self.env(vars, lines);
+        let result = self.evaluate_stmt(&stmt, &env, &scope, vars);
+        let mut reads = env.reads.take();
+        reads.clock = env.now.peek().is_some();
+        effects.reads = reads;
+        let Some((answer, is_total, assigned)) = result? else { return Ok(None) };
+        effects.assigned = assigned;
+        Ok(Some((answer, is_total)))
+    }
+
+    #[allow(clippy::type_complexity)]
+    fn evaluate_stmt(
+        &self,
+        stmt: &Stmt,
+        env: &Env,
+        scope: &Scope,
+        vars: &HashMap<String, Value>,
+    ) -> Result<Option<(Answer, bool, Option<(String, Value)>)>> {
         // Pick the branch of "if ... then ... else ...".
-        let mut stmt = &stmt;
+        let mut stmt = stmt;
         while let Stmt::If { cond, then, otherwise } = stmt {
             let chosen = if env.truthy(&env.eval(cond)?)? { Some(then) } else { otherwise.as_ref() };
             match chosen {
@@ -296,11 +351,9 @@ impl Calculator {
                 let Some(expr) = env.branch(expr)? else { return Ok(None) };
                 let (mut value, display, parts) = env.answer_line(expr)?;
                 if let Some(op) = op {
-                    let old = self
-                        .vars
-                        .get(name)
-                        .cloned()
-                        .ok_or_else(|| crate::Error::new(format!("unknown variable {name}")))?;
+                    env.reads.borrow_mut().names.push(name.clone());
+                    let old =
+                        vars.get(name).cloned().ok_or_else(|| crate::Error::new(format!("unknown variable {name}")))?;
                     value = env.binary(*op, old, value)?;
                 }
                 (expr, value, display, parts, false, Some(name.clone()))
@@ -316,11 +369,44 @@ impl Calculator {
             display = Display::Scaled;
         }
         let answer = env.describe(expr, value, display, parts, &self.config);
-        drop(env);
-        if let Some(name) = name {
-            self.vars.insert(name, answer.reference());
-        }
-        Ok(Some((answer, is_total)))
+        let assigned = name.map(|name| (name, answer.reference()));
+        Ok(Some((answer, is_total, assigned)))
+    }
+}
+
+/// What a line did besides answering: what later lines see of it, and what it read.
+#[derive(Clone, Debug)]
+pub(crate) struct Effects {
+    pub line: Line,
+    /// A variable set: `rent = $1,500`.
+    pub assigned: Option<(String, Value)>,
+    /// A divider that forgets the variables above it.
+    pub clears_vars: bool,
+    pub reads: Reads,
+}
+
+/// What a line looked at while it was calculated: what it depends on.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct Reads {
+    /// Variables read, and the names the parser asked about: a new variable may change
+    /// how a line reads.
+    pub names: Vec<String>,
+    /// Earlier lines read: by number, as `prev` or in a total.
+    pub lines: Vec<usize>,
+    /// The current time.
+    pub clock: bool,
+}
+
+/// What kind of line the text is, before calculating it.
+pub(crate) fn line_kind(trimmed: &str) -> LineKind {
+    if trimmed.is_empty() {
+        LineKind::Blank
+    } else if trimmed.starts_with('#') {
+        LineKind::Heading
+    } else if trimmed.len() >= 3 && trimmed.chars().all(|c| c == '-') {
+        LineKind::Divider
+    } else {
+        LineKind::Value
     }
 }
 

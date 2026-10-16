@@ -7,7 +7,8 @@ use std::process::ExitCode;
 use clap::{Parser, ValueEnum};
 use rechenkern::online::{OnlinePlaces, OnlineRates, OnlineWeather};
 use rechenkern::{
-    AngleUnit, Answer, Calculator, Config, DateOrder, Formatting, Highlight, Notation, Number, Side, UnitSystem,
+    AngleUnit, Answer, Calculator, Config, DateOrder, Formatting, Highlight, HtmlColors, HtmlOptions, Notation, Number,
+    Sheet, Side, UnitSystem,
 };
 use rustyline::error::ReadlineError;
 
@@ -23,6 +24,9 @@ struct Args {
     /// Print each line next to its answer.
     #[arg(short, long)]
     annotate: bool,
+    /// Print the sheet as an HTML page.
+    #[arg(long)]
+    html: bool,
     /// Print one JSON object per line: {"input", "answer", "error", "form", "source", "target", "note", "copy",
     /// "alternatives", "tokens"}.
     #[arg(long)]
@@ -148,6 +152,12 @@ fn main() -> ExitCode {
                 let result = calc.calculate(line);
                 println!("{}", json_line(&calc, line, result, &tokens));
             }
+            ExitCode::SUCCESS
+        }
+        Ok(text) if args.html => {
+            let mut sheet = Sheet::new(calc);
+            sheet.set_text(text.strip_suffix('\n').unwrap_or(&text));
+            print!("{}", sheet.to_html(&HtmlOptions::default(), &HtmlColors::default()));
             ExitCode::SUCCESS
         }
         Ok(text) => sheet(&mut calc, &text, args.annotate),

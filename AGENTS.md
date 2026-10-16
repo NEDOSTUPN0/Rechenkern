@@ -52,6 +52,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 | `answer.rs` | `Answer`: the value, its text, the line's `Form` and the two sides of a conversion (built lazily) |
 | `custom.rs` | What hosts add: `CustomUnit` (registered after the built-in units), `CustomPlace`, `UnitSystem` |
 | `alternatives.rs` | `Calculator::alternatives`: the answer in hex, as a fraction, in other units, a date as ISO 8601 |
+| `sheet/` | `Sheet`: lines that answer together, recalculated where an edit reaches; subtotals, statistics, undo, exports and archives |
+| `json.rs` | Just enough JSON for sheet exports and archives |
 | `number.rs` | `Number`: exact `rust_decimal` with `f64` fallback for huge/tiny values |
 | `lexer.rs` | Raw tokens; words stay raw, the parser decides their meaning |
 | `parser/mod.rs` | Statements and precedence climbing |
@@ -165,6 +167,18 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   (`Display::Scaled`), as SoulverCore does; glued Cyrillic and Chinese letters
   don't count.
 - `Calculator::alternatives` gives the answer in other formats and units.
+
+## Sheets
+
+- `Calculator::run` works out a line after given lines and variables without changing
+  the calculator, and says what the line read (`Reads`: variables, the names the
+  parser asked about, earlier lines, the clock) and left (`Effects`).
+- `Sheet` keeps each line's effects. An edit works out the edited line, then every
+  line below that read a line or a variable whose value changed; a line that changes
+  kind (blank, heading, divider, total), or comes or goes, means every line below.
+  `properties::sheets_recalculate_as_from_scratch` checks this against a fresh sheet.
+- Subtotals, grand totals and running totals or budgets are marks the host sets
+  (`Behaviour`); the text of a subtotal line is only its caption.
 
 ## Semantics worth knowing
 

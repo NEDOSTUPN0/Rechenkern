@@ -98,6 +98,68 @@ fn line() -> impl Strategy<Value = String> {
     line_with(true)
 }
 
+/// Lines of a sheet: random ones, and ones that set and read variables and earlier lines.
+fn sheet_line() -> impl Strategy<Value = String> {
+    const SHEET: &[&str] = &[
+        "x = 5",
+        "x = 2 km",
+        "y = x * 2",
+        "x += 1",
+        "x",
+        "y + 1",
+        "z = $10",
+        "z * 3",
+        "sum",
+        "average",
+        "prev",
+        "prev + 1",
+        "line 1",
+        "line 2 * 2",
+        "total in EUR",
+        "",
+        "# Heading",
+        "---",
+        "$20",
+        "3 km",
+        "now",
+        "x km",
+    ];
+    prop_oneof![2 => line(), 3 => select(SHEET).prop_map(String::from)]
+}
+
+/// An edit of a sheet: set, insert, remove or move a line, by an index taken modulo its length.
+#[derive(Clone, Debug)]
+enum Edit {
+    Set(usize, String),
+    Insert(usize, String),
+    Remove(usize),
+    Move(usize, usize),
+    Behaviour(usize, u8),
+}
+
+fn edit() -> impl Strategy<Value = Edit> {
+    prop_oneof![
+        3 => (0..20usize, sheet_line()).prop_map(|(i, t)| Edit::Set(i, t)),
+        2 => (0..20usize, sheet_line()).prop_map(|(i, t)| Edit::Insert(i, t)),
+        1 => (0..20usize).prop_map(Edit::Remove),
+        1 => (0..20usize, 0..20usize).prop_map(|(a, b)| Edit::Move(a, b)),
+        1 => (0..20usize, 0..5u8).prop_map(|(i, b)| Edit::Behaviour(i, b)),
+    ]
+}
+
+/// Answers of a sheet's lines as text.
+fn sheet_answers(sheet: &crate::Sheet) -> Vec<String> {
+    sheet
+        .lines()
+        .iter()
+        .map(|l| match l.answer() {
+            Ok(Some(a)) => a.text().to_string(),
+            Ok(None) => "<none>".into(),
+            Err(e) => format!("<error: {e}>"),
+        })
+        .collect()
+}
+
 fn count(counter: &'static std::thread::LocalKey<Cell<u64>>) -> u64 {
     counter.with(Cell::get)
 }
@@ -120,6 +182,40 @@ proptest! {
             if let Ok(Some(answer)) = calc.calculate(line) {
                 let _ = (answer.source(), answer.target(), answer.note(), answer.copy_text());
             }
+        }
+    }
+
+    /// A sheet that works out only what an edit reaches answers as one worked out from scratch.
+    #[test]
+    fn sheets_recalculate_as_from_scratch(
+        lines in prop::collection::vec(sheet_line(), 1..8),
+        edits in prop::collection::vec(edit(), 1..6),
+    ) {
+        use crate::{Behaviour, Sheet};
+        let mut sheet = Sheet::new(calculator(config()));
+        sheet.set_text(&lines.join("\n"));
+        for edit in edits {
+            let n = sheet.len().max(1);
+            match edit {
+                Edit::Set(i, text) if !sheet.is_empty() => { sheet.set_line(i % n, &text); }
+                Edit::Insert(i, text) => { sheet.insert(i % (n + 1), &text); }
+                Edit::Remove(i) if sheet.len() > 1 => { sheet.remove(i % n); }
+                Edit::Move(a, b) if !sheet.is_empty() => { sheet.move_line(a % n, b % n); }
+                Edit::Behaviour(i, b) if !sheet.is_empty() => {
+                    let behaviour = [Behaviour::Expression, Behaviour::Subtotal, Behaviour::GrandTotal,
+                        Behaviour::RunningTotal, Behaviour::RunningBudget][b as usize];
+                    sheet.set_behaviour(i % n, behaviour);
+                }
+                _ => {}
+            }
+            let behaviours: Vec<Behaviour> = sheet.lines().iter().map(|l| l.behaviour()).collect();
+            let mut fresh = Sheet::new(calculator(config()));
+            fresh.set_text(&sheet.text());
+            for (i, behaviour) in behaviours.into_iter().enumerate() {
+                fresh.set_behaviour(i, behaviour);
+            }
+            fresh.recalculate();
+            prop_assert_eq!(sheet_answers(&sheet), sheet_answers(&fresh), "text:\n{}", sheet.text());
         }
     }
 
@@ -263,6 +359,7 @@ fn convert(q: &Quantity, to: &Unit) -> crate::Result<Quantity> {
         rate_date: Cell::default(),
         inflation: None,
         weather: None,
+        reads: Default::default(),
     };
     env.convert_quantity(q, to)
 }

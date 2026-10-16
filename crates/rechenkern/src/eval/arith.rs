@@ -52,11 +52,11 @@ impl Env<'_> {
         })
     }
 
-    pub(super) fn add(&self, a: Value, b: Value) -> Result<Value> {
+    pub(crate) fn add(&self, a: Value, b: Value) -> Result<Value> {
         self.add_sub(a, b, false)
     }
 
-    pub(super) fn sub(&self, a: Value, b: Value) -> Result<Value> {
+    pub(crate) fn sub(&self, a: Value, b: Value) -> Result<Value> {
         self.add_sub(a, b, true)
     }
 

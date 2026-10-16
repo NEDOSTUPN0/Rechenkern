@@ -110,7 +110,7 @@ fn name(func: Func) -> &'static str {
 }
 
 impl Env<'_> {
-    pub(super) fn call(&self, func: Func, args: Vec<Value>) -> Result<Value> {
+    pub(crate) fn call(&self, func: Func, args: Vec<Value>) -> Result<Value> {
         use Func::*;
         let arity = |n: usize| -> Result<()> {
             if args.len() != n {
