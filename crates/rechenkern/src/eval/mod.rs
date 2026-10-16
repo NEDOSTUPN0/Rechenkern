@@ -46,6 +46,8 @@ pub enum Display {
     Significant(u32),
     /// Digits beyond what a number holds: pi to 1000 places.
     Digits(String),
+    /// With the scale the line wrote, while the answer stays exact with it: "$2.5M".
+    Scaled,
 }
 
 /// What kind of line an earlier line was, for totals.

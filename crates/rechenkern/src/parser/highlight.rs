@@ -94,8 +94,9 @@ pub fn highlight(src: &str, offset: usize, scope: &Scope) -> Vec<Highlight> {
     let mut out = Vec::new();
     let marker = Parser::new(src, &toks, scope).leading_labels();
     if marker > 0 {
+        // "1." and "2)": the dot or parenthesis after the marker belongs to it.
         let end = toks[marker - 1].end;
-        let end = end + src[end..].find(|c: char| c.is_whitespace()).unwrap_or(0);
+        let end = end + src[end..].len() - src[end..].trim_start_matches(['.', ')']).len();
         out.push(Highlight { range: toks[0].start..end, kind: TokenKind::ListMarker });
     }
     let kept = Parser::new(src, &toks[marker..], scope).without_comment_groups();

@@ -11,10 +11,12 @@ use std::sync::Arc;
 use jiff::Zoned;
 
 use crate::ast::{Expr, Format, Op, Target, TimeExpr};
-use crate::config::{Config, Now};
+use crate::config::{Config, ConversionRule, Now, ResultConversions};
+use crate::custom;
 use crate::error::Result;
 use crate::eval::{Display, Env, time, weight_or_volume};
 use crate::format;
+use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
 use crate::value::{Moment, MomentKind, Value};
 use crate::zones::Place;
@@ -103,6 +105,15 @@ impl Answer {
 
     pub fn form(&self) -> Form {
         self.form
+    }
+
+    /// What later lines get for this answer: the value, or the value as shown if the
+    /// config says references take the formatted value.
+    pub(crate) fn reference(&self) -> Value {
+        match self.config.formatting.references_take_formatted_value {
+            true => format::shown(&self.value, &self.display, &self.config),
+            false => self.value.clone(),
+        }
     }
 
     /// What is converted, for lines with two sides.
@@ -232,7 +243,62 @@ impl fmt::Display for Answer {
     }
 }
 
+/// Metric units in the order of size, for `ResultConversions::Automatic`.
+const METRIC_FAMILIES: &[&[&str]] = &[
+    &["km", "m", "cm", "mm", "µm", "nm"],
+    &["t", "kg", "g", "mg", "µg"],
+    &["L", "mL"],
+    &["TB", "GB", "MB", "kB", "B"],
+    &["Tbit", "Gbit", "Mbit", "kbit", "bit"],
+    &["GJ", "MJ", "kJ", "J"],
+    &["GW", "MW", "kW", "W"],
+    &["GHz", "MHz", "kHz", "Hz"],
+];
+
 impl Env<'_> {
+    /// The answer converted as the config asks, when the line asks for no conversion itself.
+    pub(crate) fn convert_result(&self, expr: &Expr, value: Value, display: Display) -> Result<(Value, Display)> {
+        if matches!(expr, Expr::Convert(..)) || !matches!(display, Display::Auto) {
+            return Ok((value, display));
+        }
+        let converted = match (&self.config.formatting.conversions, &value) {
+            (ResultConversions::None, _) => None,
+            (ResultConversions::Automatic, Value::Quantity(q)) => {
+                let symbol = q.unit.single().map(|d| d.symbol.as_str());
+                let family = METRIC_FAMILIES.iter().find(|f| symbol.is_some_and(|s| f.contains(&s)));
+                match family {
+                    Some(family) => {
+                        let units = family.iter().map(|s| registry().get(s)).collect::<Vec<_>>();
+                        let fits = |u: &Unit| self.convert_quantity(q, u).is_ok_and(|c| c.number.abs() >= Number::ONE);
+                        let unit = units.iter().find(|u| fits(u)).or(units.last());
+                        unit.map(|u| Target::Unit(u.clone()))
+                    }
+                    None => None,
+                }
+            }
+            (ResultConversions::Automatic, _) => None,
+            (ResultConversions::Rules(rules), _) => rules.iter().find_map(|rule| match (rule, &value) {
+                (ConversionRule::Unit { from, to }, Value::Quantity(q)) => {
+                    let from = custom::parse_unit(from)?;
+                    q.unit.same_as(&from).then(|| Some(Target::Unit(custom::parse_unit(to)?)))?
+                }
+                (ConversionRule::Kind { like, to }, Value::Quantity(q)) => {
+                    let like = custom::parse_unit(like)?;
+                    (!q.unit.is_none() && q.unit.dim() == like.dim())
+                        .then(|| Some(Target::Unit(custom::parse_unit(to)?)))?
+                }
+                (ConversionRule::TimeZone(zone), Value::Moment(m)) if m.kind != MomentKind::Date => {
+                    Some(Target::Zone(Place::of_zone(zone)))
+                }
+                _ => None,
+            }),
+        };
+        match converted {
+            Some(target) => self.convert(value, &target, display),
+            None => Ok((value, display)),
+        }
+    }
+
     /// Evaluates a whole line, keeping the values its sides are made of.
     pub(crate) fn answer_line(&self, expr: &Expr) -> Result<(Value, Display, Parts)> {
         let mut parts = Parts::default();

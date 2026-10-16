@@ -110,3 +110,29 @@ fn calculations_and_values() {
         ("x = 5 km in mi", "conversion | 5 km (Kilometers) | 3.106855961 mi (Miles)"),
     ]);
 }
+
+/// "kind text" of each alternative.
+fn alternatives(line: &str) -> Vec<String> {
+    let mut calc = calculator();
+    let answer = calc.calculate(line).unwrap().unwrap();
+    calc.alternatives(&answer).iter().map(|a| format!("{:?} {}", a.kind, a.text)).collect()
+}
+
+#[test]
+fn alternative_results() {
+    assert_eq!(alternatives("255"), ["Hexadecimal 0xFF", "Binary 0b11111111", "Octal 0o377"]);
+    assert_eq!(alternatives("0.375"), ["Fraction 3/8"]);
+    assert_eq!(alternatives("20%"), ["Decimal 0.2", "Fraction 1/5"]);
+    assert_eq!(alternatives("1 / 7 * 10^9")[..1], ["Scientific 1.428571429e8"]);
+    let km = alternatives("5 km");
+    assert!(km.contains(&"Unit 3.106855961 mi".to_string()), "{km:?}");
+    assert!(!km.iter().any(|a| a.ends_with(" km")), "{km:?}");
+    assert_eq!(alternatives("100 °C"), ["Unit 212 °F", "Unit 373.15 K"]);
+    let hours = alternatives("3.5 hours");
+    assert!(hours.contains(&"Laptime 03:30:00".to_string()), "{hours:?}");
+    let today = alternatives("3pm");
+    assert_eq!(
+        today,
+        ["Date Wednesday, 23 September 2026 15:00", "Iso8601 2026-09-23T15:00:00-04:00", "Timestamp 1790190000"]
+    );
+}

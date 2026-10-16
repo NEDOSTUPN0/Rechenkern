@@ -2,7 +2,7 @@
 
 use jiff::Zoned;
 
-use crate::config::{Config, Now};
+use crate::config::{Config, Formatting, Notation, Now, ScalarSystem, SymbolPosition, TimespanStyle};
 use crate::currency::Currency;
 use crate::error::{Result, bail};
 use crate::eval::Display;
@@ -30,6 +30,12 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
     {
         return text;
     }
+    // "5 ft 6 in" for 5.5 ft, if the config asks for it.
+    if let (Value::Quantity(q), Display::Auto | Display::Scaled) = (value, display)
+        && let Some(parts) = imperial_parts(q, config)
+    {
+        return quantity(q, &Display::Parts(parts), config);
+    }
     match value {
         Value::Quantity(q) => quantity(q, display, config),
         Value::Percent(p) => format!("{}%", number(*p, config)),
@@ -37,6 +43,30 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
         Value::Duration(d) => duration(d, config),
         Value::Bool(b) => b.to_string(),
         Value::Text(t) => t.clone(),
+    }
+}
+
+/// The value as its answer shows it: rounded to the digits shown, money to its coins.
+pub(crate) fn shown(value: &Value, display: &Display, config: &Config) -> Value {
+    let round = |n: Number| match config.formatting.decimal_places {
+        Some(dp) => n.round_dp(dp.min(28)),
+        None if config.formatting.plain_magnitudes().contains(&n.magnitude()) => n.round_sig(config.precision),
+        None => n,
+    };
+    match (value, display) {
+        (_, Display::Places(_) | Display::Significant(_) | Display::Digits(_)) => value.clone(),
+        (Value::Quantity(q), _) => {
+            let number = match q.unit.currency() {
+                Some((currency, 1)) if config.formatting.round_currency && q.unit.single().is_some() => {
+                    let minor = q.unit.single().map_or(Number::ONE, |d| d.scale);
+                    (q.number * minor).round_dp(currency.decimals as u32) / minor
+                }
+                _ => round(q.number),
+            };
+            Value::Quantity(Quantity::new(number, q.unit.clone()))
+        }
+        (Value::Percent(p), _) => Value::Percent(round(*p)),
+        _ => value.clone(),
     }
 }
 
@@ -61,14 +91,76 @@ fn rounded_precision(value: &Value, display: &Display) -> Option<u32> {
 
 /// A number with the configured precision and thousands separators.
 pub(crate) fn number(n: Number, config: &Config) -> String {
-    match plain_digits(n, config.precision) {
+    if let Some(text) = scaled(n, config, false, None) {
+        return text;
+    }
+    unscaled(n, config)
+}
+
+/// A number without a scale.
+fn unscaled(n: Number, config: &Config) -> String {
+    let digits = match config.formatting.decimal_places {
+        Some(dp) => places_digits(n, dp, config.formatting.plain_magnitudes()),
+        None => plain_digits(n, config.precision, config.formatting.plain_magnitudes()),
+    };
+    match digits {
         Some(digits) => group(&digits, config),
         None => scientific(n, config),
     }
 }
 
+/// Digits rounded to `dp` decimal places, or `None` for scientific notation.
+fn places_digits(n: Number, dp: u32, plain: std::ops::Range<i32>) -> Option<String> {
+    if !n.is_zero() && !plain.contains(&n.magnitude()) {
+        return None;
+    }
+    let text = match n.round_dp(dp.min(28)) {
+        Number::Exact(d) => d.normalize().to_string(),
+        Number::Float(f) => trim_zeros(format!("{f:.*}", dp.min(28) as usize)),
+    };
+    Some(if text == "-0" { "0".into() } else { text })
+}
+
+/// Scales after money written with a code, which read back as no unit: "2.5bn MMK".
+const SCALES_BEFORE_CODES: &[(i32, &str)] = &[(12, "tn"), (9, "bn"), (6, "M"), (3, "k")];
+
+/// Scales in their systems, biggest first: plain numbers take SI letters, money its own.
+fn scales(system: Option<ScalarSystem>) -> &'static [(i32, &'static str)] {
+    match system {
+        None => &[(12, "T"), (9, "G"), (6, "M"), (3, "k")],
+        Some(ScalarSystem::Standard) => &[(12, "T"), (9, "B"), (6, "M"), (3, "K")],
+        Some(ScalarSystem::Lowercase) => &[(12, "t"), (9, "b"), (6, "m"), (3, "k")],
+        Some(ScalarSystem::British) => &[(12, "tn"), (9, "bn"), (6, "m"), (3, "k")],
+        Some(ScalarSystem::Russian) => &[(12, " трлн"), (9, " млрд"), (6, " млн"), (3, " тыс.")],
+        Some(ScalarSystem::Chinese) => &[(8, "亿"), (4, "万")],
+    }
+}
+
+/// `5M`, `2.5k`: a number with a scale, when the config asks for one or the line wrote
+/// one (`written`) and the answer stays exact with it: "$5M / 4" is "$1.25M", "$5M / 3" isn't.
+fn scaled(n: Number, config: &Config, written: bool, money: Option<ScalarSystem>) -> Option<String> {
+    scaled_with(n, config, written, scales(money))
+}
+
+fn scaled_with(n: Number, config: &Config, written: bool, scales: &[(i32, &str)]) -> Option<String> {
+    let f = &config.formatting;
+    let abs = n.abs();
+    let reached = f.notation_threshold.is_some_and(|t| abs >= t.value());
+    let rounded = f.notation == Notation::On || (f.notation == Notation::Auto && reached);
+    if !rounded && !(f.notation == Notation::Auto && written) {
+        return None;
+    }
+    let &(exp, suffix) = scales.iter().find(|&&(exp, _)| abs >= Number::pow10(exp))?;
+    let value = n / Number::pow10(exp);
+    if !rounded && value.round_dp(2) != value {
+        return None;
+    }
+    let plain = Config { formatting: Formatting { notation: Notation::Off, ..f.clone() }, ..config.clone() };
+    Some(format!("{}{suffix}", unscaled(value, &plain)))
+}
+
 /// Digits without grouping, or `None` if the number needs scientific notation.
-fn plain_digits(n: Number, precision: u32) -> Option<String> {
+fn plain_digits(n: Number, precision: u32, plain: std::ops::Range<i32>) -> Option<String> {
     if !n.is_finite() {
         return Some(if n.is_negative() { "-∞" } else { "∞" }.into());
     }
@@ -76,7 +168,7 @@ fn plain_digits(n: Number, precision: u32) -> Option<String> {
         return Some("0".into());
     }
     let mag = n.magnitude();
-    if !(-9..21).contains(&mag) {
+    if !plain.contains(&mag) {
         return None;
     }
     // Keep `precision` significant digits, but never round the whole part.
@@ -219,7 +311,13 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         Display::Multiplier => return format!("{}x", number(q.number, config)),
         Display::Parts(units) => return parts(q, units, config),
         Display::Plain => {
-            plain_digits(q.number, config.precision.max(20)).unwrap_or_else(|| scientific(q.number, config))
+            plain_digits(q.number, config.precision.max(20), -9..21).unwrap_or_else(|| scientific(q.number, config))
+        }
+        Display::Scaled => {
+            if let Some((currency, 1)) = q.unit.currency() {
+                return money(q, currency, config, true);
+            }
+            scaled(q.number, config, true, None).unwrap_or_else(|| number(q.number, config))
         }
         Display::Auto
         | Display::Each(_)
@@ -229,7 +327,7 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         | Display::Significant(_)
         | Display::Digits(_) => {
             if let Some((currency, 1)) = q.unit.currency() {
-                return money(q, currency, config);
+                return money(q, currency, config, false);
             }
             number(q.number, config)
         }
@@ -247,23 +345,45 @@ fn with_unit(digits: &str, n: Number, unit: &Unit) -> String {
     if tight { format!("{digits}{text}") } else { format!("{digits} {text}") }
 }
 
-/// Money: "$12.50", "1,200 KZT", "$20.00/hour".
-fn money(q: &Quantity, currency: &Currency, config: &Config) -> String {
+/// Money: "$12.50", "1,200 KZT", "$20.00/hour", "$5M".
+fn money(q: &Quantity, currency: &Currency, config: &Config, written_scale: bool) -> String {
+    let f = &config.formatting;
     // Cents and satoshis are shown in the whole currency.
     let minor = q.unit.factors().iter().map(|&(id, _)| registry().def(id)).find(|d| d.currency.is_some());
     let n = q.number * minor.map_or(Number::ONE, |d| d.scale);
-    let digits = if currency.crypto {
-        match plain_digits(n.abs().round_dp(8), config.precision) {
+    let decimals = currency.decimals as u32;
+    let custom = f.symbols.iter().find(|s| s.code.eq_ignore_ascii_case(currency.code));
+    let (symbol, position) = match (custom, currency.symbol) {
+        (Some(custom), _) => (custom.symbol.as_str(), custom.position),
+        (None, Some(symbol)) if f.currency_symbols => (symbol, SymbolPosition::Before),
+        _ => (currency.code, SymbolPosition::AfterWithSpace),
+    };
+    // Before a code "K", "B" and "m" would be kelvins, bytes and meters: "2.5bn MMK".
+    let after = matches!(position, SymbolPosition::After | SymbolPosition::AfterWithSpace);
+    let scales = match f.scalars {
+        ScalarSystem::Standard | ScalarSystem::Lowercase | ScalarSystem::British if after => SCALES_BEFORE_CODES,
+        system => scales(Some(system)),
+    };
+    let digits = if let Some(text) = scaled_with(n.abs(), config, written_scale, scales) {
+        text
+    } else if currency.crypto {
+        match plain_digits(n.abs().round_dp(8), config.precision, config.formatting.plain_magnitudes()) {
             Some(digits) => group(&digits, config),
             None => scientific(n.abs(), config),
         }
+    } else if !f.round_currency {
+        unscaled(n.abs(), config)
+    } else if !f.currency_trailing_zeros && n.round_dp(decimals).is_integer() {
+        fixed(n.abs(), 0, config)
     } else {
-        fixed(n.abs(), currency.decimals as u32, config)
+        fixed(n.abs(), decimals, config)
     };
-    let sign = if n.is_negative() && !n.round_dp(currency.decimals as u32).is_zero() { "-" } else { "" };
-    let amount = match currency.symbol {
-        Some(symbol) => format!("{sign}{symbol}{digits}"),
-        None => format!("{sign}{digits} {}", currency.code),
+    let sign = if n.is_negative() && !n.round_dp(decimals).is_zero() { "-" } else { "" };
+    let amount = match position {
+        SymbolPosition::Before => format!("{sign}{symbol}{digits}"),
+        SymbolPosition::BeforeWithSpace => format!("{sign}{symbol} {digits}"),
+        SymbolPosition::After => format!("{sign}{digits}{symbol}"),
+        SymbolPosition::AfterWithSpace => format!("{sign}{digits} {symbol}"),
     };
     // The rest of a rate: "/hour".
     let rest: Vec<(UnitId, i8)> =
@@ -335,6 +455,20 @@ pub(crate) fn unit_text(unit: &Unit, plural: bool) -> String {
     text
 }
 
+/// Feet and inches or pounds and ounces for a fractional amount of feet or pounds,
+/// if the config asks for compound imperial units.
+fn imperial_parts(q: &Quantity, config: &Config) -> Option<Vec<Unit>> {
+    if !config.formatting.compound_imperial_units || q.number.is_integer() {
+        return None;
+    }
+    let smaller = match q.unit.single()?.symbol.as_str() {
+        "ft" => "in",
+        "lb" => "oz",
+        _ => return None,
+    };
+    Some(vec![q.unit.clone(), registry().get(smaller)])
+}
+
 /// "5 ft 6 in", "2 lb 3 oz".
 fn parts(q: &Quantity, units: &[Unit], config: &Config) -> String {
     let scale = |u: &Unit| u.single().map(|d| d.scale);
@@ -399,6 +533,33 @@ pub(crate) fn moment_text(m: &Moment, kind: MomentKind, config: &Config) -> Stri
     }
 }
 
+/// The time between two dates in the configured style: "2 months 14 days", "73 days".
+fn restyle(d: &Duration, style: TimespanStyle) -> Option<jiff::Span> {
+    use jiff::Unit as Cal;
+    let largest = match style {
+        TimespanStyle::Automatic => return None,
+        TimespanStyle::MonthsAndDays => Cal::Month,
+        TimespanStyle::WeeksAndDays => Cal::Week,
+        TimespanStyle::Days => Cal::Day,
+    };
+    let start = d.anchor?;
+    let end = start.checked_add(d.span).ok()?;
+    let span = start.until((largest, end)).ok()?;
+    // Months and days only: no weeks in between.
+    match style {
+        TimespanStyle::MonthsAndDays => {
+            let days = span.get_weeks() as i64 * 7 + span.get_days() as i64;
+            jiff::Span::new()
+                .years(span.get_years())
+                .months(span.get_months())
+                .try_days(days)
+                .ok()
+                .map(|s| s.hours(span.get_hours()).minutes(span.get_minutes()).seconds(span.get_seconds()))
+        }
+        _ => Some(span),
+    }
+}
+
 /// The first and last day of an anchored duration: "1 Jul – 30 Sep 2026".
 fn period(d: &Duration) -> Option<String> {
     let first = d.anchor?.date();
@@ -419,7 +580,8 @@ fn clock(time: &Zoned, h24: bool, seconds: bool) -> String {
 
 fn duration(d: &Duration, config: &Config) -> String {
     use jiff::Unit as Cal;
-    let span = d.span.abs();
+    let restyled = restyle(d, config.formatting.timespans);
+    let span = restyled.unwrap_or(d.span).abs();
     let sign = if d.span.is_negative() { "-" } else { "" };
     let get = |cal| crate::eval::span_field(&span, cal);
     let seconds = Number::from_i64(get(Cal::Second))
@@ -454,7 +616,7 @@ fn duration(d: &Duration, config: &Config) -> String {
         .collect();
     if !seconds.is_zero() || parts.is_empty() {
         // Every digit there is, down to the nanosecond: "1 hour 0.000000001 seconds".
-        let text = group(&plain_digits(seconds, 10).unwrap_or_default(), config);
+        let text = group(&plain_digits(seconds, 10, -9..21).unwrap_or_default(), config);
         parts.push(format!("{text} second{}", if seconds == Number::ONE { "" } else { "s" }));
     }
     format!("{sign}{}", parts.join(" "))

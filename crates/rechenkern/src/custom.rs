@@ -3,6 +3,7 @@
 
 use jiff::tz::TimeZone;
 
+use crate::config::CurrencySymbol;
 use crate::currency::Currency;
 use crate::error::{Error, Result};
 use crate::hash::TableMap;
@@ -93,8 +94,15 @@ pub(crate) struct CustomUnits {
 }
 
 impl CustomUnits {
-    pub fn build(units: &[CustomUnit]) -> Result<CustomUnits> {
+    pub fn build(units: &[CustomUnit], symbols: &[CurrencySymbol]) -> Result<CustomUnits> {
         let mut table = CustomUnits::default();
+        // The host's currency symbols read as their currencies: "100 kr".
+        for symbol in symbols {
+            let unit = registry()
+                .currency(&symbol.code)
+                .ok_or_else(|| Error::new(format!("unknown currency {}", symbol.code)))?;
+            table.exact.insert(symbol.symbol.clone(), unit);
+        }
         for custom in units {
             let unit = Unit::of(define(custom)?);
             let plural = custom.plural.clone().unwrap_or_else(|| format!("{}s", custom.name));
@@ -153,7 +161,7 @@ fn define(custom: &CustomUnit) -> Result<units::UnitId> {
 }
 
 /// A unit written as in a line or as a product of symbols: "km", "m/s", "kg*m^2".
-fn parse_unit(text: &str) -> Option<Unit> {
+pub(crate) fn parse_unit(text: &str) -> Option<Unit> {
     if let Some(unit) = registry().lookup(text) {
         return Some(unit);
     }

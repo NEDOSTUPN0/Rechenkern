@@ -166,6 +166,10 @@ impl Number {
             Exact(d) => Exact(d.round_dp_with_strategy(dp.min(28), RoundingStrategy::MidpointAwayFromZero)),
             Float(f) => {
                 let k = 10f64.powi(dp as i32);
+                // Huge numbers have no decimals left to round, and scaling them up would overflow.
+                if !(f * k).is_finite() {
+                    return self;
+                }
                 Number::from_f64((f * k).round() / k)
             }
         }

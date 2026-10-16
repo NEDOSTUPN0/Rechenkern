@@ -11,6 +11,7 @@
 //! assert_eq!(answer.to_string(), "210 minutes");
 //! ```
 
+mod alternatives;
 mod answer;
 mod ast;
 mod astro;
@@ -35,11 +36,13 @@ pub mod units;
 mod value;
 mod zones;
 
+pub use alternatives::{Alternative, AlternativeKind};
 pub use answer::{Answer, Form, Side};
 pub use calculator::Calculator;
 pub use config::{
-    AngleUnit, CommentOptions, Config, Converter, DateOptions, DateOrder, Features, MisplacedSeparator,
-    TimeZoneOptions, ZoneCodeCorrection,
+    AngleUnit, CommentOptions, Config, ConversionRule, Converter, CurrencySymbol, DateOptions, DateOrder, Features,
+    Formatting, MisplacedSeparator, Notation, ResultConversions, ScalarSystem, Scale, SymbolPosition, TimeZoneOptions,
+    TimespanStyle, ZoneCodeCorrection,
 };
 pub use custom::{CustomPlace, CustomUnit, UnitSystem};
 pub use error::{Error, Result};

@@ -30,6 +30,8 @@ pub struct Scope<'a> {
     pub config: &'a Config,
     pub is_var: &'a dyn Fn(&str) -> bool,
     pub units: &'a CustomUnits,
+    /// Set when the line writes a number with a scale: `5M`, `2 billion`.
+    pub scaled: Cell<bool>,
 }
 
 /// Parses one line; `None` means the line has nothing to calculate.

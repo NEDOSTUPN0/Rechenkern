@@ -25,6 +25,165 @@ pub enum AngleUnit {
     Degrees,
 }
 
+/// How answers are written, besides `Config::precision` and the separators, as
+/// SoulverCore's `FormattingPreferences`.
+#[derive(Clone, Debug)]
+pub struct Formatting {
+    /// Decimal places at most, instead of `Config::precision` significant digits.
+    pub decimal_places: Option<u32>,
+    /// Numbers with more whole digits than this are written in scientific notation: `1e21`.
+    pub scientific_above: u32,
+    /// Numbers with more zeros after the point than this are too: `1e-10`.
+    pub scientific_below: u32,
+    /// When big numbers are written with a scale: `5M`, `$2.5B`.
+    pub notation: Notation,
+    /// Numbers this big are written with a scale too, with `Notation::Auto`.
+    pub notation_threshold: Option<Scale>,
+    /// The scales money is written with.
+    pub scalars: ScalarSystem,
+    /// `€10.00` rather than `10.00 EUR`.
+    pub currency_symbols: bool,
+    /// Money to its smallest coin: $1.23 rather than $1.2345.
+    pub round_currency: bool,
+    /// `$1.00` rather than `$1`.
+    pub currency_trailing_zeros: bool,
+    /// The host's symbols for currencies, and where they go: `100 kr`, `100 €`.
+    pub symbols: Vec<CurrencySymbol>,
+    /// Earlier lines and variables give the value as shown, rounded.
+    pub references_take_formatted_value: bool,
+    pub timespans: TimespanStyle,
+    /// `5 ft 6 in` rather than `5.5 ft`, `1 lb 4 oz` rather than `1.25 lb`.
+    pub compound_imperial_units: bool,
+    /// Answers converted without asking for it.
+    pub conversions: ResultConversions,
+}
+
+impl Formatting {
+    /// Magnitudes written out in digits; others take scientific notation.
+    pub(crate) fn plain_magnitudes(&self) -> std::ops::Range<i32> {
+        -(self.scientific_below.min(28) as i32)..self.scientific_above.min(28) as i32
+    }
+}
+
+impl Default for Formatting {
+    fn default() -> Formatting {
+        Formatting {
+            decimal_places: None,
+            scientific_above: 21,
+            scientific_below: 9,
+            notation: Notation::Auto,
+            notation_threshold: None,
+            scalars: ScalarSystem::Standard,
+            currency_symbols: true,
+            round_currency: true,
+            currency_trailing_zeros: true,
+            symbols: Vec::new(),
+            references_take_formatted_value: false,
+            timespans: TimespanStyle::Automatic,
+            compound_imperial_units: false,
+            conversions: ResultConversions::None,
+        }
+    }
+}
+
+/// When big numbers are written with a scale, as `5M` or `$2.5B`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Notation {
+    /// When the line writes one (`$5M / 2`) and the answer stays exact with it, or the
+    /// number reaches `Formatting::notation_threshold`.
+    Auto,
+    /// From a thousand on: `100k`.
+    On,
+    Off,
+}
+
+/// A power of a thousand, for `Formatting::notation_threshold`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Scale {
+    Thousand,
+    Million,
+    Billion,
+    Trillion,
+}
+
+impl Scale {
+    pub fn value(self) -> Number {
+        Number::pow10(3 * (self as i32 + 1))
+    }
+}
+
+/// The scales money is written with: a billion dollars is `$1B`, `$1b`, `$1bn`...
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ScalarSystem {
+    /// `$5K`, `$5M`, `$5B`, `$5T`.
+    Standard,
+    /// `$5k`, `$5m`, `$5b`, `$5t`.
+    Lowercase,
+    /// `£5k`, `£5m`, `£5bn`, `£5tn`.
+    British,
+    /// `₽5 тыс.`, `₽5 млн`, `₽5 млрд`, `₽5 трлн`.
+    Russian,
+    /// `¥5万`, `¥5亿`.
+    Chinese,
+}
+
+/// A currency symbol of the host's own and where it goes.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CurrencySymbol {
+    /// ISO code: "SEK".
+    pub code: String,
+    /// "kr"; lines may use it too.
+    pub symbol: String,
+    pub position: SymbolPosition,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SymbolPosition {
+    /// `$5`
+    Before,
+    /// `Fr. 5`
+    BeforeWithSpace,
+    /// `5€`
+    After,
+    /// `5 kr`
+    AfterWithSpace,
+}
+
+/// How date intervals are written: `Jan 1 to Mar 15`.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum TimespanStyle {
+    /// Years, months, weeks and days: "2 months 2 weeks".
+    #[default]
+    Automatic,
+    /// "2 months 14 days".
+    MonthsAndDays,
+    /// "10 weeks 3 days".
+    WeeksAndDays,
+    /// "73 days".
+    Days,
+}
+
+/// Answers converted without asking for it.
+#[derive(Clone, Debug, Default)]
+pub enum ResultConversions {
+    #[default]
+    None,
+    /// Metric amounts take the prefix that keeps them between 1 and 1,000: `1500 m` is 1.5 km.
+    Automatic,
+    Rules(Vec<ConversionRule>),
+}
+
+/// One conversion of answers.
+#[derive(Clone, Debug)]
+pub enum ConversionRule {
+    /// Answers in this unit go to another: `{ from: "mi", to: "km" }`.
+    Unit { from: String, to: String },
+    /// Answers of the same kind as `like` go to `to`: `{ like: "m", to: "ft" }` for every length.
+    Kind { like: String, to: String },
+    /// Times are shown in this zone.
+    TimeZone(TimeZone),
+}
+
 /// Parts of the language to turn off or read another way, as SoulverCore's
 /// `EngineFeatureFlags`.
 #[derive(Clone, Debug)]
@@ -219,6 +378,7 @@ pub struct Config {
     /// Places of the host's own; they win over built-in places of the same name.
     pub custom_places: Vec<CustomPlace>,
     pub features: Features,
+    pub formatting: Formatting,
     /// Local time zone; `None` uses the system zone.
     pub time_zone: Option<TimeZone>,
     /// Fixed current time, mostly for tests; `None` uses the clock.
@@ -242,6 +402,7 @@ impl Default for Config {
             custom_units: Vec::new(),
             custom_places: Vec::new(),
             features: Features::default(),
+            formatting: Formatting::default(),
             time_zone: None,
             now: None,
         }
@@ -249,6 +410,18 @@ impl Default for Config {
 }
 
 impl Config {
+    /// As SoulverCore's `unformatted` preferences: every digit, no separators, currency codes.
+    pub fn unformatted(self) -> Config {
+        let formatting = Formatting {
+            notation: Notation::Off,
+            currency_symbols: false,
+            round_currency: false,
+            currency_trailing_zeros: false,
+            ..self.formatting
+        };
+        Config { precision: 28, thousands_separators: false, formatting, ..self }
+    }
+
     pub fn local_zone(&self) -> TimeZone {
         self.time_zone.clone().unwrap_or_else(TimeZone::system)
     }

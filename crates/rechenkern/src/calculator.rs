@@ -1,15 +1,16 @@
 //! The calculator: evaluates lines one after another, like a notepad.
 
-use std::cell::OnceCell;
+use std::cell::{Cell, OnceCell};
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use crate::alternatives::Alternative;
 use crate::answer::Answer;
 use crate::ast::{Expr, LineRef, Stmt};
 use crate::config::{Config, Now};
 use crate::custom::CustomUnits;
 use crate::error::{Error, Result};
-use crate::eval::{Env, Line, LineKind};
+use crate::eval::{Display, Env, Line, LineKind};
 use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::{self, Scope};
 use crate::rates::{RateProvider, RateTable, Rates};
@@ -65,7 +66,10 @@ impl Calculator {
 
     /// The custom units of the config.
     fn units(&self) -> Result<&CustomUnits> {
-        self.units.get_or_init(|| CustomUnits::build(&self.config.custom_units)).as_ref().map_err(Clone::clone)
+        self.units
+            .get_or_init(|| CustomUnits::build(&self.config.custom_units, &self.config.formatting.symbols))
+            .as_ref()
+            .map_err(Clone::clone)
     }
 
     /// Where exchange rates come from; asked once, on the first conversion.
@@ -119,12 +123,25 @@ impl Calculator {
         let result = self.evaluate(&trimmed[self.label_end(trimmed)..]);
         let (value, kind) = match &result {
             Ok(Some((answer, is_total))) => {
-                (Some(answer.value().clone()), if *is_total { LineKind::Total } else { LineKind::Value })
+                (Some(answer.reference()), if *is_total { LineKind::Total } else { LineKind::Value })
             }
             _ => (None, LineKind::Value),
         };
         self.lines.push(Line { value, kind });
         result.map(|r| r.map(|(answer, _)| answer))
+    }
+
+    /// The answer written other ways: in hex, as a fraction, in other units, a date as ISO 8601.
+    pub fn alternatives(&self, answer: &Answer) -> Vec<Alternative> {
+        let env = Env {
+            config: &self.config,
+            now: Now::new(&self.config),
+            vars: &self.vars,
+            lines: &self.lines,
+            rates: &self.rates,
+            food_as: Default::default(),
+        };
+        env.alternatives(answer)
     }
 
     /// What each part of a line is, for syntax highlighting; ranges are in bytes.
@@ -146,7 +163,12 @@ impl Calculator {
         }
         let is_var = |name: &str| self.vars.contains_key(name);
         let empty = CustomUnits::default();
-        let scope = Scope { config: &self.config, is_var: &is_var, units: self.units().unwrap_or(&empty) };
+        let scope = Scope {
+            config: &self.config,
+            is_var: &is_var,
+            units: self.units().unwrap_or(&empty),
+            scaled: Cell::new(false),
+        };
         out.extend(parser::highlight::highlight(body, start + trimmed.len() - body.len(), &scope));
         out
     }
@@ -172,7 +194,12 @@ impl Calculator {
         };
         let is_var = |name: &str| self.vars.contains_key(name);
         let empty = CustomUnits::default();
-        let scope = Scope { config: &self.config, is_var: &is_var, units: self.units().unwrap_or(&empty) };
+        let scope = Scope {
+            config: &self.config,
+            is_var: &is_var,
+            units: self.units().unwrap_or(&empty),
+            scaled: Cell::new(false),
+        };
         match parser::parse(&line[..at], &scope) {
             Ok(None) => at + dash,
             _ => 0,
@@ -182,7 +209,7 @@ impl Calculator {
     /// Parses and evaluates; the flag marks `sum`/`total` lines.
     fn evaluate(&mut self, line: &str) -> Result<Option<(Answer, bool)>> {
         let is_var = |name: &str| self.vars.contains_key(name);
-        let scope = Scope { config: &self.config, is_var: &is_var, units: self.units()? };
+        let scope = Scope { config: &self.config, is_var: &is_var, units: self.units()?, scaled: Cell::new(false) };
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
         let env = Env {
             config: &self.config,
@@ -229,10 +256,14 @@ impl Calculator {
         {
             return Err(crate::Error::new("result is too large"));
         }
+        let (value, mut display) = env.convert_result(expr, value, display)?;
+        if scope.scaled.get() && matches!(display, Display::Auto) {
+            display = Display::Scaled;
+        }
         let answer = env.describe(expr, value, display, parts, &self.config);
         drop(env);
         if let Some(name) = name {
-            self.vars.insert(name, answer.value().clone());
+            self.vars.insert(name, answer.reference());
         }
         Ok(Some((answer, is_total)))
     }

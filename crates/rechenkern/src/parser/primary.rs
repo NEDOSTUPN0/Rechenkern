@@ -95,6 +95,11 @@ impl Parser<'_> {
             };
             match glued.or_else(|| words::scale_word(w)).or_else(|| self.fraction_at(self.pos)) {
                 Some(m) => {
+                    // "5M", "2 billion", "5 млн": answers may keep the scale, as in SoulverCore.
+                    // Not "3 dozen", nor letters glued in Cyrillic or Chinese: "5к" is 5,000.
+                    if m >= Number::from_i64(1000) && (w.is_ascii() || tok.space_before) {
+                        self.scope.scaled.set(true);
+                    }
                     n = n * m;
                     self.pos += 1;
                 }

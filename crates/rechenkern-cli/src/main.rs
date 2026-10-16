@@ -6,7 +6,9 @@ use std::process::ExitCode;
 
 use clap::{Parser, ValueEnum};
 use rechenkern::online::OnlineRates;
-use rechenkern::{AngleUnit, Answer, Calculator, Config, DateOrder, Highlight, Number, Side, UnitSystem};
+use rechenkern::{
+    AngleUnit, Answer, Calculator, Config, DateOrder, Formatting, Highlight, Notation, Number, Side, UnitSystem,
+};
 use rustyline::error::ReadlineError;
 
 #[derive(Parser)]
@@ -21,7 +23,8 @@ struct Args {
     /// Print each line next to its answer.
     #[arg(short, long)]
     annotate: bool,
-    /// Print one JSON object per line: {"input", "answer", "error", "form", "source", "target", "note", "copy", "tokens"}.
+    /// Print one JSON object per line: {"input", "answer", "error", "form", "source", "target", "note", "copy",
+    /// "alternatives", "tokens"}.
     #[arg(long)]
     json: bool,
     /// Significant digits in answers.
@@ -48,6 +51,12 @@ struct Args {
     /// Pixels in an em or rem.
     #[arg(long, default_value_t = 16)]
     font_size: u32,
+    /// Decimal places at most, instead of significant digits.
+    #[arg(long)]
+    dp: Option<u32>,
+    /// When big numbers are written with a scale, as 5M.
+    #[arg(long, value_enum, default_value_t = Scales::Auto)]
+    notation: Scales,
     /// Local time zone, e.g. America/New_York [default: system].
     #[arg(long)]
     tz: Option<String>,
@@ -57,6 +66,13 @@ struct Args {
     /// Download fresh exchange rates and exit.
     #[arg(long)]
     update_rates: bool,
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum Scales {
+    Auto,
+    On,
+    Off,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -98,7 +114,8 @@ fn main() -> ExitCode {
         let line = args.expression.join(" ");
         if args.json {
             let tokens = calc.highlight(&line);
-            println!("{}", json_line(&line, calc.calculate(&line), &tokens));
+            let result = calc.calculate(&line);
+            println!("{}", json_line(&calc, &line, result, &tokens));
             return ExitCode::SUCCESS;
         }
         return match calc.calculate(&line) {
@@ -123,7 +140,8 @@ fn main() -> ExitCode {
             calc.clear();
             for line in text.lines() {
                 let tokens = calc.highlight(line);
-                println!("{}", json_line(line, calc.calculate(line), &tokens));
+                let result = calc.calculate(line);
+                println!("{}", json_line(&calc, line, result, &tokens));
             }
             ExitCode::SUCCESS
         }
@@ -134,7 +152,12 @@ fn main() -> ExitCode {
 
 /// `{"input": ..., "answer": ..., "error": ...}` for scripts and launchers, with the
 /// form of the line, its two sides and the text to copy when there is an answer.
-fn json_line(input: &str, result: rechenkern::Result<Option<Answer>>, tokens: &[Highlight]) -> serde_json::Value {
+fn json_line(
+    calc: &Calculator,
+    input: &str,
+    result: rechenkern::Result<Option<Answer>>,
+    tokens: &[Highlight],
+) -> serde_json::Value {
     let (answer, error) = match result {
         Ok(answer) => (answer, None),
         Err(e) => (None, Some(e.to_string())),
@@ -151,6 +174,12 @@ fn json_line(input: &str, result: rechenkern::Result<Option<Answer>>, tokens: &[
             json["note"] = note.into();
         }
         json["copy"] = answer.copy_text().into();
+        let alternatives: Vec<_> = calc
+            .alternatives(answer)
+            .iter()
+            .map(|a| serde_json::json!({ "kind": a.kind.name(), "text": a.text }))
+            .collect();
+        json["alternatives"] = alternatives.into();
     }
     // Offsets count characters, as hosts index strings.
     let chars = |byte: usize| input[..byte].chars().count();
@@ -188,6 +217,15 @@ fn config(args: &Args) -> Result<Config, String> {
             System::Metric => UnitSystem::Metric,
         },
         base_font_size: Number::from_i64(args.font_size.into()),
+        formatting: Formatting {
+            decimal_places: args.dp.map(|dp| dp.min(28)),
+            notation: match args.notation {
+                Scales::Auto => Notation::Auto,
+                Scales::On => Notation::On,
+                Scales::Off => Notation::Off,
+            },
+            ..Formatting::default()
+        },
         time_zone,
         ..Config::default()
     })

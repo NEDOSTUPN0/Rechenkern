@@ -14,8 +14,8 @@ $100 in EUR, GBP, JPY                        → €90.00, £80.00, ¥15,000
 $10 in cents                                 → $10.00
 5 bucks                                      → $5.00
 20 quid in USD                               → $25.00
-$5k in EUR                                   → €4,500.00
-$2.5M                                        → $2,500,000.00
+$5k in EUR                                   → €4.5K
+$2.5M                                        → $2.5M
 $1,000 after 3 years at 7%                   → $1,225.04
 $1,000 after 3 years at 7% compounding monthly → $1,232.93
 $1,000 after 3 years at 10% per month        → $30,912.68

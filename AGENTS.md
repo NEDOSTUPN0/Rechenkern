@@ -51,6 +51,7 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 | --- | --- |
 | `answer.rs` | `Answer`: the value, its text, the line's `Form` and the two sides of a conversion (built lazily) |
 | `custom.rs` | What hosts add: `CustomUnit` (registered after the built-in units), `CustomPlace`, `UnitSystem` |
+| `alternatives.rs` | `Calculator::alternatives`: the answer in hex, as a fraction, in other units, a date as ISO 8601 |
 | `number.rs` | `Number`: exact `rust_decimal` with `f64` fallback for huge/tiny values |
 | `lexer.rs` | Raw tokens; words stay raw, the parser decides their meaning |
 | `parser/mod.rs` | Statements and precedence climbing |
@@ -154,6 +155,16 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   SoulverCore's `EngineFeatureFlags` (units, dates, phrases, conversions,
   comments, labels, list markers, zone codes, date guesses...). The defaults keep
   Rechenkern's own reading; check a flag where the parser decides, not after.
+
+- `Config::formatting` writes answers as SoulverCore's `FormattingPreferences`:
+  decimal places, scales (`Notation`), money options and the host's currency
+  symbols, timespan styles, compound imperial units, conversions of answers
+  (`ResultConversions`, applied in `Env::convert_result` unless the line converts
+  itself), rounded references. A line that writes a scale (`$5M`, `2 billion`)
+  sets `Scope::scaled` and its answer keeps one while it stays exact
+  (`Display::Scaled`), as SoulverCore does; glued Cyrillic and Chinese letters
+  don't count.
+- `Calculator::alternatives` gives the answer in other formats and units.
 
 ## Semantics worth knowing
 
