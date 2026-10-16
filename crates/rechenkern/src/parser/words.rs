@@ -10,6 +10,7 @@ use crate::hash::TableMap;
 use crate::number::Number;
 use crate::units::foods::{self, Food};
 use crate::units::registry;
+use crate::weather::WeatherQuery;
 
 /// Phrases and what they mean, found by their first word.
 pub struct Phrases<T: 'static> {
@@ -364,6 +365,25 @@ pub static DATE_PARTS: Phrases<Format> = Phrases::new(&[
     ("day of week", Format::Weekday),
     ("day of the week", Format::Weekday),
     ("weekday", Format::Weekday),
+]);
+
+/// What a weather line asks for.
+pub static WEATHER: Phrases<WeatherQuery> = Phrases::new(&[
+    ("weather", WeatherQuery::Summary),
+    ("temperature", WeatherQuery::Temperature),
+    ("temp", WeatherQuery::Temperature),
+    ("high", WeatherQuery::High),
+    ("high temperature", WeatherQuery::High),
+    ("low", WeatherQuery::Low),
+    ("low temperature", WeatherQuery::Low),
+    ("humidity", WeatherQuery::Humidity),
+    ("wind", WeatherQuery::WindSpeed),
+    ("wind speed", WeatherQuery::WindSpeed),
+    ("uv", WeatherQuery::UvIndex),
+    ("uv index", WeatherQuery::UvIndex),
+    ("chance of rain", WeatherQuery::ChanceOfRain),
+    ("rain chance", WeatherQuery::ChanceOfRain),
+    ("chance of precipitation", WeatherQuery::ChanceOfRain),
 ]);
 
 /// The sun and the moon. "sunlight" and "daylight" alone need a place after them.

@@ -213,6 +213,7 @@ impl<'a> Parser<'a> {
             || self.place_time_at(i).is_some()
             || self.place_converted_at(i).is_some()
             || self.sky_at(i).is_some()
+            || self.weather_at(i).is_some()
             || self.distance_at(i).is_some()
             || self.note_at(i).is_some()
             || self.place_sky_at(i).is_some()

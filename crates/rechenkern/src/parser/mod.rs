@@ -12,6 +12,7 @@ mod sky;
 mod target;
 mod time;
 mod tokens;
+mod weather;
 pub(crate) mod words;
 
 use std::cell::{Cell, OnceCell};

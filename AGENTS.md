@@ -300,6 +300,10 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   calculator. The CLI's is `online::OnlinePlaces`: the Open-Meteo geocoding API
   (GeoNames data, CC BY 4.0; free for non-commercial use), cached in
   `~/.cache/rechenkern/places.json`, misses too.
+- Weather: a host's `WeatherProvider` (`weather in Tokyo`, `humidity in London
+  tomorrow`); without one it is an error. The CLI's is `online::OnlineWeather`:
+  Open-Meteo forecasts (16 days ahead, 92 back) and its archive for older days.
+  Temperatures are °C (convert with `in °F`); the sky is a note on `weather`.
 - Time zones: jiff with the system tzdb (bundled copy as fallback). Countries
   map to their capital's zone.
 - Places, in lookup order: `zones/places.txt` (hand-picked: countries, states,

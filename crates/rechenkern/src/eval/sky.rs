@@ -55,7 +55,7 @@ impl Env<'_> {
 
     /// The day at the place: today there, a day counted from it ("tomorrow",
     /// "in 2 days"), or the date asked for.
-    fn sky_date(&self, on: Option<&Expr>, place: &Location) -> Result<Date> {
+    pub(super) fn sky_date(&self, on: Option<&Expr>, place: &Location) -> Result<Date> {
         let today = self.now.get().with_time_zone(place.zone.clone()).date();
         let Some(on) = on else { return Ok(today) };
         let date = match self.eval(on)? {

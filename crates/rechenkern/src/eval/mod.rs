@@ -4,6 +4,7 @@ mod arith;
 mod functions;
 mod sky;
 pub(crate) mod time;
+mod weather;
 
 pub(crate) use time::get as span_field;
 
@@ -20,6 +21,7 @@ use crate::rates::Rates;
 use crate::units::foods::Food;
 use crate::units::{Dim, Unit, UnitId, registry};
 use crate::value::{Duration, Moment, MomentKind, Quantity, Value};
+use crate::weather::WeatherProvider;
 
 /// How an answer is written, beyond its value.
 #[derive(Clone, Debug, Default)]
@@ -38,7 +40,7 @@ pub enum Display {
     /// Several conversions of one value: "€9.00, ¥1,500".
     Each(Vec<Value>),
     /// A remark after the value: "Thu, 19 Nov 2026 (probably)".
-    Note(&'static str),
+    Note(std::borrow::Cow<'static, str>),
     /// A duration as its first and last day: "1 Jul – 30 Sep 2026".
     Period,
     /// Rounded to decimal places, all of them shown: "0.333333333333333".
@@ -81,6 +83,7 @@ pub(crate) struct Env<'a> {
     /// Inside `... on Jan 1, 2020`, exchange rates are that day's.
     pub rate_date: Cell<Option<jiff::civil::Date>>,
     pub inflation: Option<&'a dyn InflationProvider>,
+    pub weather: Option<&'a dyn WeatherProvider>,
 }
 
 impl Env<'_> {
@@ -115,7 +118,8 @@ impl Env<'_> {
                 };
                 Ok((value, display))
             }
-            Expr::Noted(inner, note) => Ok((self.eval(inner)?, Display::Note(note))),
+            Expr::Noted(inner, note) => Ok((self.eval(inner)?, Display::Note((*note).into()))),
+            Expr::Weather { what, place, on } => self.weather(*what, place.as_ref(), on.as_deref()),
             Expr::RatesOn(inner, date) => self.on_rates_of(date, || self.answer(inner)),
             Expr::Period(..) => Ok((self.eval(expr)?, Display::Period)),
             Expr::Round(_, Rounding::Places(dp, _)) => Ok((self.eval(expr)?, Display::Places(*dp))),
@@ -183,6 +187,7 @@ impl Env<'_> {
             Expr::Period(first, length) => self.period(first, length)?,
             Expr::ZoneDiff(a, b) => self.zone_difference(&a.zone, &b.zone)?,
             Expr::Sky { what, place, on } => self.sky(*what, place.as_ref(), on.as_deref())?,
+            Expr::Weather { what, place, on } => self.weather(*what, place.as_ref(), on.as_deref())?.0,
             Expr::Convert(..) | Expr::RatesOn(..) => self.answer(expr)?.0,
             Expr::Round(inner, rounding) => self.round(self.eval(inner)?, *rounding)?,
             Expr::Pi(places, dir) => pi(*places, *dir)?.0,

@@ -224,3 +224,71 @@ impl crate::PlaceProvider for OnlinePlaces {
         Some(crate::CustomPlace { name, zone, coordinates })
     }
 }
+
+/// The weather from Open-Meteo (CC BY 4.0; free for non-commercial use): forecasts up to
+/// 16 days ahead and the last 92 days, older days from its archive.
+#[derive(Clone, Debug)]
+pub struct OnlineWeather {
+    pub timeout: Duration,
+}
+
+impl Default for OnlineWeather {
+    fn default() -> OnlineWeather {
+        OnlineWeather { timeout: Duration::from_secs(5) }
+    }
+}
+
+/// What a day of Open-Meteo's daily weather holds.
+const DAILY: &str = "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max,uv_index_max,precipitation_probability_max";
+
+impl crate::WeatherProvider for OnlineWeather {
+    fn weather(&self, request: &crate::WeatherRequest) -> Result<crate::Weather, String> {
+        let today = jiff::Timestamp::now().to_zoned(request.zone.clone()).date();
+        let date = request.date.unwrap_or(today);
+        let days = today.until(date).map_err(|e| e.to_string())?.get_days();
+        let (url, recent) = match days {
+            -92..=15 => ("https://api.open-meteo.com/v1/forecast", true),
+            _ if days < 0 => ("https://archive-api.open-meteo.com/v1/archive", false),
+            _ => return Err("the weather is known up to 16 days ahead".into()),
+        };
+        let day = date.to_string();
+        let mut call = ureq::get(url)
+            .query("latitude", request.latitude.to_string())
+            .query("longitude", request.longitude.to_string())
+            .query("timezone", request.zone.iana_name().unwrap_or("auto"))
+            .query("start_date", &day)
+            .query("end_date", &day);
+        // The archive has no forecasts: no chance of rain, no UV index.
+        call = call.query(
+            "daily",
+            if recent {
+                DAILY
+            } else {
+                "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max"
+            },
+        );
+        if request.date.is_none() {
+            call = call.query("current", "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,uv_index");
+        }
+        let response = call.config().timeout_global(Some(self.timeout)).build().call();
+        let text = response
+            .and_then(|mut r| r.body_mut().read_to_string())
+            .map_err(|e| format!("can't get the weather: {e}"))?;
+        let json: serde_json::Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+        let daily = |field: &str| json.get("daily")?.get(field)?.get(0)?.as_f64();
+        let current = |field: &str| json.get("current")?.get(field)?.as_f64();
+        let (high, low) = (daily("temperature_2m_max"), daily("temperature_2m_min"));
+        let middle = high.zip(low).map(|(h, l)| (h + l) / 2.0);
+        let code = current("weather_code").or_else(|| daily("weather_code"));
+        Ok(crate::Weather {
+            temperature: current("temperature_2m").or(middle),
+            high,
+            low,
+            humidity: current("relative_humidity_2m").or_else(|| daily("relative_humidity_2m_mean")),
+            wind_speed: current("wind_speed_10m").or_else(|| daily("wind_speed_10m_max")),
+            uv_index: current("uv_index").or_else(|| daily("uv_index_max")),
+            chance_of_rain: daily("precipitation_probability_max"),
+            condition: code.and_then(|c| crate::weather_condition(c as u32)).map(String::from),
+        })
+    }
+}

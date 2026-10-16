@@ -163,3 +163,62 @@ fn places_from_a_provider() {
     calc.set_place_provider(Atlas(Default::default()));
     answers(&mut calc, &[("time in Smallville", "<error: unknown place \"Smallville\", did you mean \"Millville\"?>")]);
 }
+
+/// Mild weather everywhere, colder on other days; remembers the last request.
+struct Mild(std::sync::Mutex<Option<rechenkern::WeatherRequest>>);
+
+impl rechenkern::WeatherProvider for Mild {
+    fn weather(&self, request: &rechenkern::WeatherRequest) -> Result<rechenkern::Weather, String> {
+        *self.0.lock().unwrap() = Some(request.clone());
+        let other_day = request.date.is_some();
+        Ok(rechenkern::Weather {
+            temperature: Some(if other_day { 10.0 } else { 18.5 }),
+            high: Some(21.0),
+            low: Some(14.0),
+            humidity: Some(60.0),
+            wind_speed: Some(12.0),
+            uv_index: Some(3.0),
+            chance_of_rain: None,
+            condition: Some("partly cloudy".into()),
+        })
+    }
+}
+
+#[test]
+fn weather() {
+    let mut calc = Calculator::with_config(config());
+    answers(&mut calc, &[("weather in Tokyo", "<error: the weather needs a weather provider>")]);
+    let provider = std::sync::Arc::new(Mild(Default::default()));
+    struct Shared(std::sync::Arc<Mild>);
+    impl rechenkern::WeatherProvider for Shared {
+        fn weather(&self, request: &rechenkern::WeatherRequest) -> Result<rechenkern::Weather, String> {
+            self.0.weather(request)
+        }
+    }
+    calc.set_weather_provider(Shared(provider.clone()));
+    answers(
+        &mut calc,
+        &[
+            ("weather in Tokyo", "18.5 °C (partly cloudy)"),
+            ("Tokyo temperature", "18.5 °C"),
+            ("temp in London in °F", "65.3 °F"),
+            ("low in Paris", "14 °C"),
+            ("Paris high", "21 °C"),
+            ("humidity in Tokyo", "60%"),
+            ("wind speed in London", "12 km/h"),
+            ("uv index in Sydney", "3"),
+            ("chance of rain in London", "<error: the weather provider doesn't know that>"),
+            ("weather in Tokyo tomorrow", "10 °C (partly cloudy)"),
+            ("weather", "18.5 °C (partly cloudy)"),
+            ("high five", "5"),
+            ("weather in Gotham", "<error: unknown place \"Gotham\", did you mean \"Gotha\"?>"),
+        ],
+    );
+    calc.calculate("weather in Tokyo tomorrow").unwrap();
+    let request = provider.0.lock().unwrap().clone().unwrap();
+    assert_eq!((request.place.as_str(), request.date.map(|d| d.to_string())), ("Tokyo", Some("2026-09-25".into())));
+    calc.calculate("weather").unwrap();
+    assert_eq!(provider.0.lock().unwrap().as_ref().unwrap().place, "New York");
+    let answer = calc.calculate("weather in Tokyo").unwrap().unwrap();
+    assert_eq!(answer.copy_text(), "18.5 °C");
+}

@@ -357,6 +357,9 @@ impl Parser<'_> {
             self.pos += n;
             return Ok(Some(Expr::Var(name)));
         }
+        if let Some(expr) = self.weather()? {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.sky()? {
             return Ok(Some(expr));
         }

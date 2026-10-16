@@ -226,6 +226,9 @@ impl Parser<'_> {
             self.phrase_at(i, &words::DATE_PARTS).map(|(_, n)| (TokenKind::Function, n)),
             self.phrase_at(i, &words::PHYSICAL_CONSTANTS).map(|(_, n)| (TokenKind::Constant, n)),
             self.sky_at(i).map(|(_, n)| (TokenKind::Function, n)),
+            self.phrase_at(i, &words::WEATHER)
+                .filter(|_| self.weather_at(i).is_some())
+                .map(|(_, n)| (TokenKind::Function, n)),
         ];
         if let Some(found) = phrase.into_iter().flatten().max_by_key(|&(_, n)| n) {
             return vec![found];

@@ -5,6 +5,7 @@ use jiff::civil::Weekday;
 use crate::number::Number;
 use crate::units::Unit;
 use crate::units::foods::Food;
+use crate::weather::WeatherQuery;
 use crate::zones::{Location, Place};
 
 #[derive(Clone, Debug)]
@@ -69,6 +70,13 @@ pub enum Expr {
     Period(Box<Expr>, Box<Expr>),
     /// Difference between the UTC offsets of two zones.
     ZoneDiff(Place, Place),
+    /// The weather from the host's provider: `weather in Tokyo`, `humidity in London tomorrow`.
+    /// Without a place it is the local zone's city's; without a date it is now.
+    Weather {
+        what: WeatherQuery,
+        place: Option<(String, Location)>,
+        on: Option<Box<Expr>>,
+    },
     /// The sun or the moon: `sunrise in Tokyo`, `moon phase on May 1`. Without
     /// a place the sun is the local zone's city's; without a date it is today.
     Sky {

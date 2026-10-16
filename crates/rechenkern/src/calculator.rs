@@ -16,6 +16,7 @@ use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::{self, Scope};
 use crate::rates::{RateProvider, RateTable, Rates};
 use crate::value::Value;
+use crate::weather::WeatherProvider;
 
 /// Evaluates natural language math.
 ///
@@ -35,6 +36,7 @@ pub struct Calculator {
     rates: Rates,
     inflation: Option<Box<dyn InflationProvider>>,
     places: Option<Box<dyn PlaceProvider>>,
+    weather: Option<Box<dyn WeatherProvider>>,
     /// What the place provider said for each name asked.
     found_places: RefCell<HashMap<String, Option<CustomPlace>>>,
 }
@@ -59,6 +61,7 @@ impl Calculator {
             rates: Rates::default(),
             inflation: None,
             places: None,
+            weather: None,
             found_places: RefCell::default(),
         }
     }
@@ -89,6 +92,11 @@ impl Calculator {
     /// newer ones; the bundled US index is used otherwise.
     pub fn set_inflation_provider(&mut self, provider: impl InflationProvider + 'static) {
         self.inflation = Some(Box::new(provider));
+    }
+
+    /// Where the weather comes from: `weather in Tokyo`.
+    pub fn set_weather_provider(&mut self, provider: impl WeatherProvider + 'static) {
+        self.weather = Some(Box::new(provider));
     }
 
     /// Where places the engine doesn't know are looked up: `time in Smallville`.
@@ -174,6 +182,7 @@ impl Calculator {
             food_as: Default::default(),
             rate_date: Default::default(),
             inflation: self.inflation.as_deref(),
+            weather: self.weather.as_deref(),
         };
         env.alternatives(answer)
     }
@@ -263,6 +272,7 @@ impl Calculator {
             food_as: Default::default(),
             rate_date: Default::default(),
             inflation: self.inflation.as_deref(),
+            weather: self.weather.as_deref(),
         };
         // Pick the branch of "if ... then ... else ...".
         let mut stmt = &stmt;

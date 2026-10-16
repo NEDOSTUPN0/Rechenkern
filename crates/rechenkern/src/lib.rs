@@ -35,6 +35,7 @@ mod rates;
 mod tests;
 pub mod units;
 mod value;
+mod weather;
 mod zones;
 
 pub use alternatives::{Alternative, AlternativeKind};
@@ -52,4 +53,5 @@ pub use number::Number;
 pub use parser::highlight::{Highlight, TokenKind};
 pub use rates::{RateProvider, RateTable};
 pub use value::{Duration, Moment, MomentKind, Quantity, Value};
+pub use weather::{Weather, WeatherProvider, WeatherQuery, WeatherRequest, condition as weather_condition};
 pub use zones::{Place, PlaceKind};
