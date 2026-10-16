@@ -110,13 +110,13 @@ impl Calculator {
             LineKind::Value
         };
         if kind != LineKind::Value {
-            if kind == LineKind::Divider {
+            if kind == LineKind::Divider && self.config.features.dividers_reset_variable_scope {
                 self.vars.clear();
             }
             self.lines.push(Line { value: None, kind });
             return Ok(None);
         }
-        let result = self.evaluate(strip_label(trimmed));
+        let result = self.evaluate(&trimmed[self.label_end(trimmed)..]);
         let (value, kind) = match &result {
             Ok(Some((answer, is_total))) => {
                 (Some(answer.value().clone()), if *is_total { LineKind::Total } else { LineKind::Value })
@@ -138,7 +138,7 @@ impl Calculator {
         if trimmed.is_empty() || (trimmed.len() >= 3 && trimmed.chars().all(|c| c == '-')) {
             return Vec::new();
         }
-        let body = strip_label(trimmed);
+        let body = &trimmed[self.label_end(trimmed)..];
         let mut out = Vec::new();
         let label = trimmed[..trimmed.len() - body.len()].trim_end();
         if !label.is_empty() {
@@ -155,6 +155,28 @@ impl Calculator {
     pub fn calculate_sheet(&mut self, text: &str) -> Vec<Result<Option<Answer>>> {
         self.clear();
         text.lines().map(|line| self.calculate(line)).collect()
+    }
+
+    /// Where the expression starts after a label: "Rent: $1,500", or "Coffee - $5" if the
+    /// config reads dashes as labels.
+    fn label_end(&self, line: &str) -> usize {
+        let features = &self.config.features;
+        let colon = if features.comments.labels { line.len() - strip_label(line).len() } else { 0 };
+        if colon > 0 || !features.dash_separated_labels {
+            return colon;
+        }
+        // "Coffee - 12.50": words before a dash between spaces, which make no value.
+        let Some((at, dash)) = [" - ", " – ", " — "].iter().filter_map(|d| Some((line.find(d)?, d.len()))).min()
+        else {
+            return 0;
+        };
+        let is_var = |name: &str| self.vars.contains_key(name);
+        let empty = CustomUnits::default();
+        let scope = Scope { config: &self.config, is_var: &is_var, units: self.units().unwrap_or(&empty) };
+        match parser::parse(&line[..at], &scope) {
+            Ok(None) => at + dash,
+            _ => 0,
+        }
     }
 
     /// Parses and evaluates; the flag marks `sum`/`total` lines.

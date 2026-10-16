@@ -150,6 +150,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   names: custom units first, then built-in ones as the unit system reads them
   (`UnitSystem::adapt`: an imperial "gallon", a metric "cup"; "us gallon" stays).
 
+- `Config::features` turns parts of the language off or reads them another way, as
+  SoulverCore's `EngineFeatureFlags` (units, dates, phrases, conversions,
+  comments, labels, list markers, zone codes, date guesses...). The defaults keep
+  Rechenkern's own reading; check a flag where the parser decides, not after.
+
 ## Semantics worth knowing
 
 - Addition of different units: the larger unit wins; for money and rates the

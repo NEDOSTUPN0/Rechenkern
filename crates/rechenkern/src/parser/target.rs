@@ -2,6 +2,7 @@
 
 use super::{Parser, words};
 use crate::ast::{Direction, Expr, Format, Func, Op, Rounding, Sky, Target, TimeExpr};
+use crate::config::Converter;
 use crate::error::{Result, bail};
 use crate::lexer::{Tok, Token};
 use crate::number::Number;
@@ -12,7 +13,7 @@ impl Parser<'_> {
     /// One conversion step after `expr`, or `None` if there is none.
     pub(super) fn conversion(&mut self, expr: &Expr) -> Result<Option<Expr>> {
         let start = self.pos;
-        if self.eat_rounding_word() {
+        if self.converter_allowed(Converter::Rounding) && self.eat_rounding_word() {
             let dir = self.direction();
             return self.rounded_to(expr, dir).map(Some);
         }
@@ -24,6 +25,7 @@ impl Parser<'_> {
         }
         // "March 9, 2024 day of the week"
         if is_moment(expr)
+            && self.converter_allowed(Converter::DatePart)
             && let Some((format, n)) = self.phrase_at(self.pos, &words::DATE_PARTS)
         {
             self.pos += n;
@@ -58,6 +60,7 @@ impl Parser<'_> {
             return Ok(Some(Expr::Convert(amount.boxed(), Target::Unit(unit.clone()))));
         }
         if keyword == "to"
+            && self.converter_allowed(Converter::Rounding)
             && let Some((rounding, format)) = self.rounding(Direction::Nearest)?
         {
             return Ok(Some(rounded(expr, rounding, format)));
@@ -80,6 +83,13 @@ impl Parser<'_> {
                 Some(Target::Zone(zone))
             }
             None => self.target(),
+        };
+        let target = match target {
+            Some(target) if !self.converter_allowed(converter(&target)) => {
+                self.pos = start + 1;
+                None
+            }
+            target => target,
         };
         if let Some(target) = target {
             // "9am in New York to Tokyo": the first zone says where the clock is.
@@ -492,6 +502,44 @@ impl Parser<'_> {
         }
         // Articles are skipped already: "A" here is amperes.
         self.unit_phrase(true)
+    }
+}
+
+impl Parser<'_> {
+    /// The config lets lines use this kind of conversion.
+    pub(super) fn converter_allowed(&self, converter: Converter) -> bool {
+        let features = &self.config().features;
+        features.converters && !features.disabled_converters.contains(&converter)
+    }
+}
+
+/// The kind of conversion to a target, for `Features::disabled_converters`.
+fn converter(target: &Target) -> Converter {
+    match target {
+        Target::Unit(_) => Converter::Unit,
+        Target::Units(units) if units.iter().any(Unit::is_money) => Converter::Unit,
+        Target::Units(_) => Converter::Parts,
+        Target::Per(_) => Converter::Rate,
+        Target::Zone(_) => Converter::TimeZone,
+        Target::Format(format) => match format {
+            Format::Hex => Converter::Hexadecimal,
+            Format::Binary => Converter::Binary,
+            Format::Octal => Converter::Octal,
+            Format::Base(_) => Converter::Base,
+            Format::Decimal => Converter::Decimal,
+            Format::Scientific => Converter::Scientific,
+            Format::Fraction => Converter::Fraction,
+            Format::Number => Converter::Number,
+            Format::Percent => Converter::Percentage,
+            Format::Multiplier => Converter::Multiplier,
+            Format::Timespan => Converter::Timespan,
+            Format::Laptime => Converter::Laptime,
+            Format::Timestamp => Converter::Timestamp,
+            Format::Date => Converter::Date,
+            Format::Iso => Converter::Iso8601,
+            Format::Weekday | Format::WeekNumber | Format::DayOfYear | Format::DayOfMonth => Converter::DatePart,
+            Format::Pitch => Converter::Pitch,
+        },
     }
 }
 

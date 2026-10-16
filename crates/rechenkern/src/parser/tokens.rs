@@ -203,7 +203,7 @@ impl<'a> Parser<'a> {
             || (words::three_months(w).is_some() && self.quarter_starts(i))
             || words::weekday(w).is_some()
             || words::is_line_word(w)
-            || self.phrase_at(i, &words::FUNCTIONS).is_some()
+            || self.function_at(i).is_some()
             || self.phrase_at(i, &words::HOLIDAYS).is_some()
             || self.event_at(i).is_some()
             || self.phrase_at(i, &words::DATE_PARTS).is_some()
@@ -307,11 +307,23 @@ impl<'a> Parser<'a> {
     /// A unit spelled `text`: the host's own units first, then built-in ones as
     /// the unit system reads them.
     pub(super) fn lookup_unit(&self, text: &str) -> Option<Unit> {
-        if let Some(unit) = self.scope.units.lookup(text) {
-            return Some(unit);
+        let unit = match self.scope.units.lookup(text) {
+            Some(unit) => unit,
+            None => self.config().unit_system.adapt(text, registry().lookup(text)?),
+        };
+        // Without units only money is left.
+        (self.config().features.units || unit.is_money()).then_some(unit)
+    }
+
+    /// A function named at token `i`, unless the config leaves it out or wants parentheses.
+    pub(super) fn function_at(&self, i: usize) -> Option<(Func, usize)> {
+        let (func, n) = self.phrase_at(i, &words::FUNCTIONS)?;
+        let features = &self.config().features;
+        if features.functions_require_parentheses && !self.toks.get(i + n).is_some_and(|t| t.is_sym("(")) {
+            return None;
         }
-        let unit = registry().lookup(text)?;
-        Some(self.config().unit_system.adapt(text, unit))
+        let disabled = features.disabled_functions.iter().any(|name| words::function_named(name) == Some(func));
+        (!disabled).then_some((func, n))
     }
 
     pub(super) fn dollar(&self) -> Unit {
@@ -343,9 +355,15 @@ impl<'a> Parser<'a> {
     fn place_name_at(&self, i: usize) -> Option<(String, TimeZone, usize)> {
         let (words, ends) = self.name_words(i);
         let mut text = words.join(" ");
+        let options = &self.config().features.time_zones;
         for n in (1..=words.len()).rev() {
             let custom = || self.custom_place(&text).map(|p| p.zone.clone());
-            if let Some(zone) = custom().or_else(|| zones::find(&text)) {
+            // "pst" is a zone only in capitals, if the config asks for them.
+            let lowercase_code = options.require_uppercase_for_ambiguous_time_zones
+                && zones::is_code(&text)
+                && self.toks[i].word().is_some_and(|w| w.chars().any(char::is_lowercase));
+            if !lowercase_code && let Some(zone) = custom().or_else(|| zones::find(&text)) {
+                let zone = zones::corrected(&text, zone, options.code_correction);
                 return Some((text, zone, ends[n - 1] - i));
             }
             text.truncate(text.len().saturating_sub(words[n - 1].len() + 1));
@@ -512,16 +530,35 @@ impl<'a> Parser<'a> {
         let Some(w) = self.lower(self.pos) else { return false };
         words::constant(&w).is_some()
             || self.var_at(self.pos).is_some()
-            || (self
-                .phrase_at(self.pos, &words::FUNCTIONS)
-                .is_some_and(|(f, _)| !matches!(f, Func::Sum | Func::Average | Func::Count))
+            || (self.function_at(self.pos).is_some_and(|(f, _)| !matches!(f, Func::Sum | Func::Average | Func::Count))
                 && self.toks.get(self.pos + 1).is_some_and(|t| t.is_sym("(")))
     }
 
-    /// Tokens of a list marker that starts the line: "1. ", "2) ", "a) ".
-    /// "1. May" stays a date.
+    /// Tokens that start the line without being part of it: a list marker and a
+    /// label such as "Day 8", as the config asks.
+    pub(super) fn leading_labels(&self) -> usize {
+        let features = &self.config().features;
+        let marker = if features.list_marker_parsing { self.list_marker() } else { 0 };
+        marker + if features.ordinal_label_parsing { self.ordinal_label(marker) } else { 0 }
+    }
+
+    /// "Day 8", "Week 4", "mo 28" at token `i` before more of the line: a unit and a whole number.
+    fn ordinal_label(&self, i: usize) -> usize {
+        let unit = self.unit_at(i, false).filter(|&(ref u, n)| n == 1 && u.dim() == Dim::TIME);
+        let number = self.toks.get(i + 1).is_some_and(|t| matches!(&t.tok, Tok::Num(n) if n.is_integer()));
+        let more = self.toks.len() > i + 2;
+        if unit.is_some() && number && more { 2 } else { 0 }
+    }
+
+    /// Tokens of a list marker that starts the line: "1. ", "2) ", "a) ", "- ", "* ".
+    /// "1. May" stays a date, "- 5" a negative number.
     pub(super) fn list_marker(&self) -> usize {
         let Some(first) = self.toks.first() else { return 0 };
+        // "- Zenvoice: $25", "* pears $4": a bullet before words, but "- $10" and "- pi" are negative.
+        let bullet = first.is_sym("-") || first.is_sym("*");
+        if bullet && self.toks.get(1).is_some_and(|t| t.space_before && t.word().is_some()) && !self.significant(1) {
+            return 1;
+        }
         let text = &self.src[first.start..first.end];
         let is_label = match first.tok {
             Tok::Num(_) => text.len() <= 3 && text.bytes().all(|b| b.is_ascii_digit()),
@@ -586,6 +623,9 @@ impl<'a> Parser<'a> {
 
     /// Removes parentheses that hold comments: "$999 (for iPhone 16)".
     pub(super) fn without_comment_groups(&self) -> Vec<Token> {
+        if !self.config().features.comments.brackets {
+            return self.toks.to_vec();
+        }
         let mut keep = vec![true; self.toks.len()];
         let mut i = 0;
         while i < self.toks.len() {

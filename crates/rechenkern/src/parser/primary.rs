@@ -14,6 +14,9 @@ impl Parser<'_> {
         match &tok.tok {
             Tok::Num(n) => {
                 self.pos += 1;
+                if let Some(date) = self.year_first_date(*n) {
+                    return Ok(date);
+                }
                 self.number(*n)
             }
             Tok::Clock { h, m, s } => {
@@ -258,6 +261,19 @@ impl Parser<'_> {
         Some(e)
     }
 
+    /// "2026 March 5": a year before a date, if the config reads it so.
+    fn year_first_date(&mut self, year: Number) -> Option<Expr> {
+        let year = year.to_i64().filter(|y| (1000..=9999).contains(y) && year.is_integer())?;
+        let month = self.lower(self.pos).is_some_and(|w| words::month(&w).is_some());
+        if !self.config().features.dates.leading_year_parsing || !month {
+            return None;
+        }
+        let mut p = self.clone();
+        let Ok(Some(Expr::Time(TimeExpr::Date { year: None, month, day }))) = p.date_word() else { return None };
+        *self = p;
+        Some(Expr::Time(TimeExpr::Date { year: Some(year as i16), month, day }))
+    }
+
     /// A unit per an amount of another unit, known as a unit of its own: "L/100km", "liters per 100 km".
     fn per_amount(&mut self, unit: &Unit) -> Option<Unit> {
         if !self.cur().is_some_and(|t| t.is_sym("/") || t.is_word("per")) {
@@ -381,7 +397,7 @@ impl Parser<'_> {
             return self.root_of_degree(Number::from_i64(degree));
         }
         // Without arguments "min" may be minutes: "1 BTU·min".
-        if let Some((func, n)) = self.phrase_at(i, &words::FUNCTIONS)
+        if let Some((func, n)) = self.function_at(i)
             && let Some(call) = self.call(func, n)?
         {
             return Ok(Some(call));

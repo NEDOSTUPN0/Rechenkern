@@ -34,14 +34,18 @@ pub struct Scope<'a> {
 
 /// Parses one line; `None` means the line has nothing to calculate.
 pub fn parse(src: &str, scope: &Scope) -> Result<Option<Stmt>> {
-    let mut tokens = lexer::lex(src, scope.config.decimal_comma);
+    let mut tokens = lexer::lex(src, scope.config);
     if tokens::has_hyphenated_words(&tokens) {
         tokens = Parser::new(src, &tokens, scope).with_hyphenated_words();
     }
-    let marker = Parser::new(src, &tokens, scope).list_marker();
-    let tokens = Parser::new(src, &tokens[marker..], scope).without_comment_groups();
+    let skip = Parser::new(src, &tokens, scope).leading_labels();
+    let tokens = Parser::new(src, &tokens[skip..], scope).without_comment_groups();
     let mut parser = Parser::new(src, &tokens, scope);
-    parser.statement()
+    let stmt = parser.statement()?;
+    if !scope.config.features.calendar_calculations && stmt.as_ref().is_some_and(Stmt::has_dates) {
+        bail!("dates are turned off");
+    }
+    Ok(stmt)
 }
 
 #[derive(Clone)]
@@ -119,10 +123,18 @@ impl<'a> Parser<'a> {
             let (then, otherwise) = if negate { (other, value) } else { (value, other) };
             return Ok(Expr::If { cond, then, otherwise });
         }
-        match self.phrase()? {
+        let phrase = match self.config().features.word_functions {
+            true => self.phrase()?,
+            false => None,
+        };
+        let in_text = self.config().features.in_ambiguity_prefer_something_to_nothing;
+        match phrase {
             Some(expr) => Ok(expr),
             // Words that make no calculation: pick one of the values in the text.
-            None => self.expr_to_end().or_else(|e| if e.is_unclear() { self.value_in_text().ok_or(e) } else { Err(e) }),
+            None => self.expr_to_end().or_else(|e| match e.is_unclear() && in_text {
+                true => self.value_in_text().ok_or(e),
+                false => Err(e),
+            }),
         }
     }
 
@@ -161,6 +173,9 @@ impl<'a> Parser<'a> {
 
     /// `name = expr`, where the name is one or more words.
     fn assignment(&mut self) -> Result<Option<Stmt>> {
+        if !self.config().features.variable_declarations {
+            return Ok(None);
+        }
         let Some(eq) = self.toks.iter().position(|t| matches!(t.tok, Tok::Sym("=" | "+=" | "-=" | "*=" | "/="))) else {
             return Ok(None);
         };
@@ -428,6 +443,16 @@ impl<'a> Parser<'a> {
                 Some(unit) if op == Op::Div => (Op::Per, Expr::BareUnit(unit)),
                 _ => (op, rhs),
             };
+            // "4 out of 10" as a fraction, if the config asks for one.
+            if op == Op::OutOf && !share && self.config().features.proper_fraction_parsing {
+                lhs = Self::formatted(Expr::binary(Op::Div, lhs, rhs), crate::ast::Format::Fraction);
+                continue;
+            }
+            // "4 out of 10" as a fraction, if the config asks for one.
+            if op == Op::OutOf && !share && self.config().features.proper_fraction_parsing {
+                lhs = Self::formatted(Expr::binary(Op::Div, lhs, rhs), crate::ast::Format::Fraction);
+                continue;
+            }
             lhs = if swap { Expr::binary(op, rhs, lhs) } else { Expr::binary(op, lhs, rhs) };
         }
     }

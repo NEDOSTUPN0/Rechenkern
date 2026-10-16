@@ -56,7 +56,14 @@ impl Parser<'_> {
         {
             return Ok(amount);
         }
-        let hour = to_24h(h as i64, ampm)?;
+        let mut hour = to_24h(h as i64, ampm)?;
+        // "3:30" is in the afternoon when the config prefers the day: 1 to 6 o'clock.
+        if ampm.is_none()
+            && (1..=6).contains(&hour)
+            && self.config().features.dates.prefer_daytime_for_ambiguous_12_hour_times
+        {
+            hour += 12;
+        }
         if m >= 60 || s.is_some_and(|s| s >= Number::from_i64(60)) {
             bail!("invalid time {h}:{m:02}");
         }

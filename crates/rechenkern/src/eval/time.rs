@@ -177,8 +177,11 @@ impl Env<'_> {
         self.now.get().time_zone().clone()
     }
 
+    /// A day, at its start or, if the config says so, at noon.
     fn date_moment(&self, date: Date) -> Result<Moment> {
-        Ok(Moment { time: date.to_zoned(self.local_zone())?, kind: MomentKind::Date, zoned: false, seconds: false })
+        let hour = if self.config.features.dates.noon_for_single_dates { 12 } else { 0 };
+        let time = date.at(hour, 0, 0, 0).to_zoned(self.local_zone())?;
+        Ok(Moment { time, kind: MomentKind::Date, zoned: false, seconds: false })
     }
 
     pub(super) fn moment(&self, t: &TimeExpr) -> Result<Moment> {
@@ -193,11 +196,12 @@ impl Env<'_> {
                 // This year, unless the date is most of a year away: in December
                 // "January 12" is next year's.
                 let mut year = today.year();
+                let future = self.config.features.dates.prefer_future_for_ambiguous_dates;
                 if let Ok(d) = Date::new(year, *month, *day) {
                     let days = today.until(d)?.get_days();
-                    year += if days < -270 {
+                    year += if days < -270 || (future && days < 0) {
                         1
-                    } else if days > 270 {
+                    } else if days > 270 && !future {
                         -1
                     } else {
                         0

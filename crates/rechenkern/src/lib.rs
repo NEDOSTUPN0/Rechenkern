@@ -37,7 +37,10 @@ mod zones;
 
 pub use answer::{Answer, Form, Side};
 pub use calculator::Calculator;
-pub use config::{AngleUnit, Config, DateOrder};
+pub use config::{
+    AngleUnit, CommentOptions, Config, Converter, DateOptions, DateOrder, Features, MisplacedSeparator,
+    TimeZoneOptions, ZoneCodeCorrection,
+};
 pub use custom::{CustomPlace, CustomUnit, UnitSystem};
 pub use error::{Error, Result};
 pub use number::Number;

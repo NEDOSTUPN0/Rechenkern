@@ -1,5 +1,6 @@
 //! Splits a line into tokens. Words stay raw; the parser decides what they mean.
 
+use crate::config::{Config, MisplacedSeparator};
 use crate::number::Number;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -119,11 +120,39 @@ struct Lexer<'a> {
     space: bool,
     /// Decides `1,500` and `1.500`: with a decimal comma they are 1500.
     decimal_comma: bool,
+    options: Options,
     /// Open parentheses; `true` for a call like `max(`, where commas separate arguments.
     parens: Vec<bool>,
 }
 
-pub fn lex(src: &str, decimal_comma: bool) -> Vec<Token> {
+/// What the lexer skips or how it reads numbers, from `Features`.
+#[derive(Clone, Copy)]
+pub struct Options {
+    pub links: bool,
+    pub quotes: bool,
+    pub trailing: bool,
+    pub hashtags: bool,
+    pub misplaced: MisplacedSeparator,
+}
+
+impl Options {
+    pub fn of(config: &Config) -> Options {
+        let f = &config.features;
+        Options {
+            links: f.url_detection,
+            quotes: f.comments.quotation_marks,
+            trailing: f.comments.trailing,
+            hashtags: f.comments.hashtags,
+            misplaced: f.misplaced_thousands_separator,
+        }
+    }
+}
+
+pub fn lex(src: &str, config: &Config) -> Vec<Token> {
+    lex_with(src, config.decimal_comma, Options::of(config))
+}
+
+fn lex_with(src: &str, decimal_comma: bool, options: Options) -> Vec<Token> {
     let mut lx = Lexer {
         src,
         chars: src.char_indices().collect(),
@@ -131,6 +160,7 @@ pub fn lex(src: &str, decimal_comma: bool) -> Vec<Token> {
         tokens: Vec::new(),
         space: false,
         decimal_comma,
+        options,
         parens: Vec::new(),
     };
     lx.run();
@@ -158,6 +188,34 @@ impl Lexer<'_> {
         self.space = false;
     }
 
+    /// Length of a link or an email address starting here, in chars.
+    fn link_at(&self) -> Option<usize> {
+        let starts_word = self.i == 0 || matches!(self.chars[self.i - 1].1, ' ' | '\t' | '(');
+        if !self.options.links || !starts_word {
+            return None;
+        }
+        let rest = &self.src[self.offset(self.i)..];
+        let run = &rest[..rest.find(char::is_whitespace).unwrap_or(rest.len())];
+        // Most words are neither: look closer only at "://", "www." and "@".
+        let www = run.get(..4).is_some_and(|p| p.eq_ignore_ascii_case("www."));
+        if !run.contains("://") && !www && !run.contains('@') && !run.starts_with("mailto:") {
+            return None;
+        }
+        let run = run.trim_end_matches(['.', ',', ')', ';', '!', '?']);
+        let scheme = ["http://", "https://", "ftp://", "mailto:"]
+            .iter()
+            .any(|p| run.get(..p.len()).is_some_and(|s| s.eq_ignore_ascii_case(p)));
+        let email = run.split_once('@').is_some_and(|(user, domain)| {
+            !user.is_empty()
+                && user.chars().all(|c| c.is_alphanumeric() || "._+-".contains(c))
+                && domain.split('.').count() >= 2
+                && domain
+                    .split('.')
+                    .all(|part| !part.is_empty() && part.chars().all(|c| c.is_alphanumeric() || c == '-'))
+        });
+        ((scheme || www) && run.len() > 4 || email).then(|| run.chars().count())
+    }
+
     /// The previous token is a number glued to the current position.
     fn after_number(&self) -> bool {
         !self.space && matches!(self.tokens.last(), Some(Token { tok: Tok::Num(_), .. }))
@@ -169,7 +227,16 @@ impl Lexer<'_> {
             if c.is_whitespace() {
                 self.space = true;
                 self.i += 1;
-            } else if c == '/' && self.peek(1) == Some('/') {
+            } else if let Some(len) = self.link_at() {
+                // "https://example.com", "me@example.com": a comment.
+                self.i += len;
+                self.space = true;
+            } else if c == '#' && self.options.hashtags && self.peek(1).is_some_and(char::is_alphabetic) {
+                // "#food" is a tag, not a value.
+                self.i += 1;
+                self.word();
+                self.space = true;
+            } else if c == '/' && self.peek(1) == Some('/') && self.options.trailing {
                 break;
             } else if c.is_ascii_digit() || (c == '.' && self.peek(1).is_some_and(|d| d.is_ascii_digit())) {
                 let tok = self.number();
@@ -197,7 +264,9 @@ impl Lexer<'_> {
                 self.push(Tok::Word(c.to_string()), start);
             } else if matches!(c, '"' | '″' | '“' | '”') {
                 self.i += 1;
-                if self.after_number() {
+                if !self.options.quotes {
+                    self.space = true;
+                } else if self.after_number() {
                     self.push(Tok::Sym("\""), start);
                 } else {
                     // "Quoted text" is an inline comment.
@@ -301,9 +370,21 @@ impl Lexer<'_> {
         let at = |lx: &Self, k: usize| lx.chars.get(k).map(|&(_, c)| c);
         let mut text = self.digit_run();
         let mut groups = Vec::new();
+        let grouping = if self.decimal_comma { '.' } else { ',' };
         while let Some(sep @ (',' | '.')) = self.peek(0)
             && self.peek(1).is_some_and(|c| c.is_ascii_digit())
         {
+            // "1,0000": a thousands separator before more than three digits.
+            let misplaced = sep == grouping && self.digits(self.i + 1) > 3;
+            match self.options.misplaced {
+                MisplacedSeparator::Allow if misplaced => {
+                    self.i += 1;
+                    text.push_str(&self.digit_run());
+                    continue;
+                }
+                MisplacedSeparator::Disallow if misplaced => break,
+                _ => {}
+            }
             let start = self.i;
             self.i += 1;
             groups.push((sep, self.digit_run(), start));
@@ -500,7 +581,7 @@ mod tests {
     use super::*;
 
     fn toks(s: &str) -> Vec<Tok> {
-        lex(s, false).into_iter().map(|t| t.tok).collect()
+        lex(s, &Config::default()).into_iter().map(|t| t.tok).collect()
     }
 
     fn num(s: &str) -> Tok {
@@ -527,7 +608,10 @@ mod tests {
 
     #[test]
     fn lone_separator_before_three_digits() {
-        let toks_with = |s: &str, comma: bool| lex(s, comma).into_iter().map(|t| t.tok).collect::<Vec<_>>();
+        let toks_with = |s: &str, comma: bool| {
+            let config = Config { decimal_comma: comma, ..Config::default() };
+            lex(s, &config).into_iter().map(|t| t.tok).collect::<Vec<_>>()
+        };
         assert_eq!(toks_with("1,500 1.500", false), vec![num("1500"), num("1.5")]);
         assert_eq!(toks_with("1,500 1.500", true), vec![num("1.5"), num("1500")]);
     }

@@ -24,6 +24,19 @@ pub enum Stmt {
     },
 }
 
+impl Stmt {
+    /// Some part of it is a date or a time: `today`, `3pm`, `time in Tokyo`.
+    pub fn has_dates(&self) -> bool {
+        let dated = |e: &Expr| matches!(e, Expr::Time(_) | Expr::InZone(..) | Expr::ZoneDiff(..) | Expr::Sky { .. });
+        match self {
+            Stmt::Expr(e) | Stmt::Assign { expr: e, .. } => e.contains(&dated),
+            Stmt::If { cond, then, otherwise } => {
+                cond.contains(&dated) || then.has_dates() || otherwise.as_ref().is_some_and(|s| s.has_dates())
+            }
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Expr {
     Number(Number),

@@ -87,12 +87,12 @@ pub struct Highlight {
 
 /// The parts of an expression `src`, with ranges moved by `offset` (the label before it).
 pub fn highlight(src: &str, offset: usize, scope: &Scope) -> Vec<Highlight> {
-    let mut toks = lexer::lex(src, scope.config.decimal_comma);
+    let mut toks = lexer::lex(src, scope.config);
     if tokens::has_hyphenated_words(&toks) {
         toks = Parser::new(src, &toks, scope).with_hyphenated_words();
     }
     let mut out = Vec::new();
-    let marker = Parser::new(src, &toks, scope).list_marker();
+    let marker = Parser::new(src, &toks, scope).leading_labels();
     if marker > 0 {
         let end = toks[marker - 1].end;
         let end = end + src[end..].find(|c: char| c.is_whitespace()).unwrap_or(0);
@@ -127,30 +127,29 @@ pub fn highlight(src: &str, offset: usize, scope: &Scope) -> Vec<Highlight> {
     out
 }
 
-/// Text between tokens: quoted text and `// notes` are comments, `#` before a word is a tag.
+/// Text between tokens: quoted text, links and `// notes` are comments, `#food` is a tag.
 fn gaps(src: &str, out: &mut Vec<Highlight>) {
     let mut found = Vec::new();
     let mut at = 0;
-    let mut next = 0;
-    while at < src.len() {
-        let covered = out.get(next).filter(|h| h.range.start <= at);
-        if let Some(h) = covered {
-            at = at.max(h.range.end);
-            next += 1;
-            continue;
-        }
-        let end = out.get(next).map_or(src.len(), |h| h.range.start);
-        let text = &src[at..end];
-        let start = at + (text.len() - text.trim_start().len());
-        let stop = at + text.trim_end().len();
-        if start < stop {
-            let tag = &src[start..stop] == "#" && stop == end && out.get(next).is_some();
-            if tag {
-                out[next].kind = TokenKind::Tag;
+    for h in out.iter().map(|h| h.range.clone()).chain(std::iter::once(src.len()..src.len())) {
+        if h.start > at {
+            let text = &src[at..h.start];
+            let start = at + (text.len() - text.trim_start().len());
+            let stop = at + text.trim_end().len();
+            // A gap may hold several parts: "#food "quoted"".
+            let mut k = start;
+            while k < stop {
+                let rest = &src[k..stop];
+                let len = rest.find(char::is_whitespace).unwrap_or(rest.len());
+                let tag = rest.starts_with('#') && rest[1..].starts_with(char::is_alphabetic);
+                let kind = if tag { TokenKind::Tag } else { TokenKind::Comment };
+                let len = if tag { len } else { rest.len() };
+                found.push(Highlight { range: k..k + len, kind });
+                k += len;
+                k += src[k..stop].len() - src[k..stop].trim_start().len();
             }
-            found.push(Highlight { range: start..stop, kind: if tag { TokenKind::Tag } else { TokenKind::Comment } });
         }
-        at = end;
+        at = at.max(h.end);
     }
     out.extend(found);
     out.sort_by_key(|h| h.range.start);

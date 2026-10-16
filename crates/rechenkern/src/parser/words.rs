@@ -191,6 +191,13 @@ pub static POWER_WORDS: Phrases<()> = Phrases::new(&[
     ("power", ()),
 ]);
 
+/// The function a name (or one of its other names) stands for: "avg" is the average.
+pub fn function_named(name: &str) -> Option<Func> {
+    let name = name.trim().to_lowercase();
+    let first = name.split([' ', '-']).next()?;
+    FUNCTIONS.starting_with(first).find(|(phrase, _)| *phrase == name).map(|&(_, func)| func)
+}
+
 pub static FUNCTIONS: Phrases<Func> = Phrases::new(&[
     ("sqrt", Func::Sqrt),
     ("square root", Func::Sqrt),

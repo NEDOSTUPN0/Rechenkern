@@ -5,6 +5,7 @@ use std::sync::{LazyLock, OnceLock};
 use jiff::Zoned;
 use jiff::tz::{Offset, TimeZone};
 
+use crate::config::ZoneCodeCorrection;
 use crate::hash::TableMap;
 
 const PLACES: &str = include_str!("places.txt");
@@ -261,6 +262,52 @@ impl Place {
             _ => (offset_label(zone.to_offset(jiff::Timestamp::now())), PlaceKind::TimeZone),
         };
         Place { name, zone: zone.clone(), kind }
+    }
+}
+
+/// Daylight saving abbreviations and the region whose summer time they name.
+const DAYLIGHT_REGIONS: &[(&str, &str)] = &[
+    ("edt", "America/New_York"),
+    ("cdt", "America/Chicago"),
+    ("mdt", "America/Denver"),
+    ("pdt", "America/Los_Angeles"),
+    ("akdt", "America/Anchorage"),
+    ("adt", "America/Halifax"),
+    ("ndt", "America/St_Johns"),
+    ("bst", "Europe/London"),
+    ("west", "Europe/Lisbon"),
+    ("cest", "Europe/Paris"),
+    ("eest", "Europe/Athens"),
+    ("acdt", "Australia/Adelaide"),
+    ("aedt", "Australia/Sydney"),
+    ("nzdt", "Pacific/Auckland"),
+];
+
+/// The name (lowercase) is a zone abbreviation: "pst", "cest".
+pub(crate) fn is_code(name: &str) -> bool {
+    INDEX.get(name).is_some_and(|l| l.kind == PlaceKind::TimeZone && l.upper)
+}
+
+/// The zone an abbreviation names, as the config reads abbreviations.
+pub(crate) fn corrected(name: &str, zone: TimeZone, correction: ZoneCodeCorrection) -> TimeZone {
+    if !is_code(name) {
+        return zone;
+    }
+    match correction {
+        ZoneCodeCorrection::OnlyNonSummerCodes => zone,
+        // "EDT" in winter is New York's time too.
+        ZoneCodeCorrection::Automatic => DAYLIGHT_REGIONS
+            .iter()
+            .find(|(code, _)| *code == name)
+            .and_then(|(_, region)| TimeZone::get(region).ok())
+            .unwrap_or(zone),
+        // "EST" is UTC-5 all year: the region's standard time, the smaller of its offsets.
+        ZoneCodeCorrection::Never if zone.iana_name().is_some() => {
+            let offset = |s| jiff::Timestamp::from_second(s).map(|t| zone.to_offset(t).seconds()).unwrap_or(0);
+            let standard = offset(1_768_435_200).min(offset(1_784_073_600));
+            fixed(standard).unwrap_or(zone)
+        }
+        ZoneCodeCorrection::Never => zone,
     }
 }
 

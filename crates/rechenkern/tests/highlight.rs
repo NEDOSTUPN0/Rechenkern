@@ -69,7 +69,8 @@ fn notes() {
             "Boeing:comment \"747\":comment costs:comment $:unit 5:number // note:comment",
         ),
         ("1. 5 + 5", "1.:list_marker 5:number +:operator 5:number"),
-        ("coffee #food $5", "coffee:comment #:tag food:tag $:unit 5:number"),
+        ("coffee #food $5", "coffee:comment #food:tag $:unit 5:number"),
+        ("see https://example.com for $5", "see:comment https://example.com:comment for:comment $:unit 5:number"),
         ("monthly rent = $1500", "monthly rent:variable =:operator $:unit 1500:number"),
         ("line 2 + prev", "line 2:reference +:operator prev:reference"),
     ]);
