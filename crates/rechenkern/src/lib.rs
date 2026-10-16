@@ -23,6 +23,7 @@ mod error;
 mod eval;
 mod format;
 mod hash;
+mod inflation;
 mod lexer;
 mod number;
 #[cfg(feature = "online")]
@@ -46,6 +47,7 @@ pub use config::{
 };
 pub use custom::{CustomPlace, CustomUnit, UnitSystem};
 pub use error::{Error, Result};
+pub use inflation::InflationProvider;
 pub use number::Number;
 pub use parser::highlight::{Highlight, TokenKind};
 pub use rates::{RateProvider, RateTable};

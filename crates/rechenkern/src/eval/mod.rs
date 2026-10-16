@@ -14,6 +14,7 @@ use crate::ast::{Direction, Expr, Format, Func, GrowthResult, LineRef, Op, Round
 use crate::config::{Config, Now};
 use crate::error::{Error, Result, bail};
 use crate::format::unit_text;
+use crate::inflation::InflationProvider;
 use crate::number::Number;
 use crate::rates::Rates;
 use crate::units::foods::Food;
@@ -79,6 +80,7 @@ pub(crate) struct Env<'a> {
     pub food_as: Cell<Option<Dim>>,
     /// Inside `... on Jan 1, 2020`, exchange rates are that day's.
     pub rate_date: Cell<Option<jiff::civil::Date>>,
+    pub inflation: Option<&'a dyn InflationProvider>,
 }
 
 impl Env<'_> {
@@ -188,6 +190,9 @@ impl Env<'_> {
                 Some(e) => self.eval(e)?,
                 None => bail!("the condition isn't met"),
             },
+            Expr::Inflation { amount, from, to, rate } => {
+                self.inflation(self.eval(amount)?, *from, *to, rate.as_deref())?
+            }
             Expr::Growth { principal, time, rate, period, compounds, result } => {
                 let (principal, time, rate) = (self.eval(principal)?, self.eval(time)?, self.eval(rate)?);
                 self.growth(principal, time, rate, period, *compounds, *result)?
@@ -247,6 +252,56 @@ impl Env<'_> {
             Value::Percent(p) => !p.is_zero(),
             v => bail!("{} is neither true nor false", v.kind()),
         })
+    }
+
+    /// `amount` in prices of year `to` instead of year `from` (`None` is now): by the consumer
+    /// price index, or by a yearly rate of inflation.
+    fn inflation(&self, amount: Value, from: Option<i16>, to: Option<i16>, rate: Option<&Expr>) -> Result<Value> {
+        let currency = match &amount {
+            Value::Quantity(q) if q.unit.is_none() => self.config.dollar.clone(),
+            Value::Quantity(q) => match q.unit.currency() {
+                Some((currency, 1)) => currency.code.to_string(),
+                _ => bail!("inflation changes amounts of money, not {}", amount.kind()),
+            },
+            v => bail!("inflation changes amounts of money, not {}", v.kind()),
+        };
+        let factor = match rate {
+            Some(rate) => {
+                let rate = match self.eval(rate)? {
+                    Value::Percent(p) => p / Number::from_i64(100),
+                    v => bail!("expected a percentage of inflation, not {}", v.kind()),
+                };
+                let this_year = self.today().year();
+                let years = to.unwrap_or(this_year) - from.unwrap_or(this_year);
+                Number::ONE / (Number::ONE + rate).pow(Number::from_i64(years as i64))
+            }
+            None => {
+                let [from, to] = self.price_levels(&currency, [from, to])?;
+                to / from
+            }
+        };
+        self.mul(amount, Value::number(factor))
+    }
+
+    /// Consumer price indexes of the years (`None` is now), all from the host's provider or
+    /// all from the bundled US index, so they share a base.
+    fn price_levels(&self, currency: &str, years: [Option<i16>; 2]) -> Result<[Number; 2]> {
+        let today = self.today();
+        let asked = |year: Option<i16>| match year {
+            Some(y) => self.inflation?.cpi(currency, y, None),
+            None => self.inflation?.cpi(currency, today.year(), Some(today.month())),
+        };
+        if let [Some(a), Some(b)] = years.map(asked) {
+            return Ok([a, b]);
+        }
+        if currency != "USD" {
+            bail!("no inflation data for {currency}");
+        }
+        let bundled = |year: Option<i16>| match year {
+            Some(y) => crate::inflation::us_cpi(y).ok_or_else(|| Error::new(format!("no inflation data for {y}"))),
+            None => Ok(crate::inflation::us_cpi_now()),
+        };
+        Ok([bundled(years[0])?, bundled(years[1])?])
     }
 
     /// Compound growth of `principal` over `time` at `rate` per `period`, or a loan.

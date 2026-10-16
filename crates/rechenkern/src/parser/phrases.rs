@@ -10,6 +10,9 @@ use crate::units::{Dim, registry};
 impl Parser<'_> {
     /// Tries phrases such as "20 is what % of 200" on the whole line.
     pub(super) fn phrase(&mut self) -> Result<Option<Expr>> {
+        if let Some(expr) = self.inflation()? {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.growth()? {
             return Ok(Some(expr));
         }
@@ -467,7 +470,7 @@ impl Parser<'_> {
     }
 
     /// Token `i` starts this word sequence; "%" also matches "percent".
-    fn matches_at(&self, i: usize, seq: &[&str]) -> bool {
+    pub(super) fn matches_at(&self, i: usize, seq: &[&str]) -> bool {
         seq.iter().enumerate().all(|(k, s)| {
             let Some(t) = self.toks.get(i + k) else { return false };
             match *s {
@@ -477,7 +480,7 @@ impl Parser<'_> {
         })
     }
 
-    fn ends_with(&self, seq: &[&str]) -> bool {
+    pub(super) fn ends_with(&self, seq: &[&str]) -> bool {
         self.toks.len() >= seq.len() && self.matches_at(self.toks.len() - seq.len(), seq)
     }
 

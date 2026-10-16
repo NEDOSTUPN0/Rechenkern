@@ -292,6 +292,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   `scripts/rates.py`. They fill in currencies a provider lacks and stand in when
   there are no rates at all (`Features::use_default_rates_for_unhandled_currencies`).
   Refresh them now and then.
+- Inflation: `src/data/cpi.txt`, the US CPI-U (BLS, public domain) made by
+  `scripts/cpi.py`: annual averages, and the months of the year without one. Now is
+  the latest month; a host's `InflationProvider` gives other currencies.
 - Time zones: jiff with the system tzdb (bundled copy as fallback). Countries
   map to their capital's zone.
 - Places, in lookup order: `zones/places.txt` (hand-picked: countries, states,

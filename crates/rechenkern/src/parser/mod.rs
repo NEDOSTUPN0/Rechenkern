@@ -5,6 +5,7 @@
 
 mod distance;
 pub(crate) mod highlight;
+mod inflation;
 mod phrases;
 mod primary;
 mod sky;

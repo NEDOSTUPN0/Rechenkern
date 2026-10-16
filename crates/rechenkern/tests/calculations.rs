@@ -761,7 +761,7 @@ fn dates() {
         ("4 days from now", "Sun, 27 Sep 2026"),
         ("a week from now", "Wed, 30 Sep 2026"),
         ("a day ago", "Tue, 22 Sep 2026"),
-        ("$100 from 1990 is worth what today", "<error: expected a length of time before \"from\">"),
+        ("$100 from 1990 in 2000", "$131.75"),
         ("in 3 days", "Sat, 26 Sep 2026"),
         ("next friday", "Fri, 25 Sep 2026"),
         ("last monday", "Mon, 21 Sep 2026"),

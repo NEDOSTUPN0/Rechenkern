@@ -11,6 +11,7 @@ use crate::config::{Config, Now};
 use crate::custom::CustomUnits;
 use crate::error::{Error, Result};
 use crate::eval::{Display, Env, Line, LineKind};
+use crate::inflation::InflationProvider;
 use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::{self, Scope};
 use crate::rates::{RateProvider, RateTable, Rates};
@@ -32,6 +33,7 @@ pub struct Calculator {
     vars: HashMap<String, Value>,
     lines: Vec<Line>,
     rates: Rates,
+    inflation: Option<Box<dyn InflationProvider>>,
 }
 
 impl Default for Calculator {
@@ -52,6 +54,7 @@ impl Calculator {
             vars: HashMap::new(),
             lines: Vec::new(),
             rates: Rates::default(),
+            inflation: None,
         }
     }
 
@@ -75,6 +78,12 @@ impl Calculator {
     /// Where exchange rates come from; asked once, on the first conversion.
     pub fn set_rate_provider(&mut self, provider: impl RateProvider + 'static) {
         self.rates = Rates::with_provider(Box::new(provider));
+    }
+
+    /// Where consumer price indexes come from, for currencies besides the US dollar or
+    /// newer ones; the bundled US index is used otherwise.
+    pub fn set_inflation_provider(&mut self, provider: impl InflationProvider + 'static) {
+        self.inflation = Some(Box::new(provider));
     }
 
     pub fn set_rates(&mut self, table: RateTable) {
@@ -141,6 +150,7 @@ impl Calculator {
             rates: &self.rates,
             food_as: Default::default(),
             rate_date: Default::default(),
+            inflation: self.inflation.as_deref(),
         };
         env.alternatives(answer)
     }
@@ -220,6 +230,7 @@ impl Calculator {
             rates: &self.rates,
             food_as: Default::default(),
             rate_date: Default::default(),
+            inflation: self.inflation.as_deref(),
         };
         // Pick the branch of "if ... then ... else ...".
         let mut stmt = &stmt;

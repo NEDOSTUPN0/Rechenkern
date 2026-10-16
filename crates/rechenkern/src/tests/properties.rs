@@ -261,6 +261,7 @@ fn convert(q: &Quantity, to: &Unit) -> crate::Result<Quantity> {
         rates: &rates,
         food_as: Cell::default(),
         rate_date: Cell::default(),
+        inflation: None,
     };
     env.convert_quantity(q, to)
 }

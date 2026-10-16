@@ -89,3 +89,42 @@ fn rates_of_other_days_can_be_turned_off() {
     calc.set_rate_provider(Euros);
     answers(&mut calc, &[("$100 in EUR on Jan 1, 2020", "<error: exchange rates of other days are turned off>")]);
 }
+
+/// Prices that double every ten years from 2000, in euros only.
+struct Doubling;
+
+impl rechenkern::InflationProvider for Doubling {
+    fn cpi(&self, currency: &str, year: i16, _month: Option<i8>) -> Option<Number> {
+        (currency == "EUR").then(|| Number::from_f64(2f64.powf((year - 2000) as f64 / 10.0)))
+    }
+}
+
+#[test]
+fn inflation() {
+    let mut calc = Calculator::with_config(config());
+    answers(
+        &mut calc,
+        &[
+            ("$100 from 1990 in 2000", "$131.75"),
+            ("$100 from 2000 in 1990", "$75.90"),
+            ("what will $100 be worth in 2035 with 3% inflation", "$76.64"),
+            ("value of $100 in 2035 with 3% inflation", "$76.64"),
+            ("$100 from 1800 in 2000", "<error: no inflation data for 1800>"),
+            ("€100 in 1990 euros", "<error: no inflation data for EUR>"),
+            ("Born in 1990 $5", "$5.00"),
+        ],
+    );
+    // Today's prices are the latest month known.
+    let today = calc.calculate("$100 from 1990 is worth what today").unwrap().unwrap();
+    assert!(today.text() > "$250", "{today}");
+    calc.set_inflation_provider(Doubling);
+    answers(
+        &mut calc,
+        &[
+            ("€100 from 2000 in 2020", "€400.00"),
+            ("€1,000 in 2016 euros", "€2,000.00"),
+            ("value of €100 in 2016", "€50.00"),
+            ("$100 from 1990 in 2000", "$131.75"),
+        ],
+    );
+}

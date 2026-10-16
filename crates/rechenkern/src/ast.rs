@@ -88,6 +88,14 @@ pub enum Expr {
         then: Option<Box<Expr>>,
         otherwise: Option<Box<Expr>>,
     },
+    /// An amount of money in prices of another year: `$1,000 in 1990 dollars`. A year
+    /// that is `None` is now; with a rate, prices grow by it every year.
+    Inflation {
+        amount: Box<Expr>,
+        from: Option<i16>,
+        to: Option<i16>,
+        rate: Option<Box<Expr>>,
+    },
     /// Compound growth: `$1,000 after 3 years at 7% compounding monthly`,
     /// or a loan paid back monthly: `total repayment on $10,000 for 5 years at 5%`.
     Growth {
