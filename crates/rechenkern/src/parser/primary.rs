@@ -35,10 +35,10 @@ impl Parser<'_> {
                     return Ok(Expr::Time(TimeExpr::InMonth(crate::ast::MonthDay::Day(day as i8), month)));
                 }
                 // "0xff + 1": the answer is in the base of the last number written in one.
-                let radix = match self.src[tok.start..].get(..2).map(str::to_ascii_lowercase).as_deref() {
-                    Some("0x") => Some(16),
-                    Some("0b") => Some(2),
-                    Some("0o") => Some(8),
+                let radix = match self.src.as_bytes()[tok.start..].get(..2) {
+                    Some([b'0', b'x' | b'X']) => Some(16),
+                    Some([b'0', b'b' | b'B']) => Some(2),
+                    Some([b'0', b'o' | b'O']) => Some(8),
                     _ => None,
                 };
                 if radix.is_some() && tok.end > tok.start + 2 {
@@ -499,8 +499,9 @@ impl Parser<'_> {
             return Ok(Some(Expr::WithUnit(Expr::Number(amount).boxed(), unit)));
         }
         // "flour 1 cup in grams": the food before its amount.
-        if let Some((food, n)) = self.food_at(i)
-            && matches!(self.toks.get(i + n).map(|t| &t.tok), Some(Tok::Num(_)))
+        if matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_)))
+            && let Some((food, n)) = self.food_at(i)
+            && n == 1
         {
             let mut p = self.clone();
             p.pos += n;

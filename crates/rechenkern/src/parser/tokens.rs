@@ -192,12 +192,12 @@ impl<'a> Parser<'a> {
             || (w == "cast" && ["to", "as", "into"].iter().any(|t| self.words_at(i + 1, &[t])))
             || (w == "diff" && (self.words_at(i + 1, &["between"]) || self.zone_at(i + 1).is_some()))
             // "zł10", "CHF10": a currency glued before its amount.
-            || self.glued_money(i).is_some()
-            || self.glued_date(i).is_some()
+            // "zł10", "apr3": letters with digits glued after them.
+            || (word.ends_with(|c: char| c.is_ascii_digit()) && (self.glued_money(i).is_some() || self.glued_date(i).is_some()))
             // "first monday of the month"
-            || (self.nth_at(i).is_some_and(|(_, n)| n == 1)
-                && self.lower(i + 1).is_some_and(|w| words::weekday(&w).is_some())
-                && self.words_at(i + 2, &["of"]))
+            || (self.words_at(i + 2, &["of"])
+                && self.nth_at(i).is_some_and(|(_, n)| n == 1)
+                && self.lower(i + 1).is_some_and(|w| words::weekday(&w).is_some()))
             // "flour 1 cup": a food before its amount.
             || (matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_)))
                 && self.unit_at(i + 2, false).is_some_and(|(u, _)| matches!(u.dim(), Dim::MASS | Dim::VOLUME))
@@ -413,9 +413,9 @@ impl<'a> Parser<'a> {
             text.truncate(text.len().saturating_sub(words[n - 1].len() + 1));
         }
         // "japanese time", "time in kazakh": a country by its adjective, only with "time".
-        let country = self.lower(i).and_then(|w| words::demonym(&w))?;
         let with_time = self.words_at(i + 1, &["time"]) || (i >= 2 && self.words_at(i - 2, &["time", "in"]));
-        with_time.then(|| Some((country.to_string(), zones::find(country)?, 1))).flatten()
+        let country = with_time.then(|| self.lower(i).and_then(|w| words::demonym(&w))).flatten()?;
+        Some((country.to_string(), zones::find(country)?, 1))
     }
 
     /// Where the place at token `i` is, for the sun, and its length in tokens.
