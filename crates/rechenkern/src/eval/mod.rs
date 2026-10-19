@@ -90,6 +90,8 @@ pub(crate) struct Env<'a> {
     pub food_as: Cell<Option<Dim>>,
     /// Inside `... on Jan 1, 2020`, exchange rates are that day's.
     pub rate_date: Cell<Option<jiff::civil::Date>>,
+    /// Money converts at rates at hand, never downloaded: a conversion nobody asked for.
+    pub rates_at_hand: Cell<bool>,
     pub inflation: Option<&'a dyn InflationProvider>,
     pub weather: Option<&'a dyn WeatherProvider>,
     /// What the line read, for sheets that recalculate only what changed.
@@ -332,6 +334,7 @@ impl Env<'_> {
             rates: self.rates,
             food_as: Cell::new(None),
             rate_date: Cell::new(self.rate_date.get()),
+            rates_at_hand: Cell::new(self.rates_at_hand.get()),
             inflation: self.inflation,
             weather: self.weather,
             reads: Default::default(),
@@ -483,6 +486,7 @@ impl Env<'_> {
             Some(c) => {
                 let usd = match self.rate_date.get() {
                     Some(date) => self.rates.usd_value_on(c.code, date)?,
+                    None if self.rates_at_hand.get() => self.rates.usd_value_at_hand(c.code)?,
                     None => {
                         self.rates.usd_value(c.code, self.config.features.use_default_rates_for_unhandled_currencies)?
                     }
@@ -639,7 +643,7 @@ impl Env<'_> {
         })
     }
 
-    fn to_unit(&self, value: Value, unit: &Unit) -> Result<Value> {
+    pub(crate) fn to_unit(&self, value: Value, unit: &Unit) -> Result<Value> {
         // Days and longer count Monday to Friday dates; hours are hours of work.
         if unit.dim() == Dim::WORKDAY {
             let dates = match &value {

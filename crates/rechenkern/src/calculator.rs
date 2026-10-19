@@ -214,6 +214,7 @@ impl Calculator {
             rates: &self.rates,
             food_as: Default::default(),
             rate_date: Default::default(),
+            rates_at_hand: Default::default(),
             inflation: self.inflation.as_deref(),
             weather: self.weather.as_deref(),
             reads: Default::default(),
@@ -395,7 +396,8 @@ impl Calculator {
         {
             return Err(crate::Error::new("result is too large"));
         }
-        let (value, mut display) = env.convert_result(expr, value, display)?;
+        let mut parts = parts;
+        let (value, mut display) = env.convert_result(expr, value, display, &mut parts)?;
         if scope.scaled.get() && matches!(display, Display::Auto) {
             display = Display::Scaled;
         }

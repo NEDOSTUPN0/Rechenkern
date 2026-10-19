@@ -1,7 +1,7 @@
 //! End-to-end checks: input line -> formatted answer.
 
 use jiff::tz::TimeZone;
-use rechenkern::{Calculator, Config, Number, RateTable};
+use rechenkern::{Calculator, Config, Number, RateTable, ResultConversions, UnitSystem};
 
 /// A calculator at Wed 23 Sep 2026 14:30 in New York, with fixed rates.
 fn calculator() -> Calculator {
@@ -1418,4 +1418,45 @@ fn typed_results() {
         ("every 2 weeks from Oct 1 until Dec 31", "every 2 weeks, 7 times until Thu, 31 Dec 2026"),
         ("$50 every 2 weeks", "$25.00/week"),
     ]);
+}
+
+#[test]
+fn home_conversions() {
+    let mut calc = calculator();
+    let config = calc.config_mut();
+    config.formatting.conversions = ResultConversions::Home;
+    config.unit_system = UnitSystem::Metric;
+    config.currency = Some("EUR".into());
+    // Line -> answer, its form and its two sides.
+    let cases = [
+        ("18 pounds", "8.16466266 kg", "conversion", Some(("18 lb", "Pounds", "Kilograms"))),
+        ("5 miles", "8.04672 km", "conversion", Some(("5 mi", "Miles", "Kilometers"))),
+        ("100 f", "37.77777778 °C", "conversion", Some(("100 °F", "Fahrenheit", "Celsius"))),
+        ("3 us cups", "709.7647095 mL", "conversion", Some(("3 cup", "Cups", "Milliliters"))),
+        ("5 ft 10 in", "1.778 m", "conversion", Some(("5 ft 10 in", "Feet", "Meters"))),
+        ("2 lb + 3 lb", "2.26796185 kg", "conversion", Some(("5 lb", "Pounds", "Kilograms"))),
+        ("10 usd", "€9.00", "conversion", Some(("$10.00", "US Dollars", "Euros"))),
+        ("5 km in miles", "3.106855961 mi", "conversion", Some(("5 km", "Kilometers", "Miles"))),
+        ("1500 m", "1,500 m", "value", None),
+        ("1 ly", "1 ly", "value", None),
+        ("10 eur", "€10.00", "value", None),
+        ("42", "42", "value", None),
+    ];
+    let mut failures = Vec::new();
+    for (input, answer, form, sides) in cases {
+        let got = calc.calculate(input).unwrap().unwrap();
+        let got_sides = got
+            .source()
+            .zip(got.target())
+            .map(|(s, t)| (s.text.clone(), s.label.clone().unwrap_or_default(), t.label.clone().unwrap_or_default()));
+        let want_sides = sides.map(|(text, from, to)| (text.to_string(), from.to_string(), to.to_string()));
+        if got.text() != answer || got.form().name() != form || got_sides != want_sides || got.copy_text() != answer {
+            failures.push(format!("{input}: {} {} {got_sides:?}", got.text(), got.form().name()));
+        }
+    }
+    assert!(failures.is_empty(), "\n{}\n", failures.join("\n"));
+    // Home in US customary units.
+    calc.config_mut().unit_system = UnitSystem::CustomaryUs;
+    assert_eq!(calc.calculate("5 km").unwrap().unwrap().text(), "3.106855961 mi");
+    assert_eq!(calc.calculate("20 °C").unwrap().unwrap().text(), "68 °F");
 }

@@ -115,6 +115,10 @@ impl RateProvider for OnlineRates {
         downloaded.or_else(|e| self.cached(false).ok_or(e))
     }
 
+    fn cached_rates(&self) -> Option<RateTable> {
+        self.cached(false)
+    }
+
     fn rates_on(&self, date: Date) -> Result<RateTable, String> {
         let cache = self.dated_cache(date);
         if let Some(table) = cache.as_ref().and_then(|p| parse(&fs::read_to_string(p).ok()?)) {

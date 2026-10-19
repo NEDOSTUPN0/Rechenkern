@@ -171,6 +171,11 @@ pub enum ResultConversions {
     /// Metric amounts take the prefix that keeps them between 1 and 1,000: `1500 m` is 1.5 km.
     Automatic,
     Rules(Vec<ConversionRule>),
+    /// An amount in a unit of another system goes to `Config::unit_system` (`18 lb` is
+    /// 8.16 kg where it is metric, at the size `Automatic` picks), and money to
+    /// `Config::currency`, at cached or bundled rates. The answer is a conversion, with
+    /// the amount as written for its source.
+    Home,
 }
 
 /// One conversion of answers.
@@ -383,6 +388,8 @@ pub struct Config {
     pub date_order: DateOrder,
     /// Currency code meant by a bare `$`.
     pub dollar: String,
+    /// The home currency, where money goes with `ResultConversions::Home`.
+    pub currency: Option<String>,
     pub angle_unit: AngleUnit,
     /// Working hours in a workday, for `40 hours in workdays`.
     pub hours_per_workday: Number,
@@ -419,6 +426,7 @@ impl Default for Config {
             clock_24h: true,
             date_order: DateOrder::DayFirst,
             dollar: "USD".into(),
+            currency: None,
             angle_unit: AngleUnit::Radians,
             hours_per_workday: Number::from_i64(8),
             week_start: civil::Weekday::Monday,
@@ -469,6 +477,7 @@ impl Config {
             config.week_start = civil::Weekday::Sunday;
         }
         let currency = local_currency(&region);
+        config.currency = currency.map(String::from);
         // "$" is the local dollar: Canadian in Canada.
         if let Some(code) =
             currency.filter(|c| crate::currency::find(c).is_some_and(|c| c.symbol.is_some_and(|s| s.ends_with('$'))))

@@ -177,7 +177,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   decimal places, scales (`Notation`), money options and the host's currency
   symbols, timespan styles, compound imperial units, conversions of answers
   (`ResultConversions`, applied in `Env::convert_result` unless the line converts
-  itself), rounded references. A line that writes a scale (`$5M`, `2 billion`)
+  itself), rounded references. `ResultConversions::Home` is Rechenkern's own: an
+  amount in another system goes to `unit_system` (`18 lb` = 8.16 kg where it's
+  metric) and money to `Config::currency`, at rates at hand (never downloaded), and
+  the answer is a conversion with the amount as its source (CLI: `--convert home`,
+  `--currency`). A line that writes a scale (`$5M`, `2 billion`)
   sets `Scope::scaled` and its answer keeps one while it stays exact
   (`Display::Scaled`), as SoulverCore does; glued Cyrillic and Chinese letters
   don't count.

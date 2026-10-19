@@ -8,7 +8,7 @@ use clap::{Parser, ValueEnum};
 use rechenkern::online::{OnlinePlaces, OnlineRates, OnlineWeather};
 use rechenkern::{
     AngleUnit, Answer, Calculator, Config, DateOrder, Formatting, Highlight, HtmlColors, HtmlOptions, Notation, Number,
-    Sheet, Side, UnitSystem,
+    ResultConversions, Sheet, Side, UnitSystem,
 };
 use rustyline::error::ReadlineError;
 
@@ -46,6 +46,13 @@ struct Args {
     /// Currency meant by "$" [default: from locale, else USD].
     #[arg(long)]
     dollar: Option<String>,
+    /// Home currency, where `--convert home` takes money [default: from locale].
+    #[arg(long)]
+    currency: Option<String>,
+    /// Answers converted without asking: none, scale (1500 m is 1.5 km) or home
+    /// (amounts in the home unit system and currency, as conversions).
+    #[arg(long, value_enum, default_value_t = Convert::None)]
+    convert: Convert,
     /// Trigonometry takes degrees instead of radians.
     #[arg(long)]
     degrees: bool,
@@ -77,6 +84,13 @@ enum Scales {
     Auto,
     On,
     Off,
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum Convert {
+    None,
+    Scale,
+    Home,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -231,6 +245,7 @@ fn config(args: &Args) -> Result<Config, String> {
         },
         week_start: times.week_start,
         dollar: args.dollar.as_deref().map_or(base.dollar.clone(), str::to_uppercase),
+        currency: args.currency.as_deref().map(str::to_uppercase).or(base.currency.clone()),
         angle_unit: if args.degrees { AngleUnit::Degrees } else { AngleUnit::Radians },
         unit_system: match args.unit_system {
             Some(System::Us) => UnitSystem::CustomaryUs,
@@ -245,6 +260,11 @@ fn config(args: &Args) -> Result<Config, String> {
                 Scales::Auto => Notation::Auto,
                 Scales::On => Notation::On,
                 Scales::Off => Notation::Off,
+            },
+            conversions: match args.convert {
+                Convert::None => ResultConversions::None,
+                Convert::Scale => ResultConversions::Automatic,
+                Convert::Home => ResultConversions::Home,
             },
             ..numbers.formatting
         },

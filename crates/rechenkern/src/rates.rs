@@ -51,6 +51,12 @@ pub trait RateProvider: Send + Sync {
     fn rates_on(&self, date: Date) -> std::result::Result<RateTable, String> {
         Err(format!("exchange rates for {date} aren't known"))
     }
+
+    /// Rates at hand without asking anyone, however old, for conversions the line
+    /// didn't ask for (`ResultConversions::Home`).
+    fn cached_rates(&self) -> Option<RateTable> {
+        None
+    }
 }
 
 /// Rates that come with the engine (`data/rates.txt`), for currencies a provider
@@ -77,6 +83,8 @@ pub(crate) struct Rates {
     table: OnceLock<std::result::Result<RateTable, String>>,
     /// Rates of past days, as the provider gave them.
     dated: Mutex<HashMap<Date, std::result::Result<Arc<RateTable>, String>>>,
+    /// The provider's rates at hand, read once.
+    cached: OnceLock<Option<RateTable>>,
 }
 
 impl Rates {
@@ -108,6 +116,21 @@ impl Rates {
             Err(e) => return Err(e),
         };
         match rate {
+            Some(rate) if !rate.is_zero() => Ok(Number::ONE / rate),
+            _ => Err(Error::new(format!("no exchange rate for {code}"))),
+        }
+    }
+
+    /// Value of one unit of `code` in US dollars from rates at hand: loaded ones, the
+    /// provider's cache, or the bundled ones. Nothing is downloaded for it.
+    pub fn usd_value_at_hand(&self, code: &str) -> Result<Number> {
+        if code == "USD" {
+            return Ok(Number::ONE);
+        }
+        let loaded = self.table.get().and_then(|t| t.as_ref().ok());
+        let cached = || self.cached.get_or_init(|| self.provider.as_ref()?.cached_rates()).as_ref();
+        let rate = [loaded, cached()].into_iter().flatten().find_map(|t| t.get(code));
+        match rate.or_else(|| bundled_rates().get(code)) {
             Some(rate) if !rate.is_zero() => Ok(Number::ONE / rate),
             _ => Err(Error::new(format!("no exchange rate for {code}"))),
         }

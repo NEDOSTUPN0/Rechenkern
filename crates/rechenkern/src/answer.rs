@@ -13,12 +13,13 @@ use jiff::Zoned;
 use crate::ast::{Expr, Format, Op, Target, TimeExpr};
 use crate::config::{Config, ConversionRule, Now, ResultConversions};
 use crate::custom;
+use crate::custom::UnitSystem;
 use crate::error::Result;
 use crate::eval::{Display, Env, time, weight_or_volume};
 use crate::format;
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
-use crate::value::{Moment, MomentKind, Value};
+use crate::value::{Moment, MomentKind, Quantity, Value};
 use crate::zones::Place;
 
 /// What a line asks, as SoulverCore's `TokenListForm` tells it.
@@ -81,6 +82,8 @@ pub(crate) struct Parts {
     target: Option<Target>,
     /// The places of a time conversion or difference.
     places: Option<(Option<Place>, Place)>,
+    /// The config converted the answer to the home system or currency.
+    home: bool,
 }
 
 /// The result of a line.
@@ -262,6 +265,43 @@ impl fmt::Display for Answer {
     }
 }
 
+/// Units of one system and those of the home system they go to, largest first, for
+/// `ResultConversions::Home`: an amount takes the first one it is at least 1 of.
+type HomeUnits = &'static [(&'static [&'static str], &'static [&'static str])];
+
+const TO_METRIC: HomeUnits = &[
+    (&["mi", "yd", "ft", "in"], &["km", "m", "cm", "mm"]),
+    (&["lb", "oz", "st", "ton", "long ton", "grain"], &["t", "kg", "g", "mg"]),
+    (&["°F"], &["°C"]),
+    (&["mph", "feet per second"], &["kph"]),
+    (&["gal", "qt", "pint", "cup", "fl oz", "tbsp", "tsp", "imp gal", "imp qt", "imp pt", "imp fl oz"], &["L", "mL"]),
+    (&["sqmi", "ac", "sqyd", "sqft", "sqin"], &["sqkm", "ha", "sqm", "sqcm"]),
+    (&["mpg"], &["L/100km"]),
+    (&["psi"], &["bar", "kPa"]),
+];
+
+const TO_US: HomeUnits = &[
+    (&["km", "m", "cm", "mm"], &["mi", "ft", "in"]),
+    (&["t", "kg", "g", "mg"], &["lb", "oz"]),
+    (&["°C"], &["°F"]),
+    (&["kph", "mps"], &["mph"]),
+    (&["L", "mL"], &["gal", "qt", "cup", "fl oz"]),
+    (&["sqkm", "ha", "sqm", "sqcm"], &["sqmi", "ac", "sqft", "sqin"]),
+    (&["L/100km"], &["mpg"]),
+    (&["bar", "kPa"], &["psi"]),
+];
+
+const TO_IMPERIAL: HomeUnits = &[
+    (&["km", "m", "cm", "mm"], &["mi", "ft", "in"]),
+    (&["t", "kg", "g", "mg"], &["lb", "oz"]),
+    (&["°C"], &["°F"]),
+    (&["kph", "mps"], &["mph"]),
+    (&["L", "mL"], &["imp gal", "imp pt", "imp fl oz"]),
+    (&["sqkm", "ha", "sqm", "sqcm"], &["sqmi", "ac", "sqft", "sqin"]),
+    (&["L/100km"], &["mpg"]),
+    (&["bar", "kPa"], &["psi"]),
+];
+
 /// Metric units in the order of size, for `ResultConversions::Automatic`.
 const METRIC_FAMILIES: &[&[&str]] = &[
     &["km", "m", "cm", "mm", "µm", "nm"],
@@ -276,8 +316,20 @@ const METRIC_FAMILIES: &[&[&str]] = &[
 
 impl Env<'_> {
     /// The answer converted as the config asks, when the line asks for no conversion itself.
-    pub(crate) fn convert_result(&self, expr: &Expr, value: Value, display: Display) -> Result<(Value, Display)> {
-        if matches!(expr, Expr::Convert(..)) || !matches!(display, Display::Auto) {
+    pub(crate) fn convert_result(
+        &self,
+        expr: &Expr,
+        value: Value,
+        display: Display,
+        parts: &mut Parts,
+    ) -> Result<(Value, Display)> {
+        if matches!(expr, Expr::Convert(..)) {
+            return Ok((value, display));
+        }
+        if let ResultConversions::Home = self.config.formatting.conversions {
+            return Ok(self.convert_home(value, display, parts));
+        }
+        if !matches!(display, Display::Auto) {
             return Ok((value, display));
         }
         let converted = match (&self.config.formatting.conversions, &value) {
@@ -295,7 +347,7 @@ impl Env<'_> {
                     None => None,
                 }
             }
-            (ResultConversions::Automatic, _) => None,
+            (ResultConversions::Automatic | ResultConversions::Home, _) => None,
             (ResultConversions::Rules(rules), _) => rules.iter().find_map(|rule| match (rule, &value) {
                 (ConversionRule::Unit { from, to }, Value::Quantity(q)) => {
                     let from = custom::parse_unit(from)?;
@@ -316,6 +368,49 @@ impl Env<'_> {
             Some(target) => self.convert(value, &target, display),
             None => Ok((value, display)),
         }
+    }
+
+    /// An amount in the home system or currency, as an explicit conversion would give it:
+    /// `18 lb` is 8.16 kg where it's metric, `$10` is €8.90 in Germany. Anything else stays.
+    fn convert_home(&self, value: Value, display: Display, parts: &mut Parts) -> (Value, Display) {
+        let Value::Quantity(q) = &value else { return (value, display) };
+        if !matches!(display, Display::Auto | Display::Parts(_)) {
+            return (value, display);
+        }
+        let Some(unit) = self.home_unit(q) else { return (value, display) };
+        self.rates_at_hand.set(true);
+        let converted = self.convert(value.clone(), &Target::Unit(unit.clone()), Display::Auto);
+        self.rates_at_hand.set(false);
+        // Without a rate at hand the amount stays as it is.
+        let Ok(converted) = converted else { return (value, display) };
+        parts.source = Some((value, display));
+        parts.target = Some(Target::Unit(unit));
+        parts.home = true;
+        converted
+    }
+
+    /// The unit of the home system or currency an amount goes to, at the size that reads
+    /// best; `None` for amounts at home already or with no counterpart there (`1 ly`).
+    fn home_unit(&self, q: &Quantity) -> Option<Unit> {
+        let reg = registry();
+        if q.unit.is_money() {
+            let home = reg.currency(self.config.currency.as_deref()?)?;
+            let code = |u: &Unit| u.currency().map(|(c, _)| c.code);
+            return (code(&home) != code(&q.unit)).then_some(home);
+        }
+        let table = match self.config.unit_system {
+            UnitSystem::Metric => TO_METRIC,
+            UnitSystem::CustomaryUs => TO_US,
+            UnitSystem::Imperial => TO_IMPERIAL,
+        };
+        let is = |s: &&str| reg.lookup(s).is_some_and(|u| u.same_as(&q.unit));
+        let (_, family) = table.iter().find(|(from, _)| from.iter().any(is))?;
+        let units: Vec<Unit> = family.iter().filter_map(|s| reg.lookup(s)).collect();
+        let fits = |u: &&Unit| match self.to_unit(Value::Quantity(q.clone()), u) {
+            Ok(Value::Quantity(c)) => c.number.abs() >= Number::ONE,
+            _ => false,
+        };
+        units.iter().find(fits).or(units.last()).cloned()
     }
 
     /// Evaluates a whole line, keeping the values its sides are made of.
@@ -373,7 +468,7 @@ impl Env<'_> {
         config: &Arc<Config>,
     ) -> Answer {
         let text = format::render(&value, &display, self.config, &self.now);
-        let form = form(expr, &value);
+        let form = if parts.home { Form::Conversion } else { form(expr, &value) };
         Answer {
             value,
             display,

@@ -380,6 +380,7 @@ fn convert(q: &Quantity, to: &Unit) -> crate::Result<Quantity> {
         rates: &rates,
         food_as: Cell::default(),
         rate_date: Cell::default(),
+        rates_at_hand: Cell::default(),
         inflation: None,
         weather: None,
         reads: Default::default(),
