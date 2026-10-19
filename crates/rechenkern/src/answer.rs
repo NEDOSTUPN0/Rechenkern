@@ -233,19 +233,24 @@ impl Answer {
     }
 
     fn side(&self, value: Value, display: &Display) -> Side {
-        let text = match &value {
-            Value::Moment(m) => self.moment_text(m, false),
+        let text = match (&value, self.config.side_precision) {
+            (Value::Moment(m), _) => self.moment_text(m, false),
+            (_, Some(precision)) => self.render_in(&value, display, &Config { precision, ..(*self.config).clone() }),
             _ => self.render(&value, display),
         };
         Side { label: caption(&value), value, text }
     }
 
     fn render(&self, value: &Value, display: &Display) -> String {
+        self.render_in(value, display, &self.config)
+    }
+
+    fn render_in(&self, value: &Value, display: &Display, config: &Config) -> String {
         let now = match &self.now {
-            Some(time) => Now::at(&self.config, time.clone()),
-            None => Now::new(&self.config),
+            Some(time) => Now::at(config, time.clone()),
+            None => Now::new(config),
         };
-        format::render(value, display, &self.config, &now)
+        format::render(value, display, config, &now)
     }
 
     /// A date or time without its zone; `clock_only` leaves out the date of a clock time.

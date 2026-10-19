@@ -153,3 +153,11 @@ fn typed_values() {
     assert_eq!(span.start().unwrap().date().to_string(), "2026-01-01");
     assert_eq!(span.end().unwrap().date().to_string(), "2026-03-01");
 }
+
+#[test]
+fn side_precision() {
+    let config = Config { side_precision: Some(4), ..Config::default() };
+    let answer = Calculator::with_config(config).calculate("18 lb in kg").unwrap().unwrap();
+    assert_eq!(answer.target().unwrap().text, "8.165 kg");
+    assert_eq!(answer.copy_text(), "8.16466266 kg");
+}

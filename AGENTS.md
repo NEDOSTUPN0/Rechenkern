@@ -189,6 +189,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   (`Display::Scaled`), as SoulverCore does; glued Cyrillic and Chinese letters
   don't count.
 - `Calculator::alternatives` gives the answer in other formats and units.
+- `Config::side_precision` writes a conversion's sides with fewer digits for a card
+  (`8.165 kg`) while the answer and `copy_text` keep `precision` (CLI: `--side-precision`).
 
 ## Sheets
 

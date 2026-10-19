@@ -381,6 +381,10 @@ impl Default for CommentOptions {
 pub struct Config {
     /// Significant digits in answers. Whole numbers are never rounded.
     pub precision: u32,
+    /// Significant digits in the texts of a conversion's sides (`Answer::source`,
+    /// `Answer::target`), for a card that reads better with fewer ("8.165 kg") while the
+    /// answer and `copy_text` keep `precision`. `None` is `precision`.
+    pub side_precision: Option<u32>,
     /// Group thousands: `1,234,567`.
     pub thousands_separators: bool,
     /// Write `1.234,5` instead of `1,234.5`. Input takes both styles; this
@@ -425,6 +429,7 @@ impl Default for Config {
     fn default() -> Config {
         Config {
             precision: 10,
+            side_precision: None,
             thousands_separators: true,
             decimal_comma: false,
             clock_24h: true,

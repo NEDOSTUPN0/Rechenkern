@@ -34,6 +34,9 @@ struct Args {
     /// Significant digits in answers.
     #[arg(short, long, default_value_t = 10)]
     precision: u32,
+    /// Significant digits in the source and target of a conversion (JSON), if fewer.
+    #[arg(long)]
+    side_precision: Option<u32>,
     /// Use a 12-hour clock.
     #[arg(long = "12h")]
     twelve_hour: bool,
@@ -235,6 +238,7 @@ fn config(args: &Args) -> Result<Config, String> {
     let times = Config::for_locale(&locale(&["LC_ALL", "LC_TIME", "LANG"]).unwrap_or_default());
     Ok(Config {
         precision: args.precision.clamp(1, 28),
+        side_precision: args.side_precision.map(|p| p.clamp(1, 28)),
         thousands_separators: !args.no_separators,
         decimal_comma: numbers.decimal_comma,
         clock_24h: !args.twelve_hour && times.clock_24h,
