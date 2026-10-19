@@ -255,9 +255,9 @@ impl Env<'_> {
             Expr::Inflation { amount, from, to, rate } => {
                 self.inflation(self.eval(amount)?, *from, *to, rate.as_deref())?
             }
-            Expr::Growth { principal, time, rate, period, compounds, result } => {
+            Expr::Growth { principal, time, rate, period, periods, compounds, result } => {
                 let (principal, time, rate) = (self.eval(principal)?, self.eval(time)?, self.eval(rate)?);
-                self.growth(principal, time, rate, period, *compounds, *result)?
+                self.growth(principal, time, rate, (period, *periods), *compounds, *result)?
             }
         })
     }
@@ -425,15 +425,20 @@ impl Env<'_> {
         principal: Value,
         time: Value,
         rate: Value,
-        period: &Unit,
+        (period, periods): (&Unit, Number),
         compounds: Option<i64>,
         result: GrowthResult,
     ) -> Result<Value> {
+        if periods.is_zero() {
+            bail!("division by zero");
+        }
         let length_in = |unit: &Unit| match &time {
             Value::Duration(d) => Ok(self.duration_in(d, unit)?.number),
             Value::Quantity(q) if q.unit.dim() == Dim::TIME => Ok(self.convert_quantity(q, unit)?.number),
             v => bail!("expected a length of time, not {}", v.kind()),
         };
+        // How many periods the time is: "5 years" are 2.5 periods of 2 years.
+        let periods_in_time = || Ok::<_, Error>(length_in(period)? / periods);
         let rate = match rate {
             Value::Percent(p) => p / Number::from_i64(100),
             v => bail!("expected a percentage rate, not {}", v.kind()),
@@ -441,12 +446,14 @@ impl Env<'_> {
         let loan = matches!(result, GrowthResult::Repayment | GrowthResult::LoanInterest);
         // Number of compounding steps and the rate of each; a loan is paid back monthly.
         let (steps, rate) = match compounds.map(Number::from_i64) {
-            Some(n) => (length_in(period)? * n, rate / n),
+            Some(n) => (periods_in_time()? * n, rate / n),
             None if loan => {
                 let month = registry().get("mo");
-                (length_in(&month)?, rate * self.convert_quantity(&Quantity::new(Number::ONE, month), period)?.number)
+                let months_per_period =
+                    self.convert_quantity(&Quantity::new(Number::ONE, month.clone()), period)?.number;
+                (length_in(&month)?, rate * months_per_period / periods)
             }
-            None => (length_in(period)?, rate),
+            None => (periods_in_time()?, rate),
         };
         let factor = (Number::ONE + rate).pow(steps);
         // What the principal turns into: grown, or paid back in equal payments, one per step.

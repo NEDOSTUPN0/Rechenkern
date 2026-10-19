@@ -156,8 +156,9 @@ pub enum Expr {
         principal: Box<Expr>,
         time: Box<Expr>,
         rate: Box<Expr>,
-        /// The rate applies once per this time unit (a year by default)...
+        /// The rate applies once per `periods` of this time unit (a year by default)...
         period: Unit,
+        periods: Number,
         /// ...compounding this many times within it: once if `None`, monthly for a loan.
         compounds: Option<i64>,
         result: GrowthResult,

@@ -245,7 +245,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   whole-line phrase in `parser/phrases.rs`; the rate is yearly unless written
   per period (`10% per month`). Loans (`total repayment on`, `total interest on`,
   `monthly repayment on`) use the same phrase and are paid back monthly;
-  `monthly`/`weekly` spread the total over the loan's time.
+  `monthly`/`weekly` spread the total over the loan's time. A rate may say its period
+  and direction (`10% decay every 2 years`). `time from 20 to 30 at 10% every year`
+  takes the logarithm, `at 2/day` divides (a duration in that period and shorter
+  units); `growth every year from 100 to 200 over 5 years` is the rate back, and
+  `$500 invested $1,000 returned` the gain as a multiple.
 - Workdays (Mon–Fri, no public holidays yet) have their own dimension, so they
   never mix with days; `in workdays` counts them over a range or a span of days.
   Shorter time is hours of work (`Config::hours_per_workday`, 8): `40 hours in

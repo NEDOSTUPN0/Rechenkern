@@ -28,6 +28,15 @@ impl Parser<'_> {
         if let Some(expr) = self.annual_return()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.time_to_reach()? {
+            return Ok(Some(expr));
+        }
+        if let Some(expr) = self.growth_rate()? {
+            return Ok(Some(expr));
+        }
+        if let Some(expr) = self.investment_return()? {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.when_it_is()? {
             return Ok(Some(expr));
         }
@@ -251,23 +260,13 @@ impl Parser<'_> {
         // each part runs to the next one.
         let stops = [Some(during), Some(at), compounding, Some(self.toks.len())];
         let end_after = |from: usize| stops.iter().flatten().copied().filter(|&s| s > from).min().unwrap_or(from);
-        let (principal_end, time, mut rate_end) = (during.min(at), (during + 1, end_after(during)), end_after(at));
-        // "10% per month" grows every month; plain rates are yearly.
-        let mut period = registry().get("yr");
-        let per = self
-            .toks
-            .get(rate_end.wrapping_sub(2))
-            .is_some_and(|t| t.is_sym("/") || ["per", "a", "an", "every", "each"].iter().any(|w| t.is_word(w)));
-        if per
-            && self.matches_at(rate_end.wrapping_sub(3), &["%"])
-            && let Some((unit, 1)) = self.unit_at(rate_end - 1, false).filter(|(u, _)| u.dim() == Dim::TIME)
-        {
-            period = unit;
-            rate_end -= 2;
-        }
-        if !self.matches_at(rate_end.wrapping_sub(1), &["%"]) {
+        let (principal_end, time, rate_end) = (during.min(at), (during + 1, end_after(during)), end_after(at));
+        // "10% per month" grows every month, "10% every 2 years" every other year; plain rates are yearly.
+        let Some(rate) = self.rate_with_period(at + 1, rate_end)? else { return Ok(None) };
+        if !rate.percent {
             return Ok(None);
         }
+        let (periods, period) = rate.period.unwrap_or((Number::ONE, registry().get("yr")));
         let compounds = match compounding.map(|c| self.lower(c + 1).unwrap_or_default()).as_deref() {
             None => None,
             Some("yearly" | "annually" | "annual") => Some(1),
@@ -282,8 +281,9 @@ impl Parser<'_> {
         let growth = Expr::Growth {
             principal: self.part(start, principal_end)?.boxed(),
             time: time.clone().boxed(),
-            rate: self.part(at + 1, rate_end)?.boxed(),
+            rate: rate.rate.boxed(),
             period,
+            periods,
             compounds,
             result,
         };
@@ -295,6 +295,145 @@ impl Parser<'_> {
             }
             None => growth,
         }))
+    }
+
+    /// A rate between `from` and `to`, with what it is per: "10%", "10% every 2 years",
+    /// "10% decay per month", "2/day", "2 every day". Decay makes it negative.
+    fn rate_with_period(&self, from: usize, to: usize) -> Result<Option<Rate>> {
+        let period = (from + 1..to).find_map(|k| {
+            let per = self.toks[k].is_sym("/") || PER_WORDS.iter().any(|w| self.toks[k].is_word(w));
+            let count = match self.toks.get(k + 1)?.tok {
+                Tok::Num(n) => Some(n),
+                _ => None,
+            };
+            let at = k + 1 + usize::from(count.is_some());
+            let (unit, n) = self.unit_at(at, false).filter(|(u, _)| u.dim() == Dim::TIME)?;
+            (per && at + n == to).then(|| (k, (count.unwrap_or(Number::ONE), unit)))
+        });
+        let rate_end = period.as_ref().map_or(to, |&(k, _)| k);
+        let kind = self.lower(rate_end.wrapping_sub(1));
+        let (rate_end, decay) = match kind.as_deref() {
+            Some("growth" | "increase") => (rate_end - 1, false),
+            Some("decay" | "decrease") => (rate_end - 1, true),
+            _ => (rate_end, false),
+        };
+        if rate_end <= from {
+            return Ok(None);
+        }
+        let percent = self.matches_at(rate_end - 1, &["%"]);
+        let rate = self.part(from, rate_end)?;
+        let rate = if decay { Expr::Neg(rate.boxed()) } else { rate };
+        Ok(Some(Rate { rate, percent, period: period.map(|(_, p)| p) }))
+    }
+
+    /// "time from 20 to 30 at 10% every year", "days from 20 to 30 at 2 every day": how long
+    /// a value takes to grow to another, by a percentage each period (yearly unless said) or
+    /// by an amount.
+    fn time_to_reach(&self) -> Result<Option<Expr>> {
+        let unit = match self.lower(0).as_deref() {
+            Some("time") => None,
+            Some(_) => match self.unit_at(0, false) {
+                Some((unit, 1)) if unit.dim() == Dim::TIME => Some(unit),
+                _ => return Ok(None),
+            },
+            None => return Ok(None),
+        };
+        if !self.matches_at(1, &["from"]) {
+            return Ok(None);
+        }
+        let Some(to) = self.find(2, &["to"]) else { return Ok(None) };
+        let Some(at) = self.find(to + 1, &["at"]) else { return Ok(None) };
+        // Anything else is ordinary text: "time from 9am to 5pm at work".
+        let Ok(Some(rate)) = self.rate_with_period(at + 1, self.toks.len()) else { return Ok(None) };
+        let (Ok(a), Ok(b)) = (self.part(2, to), self.part(to + 1, at)) else { return Ok(None) };
+        if [&a, &b].iter().any(|e| e.contains(&|e| matches!(e, Expr::Time(_)))) {
+            return Ok(None);
+        }
+        let period = |(n, unit)| Expr::WithUnit(Expr::Number(n).boxed(), unit);
+        if rate.percent {
+            let every = period(rate.period.unwrap_or((Number::ONE, registry().get("yr"))));
+            let factor = Expr::binary(Op::Add, Expr::Number(Number::ONE), rate.rate);
+            let steps = Expr::Call(Func::Log, vec![Expr::binary(Op::Div, b, a), factor]);
+            let time = Expr::binary(Op::Mul, steps, every);
+            return Ok(Some(match unit {
+                Some(unit) => Expr::Convert(time.boxed(), Target::Unit(unit)),
+                None => time,
+            }));
+        }
+        let reg = registry();
+        // "3 days 8 hours": an amount per a period takes a time in that period and shorter ones.
+        let parts = |longest: &crate::units::Unit| {
+            let size = |u: &crate::units::Unit| u.single().map_or(Number::ZERO, |d| d.scale);
+            ["yr", "mo", "wk", "d", "h", "min", "s"]
+                .map(|s| reg.get(s))
+                .into_iter()
+                .filter(|u| size(u) <= size(longest))
+                .collect::<Vec<_>>()
+        };
+        let target = match (unit, &rate.period) {
+            (Some(unit), _) => Some(Target::Unit(unit)),
+            (None, Some((_, unit))) => Some(Target::Units(parts(unit))),
+            (None, None) => None,
+        };
+        let rate = match rate.period {
+            Some(p) => Expr::binary(Op::Per, rate.rate, period(p)),
+            None => rate.rate,
+        };
+        let time = Expr::binary(Op::Div, Expr::binary(Op::Sub, b, a), rate);
+        Ok(Some(match target {
+            Some(target) => Expr::Convert(time.boxed(), target),
+            None => time,
+        }))
+    }
+
+    /// "growth every year from 100 to 200 over 5 years": the rate per period that grows one
+    /// value into another.
+    fn growth_rate(&self) -> Result<Option<Expr>> {
+        if !["growth", "decay", "increase", "decrease"].iter().any(|w| self.matches_at(0, &[w]))
+            || !PER_WORDS.iter().any(|w| self.matches_at(1, &[w]))
+        {
+            return Ok(None);
+        }
+        let Some(from) = self.find(2, &["from"]) else { return Ok(None) };
+        let Some(to) = self.find(from + 1, &["to"]) else { return Ok(None) };
+        let Some(over) = ["over", "in", "after"].iter().filter_map(|w| self.find(to + 1, &[w])).min() else {
+            return Ok(None);
+        };
+        let every = match self.toks.get(2).map(|t| &t.tok) {
+            Some(&Tok::Num(n)) => (n, 3),
+            _ => (Number::ONE, 2),
+        };
+        let Some((unit, 1)) = self.unit_at(every.1, false).filter(|(u, _)| u.dim() == Dim::TIME) else {
+            return Ok(None);
+        };
+        if every.1 + 1 != from {
+            return Ok(None);
+        }
+        let (a, b) = (self.part(from + 1, to)?, self.part(to + 1, over)?);
+        let time = self.part(over + 1, self.toks.len())?;
+        let period = Expr::WithUnit(Expr::Number(every.0).boxed(), unit);
+        let one = || Expr::Number(Number::ONE);
+        let growth = Expr::binary(Op::Pow, Expr::binary(Op::Div, b, a), Expr::binary(Op::Div, period, time));
+        Ok(Some(Self::formatted(Expr::binary(Op::Sub, growth, one()), Format::Percent)))
+    }
+
+    /// "$500 invested $1,000 returned": the gain as a multiple of what was put in (1x).
+    fn investment_return(&self) -> Result<Option<Expr>> {
+        let Some(invested) = self.find(1, &["invested"]) else { return Ok(None) };
+        let Some(returned) = self.find(invested + 2, &["returned"]) else { return Ok(None) };
+        let start = if self.matches_at(0, &["return", "on"]) { 2 } else { 0 };
+        let tail = &self.toks[returned + 1..];
+        let format = match tail.len() {
+            0 => Format::Multiplier,
+            2 if ["in", "as"].iter().any(|w| tail[0].is_word(w)) && self.matches_at(returned + 2, &["%"]) => {
+                Format::Percent
+            }
+            _ => return Ok(None),
+        };
+        let second = invested + 1 + usize::from(self.toks[invested + 1].is_sym(","));
+        let (a, b) = (self.part(start, invested)?, self.part(second, returned)?);
+        let gain = Expr::binary(Op::Div, Expr::binary(Op::Sub, b, a.clone()), a);
+        Ok(Some(Self::formatted(gain, format)))
     }
 
     /// "ppi of 5.5 inch at 1920x1080": the pixels per inch of a screen.
@@ -630,6 +769,18 @@ fn change(a: Expr, b: Expr) -> Expr {
 }
 
 /// Phrases before the principal and what they ask for; loans need "total" or a period first.
+/// Words between a rate and its period: "10% per year", "2 every day".
+const PER_WORDS: &[&str] = &["per", "a", "an", "every", "each"];
+
+/// A rate read by `rate_with_period`.
+struct Rate {
+    rate: Expr,
+    /// The rate ends in a percentage, so it compounds.
+    percent: bool,
+    /// What it is per: 2 years in "every 2 years".
+    period: Option<(Number, crate::units::Unit)>,
+}
+
 const GROWTH_PHRASES: &[(&[&str], GrowthResult)] = &[
     (&["interest", "repayment", "on"], GrowthResult::LoanInterest),
     (&["interest", "on"], GrowthResult::Interest),
