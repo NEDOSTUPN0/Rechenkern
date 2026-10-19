@@ -188,6 +188,7 @@ impl<'a> Parser<'a> {
             || (i == 0 && words::is_cadence_word(w) && self.config().features.cadence_parsing)
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
+            || (w == "cast" && ["to", "as", "into"].iter().any(|t| self.words_at(i + 1, &[t])))
             // "sq ft", "cu m"
             || (matches!(w, "sq" | "cu") && self.unit_at(i + 1, false).is_some())
             || (matches!(w, "through" | "thru") && self.date_starts(i + 1))

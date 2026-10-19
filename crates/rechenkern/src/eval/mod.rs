@@ -626,6 +626,11 @@ impl Env<'_> {
             }
             Target::Zone(zone) => (Value::Moment(self.to_zone(value, &zone.zone)?), Display::Auto),
             Target::Format(format) => self.to_format(value, *format, display)?,
+            Target::Cast(unit) => match value {
+                Value::Quantity(q) => (Value::Quantity(Quantity::new(q.number, unit.clone())), Display::Auto),
+                Value::Percent(p) => (Value::Quantity(Quantity::new(p, unit.clone())), Display::Auto),
+                v => bail!("can't cast {} to a unit", v.kind()),
+            },
         })
     }
 

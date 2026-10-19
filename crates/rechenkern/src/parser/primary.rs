@@ -164,12 +164,27 @@ impl Parser<'_> {
         Ok(if parts.len() == 1 { parts.pop().unwrap() } else { Expr::Composite(parts) })
     }
 
+    /// "um" or "us" ends the amount: nothing after it but a conversion.
+    fn micro_here(&self) -> bool {
+        match self.toks.get(self.pos + 1) {
+            None => true,
+            Some(t) => ["in", "to", "as", "into"].iter().any(|w| t.is_word(w)) || t.word().is_none(),
+        }
+    }
+
     /// The unit written right after a number.
     fn number_unit(&mut self) -> Option<Unit> {
         let tok = self.cur()?;
         let symbol = match &tok.tok {
             Tok::Sym("'") => Some("ft"),
             Tok::Sym("\"") => Some("in"),
+            // Primes are minutes and seconds of arc, as in SoulverCore.
+            Tok::Sym("′") => Some("arcmin"),
+            Tok::Sym("″") => Some("arcsec"),
+            // "5 um", "10 us in ms": micro typed with a "u", but not "5 us dollars".
+            Tok::Word(w) if matches!(w.as_str(), "um" | "us") && self.micro_here() => {
+                Some(if w == "um" { "µm" } else { "µs" })
+            }
             Tok::Word(w) if w.eq_ignore_ascii_case("in") && self.inch_here() => Some("in"),
             _ => None,
         };
@@ -344,8 +359,10 @@ impl Parser<'_> {
             p.pos += 1;
             registry().get("min")
         // "40° 26′ 46″": after degrees, minutes and seconds of arc.
-        } else if last.dim() == Dim::ANGLE && p.cur().is_some_and(|t| t.is_sym("'") || t.is_sym("\"")) {
-            let arc = if p.cur().is_some_and(|t| t.is_sym("'")) { "arcmin" } else { "arcsec" };
+        } else if last.dim() == Dim::ANGLE
+            && p.cur().is_some_and(|t| t.is_sym("'") || t.is_sym("\"") || t.is_sym("′") || t.is_sym("″"))
+        {
+            let arc = if p.cur().is_some_and(|t| t.is_sym("'") || t.is_sym("′")) { "arcmin" } else { "arcsec" };
             p.pos += 1;
             registry().get(arc)
         } else {
@@ -436,6 +453,13 @@ impl Parser<'_> {
                 self.scope.radix.set(Some(radix));
             }
             return Ok(Some(Expr::Var(name)));
+        }
+        // "Mach 2": the number comes after.
+        if w == "mach"
+            && let Some(Tok::Num(n)) = self.toks.get(i + 1).map(|t| &t.tok)
+        {
+            self.pos += 2;
+            return Ok(Some(Expr::WithUnit(Expr::Number(*n).boxed(), registry().get("mach"))));
         }
         if let Some(expr) = self.weather()? {
             return Ok(Some(expr));

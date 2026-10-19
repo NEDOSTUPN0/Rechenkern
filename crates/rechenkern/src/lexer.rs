@@ -304,7 +304,8 @@ impl Lexer<'_> {
                 if !self.options.quotes {
                     self.space = true;
                 } else if self.after_number() {
-                    self.push(Tok::Sym("\""), start);
+                    // "30″" is arcseconds, as in SoulverCore; "5'10\"" feet and inches.
+                    self.push(Tok::Sym(if c == '″' { "″" } else { "\"" }), start);
                 } else {
                     // "Quoted text" is an inline comment.
                     while self.peek(0).is_some_and(|c| !matches!(c, '"' | '“' | '”')) {
@@ -316,7 +317,7 @@ impl Lexer<'_> {
             } else if matches!(c, '\'' | '′' | '’') {
                 self.i += 1;
                 if self.after_number() {
-                    self.push(Tok::Sym("'"), start);
+                    self.push(Tok::Sym(if c == '′' { "′" } else { "'" }), start);
                 }
             } else if let Some(&(text, sym)) =
                 MULTI_SYMBOLS.iter().find(|(t, _)| self.src[self.offset(self.i)..].starts_with(t))

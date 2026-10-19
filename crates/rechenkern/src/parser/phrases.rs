@@ -25,6 +25,9 @@ impl Parser<'_> {
         if let Some(expr) = self.screen_density()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.wheel_speed()? {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.annual_return()? {
             return Ok(Some(expr));
         }
@@ -519,6 +522,43 @@ impl Parser<'_> {
         let pixels = Expr::Call(Func::Sqrt, vec![Expr::Number(width * width + height * height)]);
         let density = Expr::binary(Op::Div, pixels, Self::formatted(inches, Format::Number));
         Ok(Some(Expr::WithUnit(density.boxed(), reg.get("ppi"))))
+    }
+
+    /// "speed of 26 inch tire at 200 rpm": a wheel of that diameter rolls its
+    /// circumference each turn. In mph for imperial sizes, km/h otherwise.
+    fn wheel_speed(&self) -> Result<Option<Expr>> {
+        if !self.matches_at(0, &["speed", "of"]) {
+            return Ok(None);
+        }
+        let Some(at) = (3..self.toks.len()).find(|&i| self.matches_at(i, &["at"])) else { return Ok(None) };
+        let wheel = ["tire", "tyre", "wheel"].iter().any(|w| self.matches_at(at - 1, &[w]));
+        let diameter = self.part(2, at - usize::from(wheel))?;
+        let reg = registry();
+        let Expr::WithUnit(_, unit) = &diameter else { return Ok(None) };
+        if unit.dim() != Dim::LENGTH {
+            return Ok(None);
+        }
+        let conversion =
+            (at + 1..self.toks.len()).find(|&i| ["in", "to", "as"].iter().any(|w| self.matches_at(i, &[w])));
+        let end = conversion.unwrap_or(self.toks.len());
+        let turns =
+            Expr::Convert(self.part(at + 1, end)?.boxed(), Target::Unit(reg.get("rev").product(&reg.get("s").pow(-1))));
+        let pi = Expr::Number(Number::from_f64(std::f64::consts::PI));
+        let per_second =
+            Expr::binary(Op::Mul, Expr::binary(Op::Mul, diameter.clone(), pi), Self::formatted(turns, Format::Number));
+        let speed = Expr::binary(Op::Per, per_second, Expr::BareUnit(reg.get("s")));
+        let target = match conversion {
+            Some(i) => match self.sub(i + 1, self.toks.len()).target() {
+                Some(target) => target,
+                None => return Ok(None),
+            },
+            None => {
+                let imperial = ["in", "ft", "yd", "mi"].iter().any(|s| *unit == reg.get(s));
+                let distance = reg.get(if imperial { "mi" } else { "km" });
+                Target::Unit(distance.product(&reg.get("h").pow(-1)))
+            }
+        };
+        Ok(Some(Expr::Convert(speed.boxed(), target)))
     }
 
     /// A screen resolution at token `i`: "1920x1080", "1920 x 1080"; its width, height and length.

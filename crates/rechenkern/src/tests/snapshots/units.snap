@@ -333,6 +333,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 LUNA in EUR                              → €1.13
 2.5 LYD                                      → 2.500 LYD
 2.5 LYD in EUR                               → €1.13
+2.5 M                                        → 2.5 M
 2.5 MA                                       → 2.5 MA
 2.5 MA in A                                  → 2,500,000 A
 2.5 MAD                                      → 2.50 MAD
@@ -389,6 +390,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 MYR in EUR                               → €1.13
 2.5 MZN                                      → 2.50 MZN
 2.5 MZN in EUR                               → €1.13
+2.5 Mach                                     → 2.5 mach
+2.5 Mach in mph                              → 1,903.039996 mph
 2.5 Mb                                       → 2.5 Mbit
 2.5 Mb in B                                  → 312,500 B
 2.5 Mbit                                     → 2.5 Mbit
@@ -645,6 +648,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 VUV                                      → 3 VUV
 2.5 VUV in EUR                               → €1.13
 2.5 W                                        → 2.5 W
+2.5 W m                                      → 2.5 W·m
 2.5 W s                                      → 2.5 W·s
 2.5 W s in J                                 → 2.5 J
 2.5 WST                                      → 2.50 WST
@@ -1168,10 +1172,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 cfp francs in EUR                        → €1.13
 2.5 cg                                       → 2.5 cg
 2.5 cg in kg                                 → 0.000025 kg
+2.5 ch                                       → 2.5 chains
+2.5 ch in m                                  → 50.292 m
+2.5 chain                                    → 2.5 chains
+2.5 chain in m                               → 50.292 m
 2.5 chainlink                                → 2.5 LINK
 2.5 chainlink in EUR                         → €1.13
 2.5 chainlinks                               → 2.5 LINK
 2.5 chainlinks in EUR                        → €1.13
+2.5 chains                                   → 2.5 chains
+2.5 chains in m                              → 50.292 m
 2.5 chf                                      → 2.50 CHF
 2.5 chf in EUR                               → €1.13
 2.5 chilean peso                             → 3 CLP
@@ -1248,6 +1258,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 cuyd in L                                → 1,911.387145 L
 2.5 cve                                      → 2.50 CVE
 2.5 cve in EUR                               → €1.13
+2.5 cwt                                      → 2.5 cwt
+2.5 cwt in kg                                → 113.3980925 kg
 2.5 czech crown                              → 2.50 CZK
 2.5 czech crown in EUR                       → €1.13
 2.5 czech crowns                             → 2.50 CZK
@@ -1412,6 +1424,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 dram in EUR                              → €1.13
 2.5 drams                                    → 2.50 AMD
 2.5 drams in EUR                             → €1.13
+2.5 drop                                     → 2.5 drops
+2.5 drop in L                                → 0.000125 L
+2.5 drops                                    → 2.5 drops
+2.5 drops in L                               → 0.000125 L
+2.5 dyn                                      → 2.5 dyn
+2.5 dyn in N                                 → 0.000025 N
+2.5 dyne                                     → 2.5 dyn
+2.5 dyne in N                                → 0.000025 N
+2.5 dynes                                    → 2.5 dyn
+2.5 dynes in N                               → 0.000025 N
 2.5 dzd                                      → 2.50 DZD
 2.5 dzd in EUR                               → €1.13
 2.5 eV                                       → 2.5 eV
@@ -1452,6 +1474,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 emirati dirhams in EUR                   → €1.13
 2.5 ems                                      → 2.5 em
 2.5 ems in m                                 → 0.01058333333 m
+2.5 erg                                      → 2.5 ergs
+2.5 erg in J                                 → 0.00000025 J
+2.5 ergs                                     → 2.5 ergs
+2.5 ergs in J                                → 0.00000025 J
 2.5 ern                                      → 2.50 ERN
 2.5 ern in EUR                               → €1.13
 2.5 escudo                                   → 2.50 CVE
@@ -1641,6 +1667,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 ghanaian cedis in EUR                    → €1.13
 2.5 ghs                                      → 2.50 GHS
 2.5 ghs in EUR                               → €1.13
+2.5 gi                                       → 2.5 gills
+2.5 gi in L                                  → 0.2957352956 L
 2.5 gib                                      → 2.5 GiB
 2.5 gib in B                                 → 2,684,354,560 B
 2.5 gibibit                                  → 2.5 Gibit
@@ -1705,6 +1733,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 gigawatt hours in J                      → 9,000,000,000,000 J
 2.5 gigawatts                                → 2.5 GW
 2.5 gigawatts in W                           → 2,500,000,000 W
+2.5 gill                                     → 2.5 gills
+2.5 gill in L                                → 0.2957352956 L
+2.5 gills                                    → 2.5 gills
+2.5 gills in L                               → 0.2957352956 L
 2.5 gip                                      → 2.50 GIP
 2.5 gip in EUR                               → €1.13
 2.5 gj                                       → 2.5 GJ
@@ -1741,6 +1773,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 grams in kg                              → 0.0025 kg
 2.5 gtq                                      → 2.50 GTQ
 2.5 gtq in EUR                               → €1.13
+2.5 gtt                                      → 2.5 drops
+2.5 gtt in L                                 → 0.000125 L
 2.5 guarani                                  → 3 PYG
 2.5 guarani in EUR                           → €1.13
 2.5 guaranis                                 → 3 PYG
@@ -1787,6 +1821,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 haitian gourde in EUR                    → €1.13
 2.5 haitian gourdes                          → 2.50 HTG
 2.5 haitian gourdes in EUR                   → €1.13
+2.5 hand                                     → 2.5 hands
+2.5 hand in m                                → 0.254 m
+2.5 hands                                    → 2.5 hands
+2.5 hands in m                               → 0.254 m
 2.5 hbar                                     → 2.5 HBAR
 2.5 hbar in EUR                              → €1.13
 2.5 hectare                                  → 2.5 ha
@@ -1823,6 +1861,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 henry                                    → 2.5 henries
 2.5 henrys                                   → 2.5 henries
 2.5 hertz                                    → 2.5 Hz
+2.5 hh                                       → 2.5 hands
+2.5 hh in m                                  → 0.254 m
+2.5 hhd                                      → 2.5 hogsheads
+2.5 hhd in L                                 → 596.202356 L
 2.5 hkd                                      → HK$2.50
 2.5 hkd in EUR                               → €1.13
 2.5 hl                                       → 2.5 hL
@@ -1831,6 +1873,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 hm in m                                  → 250 m
 2.5 hnl                                      → 2.50 HNL
 2.5 hnl in EUR                               → €1.13
+2.5 hogshead                                 → 2.5 hogsheads
+2.5 hogshead in L                            → 596.202356 L
+2.5 hogsheads                                → 2.5 hogsheads
+2.5 hogsheads in L                           → 596.202356 L
 2.5 honduran lempira                         → 2.50 HNL
 2.5 honduran lempira in EUR                  → €1.13
 2.5 honduran lempiras                        → 2.50 HNL
@@ -1863,6 +1909,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 htg in EUR                               → €1.13
 2.5 huf                                      → 2.50 HUF
 2.5 huf in EUR                               → €1.13
+2.5 hundredweight                            → 2.5 cwt
+2.5 hundredweight in kg                      → 113.3980925 kg
+2.5 hundredweights                           → 2.5 cwt
+2.5 hundredweights in kg                     → 113.3980925 kg
 2.5 hungarian forint                         → 2.50 HUF
 2.5 hungarian forint in EUR                  → €1.13
 2.5 hungarian forints                        → 2.50 HUF
@@ -1890,6 +1940,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 imp fl oz in L                           → 0.07103265625 L
 2.5 imp gal                                  → 2.5 imp gal
 2.5 imp gal in L                             → 11.365225 L
+2.5 imp gi                                   → 2.5 imp gi
+2.5 imp gi in L                              → 0.3551632813 L
+2.5 imp pk                                   → 2.5 imp pk
+2.5 imp pk in L                              → 22.73045 L
 2.5 imp pt                                   → 2.5 imp pt
 2.5 imp pt in L                              → 1.420653125 L
 2.5 imp qt                                   → 2.5 imp qt
@@ -1906,6 +1960,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 imperial gallon in L                     → 11.365225 L
 2.5 imperial gallons                         → 2.5 imp gal
 2.5 imperial gallons in L                    → 11.365225 L
+2.5 imperial gill                            → 2.5 imp gi
+2.5 imperial gill in L                       → 0.3551632813 L
+2.5 imperial gills                           → 2.5 imp gi
+2.5 imperial gills in L                      → 0.3551632813 L
+2.5 imperial hundredweight                   → 2.5 long cwt
+2.5 imperial hundredweight in kg             → 127.0058636 kg
+2.5 imperial peck                            → 2.5 imp pk
+2.5 imperial peck in L                       → 22.73045 L
+2.5 imperial pecks                           → 2.5 imp pk
+2.5 imperial pecks in L                      → 22.73045 L
 2.5 imperial pint                            → 2.5 imp pt
 2.5 imperial pint in L                       → 1.420653125 L
 2.5 imperial pints                           → 2.5 imp pt
@@ -2178,9 +2242,9 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 kilopounds per square inch               → 2.5 ksi
 2.5 kilopounds per square inch in Pa         → 17,236,893.23 Pa
 2.5 kilosiemens                              → 2.5 kS
-2.5 kilotonne                                → 2.5 kt
+2.5 kilotonne                                → 2.5 kilotonnes
 2.5 kilotonne in kg                          → 2,500,000 kg
-2.5 kilotonnes                               → 2.5 kt
+2.5 kilotonnes                               → 2.5 kilotonnes
 2.5 kilotonnes in kg                         → 2,500,000 kg
 2.5 kilovolt                                 → 2.5 kV
 2.5 kilovolt in V                            → 2,500 V
@@ -2218,13 +2282,13 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 kl in L                                  → 2,500 L
 2.5 km                                       → 2.5 km
 2.5 km in m                                  → 2,500 m
-2.5 kmetric ton                              → 2.5 kt
+2.5 kmetric ton                              → 2.5 kilotonnes
 2.5 kmetric ton in kg                        → 2,500,000 kg
-2.5 kmetric tonne                            → 2.5 kt
+2.5 kmetric tonne                            → 2.5 kilotonnes
 2.5 kmetric tonne in kg                      → 2,500,000 kg
-2.5 kmetric tonnes                           → 2.5 kt
+2.5 kmetric tonnes                           → 2.5 kilotonnes
 2.5 kmetric tonnes in kg                     → 2,500,000 kg
-2.5 kmetric tons                             → 2.5 kt
+2.5 kmetric tons                             → 2.5 kilotonnes
 2.5 kmetric tons in kg                       → 2,500,000 kg
 2.5 kmf                                      → 3 KMF
 2.5 kmf in EUR                               → €1.13
@@ -2274,8 +2338,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 krw in EUR                               → €1.13
 2.5 ksi                                      → 2.5 ksi
 2.5 ksi in Pa                                → 17,236,893.23 Pa
-2.5 kt                                       → 2.5 kt
-2.5 kt in kg                                 → 2,500,000 kg
+2.5 kt                                       → 2.5 kn
+2.5 kt in mph                                → 2.87694862 mph
 2.5 kts                                      → 2.5 kn
 2.5 kts in mph                               → 2.87694862 mph
 2.5 kuwaiti dinar                            → 2.500 KWD
@@ -2337,6 +2401,12 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 lbp in EUR                               → €1.13
 2.5 lbs                                      → 2.5 lb
 2.5 lbs in kg                                → 1.133980925 kg
+2.5 lea                                      → 2.5 leagues
+2.5 lea in m                                 → 12,070.08 m
+2.5 league                                   → 2.5 leagues
+2.5 league in m                              → 12,070.08 m
+2.5 leagues                                  → 2.5 leagues
+2.5 leagues in m                             → 12,070.08 m
 2.5 lebanese pound                           → 2.50 LBP
 2.5 lebanese pound in EUR                    → €1.13
 2.5 lebanese pounds                          → 2.50 LBP
@@ -2419,6 +2489,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 litres                                   → 2.5 L
 2.5 lkr                                      → 2.50 LKR
 2.5 lkr in EUR                               → €1.13
+2.5 long cwt                                 → 2.5 long cwt
+2.5 long cwt in kg                           → 127.0058636 kg
+2.5 long hundredweight                       → 2.5 long cwt
+2.5 long hundredweight in kg                 → 127.0058636 kg
 2.5 long ton                                 → 2.5 long ton
 2.5 long ton in kg                           → 2,540.117272 kg
 2.5 long tons                                → 2.5 long ton
@@ -2458,6 +2532,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 mJ in J                                  → 0.0025 J
 2.5 mL                                       → 2.5 mL
 2.5 mL in L                                  → 0.0025 L
+2.5 mM                                       → 2.5 mM
 2.5 mN                                       → 2.5 mN
 2.5 mN in N                                  → 0.0025 N
 2.5 mS                                       → 2.5 mS
@@ -2479,6 +2554,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 macedonian denaris in EUR                → €1.13
 2.5 macedonian denars                        → 2.50 MKD
 2.5 macedonian denars in EUR                 → €1.13
+2.5 mach                                     → 2.5 mach
+2.5 mach in mph                              → 1,903.039996 mph
 2.5 mah                                      → 2.5 mAh
 2.5 malagasy ariary                          → 2.50 MGA
 2.5 malagasy ariary in EUR                   → €1.13
@@ -2719,6 +2796,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 micromhos                                → 2.5 µS
 2.5 micromol                                 → 2.5 µmol
 2.5 micromol in mol                          → 0.0000025 mol
+2.5 micromolar                               → 2.5 µM
 2.5 micromole                                → 2.5 µmol
 2.5 micromole in mol                         → 0.0000025 mol
 2.5 micromoles                               → 2.5 µmol
@@ -2824,6 +2902,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 millimhos                                → 2.5 mS
 2.5 millimol                                 → 2.5 mmol
 2.5 millimol in mol                          → 0.0025 mol
+2.5 millimolar                               → 2.5 mM
 2.5 millimole                                → 2.5 mmol
 2.5 millimole in mol                         → 0.0025 mol
 2.5 millimoles                               → 2.5 mmol
@@ -2865,6 +2944,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 milliℓ in L                              → 0.0025 L
 2.5 min                                      → 2.5 minutes
 2.5 min in s                                 → 150 seconds
+2.5 minim                                    → 2.5 minims
+2.5 minim in L                               → 0.0001540287998 L
+2.5 minims                                   → 2.5 minims
+2.5 minims in L                              → 0.0001540287998 L
 2.5 mins                                     → 2.5 minutes
 2.5 mins in s                                → 150 seconds
 2.5 minute                                   → 2.5 minutes
@@ -2890,6 +2973,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 mo                                       → 2.5 months
 2.5 mo in s                                  → 6,574,365 seconds
 2.5 mol                                      → 2.5 mol
+2.5 molar                                    → 2.5 M
 2.5 moldovan lei                             → 2.50 MDL
 2.5 moldovan lei in EUR                      → €1.13
 2.5 moldovan leis                            → 2.50 MDL
@@ -2967,6 +3051,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 nHz in Hz                                → 0.0000000025 Hz
 2.5 nL                                       → 2.5 nL
 2.5 nL in L                                  → 0.0000000025 L
+2.5 nM                                       → 2.5 nM
 2.5 nN                                       → 2.5 nN
 2.5 nN in N                                  → 0.0000000025 N
 2.5 nT                                       → 2.5 nT
@@ -3024,6 +3109,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 nanometres in m                          → 0.0000000025 m
 2.5 nanomol                                  → 2.5 nmol
 2.5 nanomol in mol                           → 0.0000000025 mol
+2.5 nanomolar                                → 2.5 nM
 2.5 nanomole                                 → 2.5 nmol
 2.5 nanomole in mol                          → 0.0000000025 mol
 2.5 nanomoles                                → 2.5 nmol
@@ -3254,6 +3340,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 pebioctet in B                           → 2,814,749,767,106,560 B
 2.5 pebioctets                               → 2.5 PiB
 2.5 pebioctets in B                          → 2,814,749,767,106,560 B
+2.5 peck                                     → 2.5 pecks
+2.5 peck in L                                → 22.02441885 L
+2.5 pecks                                    → 2.5 pecks
+2.5 pecks in L                               → 22.02441885 L
 2.5 pence                                    → £0.03
 2.5 pence in EUR                             → €0.03
 2.5 pennies                                  → £0.03
@@ -3262,6 +3352,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 penny in EUR                             → €0.03
 2.5 pepe                                     → 2.5 PEPE
 2.5 pepe in EUR                              → €1.13
+2.5 perch                                    → 2.5 rods
+2.5 perch in m                               → 12.573 m
+2.5 perches                                  → 2.5 rods
+2.5 perches in m                             → 12.573 m
 2.5 peruvian sol                             → 2.50 PEN
 2.5 peruvian sol in EUR                      → €1.13
 2.5 peruvian soles                           → 2.50 PEN
@@ -3306,6 +3400,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 picometre in m                           → 2.5e-12 m
 2.5 picometres                               → 2.5 picometers
 2.5 picometres in m                          → 2.5e-12 m
+2.5 picomolar                                → 2.5 picomolar
 2.5 picosec                                  → 2.5 ps
 2.5 picosec in s                             → 2.5e-12 seconds
 2.5 picosecond                               → 2.5 ps
@@ -3328,12 +3423,18 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 pixels                                   → 2.5 px
 2.5 pixels in m                              → 0.0006614583333 m
 2.5 pixels per inch                          → 2.5 ppi
+2.5 pk                                       → 2.5 pecks
+2.5 pk in L                                  → 22.02441885 L
 2.5 pkr                                      → 2.50 PKR
 2.5 pkr in EUR                               → €1.13
 2.5 pln                                      → 2.50 PLN
 2.5 pln in EUR                               → €1.13
 2.5 pol                                      → 2.5 POL
 2.5 pol in EUR                               → €1.13
+2.5 pole                                     → 2.5 rods
+2.5 pole in m                                → 12.573 m
+2.5 poles                                    → 2.5 rods
+2.5 poles in m                               → 12.573 m
 2.5 polish zloty                             → 2.50 PLN
 2.5 polish zloty in EUR                      → €1.13
 2.5 polish zlotys                            → 2.50 PLN
@@ -3484,6 +3585,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 rmb in EUR                               → €1.13
 2.5 rmbs                                     → CN¥2.50
 2.5 rmbs in EUR                              → €1.13
+2.5 rod                                      → 2.5 rods
+2.5 rod in m                                 → 12.573 m
+2.5 rods                                     → 2.5 rods
+2.5 rods in m                                → 12.573 m
 2.5 romanian lei                             → 2.50 RON
 2.5 romanian lei in EUR                      → €1.13
 2.5 romanian leis                            → 2.50 RON
@@ -3601,6 +3706,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 shiba inu in EUR                         → €1.13
 2.5 shiba inus                               → 2.5 SHIB
 2.5 shiba inus in EUR                        → €1.13
+2.5 short hundredweight                      → 2.5 cwt
+2.5 short hundredweight in kg                → 113.3980925 kg
 2.5 short ton                                → 2.5 ton
 2.5 short ton in kg                          → 2,267.96185 kg
 2.5 short tons                               → 2.5 ton
@@ -3618,6 +3725,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 singapore dollars in EUR                 → €1.13
 2.5 sle                                      → 2.50 SLE
 2.5 sle in EUR                               → €1.13
+2.5 slug                                     → 2.5 slugs
+2.5 slug in kg                               → 36.48475734 kg
+2.5 slugs                                    → 2.5 slugs
+2.5 slugs in kg                              → 36.48475734 kg
 2.5 smidgen                                  → 2.5 smidgens
 2.5 smidgen in L                             → 0.0003850719995 L
 2.5 smidgens                                 → 2.5 smidgens
@@ -3858,6 +3969,12 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 thai bahts in EUR                        → €1.13
 2.5 thb                                      → ฿2.50
 2.5 thb in EUR                               → €1.13
+2.5 therm                                    → 2.5 therms
+2.5 therm in J                               → 263,701,000 J
+2.5 therms                                   → 2.5 therms
+2.5 therms in J                              → 263,701,000 J
+2.5 thm                                      → 2.5 therms
+2.5 thm in J                                 → 263,701,000 J
 2.5 tib                                      → 2.5 TiB
 2.5 tib in B                                 → 2,748,779,069,440 B
 2.5 tjs                                      → 2.50 TJS
@@ -3951,6 +4068,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 uHz in Hz                                → 0.0000025 Hz
 2.5 uL                                       → 2.5 µL
 2.5 uL in L                                  → 0.0000025 L
+2.5 uM                                       → 2.5 µM
 2.5 uN                                       → 2.5 µN
 2.5 uN in N                                  → 0.0000025 N
 2.5 uS                                       → 2.5 µS
@@ -3982,6 +4100,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 uk gallon in L                           → 11.365225 L
 2.5 uk gallons                               → 2.5 imp gal
 2.5 uk gallons in L                          → 11.365225 L
+2.5 uk gill                                  → 2.5 imp gi
+2.5 uk gill in L                             → 0.3551632813 L
+2.5 uk gills                                 → 2.5 imp gi
+2.5 uk gills in L                            → 0.3551632813 L
+2.5 uk hundredweight                         → 2.5 long cwt
+2.5 uk hundredweight in kg                   → 127.0058636 kg
+2.5 uk peck                                  → 2.5 imp pk
+2.5 uk peck in L                             → 22.73045 L
+2.5 uk pecks                                 → 2.5 imp pk
+2.5 uk pecks in L                            → 22.73045 L
 2.5 uk pint                                  → 2.5 imp pt
 2.5 uk pint in L                             → 1.420653125 L
 2.5 uk pints                                 → 2.5 imp pt
@@ -4032,6 +4160,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 us gallon in L                           → 9.46352946 L
 2.5 us gallons                               → 2.5 gal
 2.5 us gallons in L                          → 9.46352946 L
+2.5 us gill                                  → 2.5 gills
+2.5 us gill in L                             → 0.2957352956 L
+2.5 us gills                                 → 2.5 gills
+2.5 us gills in L                            → 0.2957352956 L
+2.5 us hundredweight                         → 2.5 cwt
+2.5 us hundredweight in kg                   → 113.3980925 kg
+2.5 us peck                                  → 2.5 pecks
+2.5 us peck in L                             → 22.02441885 L
+2.5 us pecks                                 → 2.5 pecks
+2.5 us pecks in L                            → 22.02441885 L
 2.5 us pint                                  → 2.5 pints
 2.5 us pint in L                             → 1.182941183 L
 2.5 us pints                                 → 2.5 pints
@@ -4040,6 +4178,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 us quart in L                            → 2.365882365 L
 2.5 us quarts                                → 2.5 qt
 2.5 us quarts in L                           → 2.365882365 L
+2.5 us therm                                 → 2.5 therms
+2.5 us therm in J                            → 263,701,000 J
+2.5 us therms                                → 2.5 therms
+2.5 us therms in J                           → 263,701,000 J
 2.5 us ton                                   → 2.5 ton
 2.5 us ton in kg                             → 2,267.96185 kg
 2.5 us tons                                  → 2.5 ton
@@ -4267,6 +4409,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 µHz in Hz                                → 0.0000025 Hz
 2.5 µL                                       → 2.5 µL
 2.5 µL in L                                  → 0.0000025 L
+2.5 µM                                       → 2.5 µM
 2.5 µN                                       → 2.5 µN
 2.5 µN in N                                  → 0.0000025 N
 2.5 µS                                       → 2.5 µS
@@ -4298,6 +4441,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 μH                                       → 2.5 μH
 2.5 μL                                       → 2.5 μL
 2.5 μL in L                                  → 0.0000025 L
+2.5 μM                                       → 2.5 μM
 2.5 μS                                       → 2.5 μS
 2.5 μT                                       → 2.5 μT
 2.5 μWb                                      → 2.5 μWb
@@ -4317,6 +4461,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 ৳ in EUR                                 → €1.13
 2.5 ฿                                        → ฿2.50
 2.5 ฿ in EUR                                 → €1.13
+2.5 ′                                        → 2.5
+2.5 ′ in rad                                 → 2.5 rad
+2.5 ″                                        → 2.5
+2.5 ″ in rad                                 → 2.5
 2.5 ₡                                        → 2.50 CRC
 2.5 ₡ in EUR                                 → €1.13
 2.5 ₦                                        → ₦2.50

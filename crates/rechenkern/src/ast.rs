@@ -487,6 +487,8 @@ pub enum Target {
     Per(Unit),
     Zone(Place),
     Format(Format),
+    /// The same number in another unit, without converting: `5 km cast to miles` = 5 mi.
+    Cast(Unit),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

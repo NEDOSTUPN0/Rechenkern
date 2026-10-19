@@ -36,6 +36,16 @@ impl Parser<'_> {
         if let Some(through) = self.range_word(until) {
             return Ok(Some(Expr::Range(expr.clone().boxed(), self.range_end(through)?.boxed())));
         }
+        // "5 km cast to miles": the number kept, the unit changed.
+        if self.words_at(self.pos, &["cast"]) && ["to", "as", "into"].iter().any(|w| self.words_at(self.pos + 1, &[w]))
+        {
+            let mut p = self.clone();
+            p.pos += 2;
+            if let Some(Target::Unit(unit)) = p.target() {
+                *self = p;
+                return Ok(Some(Expr::Convert(expr.clone().boxed(), Target::Cast(unit))));
+            }
+        }
         let Some(tok) = self.peek() else { return Ok(None) };
         let keyword = match &tok.tok {
             Tok::Sym("->") => "->".to_string(),
@@ -479,6 +489,17 @@ impl Parser<'_> {
             self.pos += 2;
             return Some(Target::Format(Format::Base(base as u8)));
         }
+        // "440 Hz to 1/s"
+        if self.cur().is_some_and(|t| matches!(t.tok, Tok::Num(n) if n == crate::number::Number::ONE))
+            && self.toks.get(self.pos + 1).is_some_and(|t| t.is_sym("/"))
+        {
+            let mut p = self.clone();
+            p.pos += 2;
+            if let Some(unit) = p.unit_expr(false) {
+                *self = p;
+                return Some(Target::Unit(unit.pow(-1)));
+            }
+        }
         if let Some(unit) = self.unit_expr(true) {
             // "$10 to $20": an amount of money, not a currency to convert to.
             if unit.is_money() && self.cur().is_some_and(|t| matches!(t.tok, Tok::Num(_))) {
@@ -565,7 +586,7 @@ impl Parser<'_> {
 /// The kind of conversion to a target, for `Features::disabled_converters`.
 fn converter(target: &Target) -> Converter {
     match target {
-        Target::Unit(_) => Converter::Unit,
+        Target::Unit(_) | Target::Cast(_) => Converter::Unit,
         Target::Units(units) if units.iter().any(Unit::is_money) => Converter::Unit,
         Target::Units(_) => Converter::Parts,
         Target::Per(_) => Converter::Rate,

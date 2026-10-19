@@ -212,6 +212,10 @@ fn definitions() -> Vec<Def> {
         unit("mi", "mile", Dim::LENGTH, "1609.344"),
         unit("nmi", "nautical mile", Dim::LENGTH, "1852").aliases(&["NM"]),
         unit("fur", "furlong", Dim::LENGTH, "201.168"),
+        unit("ch", "chain", Dim::LENGTH, "20.1168").spelled(),
+        unit("rod", "rod", Dim::LENGTH, "5.0292").aliases(&["pole", "poles", "perch", "perches"]).spelled(),
+        unit("hand", "hand", Dim::LENGTH, "0.1016").aliases(&["hh"]).spelled(),
+        unit("lea", "league", Dim::LENGTH, "4828.032").spelled(),
         unit("ftm", "fathom", Dim::LENGTH, "1.8288"),
         unit("Å", "angstrom", Dim::LENGTH, "1e-10").aliases(&["ångström"]),
         unit("au", "astronomical unit", Dim::LENGTH, "149597870700").aliases(&["AU"]),
@@ -245,6 +249,16 @@ fn definitions() -> Vec<Def> {
         unit("oz t", "troy ounce", Dim::MASS, "0.0311034768").aliases(&["ozt", "troy oz", "ounce troy", "ounces troy"]),
         unit("ct", "carat", Dim::MASS, "0.0002"),
         unit("grain", "grain", Dim::MASS, "0.00006479891").spelled(),
+        unit("slug", "slug", Dim::MASS, "14.593902937206364").spelled(),
+        // A hundredweight is 100 lb in the US, 112 lb (the long one) in Britain.
+        unit("cwt", "hundredweight", Dim::MASS, "45.359237").plural("hundredweight").aliases(&[
+            "hundredweights",
+            "short hundredweight",
+            "us hundredweight",
+        ]),
+        unit("long cwt", "long hundredweight", Dim::MASS, "50.80234544")
+            .plural("long hundredweight")
+            .aliases(&["imperial hundredweight", "uk hundredweight"]),
         // Area
         unit("ha", "hectare", Dim::AREA, "10000"),
         unit("ac", "acre", Dim::AREA, "4046.8564224"),
@@ -288,6 +302,14 @@ fn definitions() -> Vec<Def> {
             .scale(Number::parse("0.0000177581640625").unwrap() / Number::from_i64(3))
             .aliases(&["uk teaspoon", "uk teaspoons"]),
         unit("bbl", "barrel", Dim::VOLUME, "0.158987294928"),
+        unit("pk", "peck", Dim::VOLUME, "0.00880976754172").aliases(&["us peck", "us pecks"]).spelled(),
+        unit("imp pk", "imperial peck", Dim::VOLUME, "0.00909218").aliases(&["uk peck", "uk pecks"]),
+        unit("hhd", "hogshead", Dim::VOLUME, "0.238480942392").spelled(),
+        unit("gi", "gill", Dim::VOLUME, "0.00011829411825").aliases(&["us gill", "us gills"]).spelled(),
+        unit("imp gi", "imperial gill", Dim::VOLUME, "0.0001420653125").aliases(&["uk gill", "uk gills"]),
+        unit("minim", "minim", Dim::VOLUME, "0.000000061611519921875").spelled(),
+        // A metric drop, as pharmacists count: 20 to the milliliter.
+        unit("drop", "drop", Dim::VOLUME, "0.00000005").aliases(&["gtt"]).spelled(),
         unit("bu", "bushel", Dim::VOLUME, "0.03523907016688"),
         unit("acre-foot", "acre-foot", Dim::VOLUME, "1233.48183754752")
             .plural("acre-feet")
@@ -306,6 +328,7 @@ fn definitions() -> Vec<Def> {
         unit("grad", "gradian", Dim::ANGLE, "1").scale(pi / Number::from_i64(200)).aliases(&["gon", "gons"]),
         unit("rev", "revolution", Dim::ANGLE, "1").scale(pi * Number::from_i64(2)).aliases(&["turn", "turns", "revs"]),
         unit("arcmin", "arcminute", Dim::ANGLE, "1").scale(pi / Number::from_i64(10_800)).aliases(&[
+            "′",
             "arcmins",
             "arc min",
             "arc mins",
@@ -313,6 +336,7 @@ fn definitions() -> Vec<Def> {
             "arc minutes",
         ]),
         unit("arcsec", "arcsecond", Dim::ANGLE, "1").scale(pi / Number::from_i64(648_000)).aliases(&[
+            "″",
             "arcsecs",
             "arc sec",
             "arc secs",
@@ -372,6 +396,9 @@ fn definitions() -> Vec<Def> {
         unit("fps", "frame per second", Dim::FREQUENCY, "1").plural("frames per second"),
         // Mechanics
         unit("N", "newton", Dim::FORCE, "1").prefixes(&[KILO, MEGA, GIGA, MILLI, MICRO, NANO]),
+        unit("dyn", "dyne", Dim::FORCE, "0.00001"),
+        // The speed of sound at sea level (ISA, 15 °C).
+        unit("mach", "mach", Dim::SPEED, "340.294").plural("mach").aliases(&["Mach"]).spelled(),
         unit("lbf", "pound-force", Dim::FORCE, "4.4482216152605").plural("pounds-force").aliases(&[
             "pound force",
             "pounds force",
@@ -389,6 +416,9 @@ fn definitions() -> Vec<Def> {
         unit("kgf", "kilogram-force", Dim::FORCE, "9.80665").plural("kilograms-force").aliases(&["kilogram force"]),
         unit("J", "joule", Dim::ENERGY, "1").prefixes(&[KILO, MEGA, GIGA, TERA, MILLI]),
         unit("cal", "calorie", Dim::ENERGY, "4.184").prefixes(&[KILO]),
+        unit("erg", "erg", Dim::ENERGY, "0.0000001").spelled(),
+        // The US therm, as gas bills count it.
+        unit("thm", "therm", Dim::ENERGY, "105480400").aliases(&["us therm", "us therms"]).spelled(),
         unit("eV", "electronvolt", Dim::ENERGY, "0.0000000000000000001602176634")
             .aliases(&["electron volt", "electron volts"])
             .prefixes(&[KILO, MEGA, GIGA, TERA]),
@@ -442,6 +472,14 @@ fn definitions() -> Vec<Def> {
         unit("T", "tesla", Dim::FLUX_DENSITY, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO]).prefixed_only(),
         unit("gauss", "gauss", Dim::FLUX_DENSITY, "0.0001").plural("gauss").spelled(),
         unit("mol", "mole", Dim::AMOUNT, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO]),
+        // Molar concentration, a mole per liter; glued to a number "M" is a million ("5M").
+        unit("M", "molar", Dim::AMOUNT.div(Dim::VOLUME), "1000").plural("molar").prefixes(&[
+            MILLI,
+            MICRO,
+            MICRO_GREEK,
+            NANO,
+            PICO,
+        ]),
         // Data (base: bit)
         unit("bit", "bit", Dim::DATA, "1").prefixes(DATA),
         unit("B", "byte", Dim::DATA, "8").aliases(&["octet", "octets"]).prefixes(DATA),
@@ -476,6 +514,8 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("TWh", &["TWh", "twh", "terawatt hour", "terawatt hours"], "TW*h"),
     ("N·m", &["Nm", "N·m", "N⋅m", "N m", "newton meter", "newton meters", "newton metre", "newton metres"], "N*m"),
     ("", &["Ws", "W s", "watt second", "watt seconds"], "W*s"),
+    // A product written with a space, as SoulverCore keeps it: "3 W m".
+    ("", &["W m"], "W*m"),
     (
         "",
         &[
@@ -699,8 +739,8 @@ pub(super) fn build() -> Registry {
             };
             let base_def = &b.defs[base as usize];
             let symbol = format!("{}{}", p.symbol, base_def.symbol);
-            // "1 pm" would read as a clock time: picometers are written out.
-            let spelled = symbol == "pm";
+            // "1 pm" would read as a clock time and "kt" as knots: these are written out.
+            let spelled = symbol.eq_ignore_ascii_case("pm") || symbol == "kt";
             let symbol = if spelled { format!("{}{}", p.name, base_def.name) } else { symbol };
             let id = b.push(UnitDef {
                 symbol,
@@ -727,7 +767,7 @@ pub(super) fn build() -> Registry {
                 }
                 aliases.extend(d.aliases.iter().filter(|a| a.len() <= 2).map(|a| format!("u{a}")));
             }
-            b.register(id, aliases, true);
+            b.register(id, aliases, !spelled);
         }
     }
 

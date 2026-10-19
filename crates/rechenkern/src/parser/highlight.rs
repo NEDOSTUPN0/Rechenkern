@@ -320,7 +320,7 @@ impl Parser<'_> {
         };
         let length = p.pos - (i + 1);
         let kind = match target {
-            Target::Unit(_) | Target::Units(_) | Target::Per(_) => TokenKind::Unit,
+            Target::Unit(_) | Target::Units(_) | Target::Per(_) | Target::Cast(_) => TokenKind::Unit,
             Target::Zone(place) => TokenKind::Place(place.kind),
             Target::Format(_) => TokenKind::Format,
         };

@@ -230,6 +230,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - `C`, `F`, `H`, `S`, `T` alone are °C, °F and so on, as in SoulverCore; coulombs,
   farads, henries, siemens and teslas are written out and read with a prefix (`µF`).
   `rpm`/`rps` are turns per time, and a turn converts to a cycle (`60 rpm in Hz`).
+- `′` and `″` are minutes and seconds of arc, as in SoulverCore (`30′ in degrees` =
+  0.5°); `'` and `"` stay feet and inches. `kt` is knots (kilotonnes are written out),
+  `2 M` molar (glued `5M` is a million), `5 um`/`10 us` micro when nothing but a
+  conversion follows. `5 km cast to miles` keeps the number (`Target::Cast`).
+  `speed of 26 inch tire at 200 rpm` rolls the circumference each turn.
 - `in per week`, `as per day` and `is what per week` give a rate a new period
   (`Target::Per`).
 - Converting to the inverse kind takes the reciprocal (`2 seconds in Hz`,
