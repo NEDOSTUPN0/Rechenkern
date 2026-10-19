@@ -713,6 +713,15 @@ impl<'a> Parser<'a> {
             // "$120/night" and "5 km per hour" are rates that bind tightly:
             // "4 nights * $120/night" multiplies by the rate. "per cent" is a percentage.
             let rate = tok.is_sym("/") || (tok.is_word("per") && !self.words_at(self.pos + 1, &["cent"]));
+            // "$5/in", "lbf/in²": "in" glued to a slash is the inch.
+            let glued_inch =
+                tok.is_sym("/") && self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("in") && !t.space_before);
+            if glued_inch {
+                self.pos += 2;
+                let inch = self.unit_exponent(crate::units::registry().get("in"));
+                expr = Expr::binary(Op::Per, expr, Expr::BareUnit(inch));
+                continue;
+            }
             if rate && self.unit_at(self.pos + 1, false).is_some() {
                 self.pos += 1;
                 let unit = self.unit_phrase(false).expect("unit checked above");

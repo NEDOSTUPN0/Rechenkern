@@ -188,6 +188,23 @@ impl std::fmt::Display for Unit {
     }
 }
 
+/// Kinds of quantities with a coherent SI unit that products of other units turn into.
+const DERIVED: &[(Dim, &str)] = &[
+    (Dim::FORCE, "N"),
+    (Dim::ENERGY, "J"),
+    (Dim::POWER, "W"),
+    (Dim::PRESSURE, "Pa"),
+    (Dim::CURRENT, "A"),
+    (Dim::VOLTAGE, "V"),
+    (Dim::RESISTANCE, "Ω"),
+    (Dim::CONDUCTANCE, "siemens"),
+    (Dim::CHARGE, "coulomb"),
+    (Dim::CAPACITANCE, "farad"),
+    (Dim::MAGNETIC_FLUX, "Wb"),
+    (Dim::FLUX_DENSITY, "tesla"),
+    (Dim::INDUCTANCE, "henry"),
+];
+
 /// All known units and their spellings.
 pub struct Registry {
     defs: Vec<UnitDef>,
@@ -281,6 +298,43 @@ impl Registry {
 
     fn per_amount(&self, id: UnitId) -> Option<(&Unit, Number)> {
         self.per_amount.iter().find(|p| p.0 == id).map(|(_, rate, amount)| (rate, *amount))
+    }
+
+    /// A product of units as a unit of its own: `V·A` is a watt, `lb·ft/s²` a poundal,
+    /// `kN/m²` a kilopascal, `mAh·V` joules. None when the product reads well as it is:
+    /// a single unit, a named compound (`kWh`), a torque (`N·m/s` too) or a length per a time
+    /// squared (`km/h²`, but not `mi/(h·s)`).
+    pub fn named_product(&self, unit: &Unit) -> Option<Unit> {
+        let factors = unit.factors();
+        if factors.len() < 2 || self.compound_symbol(unit).is_some() {
+            return None;
+        }
+        let dim = unit.dim();
+        let si = match DERIVED.iter().find(|(d, _)| *d == dim) {
+            Some((_, name)) => self.lookup(name)?,
+            None if dim == Dim::ACCELERATION => self.get("m").product(&self.get("s").pow(-2)),
+            None => return None,
+        };
+        let kinds: Vec<(Dim, i8)> = factors.iter().map(|&(id, e)| (self.def(id).dim, e)).collect();
+        let torque = kinds.contains(&(Dim::FORCE, 1)) && kinds.contains(&(Dim::LENGTH, 1));
+        let per_time_squared = kinds.len() == 2 && kinds.contains(&(Dim::TIME, -2));
+        if torque || per_time_squared {
+            return None;
+        }
+        // Power for hours is energy in watt hours: "1 hp × 1 h" = 745.7 Wh.
+        let hour = factors.iter().any(|&(id, e)| self.def(id).symbol == "h" && e == 1);
+        if dim == Dim::ENERGY && hour && kinds.contains(&(Dim::POWER, 1)) && factors.len() == 2 {
+            return self.lookup("Wh");
+        }
+        let scale = factors.iter().fold(Number::ONE, |acc, &(id, e)| acc * self.def(id).scale.powi(e as i64));
+        let same_size = |def: &UnitDef| {
+            let (a, b) = (def.scale.to_f64(), scale.to_f64());
+            def.dim == dim && def.currency.is_none() && def.offset.is_zero() && ((a - b) / b).abs() < 1e-12
+        };
+        match self.defs.iter().position(same_size) {
+            Some(id) => Some(Unit::of(id as UnitId)),
+            None => Some(si),
+        }
     }
 
     /// Preferred symbol for a compound unit ("mph", "kWh").

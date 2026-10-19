@@ -416,7 +416,7 @@ fn with_unit(digits: &str, n: Number, unit: &Unit) -> String {
         return digits.to_string();
     }
     let text = unit_text(unit, n.abs() != Number::ONE);
-    let tight = unit.single().is_some_and(|d| d.tight) || text.starts_with('/');
+    let tight = matches!(unit.factors().first(), Some(&(id, 1)) if registry().def(id).tight) || text.starts_with('/');
     if tight { format!("{digits}{text}") } else { format!("{digits} {text}") }
 }
 
@@ -504,7 +504,9 @@ pub(crate) fn unit_text(unit: &Unit, plural: bool) -> String {
         let long = def.calendar.is_some_and(|(cal, _)| cal >= jiff::Unit::Day);
         // "in" after other units or "/" reads as a word: "N·inch³", "$5/inch".
         let inch = def.symbol == "in" && !matches!(unit.factors(), [(_, e)] if *e > 0);
-        let name = if def.spelled && (words || long) || inch { def.name.clone() } else { def.symbol.clone() };
+        // "C" alone is Celsius: a coulomb in a compound is written out.
+        let unread = def.spelled && reg.lookup(&def.symbol).is_none_or(|u| !u.same_as(&Unit::of(id)));
+        let name = if def.spelled && (words || long || unread) || inch { def.name.clone() } else { def.symbol.clone() };
         format!("{name}{}", superscript(e))
     };
     // A compound with a name of its own keeps it: "$/kWh", not "$/(kW·hour)"; "/(N·m)" stays in parentheses.

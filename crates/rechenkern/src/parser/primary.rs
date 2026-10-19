@@ -267,7 +267,7 @@ impl Parser<'_> {
     }
 
     /// A power written after a unit: `m²`, `m^3`, `m squared`.
-    fn unit_exponent(&mut self, unit: Unit) -> Unit {
+    pub(super) fn unit_exponent(&mut self, unit: Unit) -> Unit {
         match self.exponent() {
             Some(e) => unit.pow(e),
             None => unit,

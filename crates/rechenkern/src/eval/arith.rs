@@ -23,7 +23,8 @@ impl Env<'_> {
             Op::Div => self.div(a, b),
             Op::Per => match (a, b) {
                 (Value::Quantity(x), Value::Quantity(y)) => {
-                    Ok(Value::Quantity(Quantity::new(x.number / y.number, x.unit.product(&y.unit.pow(-1)))))
+                    let unit = x.unit.product(&y.unit.pow(-1));
+                    Ok(Value::Quantity(self.named_product(Quantity::new(x.number / y.number, unit.clone()), &unit)?))
                 }
                 (a, b) => self.div(a, b),
             },
@@ -218,6 +219,15 @@ impl Env<'_> {
         })
     }
 
+    /// Units that multiply into a quantity of their own take its unit: "12 V × 2 A" is 24 W.
+    /// `product` is the unit before units of the same kind merged: `mi/(h·s)`, not `mi/h²`.
+    fn named_product(&self, q: Quantity, product: &Unit) -> Result<Quantity> {
+        match registry().named_product(product) {
+            Some(unit) => self.convert_quantity(&q, &unit),
+            None => Ok(q),
+        }
+    }
+
     /// Seconds that come out of unit algebra read better as a time span:
     /// "3 GB / 10 MB/s" is 5 minutes, not 300 seconds.
     fn tidy_time(&self, q: Quantity, (a, b): (Unit, Unit)) -> Result<Value> {
@@ -259,7 +269,7 @@ impl Env<'_> {
             return Ok(Quantity::new(number, x.unit.numerator().product(&y_unit)));
         }
         let (unit, factor) = x.unit.mul(&y_unit, &|id| self.scale(id))?;
-        Ok(Quantity::new(number * factor, unit))
+        self.named_product(Quantity::new(number * factor, unit), &x.unit.product(&y_unit))
     }
 
     /// Workdays that would cancel against hours are hours of work:
@@ -359,7 +369,7 @@ impl Env<'_> {
             return Ok(Value::Timecode(crate::value::Timecode { frames, fps: rate.number }));
         }
         if let (Value::Quantity(x), Value::Quantity(speed)) = (&a, &b)
-            && speed.unit.dim() == Dim::FREQUENCY
+            && matches!(speed.unit.dim(), Dim::FREQUENCY | Dim::ANGULAR_VELOCITY)
             && let Some(turned) = self.turning(x, speed)?
         {
             return Ok(Value::Quantity(turned));

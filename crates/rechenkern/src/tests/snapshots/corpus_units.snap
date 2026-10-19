@@ -37,12 +37,12 @@ hours in a week                              → 168 hours
 1 quarter in months                          → 3 months
 
 // Not supported yet
-1 rad/s in rpm                               → <error: can't convert rad/s to rpm>
-12 V * 2 A                                   → 24 V·A
-5 A * 10 Ω                                   → 50 A·Ω
-10 kg * 9.8 m/s^2                            → 98 kg·m/s²
+1 rad/s in rpm                               → 9.549296586 rpm
+12 V * 2 A                                   → 24 W
+5 A * 10 Ω                                   → 50 V
+10 kg * 9.8 m/s^2                            → 98 N
 5 km cast to miles                           → 3.106855961 mi
-2000 mAh * 3.7 V                             → 7,400 mA·h·V
+2000 mAh * 3.7 V                             → 26,640 J
 
 // Ranges of amounts
 5-10 kg                                      → 5 – 10 kg

@@ -37,6 +37,12 @@ impl Dim {
     pub const CHARGE: Dim = Dim::CURRENT.mul(Dim::TIME);
     pub const VOLTAGE: Dim = Dim::POWER.div(Dim::CURRENT);
     pub const RESISTANCE: Dim = Dim::VOLTAGE.div(Dim::CURRENT);
+    pub const CONDUCTANCE: Dim = Dim::RESISTANCE.pow(-1);
+    pub const CAPACITANCE: Dim = Dim::CHARGE.div(Dim::VOLTAGE);
+    pub const MAGNETIC_FLUX: Dim = Dim::VOLTAGE.mul(Dim::TIME);
+    pub const FLUX_DENSITY: Dim = Dim::MAGNETIC_FLUX.div(Dim::AREA);
+    pub const INDUCTANCE: Dim = Dim::MAGNETIC_FLUX.div(Dim::CURRENT);
+    pub const ANGULAR_VELOCITY: Dim = Dim::ANGLE.div(Dim::TIME);
     pub const DATA_RATE: Dim = Dim::DATA.div(Dim::TIME);
 
     const fn base(i: usize) -> Dim {
@@ -105,6 +111,13 @@ impl Dim {
             (Dim::PRESSURE, "pressure"),
             (Dim::VOLTAGE, "voltage"),
             (Dim::RESISTANCE, "resistance"),
+            (Dim::CONDUCTANCE, "conductance"),
+            (Dim::CHARGE, "charge"),
+            (Dim::CAPACITANCE, "capacitance"),
+            (Dim::MAGNETIC_FLUX, "magnetic flux"),
+            (Dim::FLUX_DENSITY, "magnetic flux density"),
+            (Dim::INDUCTANCE, "inductance"),
+            (Dim::ANGULAR_VELOCITY, "angular velocity"),
             (Dim::DATA_RATE, "data rate"),
         ];
         if let Some((_, name)) = named.iter().find(|(d, _)| *d == self) {

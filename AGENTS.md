@@ -213,6 +213,15 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   = 25/kg).
 - Money times a non-money unit stays money (`$30 × 4 days` = `$120`), and a
   money rate divided by a time spreads it (`$500/month / 30 days` = `$16.67/day`).
+- Units that multiply into a quantity of their own take its unit
+  (`Registry::named_product`): a unit of the same size if there is one (`V·A` = W,
+  `lb·ft/s²` = pdl, `lbf/in²` = psi), the SI unit otherwise (`mAh·V` in J,
+  `km/h/s` in m/s²). Named compounds (`kWh`, `Ah`), torques (`N·m`) and a length per
+  a time squared (`km/h²`) stay as written. SoulverCore gets electric ones wrong
+  (`12 V * 2 A` = 24 V).
+- `C`, `F`, `H`, `S`, `T` alone are °C, °F and so on, as in SoulverCore; coulombs,
+  farads, henries, siemens and teslas are written out and read with a prefix (`µF`).
+  `rpm`/`rps` are turns per time, and a turn converts to a cycle (`60 rpm in Hz`).
 - `in per week`, `as per day` and `is what per week` give a rate a new period
   (`Target::Per`).
 - Converting to the inverse kind takes the reciprocal (`2 seconds in Hz`,

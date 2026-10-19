@@ -481,6 +481,15 @@ impl Env<'_> {
             if let Some(q) = self.work_time(q, to)? {
                 return Ok(q);
             }
+            // A turn is a cycle: "60 rpm in Hz", "1 Hz in rad/s".
+            let turn = registry().get("rev");
+            if q.unit.dim() == Dim::ANGULAR_VELOCITY && to.dim() == Dim::FREQUENCY {
+                let cycles = self.convert_quantity(q, &to.product(&turn))?;
+                return Ok(Quantity::new(cycles.number, to.clone()));
+            }
+            if q.unit.dim() == Dim::FREQUENCY && to.dim() == Dim::ANGULAR_VELOCITY {
+                return self.convert_quantity(&Quantity::new(q.number, q.unit.product(&turn)), to);
+            }
             bail!("can't convert {} to {}", unit_text(&q.unit, true), unit_text(to, true));
         }
         if let (Some(a), Some(b)) = (q.unit.single(), to.single())

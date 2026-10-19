@@ -74,6 +74,8 @@ struct Def {
     spelled: bool,
     tight: bool,
     calendar: Option<(Cal, i64)>,
+    /// The symbol alone is no spelling of the unit, only with a prefix: "µF", but "F" is °F.
+    prefixed_only: bool,
 }
 
 fn unit(symbol: &'static str, name: &'static str, dim: Dim, scale: &str) -> Def {
@@ -89,6 +91,7 @@ fn unit(symbol: &'static str, name: &'static str, dim: Dim, scale: &str) -> Def 
         spelled: false,
         tight: false,
         calendar: None,
+        prefixed_only: false,
     }
 }
 
@@ -124,6 +127,11 @@ impl Def {
     fn calendar(mut self, unit: Cal, multiple: i64) -> Def {
         self.calendar = Some((unit, multiple));
         self
+    }
+    /// Answers write the name ("3 coulombs") and only prefixed symbols are read ("mC").
+    fn prefixed_only(mut self) -> Def {
+        self.prefixed_only = true;
+        self.spelled()
     }
 }
 
@@ -355,9 +363,6 @@ fn definitions() -> Vec<Def> {
             .plural("hertz")
             .prefixes(&[KILO, MEGA, GIGA, TERA, MILLI, MICRO, NANO]),
         unit("fps", "frame per second", Dim::FREQUENCY, "1").plural("frames per second"),
-        unit("rpm", "revolution per minute", Dim::FREQUENCY, "1")
-            .plural("revolutions per minute")
-            .scale(Number::ratio(1, 60)),
         // Mechanics
         unit("N", "newton", Dim::FORCE, "1").prefixes(&[KILO, MEGA, GIGA, MILLI, MICRO, NANO]),
         unit("lbf", "pound-force", Dim::FORCE, "4.4482216152605").plural("pounds-force").aliases(&[
@@ -412,6 +417,23 @@ fn definitions() -> Vec<Def> {
         ]),
         unit("V", "volt", Dim::VOLTAGE, "1").prefixes(&[KILO, MEGA, MILLI, MICRO]),
         unit("Ω", "ohm", Dim::RESISTANCE, "1").aliases(&["Ω"]).prefixes(&[KILO, MEGA, MILLI, MICRO]),
+        // "C", "F", "H", "S" and "T" alone are Celsius, Fahrenheit, hours, seconds and tonnes, as in SoulverCore.
+        unit("C", "coulomb", Dim::CHARGE, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO, PICO]).prefixed_only(),
+        unit("F", "farad", Dim::CAPACITANCE, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO, PICO]).prefixed_only(),
+        unit("H", "henry", Dim::INDUCTANCE, "1")
+            .plural("henries")
+            .aliases(&["henrys"])
+            .prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO])
+            .prefixed_only(),
+        unit("S", "siemens", Dim::CONDUCTANCE, "1")
+            .plural("siemens")
+            .aliases(&["mho", "mhos"])
+            .prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK])
+            .prefixed_only(),
+        unit("Wb", "weber", Dim::MAGNETIC_FLUX, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO]),
+        unit("Mx", "maxwell", Dim::MAGNETIC_FLUX, "0.00000001"),
+        unit("T", "tesla", Dim::FLUX_DENSITY, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO]).prefixed_only(),
+        unit("gauss", "gauss", Dim::FLUX_DENSITY, "0.0001").plural("gauss").spelled(),
         unit("mol", "mole", Dim::AMOUNT, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO]),
         // Data (base: bit)
         unit("bit", "bit", Dim::DATA, "1").prefixes(DATA),
@@ -467,6 +489,8 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ),
     ("", &["lbf-in", "in-lb", "in-lbs", "in-lbf", "lb-in", "inch-pound", "inch-pounds"], "lbf*in"),
     ("", &["ozf-in", "oz-in", "in-oz", "inch-ounce", "inch-ounces"], "ozf*in"),
+    ("rpm", &["rpm", "revolution per minute", "revolutions per minute"], "rev/min"),
+    ("rps", &["rps", "revolution per second", "revolutions per second"], "rev/s"),
     ("Ah", &["Ah", "amp hour", "amp hours", "ampere hour", "ampere hours"], "A*h"),
     ("mAh", &["mAh", "mah", "milliamp hour", "milliamp hours"], "mA*h"),
     ("bps", &["bps", "bits per second"], "bit/s"),
@@ -567,11 +591,13 @@ impl Builder {
         self.folded.entry(text.to_lowercase()).or_insert_with(|| unit.clone());
     }
 
-    fn register(&mut self, id: UnitId, aliases: impl IntoIterator<Item = String>) {
+    fn register(&mut self, id: UnitId, aliases: impl IntoIterator<Item = String>, symbol: bool) {
         let unit = Unit::of(id);
         let def = &self.defs[id as usize];
-        let (symbol, name, plural) = (def.symbol.clone(), def.name.clone(), def.plural.clone());
-        self.exact.entry(symbol).or_insert_with(|| unit.clone());
+        let (symbol_text, name, plural) = (def.symbol.clone(), def.name.clone(), def.plural.clone());
+        if symbol {
+            self.exact.entry(symbol_text).or_insert_with(|| unit.clone());
+        }
         self.name(&name, &unit);
         self.name(&plural, &unit);
         for alias in aliases {
@@ -603,7 +629,7 @@ pub(super) fn build() -> Registry {
             calendar: d.calendar,
             currency: None,
         });
-        b.register(id, d.aliases.iter().map(|a| a.to_string()));
+        b.register(id, d.aliases.iter().map(|a| a.to_string()), !d.prefixed_only);
         ids.push(id);
     }
 
@@ -651,7 +677,7 @@ pub(super) fn build() -> Registry {
             calendar: None,
             currency: Some(currency),
         });
-        b.register(id, aliases.iter().map(|a| a.to_string()));
+        b.register(id, aliases.iter().map(|a| a.to_string()), true);
     }
 
     // Prefixed units come last so they never shadow a base unit.
@@ -694,7 +720,7 @@ pub(super) fn build() -> Registry {
                 }
                 aliases.extend(d.aliases.iter().filter(|a| a.len() <= 2).map(|a| format!("u{a}")));
             }
-            b.register(id, aliases);
+            b.register(id, aliases, true);
         }
     }
 
