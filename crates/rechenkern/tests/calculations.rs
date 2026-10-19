@@ -1286,6 +1286,23 @@ fn sheets() {
 #[test]
 fn compound_growth() {
     check(&[
+        ("compound interest on $1,000 at 5% for 10 years", "$628.89"),
+        ("simple interest on $1,000 at 5% for 10 years", "$500.00"),
+        ("investment required for $1,000/month at 5%", "$240,000.00"),
+        ("income tax on $100,000 in US", "$13,449.00"),
+        ("take home pay on £50,000 in UK", "£42,514.00"),
+        ("effective tax rate on €80,000 in Germany", "28.36%"),
+        ("marginal tax rate on €80,000 in Germany", "42%"),
+        ("€80,000 after tax in Germany", "€57,312.00"),
+        ("income tax on 300,000 CNY in China", "CN¥31,080.00"),
+        ("$10 in cents", "1,000 cents"),
+        ("1 BTC in satoshis", "100,000,000 satoshis"),
+        ("1 ETH in gwei", "1,000,000,000 gwei"),
+        ("5 gwei", "0.000000005 ETH"),
+        ("zł10", "10.00 PLN"),
+        ("Kč10 + Kč5", "15.00 CZK"),
+        ("Ft10", "10.00 HUF"),
+        ("kr 10", "10.00 DKK"),
         ("$1,000 after 3 years at 7%", "$1,225.04"),
         ("$1,000 for 3 years at 7% compounding monthly", "$1,232.93"),
         ("$1,000 for 3 years at 7% compounding quarterly", "$1,231.44"),

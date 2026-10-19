@@ -9,9 +9,9 @@ $200 + €200                                  → €380.00
 $100 in EUR, GBP, JPY                        → €90.00, £80.00, ¥15,000
 100 JPY in USD                               → $0.67
 1 BTC in USD                                 → $100,000.00
-0.001 BTC in sats                            → 0.001 BTC
+0.001 BTC in sats                            → 100,000 satoshis
 50 cents in dollars                          → $0.50
-$10 in cents                                 → $10.00
+$10 in cents                                 → 1,000 cents
 5 bucks                                      → $5.00
 20 quid in USD                               → $25.00
 $5k in EUR                                   → €4.5K
@@ -35,7 +35,7 @@ $30 × 4 days                                 → $120.00
 // Not supported yet
 exchange rate from USD to EUR                → €0.90
 $100 from 1990 is worth what today           → $257.80
-investment required for $1,000/month at 5%   → <error: expected a value at the end>
-income tax on $100,000 in US                 → <error: only a date or a time can be in a time zone, not money>
-zł10                                         → <none>
-kr 10                                        → 10
+investment required for $1,000/month at 5%   → $240,000.00
+income tax on $100,000 in US                 → $13,449.00
+zł10                                         → 10.00 PLN
+kr 10                                        → 10.00 DKK

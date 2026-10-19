@@ -384,6 +384,7 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         Display::Plain => {
             plain_digits(q.number, config.precision.max(20), -9..21).unwrap_or_else(|| scientific(q.number, config))
         }
+        Display::Minor => number(q.number, config),
         Display::Scaled => {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config, true);
@@ -466,7 +467,10 @@ fn money(q: &Quantity, currency: &Currency, config: &Config, written_scale: bool
     let digits = if let Some(text) = scaled_with(n.abs(), config, written_scale, scales) {
         text
     } else if currency.crypto {
-        match plain_digits(n.abs().round_dp(8), config.precision, config.formatting.plain_magnitudes()) {
+        // Eight places, as wallets show; smaller amounts ("5 gwei") keep their digits.
+        let tiny = n.abs() < Number::pow10(-4);
+        let rounded = if tiny { n.abs() } else { n.abs().round_dp(8) };
+        match plain_digits(rounded, config.precision, config.formatting.plain_magnitudes()) {
             Some(digits) => group(&digits, config),
             None => scientific(n.abs(), config),
         }

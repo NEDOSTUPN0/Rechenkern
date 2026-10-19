@@ -6,6 +6,7 @@ use super::{Parser, words};
 use crate::ast::Func;
 use crate::custom::CustomPlace;
 use crate::lexer::{Tok, Token};
+use crate::number::Number;
 use crate::units::foods::Food;
 use crate::units::{Dim, Unit, registry};
 use crate::zones::{self, Location, Place, PlaceKind};
@@ -189,6 +190,8 @@ impl<'a> Parser<'a> {
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
             || (w == "cast" && ["to", "as", "into"].iter().any(|t| self.words_at(i + 1, &[t])))
+            // "zł10", "CHF10": a currency glued before its amount.
+            || self.glued_money(i).is_some()
             // "flour 1 cup": a food before its amount.
             || (matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_)))
                 && self.unit_at(i + 2, false).is_some_and(|(u, _)| matches!(u.dim(), Dim::MASS | Dim::VOLUME))
@@ -227,6 +230,16 @@ impl<'a> Parser<'a> {
             || self.note_at(i).is_some()
             || self.place_sky_at(i).is_some()
             || self.density_at(i).is_some()
+    }
+
+    /// A currency and an amount written as one word: "zł10", "CHF10", "Kč250".
+    pub(super) fn glued_money(&self, i: usize) -> Option<(Unit, Number)> {
+        let word = self.toks.get(i)?.word()?;
+        let split = word.find(|c: char| c.is_ascii_digit()).filter(|&s| s > 0)?;
+        let (symbol, digits) = word.split_at(split);
+        let amount = Number::parse(digits)?;
+        let unit = self.lookup_unit(symbol).filter(Unit::is_money)?;
+        Some((unit, amount))
     }
 
     /// A food named at token `i` and its length in tokens: "olive oil".

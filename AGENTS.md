@@ -211,6 +211,17 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   until Dec 31`, a whole line). A span between dates is a `Duration` with
   `start()`/`end()`.
 - Minutes per a length are a pace, written `m:ss min/km`, which reads back.
+- Income tax (`income_tax.rs`, `data/income_tax.txt`): `income tax on $100,000 in US`,
+  `€80,000 after tax in Germany`, `take home pay on £50,000 in UK`, `effective tax rate`,
+  `marginal tax rate`, for SoulverCore's 25 countries. A single resident employee in 2025:
+  the national schedule with the allowance or credit everyone gets (Germany by its
+  formula), Nordic municipal tax at the average rate, no social contributions. Income in
+  another currency converts first. Update the file each year.
+- `compound interest on`, `simple interest on` (never compounded), `investment required
+  for $1,000/month at 5%` (what pays that a year at the rate) are growth phrases too.
+- Cents, satoshis, gwei and wei show as themselves when converted to (`$10 in cents` =
+  1,000 cents, `Display::Minor`). A currency glued before its amount reads as one
+  (`zł10`, `CHF10`, `Kč250`); `kr` alone is the Danish krone, as in SoulverCore.
 - Sales tax: `8% vat in $108` is the tax in a price, `$108 before 8% tax` (or
   `- 8% vat`) the price without it; a tax word after the percentage makes it so.
 
@@ -376,7 +387,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 ## Data sources
 
 - Exchange rates: fawazahmed0 currency API (CC0), jsDelivr with a Cloudflare
-  mirror as fallback. Rates are units per USD. Cache: `~/.cache/rechenkern/rates.json`,
+  mirror as fallback. Coins it lacks (TON) come from CoinGecko's free price API
+  (`online::SUPPLEMENT`), merged into the cached file. Rates are units per USD. Cache: `~/.cache/rechenkern/rates.json`,
   refreshed after 6 hours; a stale cache is used when offline.
 - Rates of past days (`$100 in EUR on Jan 1, 2020`, `RateProvider::rates_on`):
   the same API keeps dated snapshots from March 2024; earlier days come from the

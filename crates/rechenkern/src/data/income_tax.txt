@@ -1,0 +1,119 @@
+# Income tax of a single resident employee in 2025, by country: the national schedule with
+# the personal allowance or credit everyone gets. Where most of the tax is municipal (the
+# Nordic countries) the average municipal rate is included; social contributions are not,
+# except Denmark's labour market contribution, which the law counts as income tax.
+#
+# [code] currency year | names (lowercase)
+#   allowance N                      deducted from income before the `taxable` schedules
+#   allowance N taper FROM R         less R per unit of income above FROM (UK)
+#   allowance N phase FULL ZERO      whole up to FULL, nothing from ZERO, linear between
+#   allowance tiers UPTO:N, ..., N   by income; the last applies above every UPTO
+#   contribution R%                  taken first; `net` is income without it
+#   gross|net|taxable FROM R%, ...   rates from each threshold on; they add up
+#   levy R% above N                  on the whole income once it is above N
+#   credit N [at first rate]         taken off the tax (or N times the lowest rate)
+#   surtax R%                        on the tax
+#   cap R%                           the tax is at most this share of the income
+#   formula germany                  §32a EStG
+#
+# Sources: the tax authorities' published rates for 2025 (IRS, ATO, HMRC, CRA, BMF,
+# service-public.fr, Belastingdienst, Revenue, IRD, NTA, IRAS, Agenzia Entrate, AEAT,
+# Skatteetaten, Skatteverket, Skattestyrelsen, Vero, Skatturinn, ESTV, EMTA, VID, VMI,
+# FNS, STA, NTS).
+
+[AU] AUD 2025 | australia
+taxable 0 0%, 18200 16%, 45000 30%, 135000 37%, 190000 45%
+levy 2% above 27222
+
+[US] USD 2025 | united states, united states of america, usa, us, america
+allowance 15750
+taxable 0 10%, 11925 12%, 48475 22%, 103350 24%, 197300 32%, 250525 35%, 626350 37%
+
+[GB] GBP 2025 | united kingdom, uk, great britain, britain, england, wales, northern ireland
+allowance 12570 taper 100000 0.5
+taxable 0 20%, 37700 40%, 125140 45%
+
+[CA] CAD 2025 | canada
+taxable 0 14.5%, 57375 20.5%, 114750 26%, 177882 29%, 253414 33%
+credit 16129 at first rate
+
+[DE] EUR 2025 | germany, deutschland
+formula germany
+
+[FR] EUR 2025 | france
+taxable 0 0%, 11497 11%, 29315 30%, 83823 41%, 180294 45%
+
+[NL] EUR 2025 | netherlands, the netherlands, holland
+taxable 0 35.82%, 38441 37.48%, 76817 49.5%
+
+[IE] EUR 2025 | ireland, republic of ireland
+taxable 0 20%, 44000 40%
+credit 4000
+
+[NZ] NZD 2025 | new zealand, nz
+taxable 0 10.5%, 15600 17.5%, 53500 30%, 78100 33%, 180000 39%
+
+[JP] JPY 2025 | japan
+allowance tiers 1320000:950000, 3360000:880000, 4890000:680000, 6550000:630000, 23500000:580000, 24000000:480000, 24500000:320000, 25000000:160000, 0
+taxable 0 5%, 1950000 10%, 3300000 20%, 6950000 23%, 9000000 33%, 18000000 40%, 40000000 45%
+surtax 2.1%
+
+[SG] SGD 2025 | singapore
+taxable 0 0%, 20000 2%, 30000 3.5%, 40000 7%, 80000 11.5%, 120000 15%, 160000 18%, 200000 19%, 240000 19.5%, 280000 20%, 320000 22%, 500000 23%, 1000000 24%
+
+[IT] EUR 2025 | italy
+taxable 0 23%, 28000 35%, 50000 43%
+
+[ES] EUR 2025 | spain
+taxable 0 19%, 12450 24%, 20200 30%, 35200 37%, 60000 45%, 300000 47%
+credit 5550 at first rate
+
+[NO] NOK 2025 | norway
+allowance 108550
+taxable 0 22%
+gross 0 0%, 217400 1.7%, 306050 4%, 697150 13.7%, 942400 16.7%, 1410750 17.7%
+
+[SE] SEK 2025 | sweden
+allowance 17300
+taxable 0 32.41%, 625800 52.41%
+
+[DK] DKK 2025 | denmark
+contribution 8%
+allowance 51600
+taxable 0 37.01%
+net 0 0%, 611800 15%
+
+[FI] EUR 2025 | finland
+taxable 0 12.64%, 21200 19%, 31500 30.25%, 52100 34%, 88200 41.75%, 150000 44.25%
+gross 0 7.46%
+
+[IS] ISK 2025 | iceland
+taxable 0 31.49%, 5664060 37.99%, 15901524 46.29%
+credit 824292
+
+[CH] CHF 2025 | switzerland
+taxable 0 0%, 15200 0.77%, 33200 0.88%, 43500 2.64%, 58000 2.97%, 76100 5.94%, 82000 6.6%, 108800 8.8%, 141500 11%, 184900 13.2%
+cap 11.5%
+
+[EE] EUR 2025 | estonia
+allowance 7848 phase 14400 25200
+taxable 0 22%
+
+[LV] EUR 2025 | latvia
+allowance 6120
+taxable 0 25.5%, 105300 33%
+
+[LT] EUR 2025 | lithuania
+allowance 8964 phase 12456 30749
+taxable 0 20%, 126532.8 32%
+
+[RU] RUB 2025 | russia, russian federation
+taxable 0 13%, 2400000 15%, 5000000 18%, 20000000 20%, 50000000 22%
+
+[CN] CNY 2025 | china
+allowance 60000
+taxable 0 3%, 36000 10%, 144000 20%, 300000 25%, 420000 30%, 660000 35%, 960000 45%
+
+[KR] KRW 2025 | south korea, korea, republic of korea
+allowance 1500000
+taxable 0 6%, 14000000 15%, 50000000 24%, 88000000 35%, 150000000 38%, 300000000 40%, 500000000 42%, 1000000000 45%

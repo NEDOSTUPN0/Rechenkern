@@ -173,6 +173,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 FJD in EUR                               → €1.13
 2.5 FKP                                      → 2.50 FKP
 2.5 FKP in EUR                               → €1.13
+2.5 Ft                                       → 2.50 HUF
+2.5 Ft in EUR                                → €1.13
 2.5 GB                                       → 2.5 GB
 2.5 GB in B                                  → 2,500,000,000 B
 2.5 GBP                                      → £2.50
@@ -201,6 +203,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 GTQ in EUR                               → €1.13
 2.5 GW                                       → 2.5 GW
 2.5 GW in W                                  → 2,500,000,000 W
+2.5 GWEI                                     → 0.0000000025 ETH
+2.5 GWEI in EUR                              → €0.00
 2.5 GWh                                      → 2.5 GWh
 2.5 GWh in J                                 → 9,000,000,000,000 J
 2.5 GYD                                      → 2.50 GYD
@@ -235,6 +239,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 Gpc in m                                 → 7.714193954e25 m
 2.5 Gt                                       → 2.5 Gt
 2.5 Gt in kg                                 → 2,500,000,000,000 kg
+2.5 Gwei                                     → 0.0000000025 ETH
+2.5 Gwei in EUR                              → €0.00
 2.5 HBAR                                     → 2.5 HBAR
 2.5 HBAR in EUR                              → €1.13
 2.5 HK$                                      → HK$2.50
@@ -1805,6 +1811,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 guyanese dollar in EUR                   → €1.13
 2.5 guyanese dollars                         → 2.50 GYD
 2.5 guyanese dollars in EUR                  → €1.13
+2.5 gwei                                     → 0.0000000025 ETH
+2.5 gwei in EUR                              → €0.00
 2.5 gwh                                      → 2.5 GWh
 2.5 gwh in J                                 → 9,000,000,000,000 J
 2.5 gyd                                      → 2.50 GYD
@@ -2318,6 +2326,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 kph in mph                               → 1.553427981 mph
 2.5 kpw                                      → 2.50 KPW
 2.5 kpw in EUR                               → €1.13
+2.5 kr                                       → 2.50 DKK
+2.5 kr in EUR                                → €1.13
 2.5 krona                                    → 2.50 SEK
 2.5 krona in EUR                             → €1.13
 2.5 kronas                                   → 2.50 SEK
@@ -3656,11 +3666,11 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 samoan talas in EUR                      → €1.13
 2.5 sar                                      → 2.50 SAR
 2.5 sar in EUR                               → €1.13
-2.5 satoshi                                  → 0.00000003 BTC
+2.5 satoshi                                  → 0.000000025 BTC
 2.5 satoshi in EUR                           → €0.00
-2.5 satoshis                                 → 0.00000003 BTC
+2.5 satoshis                                 → 0.000000025 BTC
 2.5 satoshis in EUR                          → €0.00
-2.5 sats                                     → 0.00000003 BTC
+2.5 sats                                     → 0.000000025 BTC
 2.5 sats in EUR                              → €0.00
 2.5 saudi riyal                              → 2.50 SAR
 2.5 saudi riyal in EUR                       → €1.13
@@ -4259,6 +4269,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 weekdays                                 → 2.5 workdays
 2.5 weeks                                    → 2.5 weeks
 2.5 weeks in s                               → 1,512,000 seconds
+2.5 wei                                      → 2.5e-18 ETH
+2.5 wei in EUR                               → €0.00
 2.5 west african cfa franc                   → 3 XOF
 2.5 west african cfa franc in EUR            → €1.13
 2.5 west african cfa francs                  → 3 XOF

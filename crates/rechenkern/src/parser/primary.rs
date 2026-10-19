@@ -458,6 +458,10 @@ impl Parser<'_> {
                 None => Expr::Var(name),
             }));
         }
+        if let Some((unit, amount)) = self.glued_money(i) {
+            self.pos += 1;
+            return Ok(Some(Expr::WithUnit(Expr::Number(amount).boxed(), unit)));
+        }
         // "flour 1 cup in grams": the food before its amount.
         if let Some((food, n)) = self.food_at(i)
             && matches!(self.toks.get(i + n).map(|t| &t.tok), Some(Tok::Num(_)))

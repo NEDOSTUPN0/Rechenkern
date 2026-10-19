@@ -1,7 +1,7 @@
 //! Whole-line phrases: percentage questions and proportions.
 
 use super::Parser;
-use crate::ast::{Direction, Expr, Format, Func, GrowthResult, Op, Target, TaxPart, TimeExpr, Which};
+use crate::ast::{Direction, Expr, Format, Func, GrowthResult, IncomeTaxPart, Op, Target, TaxPart, TimeExpr, Which};
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -19,6 +19,12 @@ impl Parser<'_> {
         if let Some(expr) = self.inflation()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.investment_required()? {
+            return Ok(Some(expr));
+        }
+        if let Some(expr) = self.income_tax()? {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.growth()? {
             return Ok(Some(expr));
         }
@@ -28,6 +34,7 @@ impl Parser<'_> {
         if let Some(expr) = self.wheel_speed()? {
             return Ok(Some(expr));
         }
+
         if let Some(expr) = self.annual_return()? {
             return Ok(Some(expr));
         }
@@ -524,6 +531,77 @@ impl Parser<'_> {
         Ok(Some(Expr::WithUnit(density.boxed(), reg.get("ppi"))))
     }
 
+    /// "income tax on $100,000 in US", "€80,000 after tax in Germany", "take home pay on
+    /// £50,000 in UK", "effective tax rate for €80,000 in Germany".
+    fn income_tax(&self) -> Result<Option<Expr>> {
+        let len = self.toks.len();
+        let tax = self.toks.iter().any(|t| t.is_word("tax")) || (0..len).any(|i| self.matches_at(i, &["take", "home"]));
+        if !tax {
+            return Ok(None);
+        }
+        // The country: after the last "in", or first: "Germany income tax on €80,000".
+        let country_at = |from: usize, to: usize| {
+            let name = (from..to).map(|i| self.lower(i)).collect::<Option<Vec<_>>>()?.join(" ");
+            crate::income_tax::country(&name)
+        };
+        let after_in = (0..len).rev().find(|&i| self.matches_at(i, &["in"]));
+        let (country, words) = match after_in.and_then(|i| Some((country_at(i + 1, len)?, 0..i))) {
+            Some(found) => found,
+            None => match (1..len).find_map(|n| Some((country_at(0, n)?, n..len))) {
+                Some(found) => found,
+                None => return Ok(None),
+            },
+        };
+        const WORDS: &[&str] = &[
+            "income",
+            "tax",
+            "on",
+            "for",
+            "after",
+            "take",
+            "home",
+            "pay",
+            "effective",
+            "marginal",
+            "rate",
+            "of",
+            "net",
+            "salary",
+            "the",
+            "my",
+        ];
+        let has = |w: &str| words.clone().any(|i| self.matches_at(i, &[w]));
+        let part = if has("after") || has("take") || has("net") {
+            IncomeTaxPart::AfterTax
+        } else if has("marginal") {
+            IncomeTaxPart::Marginal
+        } else if has("rate") {
+            IncomeTaxPart::Rate
+        } else {
+            IncomeTaxPart::Tax
+        };
+        let keyword = |i: usize| WORDS.iter().any(|w| self.matches_at(i, &[w]));
+        let Some(start) = words.clone().find(|&i| !keyword(i)) else { return Ok(None) };
+        let Some(end) = words.clone().rev().find(|&i| !keyword(i)) else { return Ok(None) };
+        let income = self.part(start, end + 1)?;
+        Ok(Some(Expr::IncomeTax { income: income.boxed(), country, part }))
+    }
+
+    /// "investment required for $1,000/month at 5%": what pays that much a year at the
+    /// rate, without touching the principal.
+    fn investment_required(&self) -> Result<Option<Expr>> {
+        let needed = self.matches_at(1, &["required", "for"]) || self.matches_at(1, &["needed", "for"]);
+        if !self.matches_at(0, &["investment"]) || !needed {
+            return Ok(None);
+        }
+        let Some(at) = self.find(3, &["at"]) else { return Ok(None) };
+        let income = self.part(3, at)?;
+        let year = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("yr"));
+        let yearly = Expr::binary(Op::Mul, income, year);
+        let rate = Self::formatted(self.part(at + 1, self.toks.len())?, Format::Decimal);
+        Ok(Some(Expr::binary(Op::Div, yearly, rate)))
+    }
+
     /// "speed of 26 inch tire at 200 rpm": a wheel of that diameter rolls its
     /// circumference each turn. In mph for imperial sizes, km/h otherwise.
     fn wheel_speed(&self) -> Result<Option<Expr>> {
@@ -888,6 +966,8 @@ struct Rate {
 const GROWTH_PHRASES: &[(&[&str], GrowthResult)] = &[
     (&["interest", "repayment", "on"], GrowthResult::LoanInterest),
     (&["interest", "on"], GrowthResult::Interest),
+    (&["compound", "interest", "on"], GrowthResult::Interest),
+    (&["simple", "interest", "on"], GrowthResult::SimpleInterest),
     (&["present", "value", "of"], GrowthResult::Present),
     (&["future", "value", "of"], GrowthResult::Future),
     (&["repayment", "on"], GrowthResult::Repayment),

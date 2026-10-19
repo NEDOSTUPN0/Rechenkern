@@ -1,6 +1,7 @@
 //! Exchange rates from the free currency API by Fawaz Ahmed (CC0), with a disk cache.
 //!
-//! Rates cover fiat currencies, metals and popular crypto, and update daily.
+//! Rates cover fiat currencies, metals and popular crypto, and update daily. Coins the
+//! API lacks come from CoinGecko's free price API (`SUPPLEMENT`).
 
 use std::fs;
 use std::path::PathBuf;
@@ -15,6 +16,9 @@ const SOURCES: &[&str] = &[
     "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json",
     "https://latest.currency-api.pages.dev/v1/currencies/usd.min.json",
 ];
+
+/// Coins the currency API has no rate for, by their CoinGecko ids.
+const SUPPLEMENT: &[(&str, &str)] = &[("ton", "the-open-network")];
 
 /// Downloads rates when the cache is missing or older than `max_age`.
 /// A stale cache is still used when the download fails.
@@ -48,14 +52,40 @@ impl OnlineRates {
         for url in SOURCES {
             let response = ureq::get(*url).config().timeout_global(Some(self.timeout)).build().call();
             match response.and_then(|mut r| r.body_mut().read_to_string()) {
-                Ok(text) => match parse(&text) {
-                    Some(table) => return Ok((text, table)),
-                    None => last_error = format!("unexpected response from {url}"),
-                },
+                Ok(text) => {
+                    let text = self.supplemented(text);
+                    match parse(&text) {
+                        Some(table) => return Ok((text, table)),
+                        None => last_error = format!("unexpected response from {url}"),
+                    }
+                }
                 Err(e) => last_error = e.to_string(),
             }
         }
         Err(format!("can't download exchange rates: {last_error}"))
+    }
+
+    /// The API's answer with the coins it lacks added from CoinGecko, if it answers.
+    fn supplemented(&self, text: String) -> String {
+        let Ok(mut json) = serde_json::from_str::<serde_json::Value>(&text) else { return text };
+        let Some(usd) = json.get_mut("usd").and_then(|u| u.as_object_mut()) else { return text };
+        let missing: Vec<_> = SUPPLEMENT.iter().filter(|(code, _)| !usd.contains_key(*code)).collect();
+        if missing.is_empty() {
+            return text;
+        }
+        let ids = missing.iter().map(|(_, id)| *id).collect::<Vec<_>>().join(",");
+        let url = format!("https://api.coingecko.com/api/v3/simple/price?ids={ids}&vs_currencies=usd");
+        let response = ureq::get(&url).config().timeout_global(Some(self.timeout)).build().call();
+        let Ok(prices) = response.and_then(|mut r| r.body_mut().read_to_string()) else { return text };
+        let Ok(prices) = serde_json::from_str::<serde_json::Value>(&prices) else { return text };
+        for (code, id) in missing {
+            // CoinGecko gives dollars per coin; the table keeps coins per dollar.
+            if let Some(price) = prices.get(id).and_then(|p| p.get("usd")).and_then(|p| p.as_f64()).filter(|p| *p > 0.0)
+            {
+                usd.insert(code.to_string(), serde_json::json!(1.0 / price));
+            }
+        }
+        json.to_string()
     }
 
     /// Downloads rates now and updates the cache.

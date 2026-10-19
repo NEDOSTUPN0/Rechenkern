@@ -710,14 +710,14 @@ pub(super) fn build() -> Registry {
             }
         }
     }
-    for &(code, name, plural, aliases) in MINOR_UNITS {
+    for &(code, name, plural, aliases, places) in MINOR_UNITS {
         let currency = find(code).expect("minor unit of a known currency");
         let id = b.push(UnitDef {
             symbol: name.into(),
             name: name.into(),
             plural: plural.into(),
             dim: Dim::MONEY,
-            scale: Number::pow10(-(currency.decimals as i32)),
+            scale: Number::pow10(-places),
             offset: Number::ZERO,
             spelled: true,
             tight: false,

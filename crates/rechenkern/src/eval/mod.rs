@@ -11,7 +11,7 @@ pub(crate) use time::get as span_field;
 use std::cell::Cell;
 use std::collections::HashMap;
 
-use crate::ast::{Direction, Expr, Format, Func, GrowthResult, LineRef, Op, Rounding, Target};
+use crate::ast::{Direction, Expr, Format, Func, GrowthResult, IncomeTaxPart, LineRef, Op, Rounding, Target};
 use crate::config::{Config, Now};
 use crate::error::{Error, Result, bail};
 use crate::format::unit_text;
@@ -51,6 +51,8 @@ pub enum Display {
     Dms,
     /// With the scale the line wrote, while the answer stays exact with it: "$2.5M".
     Scaled,
+    /// In cents or satoshis, as asked: "$10 in cents" = 1,000 cents.
+    Minor,
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -265,6 +267,29 @@ impl Env<'_> {
                 let (principal, time, rate) = (self.eval(principal)?, self.eval(time)?, self.eval(rate)?);
                 self.growth(principal, time, rate, (period, *periods), *compounds, *result)?
             }
+            Expr::IncomeTax { income, country, part } => self.income_tax(self.eval(income)?, country, *part)?,
+        })
+    }
+
+    /// A country's income tax, in its currency: an income in another currency converts first.
+    fn income_tax(&self, income: Value, country: &crate::income_tax::Country, part: IncomeTaxPart) -> Result<Value> {
+        let currency = registry().currency(country.currency).ok_or_else(|| Error::new("unknown currency"))?;
+        let income = match income {
+            Value::Quantity(q) if q.unit.is_none() => q.number,
+            Value::Quantity(q) if q.unit.is_money() => self.convert_quantity(&q, &currency)?.number,
+            v => bail!("income tax needs an amount of money, not {}", v.kind()),
+        };
+        let tax = country.tax(income);
+        let money = |n: Number| Value::Quantity(Quantity::new(n, currency.clone()));
+        Ok(match part {
+            IncomeTaxPart::Tax => money(tax),
+            IncomeTaxPart::AfterTax => money(income - tax),
+            IncomeTaxPart::Rate if income.is_zero() => Value::Percent(Number::ZERO),
+            IncomeTaxPart::Rate => Value::Percent(tax / income * Number::from_i64(100)),
+            IncomeTaxPart::Marginal => {
+                let step = Number::from_i64(100);
+                Value::Percent((country.tax(income + step) - tax) / step * Number::from_i64(100))
+            }
         })
     }
 
@@ -463,6 +488,9 @@ impl Env<'_> {
             }
             None => (periods_in_time()?, rate),
         };
+        if result == GrowthResult::SimpleInterest {
+            return self.mul(principal, Value::number(rate * periods_in_time()?));
+        }
         let factor = (Number::ONE + rate).pow(steps);
         // What the principal turns into: grown, or paid back in equal payments, one per step.
         let multiple = match loan {
@@ -475,6 +503,7 @@ impl Env<'_> {
             GrowthResult::Future | GrowthResult::Repayment => Ok(total),
             GrowthResult::Interest | GrowthResult::LoanInterest => self.sub(total, principal),
             GrowthResult::Present => self.div(principal, Value::number(factor)),
+            GrowthResult::SimpleInterest => unreachable!("worked out above"),
         }
     }
 
@@ -615,7 +644,10 @@ impl Env<'_> {
 
     pub(crate) fn convert(&self, value: Value, target: &Target, display: Display) -> Result<(Value, Display)> {
         Ok(match target {
-            Target::Unit(unit) => (self.to_unit(value, unit)?, Display::Auto),
+            Target::Unit(unit) => {
+                let minor = unit.single().is_some_and(|d| d.currency.is_some() && d.scale != Number::ONE);
+                (self.to_unit(value, unit)?, if minor { Display::Minor } else { Display::Auto })
+            }
             Target::Units(units) => self.to_parts(value, units)?,
             Target::Per(period) => {
                 let unit = match &value {

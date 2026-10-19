@@ -166,6 +166,24 @@ pub enum Expr {
         compounds: Option<i64>,
         result: GrowthResult,
     },
+    /// A country's income tax on a year's income: `income tax on $100,000 in US`.
+    IncomeTax {
+        income: Box<Expr>,
+        country: &'static crate::income_tax::Country,
+        part: IncomeTaxPart,
+    },
+}
+
+/// What an income tax phrase asks for.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum IncomeTaxPart {
+    Tax,
+    /// What is left: "after tax", "take home pay".
+    AfterTax,
+    /// The tax as a share of the income: "effective tax rate".
+    Rate,
+    /// The tax on one more unit of income.
+    Marginal,
 }
 
 /// What a sales tax phrase asks for.
@@ -194,6 +212,8 @@ pub enum GrowthResult {
     Future,
     /// Only the interest earned.
     Interest,
+    /// Interest on the principal alone, never compounded: "simple interest on".
+    SimpleInterest,
     /// What a future amount is worth today.
     Present,
     /// Everything paid back on a loan.

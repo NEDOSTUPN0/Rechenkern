@@ -24,6 +24,7 @@ mod eval;
 mod find;
 mod format;
 mod hash;
+mod income_tax;
 mod inflation;
 mod json;
 mod lexer;

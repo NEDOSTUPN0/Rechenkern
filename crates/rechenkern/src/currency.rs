@@ -75,10 +75,10 @@ pub static CURRENCIES: &[Currency] = &[
     fiat("MXN", "Mexican peso", "Mexican pesos", "MX$", 2, &["MX$", "peso", "mexican peso"]),
     fiat("SEK", "Swedish krona", "Swedish kronor", "", 2, &["krona", "kronor", "swedish krona", "swedish kronor"]),
     fiat("NOK", "Norwegian krone", "Norwegian kroner", "", 2, &["krone", "kroner", "norwegian krone", "norwegian kroner"]),
-    fiat("DKK", "Danish krone", "Danish kroner", "", 2, &["danish krone", "danish kroner"]),
+    fiat("DKK", "Danish krone", "Danish kroner", "", 2, &["danish krone", "danish kroner", "kr"]),
     fiat("PLN", "Polish zloty", "Polish zlotys", "", 2, &["zł", "zloty", "złoty", "polish zloty"]),
     fiat("CZK", "Czech koruna", "Czech korunas", "", 2, &["Kč", "koruna", "czech koruna", "czech crown"]),
-    fiat("HUF", "Hungarian forint", "Hungarian forints", "", 2, &["forint", "hungarian forint"]),
+    fiat("HUF", "Hungarian forint", "Hungarian forints", "", 2, &["forint", "hungarian forint", "Ft"]),
     fiat("RON", "Romanian leu", "Romanian lei", "", 2, &["leu", "lei", "romanian leu", "romanian lei"]),
     fiat("BGN", "Bulgarian lev", "Bulgarian leva", "", 2, &["lev", "leva", "bulgarian lev"]),
     fiat("ZAR", "South African rand", "South African rand", "", 2, &["rand", "south african rand"]),
@@ -246,12 +246,14 @@ pub static CURRENCIES: &[Currency] = &[
     crypto("LUNA", "Terra", "Terra", &[]),
 ];
 
-/// The smallest unit of a currency, worth 10^-decimals of it: (code, name, plural, aliases).
-pub static MINOR_UNITS: &[(&str, &str, &str, &[&str])] = &[
-    ("USD", "cent", "cents", &["¢"]),
-    ("EUR", "euro cent", "euro cents", &[]),
-    ("GBP", "penny", "pence", &["pennies"]),
-    ("BTC", "satoshi", "satoshis", &["sats"]),
+/// Small units of a currency, worth 10^-places of it: (code, name, plural, aliases, places).
+pub static MINOR_UNITS: &[(&str, &str, &str, &[&str], i32)] = &[
+    ("USD", "cent", "cents", &["¢"], 2),
+    ("EUR", "euro cent", "euro cents", &[], 2),
+    ("GBP", "penny", "pence", &["pennies"], 2),
+    ("BTC", "satoshi", "satoshis", &["sats"], 8),
+    ("ETH", "gwei", "gwei", &["GWEI", "Gwei"], 9),
+    ("ETH", "wei", "wei", &[], 18),
 ];
 
 /// Finds a currency by its ISO code (case-insensitive).
