@@ -4,7 +4,8 @@
 # Countries spanning several zones use the capital's zone.
 # Cities and airports missing from cities.txt (or there with another zone)
 # also give latitude and longitude, for the sun: `bath = Europe/London 51.38 -2.36`.
-# Airports use the city they serve; coordinates are from GeoNames.
+# Airports use the city they serve; coordinates are from GeoNames. The airports
+# listed here may be written in any case; airports.txt has the rest.
 
 # Abbreviations. Standard time names the region's time all year, as people
 # use it ("EST" in summer); daylight time is a fixed offset in POSIX form,

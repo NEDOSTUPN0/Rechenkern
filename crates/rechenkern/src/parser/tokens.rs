@@ -363,10 +363,10 @@ impl<'a> Parser<'a> {
         let options = &self.config().features.time_zones;
         for n in (1..=words.len()).rev() {
             let custom = || self.custom_place(&text).map(|p| p.zone.clone());
-            // "pst" is a zone only in capitals, if the config asks for them.
-            let lowercase_code = options.require_uppercase_for_ambiguous_time_zones
-                && zones::is_code(&text)
-                && self.toks[i].word().is_some_and(|w| w.chars().any(char::is_lowercase));
+            // "pst" is a zone only in capitals, if the config asks for them; "man" is never an airport.
+            let capitals = (options.require_uppercase_for_ambiguous_time_zones && zones::is_code(&text))
+                || zones::capitals_only(&text);
+            let lowercase_code = capitals && self.toks[i].word().is_some_and(|w| w.chars().any(char::is_lowercase));
             if !lowercase_code && let Some(zone) = custom().or_else(|| zones::find(&text)) {
                 let zone = zones::corrected(&text, zone, options.code_correction);
                 return Some((text, zone, ends[n - 1] - i));
