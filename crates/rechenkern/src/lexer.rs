@@ -13,6 +13,8 @@ pub enum Tok {
     Sym(&'static str),
     /// Clock time `h:mm[:ss[.fff]]`.
     Clock { h: u32, m: u32, s: Option<Number> },
+    /// A video timecode, hours to frames: `01:00:10:12`.
+    Timecode([u32; 4]),
     /// Date made of numbers; `sep` tells the order: '-' is year-month-day.
     Date { parts: [u32; 3], sep: char },
     /// Full ISO 8601 timestamp such as `2019-04-01T15:30:00Z`.
@@ -602,6 +604,18 @@ impl Lexer<'_> {
         let m = self.slice(self.i + h_len + 1, self.i + h_len + 3).parse().ok()?;
         self.i += h_len + 3;
         let mut s = None;
+        // "01:00:10:12": a timecode, its last part frames.
+        if self.peek(0) == Some(':')
+            && self.digits(self.i + 1) == 2
+            && self.peek(3) == Some(':')
+            && self.digits(self.i + 4) == 2
+            && self.digits(self.i + 6) == 0
+        {
+            let sec = self.slice(self.i + 1, self.i + 3).parse().ok()?;
+            let frames = self.slice(self.i + 4, self.i + 6).parse().ok()?;
+            self.i += 6;
+            return Some(Tok::Timecode([h, m, sec, frames]));
+        }
         if self.peek(0) == Some(':') && self.digits(self.i + 1) == 2 {
             let mut end = self.i + 3;
             if self.chars.get(end).map(|&(_, c)| c) == Some('.') && self.digits(end + 1) > 0 {

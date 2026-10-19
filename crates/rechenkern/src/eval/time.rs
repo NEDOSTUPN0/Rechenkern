@@ -5,7 +5,7 @@ use jiff::tz::TimeZone;
 use jiff::{Span, Timestamp, Unit as Cal, Zoned};
 
 use super::Env;
-use crate::ast::{Expr, Holiday, Op, TimeExpr, Which};
+use crate::ast::{Expr, Holiday, MonthDay, Op, TimeExpr, Which};
 use crate::error::{Error, Result, bail};
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
@@ -213,6 +213,27 @@ impl Env<'_> {
                     None => bail!("invalid date {month}/{day}"),
                 }
             }
+            TimeExpr::InMonth(pick, month) => {
+                let pick_in = |d: Date| -> Result<Date> {
+                    Ok(match *pick {
+                        MonthDay::Nth(n, weekday) => d.first_of_month().nth_weekday_of_month(n, weekday)?,
+                        MonthDay::Day(day) => Date::new(d.year(), d.month(), day)
+                            .map_err(|_| Error::new(format!("that month has no day {day}")))?,
+                    })
+                };
+                let date = match month {
+                    Some(month) => match self.eval(month)? {
+                        Value::Moment(m) => pick_in(m.time.date())?,
+                        v => bail!("expected a month, not {}", v.kind()),
+                    },
+                    // "first monday of the month": the next one.
+                    None => match pick_in(today) {
+                        Ok(d) if d >= today => d,
+                        _ => pick_in(today.first_of_month().checked_add(Span::new().months(1))?)?,
+                    },
+                };
+                self.date_moment(date)
+            }
             TimeExpr::Weekday(weekday, which) => {
                 self.date_moment(weekday_date(today, *weekday, *which, self.config.week_start)?)
             }
@@ -362,6 +383,11 @@ impl Env<'_> {
     pub(crate) fn range(&self, a: Value, b: Value) -> Result<Value> {
         match (a, b) {
             (Value::Moment(a), Value::Moment(b)) => Ok(Value::Duration(self.between(&a, &b, true)?)),
+            // Lap times and timecodes: "from 01:30:00 to 02:45:30" = 01:15:30.
+            (a @ Value::Duration(_), b @ Value::Duration(_)) => self.sub(b, a),
+            (Value::Timecode(a), Value::Timecode(b)) if a.fps == b.fps => {
+                Ok(Value::Timecode(crate::value::Timecode { frames: b.frames - a.frames, fps: a.fps }))
+            }
             (a, b) => bail!("can't make a range from {} to {}", a.kind(), b.kind()),
         }
     }

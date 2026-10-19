@@ -70,6 +70,10 @@ impl Env<'_> {
                 Value::Quantity(Quantity::new(x.number * (Number::ONE + sign(p) / hundred()), x.unit))
             }
             (Value::Percent(p), Value::Percent(q)) => Value::Percent(p + sign(q)),
+            (Value::Timecode(x), Value::Timecode(y)) if x.fps == y.fps => Value::Timecode(crate::value::Timecode {
+                frames: x.frames + if sub { -y.frames } else { y.frames },
+                fps: x.fps,
+            }),
             // "30% + 0.4" treats 0.4 as 40%.
             (Value::Percent(p), Value::Quantity(y)) if y.unit.is_none() => {
                 Value::Percent(p + sign(y.number) * hundred())
@@ -391,7 +395,17 @@ impl Env<'_> {
         // Playback speed: "1 hour at 1.5x".
         let is_time = matches!(&a, Value::Duration(_)) || matches!(&a, Value::Quantity(q) if q.unit.dim() == Dim::TIME);
         if is_time && matches!(&b, Value::Quantity(q) if q.unit.is_none()) {
-            return self.div(a, b);
+            // A time, as SoulverCore shows it: "2 hours at 1.5x" = 1 hour 20 min.
+            let (Value::Quantity(speed), Value::Quantity(q)) = (&b, &a) else { return self.div(a, b) };
+            if is_calendar(&q.unit) || speed.number.is_zero() {
+                return self.div(a, b);
+            }
+            let seconds = self.seconds(&a)? / speed.number;
+            let largest = q.unit.single().and_then(|d| d.calendar).map_or(jiff::Unit::Second, |(cal, _)| cal);
+            return match seconds.is_integer() {
+                true => Ok(Value::Duration(Duration::new(super::time::balance(seconds, largest)?))),
+                false => self.div(a, b),
+            };
         }
         let product = self.mul(a.clone(), b.clone());
         let quotient = self.div(a, b);

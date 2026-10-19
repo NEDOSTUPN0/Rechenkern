@@ -53,6 +53,10 @@ pub enum Display {
     Scaled,
     /// In cents or satoshis, as asked: "$10 in cents" = 1,000 cents.
     Minor,
+    /// A time in hours, minutes and seconds: "3h 30m 0s".
+    Hms,
+    /// A count of video frames: "240 frames".
+    Frames,
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -268,6 +272,11 @@ impl Env<'_> {
                 self.growth(principal, time, rate, (period, *periods), *compounds, *result)?
             }
             Expr::IncomeTax { income, country, part } => self.income_tax(self.eval(income)?, country, *part)?,
+            Expr::Timecode([h, m, s, f], fps) => {
+                let seconds = Number::from_i64((*h as i64 * 60 + *m as i64) * 60 + *s as i64);
+                let frames = (seconds * *fps).round_dp(0).to_i64().unwrap_or(0) + *f as i64;
+                Value::Timecode(crate::value::Timecode { frames, fps: *fps })
+            }
         })
     }
 
@@ -658,6 +667,12 @@ impl Env<'_> {
             }
             Target::Zone(zone) => (Value::Moment(self.to_zone(value, &zone.zone)?), Display::Auto),
             Target::Format(format) => self.to_format(value, *format, display)?,
+            Target::Pattern(pattern) => match value {
+                Value::Moment(m) => {
+                    (Value::Text(m.time.strftime(&strftime_pattern(pattern)).to_string()), Display::Auto)
+                }
+                v => bail!("{} is not a date", v.kind()),
+            },
             Target::Cast(unit) => match value {
                 Value::Quantity(q) => (Value::Quantity(Quantity::new(q.number, unit.clone())), Display::Auto),
                 Value::Percent(p) => (Value::Quantity(Quantity::new(p, unit.clone())), Display::Auto),
@@ -696,6 +711,23 @@ impl Env<'_> {
             if let Some(d) = dates {
                 return Ok(Value::Quantity(Quantity::new(self.workdays(&d)?, unit.clone())));
             }
+        }
+        // Hour angles: the sky turns 15° an hour ("12h 30m in degrees" = 187.5°).
+        let is_time =
+            matches!(&value, Value::Duration(_)) || matches!(&value, Value::Quantity(q) if q.unit.dim() == Dim::TIME);
+        let reg = registry();
+        if is_time && unit.dim() == Dim::ANGLE {
+            let hours = self.seconds(&value)? / Number::from_i64(3600);
+            let degrees = Quantity::new(hours * Number::from_i64(15), reg.get("°"));
+            return Ok(Value::Quantity(self.convert_quantity(&degrees, unit)?));
+        }
+        if let Value::Quantity(q) = &value
+            && q.unit.dim() == Dim::ANGLE
+            && unit.dim() == Dim::TIME
+        {
+            let degrees = self.convert_quantity(q, &reg.get("°"))?.number;
+            let hours = Quantity::new(degrees / Number::from_i64(15), reg.get("h"));
+            return Ok(Value::Quantity(self.convert_quantity(&hours, unit)?));
         }
         match value {
             // "30 mpg in L/100km", "2 seconds in Hz": a unit of the inverse kind takes the reciprocal,
@@ -804,7 +836,7 @@ impl Env<'_> {
                 v => bail!("only a resolution has megapixels, not {}", v.kind()),
             },
             Format::Frames => match value {
-                Value::Timecode(t) => (Value::number(Number::from_i64(t.frames)), Display::Auto),
+                Value::Timecode(t) => (Value::number(Number::from_i64(t.frames)), Display::Frames),
                 v => bail!("only a timecode has frames, not {}", v.kind()),
             },
             Format::Pitch => match &value {
@@ -849,6 +881,23 @@ impl Env<'_> {
                 }
                 v => bail!("can't show {} as a percentage", v.kind()),
             },
+            Format::Hms => {
+                let seconds = match &value {
+                    Value::Duration(d) => self.duration_in(d, &registry().get("s"))?.number,
+                    Value::Quantity(q) if q.unit.dim() == Dim::TIME => {
+                        self.convert_quantity(q, &registry().get("s"))?.number
+                    }
+                    // An hour angle: "90 degrees in hms" = 6h 0m 0s.
+                    Value::Quantity(q) if q.unit.dim() == Dim::ANGLE => {
+                        match self.to_unit(value.clone(), &registry().get("s"))? {
+                            Value::Quantity(s) => s.number,
+                            v => bail!("can't show {} in hours, minutes and seconds", v.kind()),
+                        }
+                    }
+                    v => bail!("can't show {} in hours, minutes and seconds", v.kind()),
+                };
+                (Value::Duration(Duration::new(time::balance(seconds, jiff::Unit::Hour)?)), Display::Hms)
+            }
             Format::Timespan | Format::Laptime => {
                 let mut d = match value {
                     Value::Duration(d) => d,
@@ -890,10 +939,15 @@ impl Env<'_> {
                 Value::Moment(m) => (Value::Text(m.time.strftime("%A").to_string()), Display::Auto),
                 v => bail!("{} has no weekday", v.kind()),
             },
-            Format::WeekNumber | Format::DayOfYear | Format::DayOfMonth => match value {
+            Format::WeekNumber | Format::DayOfYear | Format::DayOfMonth | Format::WeekOfMonth => match value {
                 Value::Moment(m) => {
                     let n = match format {
                         Format::WeekNumber => m.time.date().iso_week_date().week() as i64,
+                        Format::WeekOfMonth => {
+                            let first = m.time.date().first_of_month().weekday();
+                            let offset = first.since(self.config.week_start) as i64;
+                            (m.time.day() as i64 - 1 + offset) / 7 + 1
+                        }
                         Format::DayOfYear => m.time.day_of_year() as i64,
                         _ => m.time.day() as i64,
                     };
@@ -976,4 +1030,50 @@ pub(crate) fn weight_or_volume(target: &Target) -> Option<Dim> {
 pub(crate) fn is_exchange_rate(unit: &Unit) -> bool {
     let money = |id: UnitId| registry().def(id).currency.is_some();
     matches!(unit.factors(), &[(a, x), (b, y)] if x * y == -1 && x.abs() == 1 && money(a) && money(b))
+}
+
+/// A Unicode date pattern in strftime's terms: "yyyy-MM-dd" is "%Y-%m-%d".
+fn strftime_pattern(pattern: &str) -> String {
+    const CODES: &[(&str, &str)] = &[
+        ("yyyy", "%Y"),
+        ("yy", "%y"),
+        ("y", "%Y"),
+        ("MMMM", "%B"),
+        ("MMM", "%b"),
+        ("MM", "%m"),
+        ("M", "%-m"),
+        ("dd", "%d"),
+        ("d", "%-d"),
+        ("EEEE", "%A"),
+        ("EEE", "%a"),
+        ("E", "%a"),
+        ("HH", "%H"),
+        ("H", "%-H"),
+        ("hh", "%I"),
+        ("h", "%-I"),
+        ("mm", "%M"),
+        ("m", "%-M"),
+        ("ss", "%S"),
+        ("s", "%-S"),
+        ("a", "%p"),
+        ("Z", "%z"),
+    ];
+    let mut out = String::new();
+    let mut rest = pattern;
+    'outer: while let Some(c) = rest.chars().next() {
+        for (code, spec) in CODES {
+            if let Some(after) = rest.strip_prefix(code) {
+                out.push_str(spec);
+                rest = after;
+                continue 'outer;
+            }
+        }
+        if c == '%' {
+            out.push_str("%%");
+        } else if c != '\'' {
+            out.push(c);
+        }
+        rest = &rest[c.len_utf8()..];
+    }
+    out
 }

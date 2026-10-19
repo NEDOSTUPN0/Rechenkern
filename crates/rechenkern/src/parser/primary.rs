@@ -17,6 +17,23 @@ impl Parser<'_> {
                 if let Some(date) = self.year_first_date(*n) {
                     return Ok(date);
                 }
+                // "2nd tuesday of March"
+                self.pos -= 1;
+                if let Some(day) = self.day_in_month()? {
+                    return Ok(day);
+                }
+                self.pos += 1;
+                // "the 15th", "on the 15th of next month": a day of a month.
+                let the = self.pos >= 2 && self.toks[self.pos - 2].is_word("the");
+                let starts = self.pos == 2 || (self.pos == 3 && self.toks[0].is_word("on"));
+                if the
+                    && starts
+                    && let Some(day) = n.to_i64().filter(|d| (1..=31).contains(d))
+                    && self.eat_ordinal()
+                {
+                    let month = if self.eat_word("of") { self.month_of()? } else { None };
+                    return Ok(Expr::Time(TimeExpr::InMonth(crate::ast::MonthDay::Day(day as i8), month)));
+                }
                 // "0xff + 1": the answer is in the base of the last number written in one.
                 let radix = match self.src[tok.start..].get(..2).map(str::to_ascii_lowercase).as_deref() {
                     Some("0x") => Some(16),
@@ -37,6 +54,10 @@ impl Parser<'_> {
                 self.pos += 1;
                 let date = self.numeric_date(*parts, *sep)?;
                 self.date_tail(date)
+            }
+            Tok::Timecode(parts) => {
+                self.pos += 1;
+                Ok(Expr::Timecode(*parts, self.frame_rate().unwrap_or(Number::from_i64(24))))
             }
             Tok::IsoDateTime(text) => {
                 self.pos += 1;
@@ -162,6 +183,16 @@ impl Parser<'_> {
             last = unit;
         }
         Ok(if parts.len() == 1 { parts.pop().unwrap() } else { Expr::Composite(parts) })
+    }
+
+    /// "at 30 fps" after a timecode: its frame rate.
+    fn frame_rate(&mut self) -> Option<Number> {
+        let Tok::Num(fps) = self.toks.get(self.pos + 1)?.tok else { return None };
+        let fps_unit = self.toks.get(self.pos + 2).is_some_and(|t| t.is_word("fps"));
+        (self.words_at(self.pos, &["at"]) && fps_unit).then(|| {
+            self.pos += 3;
+            fps
+        })
     }
 
     /// "um" or "us" ends the amount: nothing after it but a conversion.
@@ -457,6 +488,11 @@ impl Parser<'_> {
                 Some(food) => Expr::Food(Expr::Var(name).boxed(), food),
                 None => Expr::Var(name),
             }));
+        }
+        if let Some((month, day)) = self.glued_date(i) {
+            self.pos += 1;
+            let date = Expr::Time(TimeExpr::Date { year: None, month, day });
+            return self.date_tail(date).map(Some);
         }
         if let Some((unit, amount)) = self.glued_money(i) {
             self.pos += 1;

@@ -190,8 +190,14 @@ impl<'a> Parser<'a> {
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
             || (w == "cast" && ["to", "as", "into"].iter().any(|t| self.words_at(i + 1, &[t])))
+            || (w == "diff" && (self.words_at(i + 1, &["between"]) || self.zone_at(i + 1).is_some()))
             // "zł10", "CHF10": a currency glued before its amount.
             || self.glued_money(i).is_some()
+            || self.glued_date(i).is_some()
+            // "first monday of the month"
+            || (self.nth_at(i).is_some_and(|(_, n)| n == 1)
+                && self.lower(i + 1).is_some_and(|w| words::weekday(&w).is_some())
+                && self.words_at(i + 2, &["of"]))
             // "flour 1 cup": a food before its amount.
             || (matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_)))
                 && self.unit_at(i + 2, false).is_some_and(|(u, _)| matches!(u.dim(), Dim::MASS | Dim::VOLUME))
@@ -230,6 +236,16 @@ impl<'a> Parser<'a> {
             || self.note_at(i).is_some()
             || self.place_sky_at(i).is_some()
             || self.density_at(i).is_some()
+    }
+
+    /// A month and a day written as one word: "apr3", "dec25".
+    pub(super) fn glued_date(&self, i: usize) -> Option<(i8, i8)> {
+        let word = self.toks.get(i)?.word()?;
+        let split = word.find(|c: char| c.is_ascii_digit()).filter(|&s| s >= 3)?;
+        let (name, digits) = word.split_at(split);
+        let (month, _) = words::month(&name.to_lowercase())?;
+        let day = digits.parse::<i8>().ok().filter(|d| (1..=31).contains(d) && digits.len() <= 2)?;
+        Some((month, day))
     }
 
     /// A currency and an amount written as one word: "zł10", "CHF10", "Kč250".
@@ -396,7 +412,10 @@ impl<'a> Parser<'a> {
             }
             text.truncate(text.len().saturating_sub(words[n - 1].len() + 1));
         }
-        None
+        // "japanese time", "time in kazakh": a country by its adjective, only with "time".
+        let country = self.lower(i).and_then(|w| words::demonym(&w))?;
+        let with_time = self.words_at(i + 1, &["time"]) || (i >= 2 && self.words_at(i - 2, &["time", "in"]));
+        with_time.then(|| Some((country.to_string(), zones::find(country)?, 1))).flatten()
     }
 
     /// Where the place at token `i` is, for the sun, and its length in tokens.
@@ -470,7 +489,7 @@ impl<'a> Parser<'a> {
         p.pos += skip;
         let Some(tok) = p.peek() else { return false };
         match &tok.tok {
-            Tok::Num(_) | Tok::Clock { .. } | Tok::Date { .. } | Tok::IsoDateTime(_) => true,
+            Tok::Num(_) | Tok::Clock { .. } | Tok::Date { .. } | Tok::IsoDateTime(_) | Tok::Timecode(_) => true,
             // "°" is a unit: "fl oz·°F", "ct·°".
             Tok::Sym(s) => matches!(*s, "(" | "-" | "+" | "√" | "∛" | "°"),
             Tok::Word(w) => {

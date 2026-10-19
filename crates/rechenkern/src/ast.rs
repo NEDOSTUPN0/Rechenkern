@@ -166,6 +166,8 @@ pub enum Expr {
         compounds: Option<i64>,
         result: GrowthResult,
     },
+    /// A video timecode at a frame rate: `01:00:10:12`, `00:00:10:00 at 30 fps`.
+    Timecode([u32; 4], Number),
     /// A country's income tax on a year's income: `income tax on $100,000 in US`.
     IncomeTax {
         income: Box<Expr>,
@@ -395,6 +397,13 @@ pub enum LineRef {
     Stat(Func),
 }
 
+/// A day of a month: the nth weekday (-1 the last) or a day number.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MonthDay {
+    Nth(i8, Weekday),
+    Day(i8),
+}
+
 /// Which occurrence of a weekday or period: `next friday`, `last month`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Which {
@@ -427,6 +436,9 @@ pub enum TimeExpr {
         day: i8,
     },
     Weekday(Weekday, Option<Which>),
+    /// A day picked in a month: `first monday of the month`, `the 15th of next month`.
+    /// Without a month it is the next one from today: `last friday of the month`.
+    InMonth(MonthDay, Option<Box<Expr>>),
     /// `next week`, `last month`: today moved by one period.
     Period(jiff::Unit, Which),
     /// First day of this, next or last quarter.
@@ -509,6 +521,8 @@ pub enum Target {
     Format(Format),
     /// The same number in another unit, without converting: `5 km cast to miles` = 5 mi.
     Cast(Unit),
+    /// A date written by a template, as in Unicode's date patterns: `today as yyyy-MM-dd`.
+    Pattern(String),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -527,6 +541,10 @@ pub enum Format {
     Multiplier,
     Timespan,
     Laptime,
+    /// Hours, minutes and seconds, as SoulverCore writes them: "3h 30m 0s".
+    Hms,
+    /// The row of the month's calendar a date is in: "week of month".
+    WeekOfMonth,
     Timestamp,
     Date,
     Iso,

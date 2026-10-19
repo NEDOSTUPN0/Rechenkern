@@ -3,7 +3,7 @@
 use jiff::tz::TimeZone;
 
 use super::{Parser, words};
-use crate::ast::{Expr, Format, Func, Op, Target, TimeExpr, Which};
+use crate::ast::{Expr, Format, Func, MonthDay, Op, Target, TimeExpr, Which};
 use crate::config::DateOrder;
 use crate::error::{Result, bail};
 use crate::lexer::Tok;
@@ -75,6 +75,23 @@ impl Parser<'_> {
     /// `5:30 in minutes` is 5 hours 30 minutes.
     fn clock_as_duration(&mut self, h: u32, m: u32) -> Option<Expr> {
         let reg = registry();
+        // "00:45 + 01:30": times added are lengths of time, as in SoulverCore.
+        let bare_clock = |i: usize| {
+            matches!(self.toks.get(i).map(|t| &t.tok), Some(Tok::Clock { s: None, .. }))
+                && !self.lower(i + 1).is_some_and(|w| matches!(w.as_str(), "am" | "pm" | "a.m." | "p.m."))
+        };
+        let sign = |i: usize| self.toks.get(i).is_some_and(|t| t.is_sym("+") || t.is_sym("-"));
+        let summed = (sign(self.pos) && bare_clock(self.pos + 1))
+            || (self.pos >= 3 && sign(self.pos - 2) && bare_clock(self.pos - 3));
+        if summed && m < 60 {
+            let part =
+                |n: u32, unit: &str| Expr::WithUnit(Expr::Number(Number::from_i64(n.into())).boxed(), reg.get(unit));
+            return Some(match (h, m) {
+                (0, m) => part(m, "min"),
+                (h, 0) => part(h, "h"),
+                (h, m) => Expr::binary(Op::Add, part(h, "h"), part(m, "min")),
+            });
+        }
         let time_unit = |i: usize| self.unit_at(i, true).filter(|(u, _)| u.dim() == Dim::TIME);
         let converted = ["in", "to", "as", "into"].iter().any(|w| self.words_at(self.pos, &[w]));
         let (unit, len) = match converted {
@@ -196,6 +213,52 @@ impl Parser<'_> {
         self.time_word_date()
     }
 
+    /// "first monday of the month", "last friday of October", "the 15th of next month".
+    pub(super) fn day_in_month(&mut self) -> Result<Option<Expr>> {
+        let Some((nth, n)) = self.nth_at(self.pos) else { return Ok(None) };
+        let Some((weekday, _)) = self.lower(self.pos + n).and_then(|w| words::weekday(&w)) else { return Ok(None) };
+        if !self.words_at(self.pos + n + 1, &["of"]) {
+            return Ok(None);
+        }
+        self.pos += n + 2;
+        let month = self.month_of()?;
+        Ok(Some(Expr::Time(TimeExpr::InMonth(MonthDay::Nth(nth, weekday), month))))
+    }
+
+    /// "first", "2nd", "last" at token `i`: which one, and its length in tokens.
+    pub(super) fn nth_at(&self, i: usize) -> Option<(i8, usize)> {
+        if let Some(Tok::Num(n)) = self.toks.get(i).map(|t| &t.tok)
+            && self
+                .toks
+                .get(i + 1)
+                .is_some_and(|t| !t.space_before && ["st", "nd", "rd", "th"].iter().any(|s| t.is_word(s)))
+        {
+            return n.to_i64().filter(|n| (1..=5).contains(n)).map(|n| (n as i8, 2));
+        }
+        let n = match self.lower(i)?.as_str() {
+            "first" => 1,
+            "second" => 2,
+            "third" => 3,
+            "fourth" => 4,
+            "fifth" => 5,
+            "last" => -1,
+            _ => return None,
+        };
+        Some((n, 1))
+    }
+
+    /// The month after "of": "the month" (`None`, the next one from today), "next month",
+    /// "October", "March 2027".
+    pub(super) fn month_of(&mut self) -> Result<Option<Box<Expr>>> {
+        for every in [&["the", "month"][..], &["every", "month"], &["each", "month"], &["month"]] {
+            if self.words_at(self.pos, every) {
+                self.pos += every.len();
+                return Ok(None);
+            }
+        }
+        Ok(Some(self.date_or_period(true)?.boxed()))
+    }
+
     /// `2026-09-23`, `23.09.2026`, `9/23/2026`.
     pub(super) fn numeric_date(&self, parts: [u32; 3], sep: char) -> Result<Expr> {
         let [a, b, c] = parts;
@@ -295,6 +358,10 @@ impl Parser<'_> {
                 return Ok(Some(Expr::Time(TimeExpr::Now)));
             }
             "time" | "date" | "difference" => return self.time_phrase(&w),
+            // "diff between Tokyo and London", "diff Tokyo London"
+            "diff" if self.words_at(self.pos + 1, &["between"]) || self.zone_at(self.pos + 1).is_some() => {
+                return self.time_phrase("difference");
+            }
             "noon" | "midday" | "midnight" => {
                 self.pos += 1;
                 let hour = if w == "midnight" { 0 } else { 12 };
@@ -386,6 +453,9 @@ impl Parser<'_> {
         if self.words_at(self.pos, &["day", "before", "yesterday"]) {
             return day(self, 3, -2);
         }
+        if let Some(expr) = self.day_in_month()? {
+            return Ok(Some(expr));
+        }
         match w.as_str() {
             "today" => return day(self, 1, 0),
             "tomorrow" => return day(self, 1, 1),
@@ -426,6 +496,11 @@ impl Parser<'_> {
             return Ok(Some(expr));
         }
         if let Some((holiday, n)) = self.phrase_at(self.pos, &words::HOLIDAYS) {
+            // "Christmas day of the week": "day" starts the date part.
+            let n = match n > 1 && self.words_at(self.pos + n - 1, &["day", "of"]) {
+                true => self.phrase_at(self.pos, &words::HOLIDAYS).filter(|&(_, m)| m < n).map_or(n - 1, |(_, m)| m),
+                false => n,
+            };
             self.pos += n;
             let year = self.year().map(|y| y as i16);
             return Ok(Some(self.in_year(TimeExpr::Holiday { holiday, year })));
@@ -535,6 +610,20 @@ impl Parser<'_> {
                 };
                 return Ok(Some(timespan(Expr::Range(a.boxed(), b.boxed()))));
             }
+            // "time in qld", "time in tx": a region's code, only here, as in SoulverCore.
+            // In capitals an airport code wins: "TAS" is Tashkent, "tas" Tasmania.
+            let airport =
+                |w: &str| w.chars().all(|c| c.is_ascii_uppercase()) && zones::find(&w.to_lowercase()).is_some();
+            if self.words_at(self.pos, &["in"])
+                && self.toks.len() == self.pos + 2
+                && !self.toks[self.pos + 1].word().is_some_and(airport)
+                && let Some(zone) = self.lower(self.pos + 1).and_then(|w| words::region_zone(&w))
+                && let Ok(zone) = TimeZone::get(zone)
+            {
+                let written = self.toks[self.pos + 1].word().unwrap_or_default().to_uppercase();
+                self.pos += 2;
+                return Ok(Some(Expr::Convert(now().boxed(), Target::Zone(Place::written(&written, zone)))));
+            }
             // "time Tokyo", "time at Tokyo now", "time now in Tokyo"
             self.eat_word("now");
             let mut p = self.clone();
@@ -551,7 +640,7 @@ impl Parser<'_> {
     }
 
     /// `A and B` inside `between`; also `A to B` and `A - B`.
-    fn pair(&mut self) -> Result<[Expr; 2]> {
+    pub(super) fn pair(&mut self) -> Result<[Expr; 2]> {
         let saved = std::mem::replace(&mut self.in_list, true);
         let a = self.additive()?;
         let through = match self.range_word(&["and", "to"]) {
@@ -595,10 +684,15 @@ impl Parser<'_> {
     /// "difference between Seattle and Tokyo", "Seattle Tokyo", "Tokyo" (from here)
     /// or between two dates.
     fn difference(&mut self) -> Result<Expr> {
-        if let Some((a, n)) = self.zone_at(self.pos) {
+        // "here" is the local zone: "time difference between here and Tokyo".
+        let place_at = |p: &Self, i: usize| match p.words_at(i, &["here"]) {
+            true => Some((Place::of_zone(&p.config().local_zone()), 1)),
+            false => p.zone_at(i),
+        };
+        if let Some((a, n)) = place_at(self, self.pos) {
             let and = self.toks.get(self.pos + n).is_some_and(|t| t.is_word("and") || t.is_sym("&"));
             let next = self.pos + n + usize::from(and);
-            if let Some((b, m)) = self.zone_at(next) {
+            if let Some((b, m)) = place_at(self, next) {
                 self.pos = next + m;
                 return Ok(Expr::ZoneDiff(a, b));
             }

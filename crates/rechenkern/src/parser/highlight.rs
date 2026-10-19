@@ -167,6 +167,7 @@ impl Parser<'_> {
         let kind = match &tok.tok {
             Tok::Num(_) => TokenKind::Number,
             Tok::Clock { .. } | Tok::Date { .. } | Tok::IsoDateTime(_) => TokenKind::Date,
+            Tok::Timecode(_) => TokenKind::Number,
             Tok::Sym("(" | ")") => TokenKind::Parenthesis,
             Tok::Sym("->") => return self.conversion_at(i).unwrap_or(vec![(TokenKind::Converter, 1)]),
             Tok::Sym("°") => return vec![(TokenKind::Unit, self.unit_at(i, true).map_or(1, |(_, n)| n))],
@@ -275,7 +276,7 @@ impl Parser<'_> {
     /// A date or time written from token `i`, and the place it is in: "3pm", "5 May 2027", "9am Tokyo".
     fn date_at(&self, i: usize) -> Option<Vec<(TokenKind, usize)>> {
         let starts = match &self.toks[i].tok {
-            Tok::Num(_) | Tok::Clock { .. } | Tok::Date { .. } => true,
+            Tok::Num(_) | Tok::Clock { .. } | Tok::Date { .. } | Tok::Timecode(_) => true,
             Tok::Word(w) => {
                 let w = w.to_lowercase();
                 words::month(&w).is_some() || words::weekday(&w).is_some()
@@ -322,7 +323,7 @@ impl Parser<'_> {
         let kind = match target {
             Target::Unit(_) | Target::Units(_) | Target::Per(_) | Target::Cast(_) => TokenKind::Unit,
             Target::Zone(place) => TokenKind::Place(place.kind),
-            Target::Format(_) => TokenKind::Format,
+            Target::Format(_) | Target::Pattern(_) => TokenKind::Format,
         };
         Some(vec![(TokenKind::Converter, 1), (kind, length)].into_iter().filter(|&(_, n)| n > 0).collect())
     }

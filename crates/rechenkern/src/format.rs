@@ -36,6 +36,7 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
         Value::Quantity(q) => quantity(q, display, config),
         Value::Percent(p) => format!("{}%", number(*p, config)),
         Value::Moment(m) => moment(m, config, now.get()),
+        Value::Duration(d) if matches!(display, Display::Hms) => hms(d),
         Value::Duration(d) => duration(d, config),
         Value::Bool(b) => b.to_string(),
         Value::Text(t) => t.clone(),
@@ -385,6 +386,7 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
             plain_digits(q.number, config.precision.max(20), -9..21).unwrap_or_else(|| scientific(q.number, config))
         }
         Display::Minor => number(q.number, config),
+        Display::Frames => return format!("{} frames", number(q.number, config)),
         Display::Scaled => {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config, true);
@@ -392,6 +394,7 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
             scaled(q.number, config, true, None).unwrap_or_else(|| number(q.number, config))
         }
         Display::Auto
+        | Display::Hms
         | Display::Note(_)
         | Display::Period
         | Display::Dms
@@ -692,6 +695,16 @@ fn clock(time: &Zoned, h24: bool, seconds: bool) -> String {
         (false, false) => time.strftime("%-I:%M %P").to_string(),
         (false, true) => time.strftime("%-I:%M:%S %P").to_string(),
     }
+}
+
+/// "3h 30m 0s": every hour in the hours.
+fn hms(d: &Duration) -> String {
+    use jiff::Unit as Cal;
+    let span = d.span.abs();
+    let get = |cal| crate::eval::span_field(&span, cal);
+    let hours = get(Cal::Week) * 7 * 24 + get(Cal::Day) * 24 + get(Cal::Hour);
+    let sign = if d.span.is_negative() { "-" } else { "" };
+    format!("{sign}{hours}h {}m {}s", get(Cal::Minute), get(Cal::Second))
 }
 
 fn duration(d: &Duration, config: &Config) -> String {

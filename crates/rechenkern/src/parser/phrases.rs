@@ -22,6 +22,15 @@ impl Parser<'_> {
         if let Some(expr) = self.investment_required()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.time_saved()? {
+            return Ok(Some(expr));
+        }
+        // "frames between 00:00:10:00 and 00:00:20:00"
+        if self.matches_at(0, &["frames", "between"]) {
+            let mut p = self.sub(2, self.toks.len());
+            let [a, b] = p.pair()?;
+            return Ok(Some(Self::formatted(Expr::Range(a.boxed(), b.boxed()), Format::Frames)));
+        }
         if let Some(expr) = self.income_tax()? {
             return Ok(Some(expr));
         }
@@ -585,6 +594,19 @@ impl Parser<'_> {
         let Some(end) = words.clone().rev().find(|&i| !keyword(i)) else { return Ok(None) };
         let income = self.part(start, end + 1)?;
         Ok(Some(Expr::IncomeTax { income: income.boxed(), country, part }))
+    }
+
+    /// "time saved for 1 hour 30 minutes at 1.5x": the time minus the time at that speed.
+    fn time_saved(&self) -> Result<Option<Expr>> {
+        if !self.matches_at(0, &["time", "saved"]) {
+            return Ok(None);
+        }
+        let start = 2 + usize::from(self.matches_at(2, &["for"]) || self.matches_at(2, &["on"]));
+        let Some(at) = self.find(start + 1, &["at"]) else { return Ok(None) };
+        let time = self.part(start, at)?;
+        let speed = self.part(at + 1, self.toks.len())?;
+        let faster = Expr::binary(Op::At, time.clone(), speed);
+        Ok(Some(Expr::binary(Op::Sub, time, faster)))
     }
 
     /// "investment required for $1,000/month at 5%": what pays that much a year at the

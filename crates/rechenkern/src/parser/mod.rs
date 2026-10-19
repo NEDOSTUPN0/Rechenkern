@@ -735,8 +735,9 @@ impl<'a> Parser<'a> {
                 };
                 self.pos += 1;
                 self.eat_word("of");
-                // "twice a day" is a rate.
-                if self.article_unit_at(self.pos) {
+                // "twice a day", "twice per week" are rates.
+                let per = self.words_at(self.pos, &["per"]) && self.unit_at(self.pos + 1, false).is_some();
+                if self.article_unit_at(self.pos) || per {
                     self.pos += 1;
                     let unit = self.unary()?;
                     return Ok(Expr::binary(Op::Per, Expr::Number(factor.into()), unit));

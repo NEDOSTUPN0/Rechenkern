@@ -35,7 +35,7 @@ noon to 5:30pm                               → 5 hours 30 minutes
 1 year - 2 months                            → 10 months
 1 day - 2 hours                              → 22 hours
 3.5 hours in hours and minutes               → 3 hours 30 minutes
-2 hours at 1.5x                              → 1.333333333 hours
+2 hours at 1.5x                              → 1 hour 20 minutes
 unix time                                    → 1790188200
 1700000000 as date                           → Tue, 14 Nov 2023 17:13:20
 now as iso                                   → 2026-09-23T14:30:00-04:00
@@ -75,7 +75,7 @@ days since Dec 25                            → 272 days
 days until March                             → 159 days
 year %                                       → 72.76826484%
 3 days ago at 5pm                            → Sun, 20 Sep 2026 17:00
-3.5 hours as hms                             → 03:30:00
+3.5 hours as hms                             → 3h 30m 0s
 10 km in 50 minutes                          → 5:00 min/km
 midday                                       → 12:00
 previous monday                              → Mon, 21 Sep 2026

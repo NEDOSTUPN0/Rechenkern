@@ -368,7 +368,7 @@ pub static FORMATS: Phrases<Format> = Phrases::new(&[
     ("time span", Format::Timespan),
     ("laptime", Format::Laptime),
     ("lap time", Format::Laptime),
-    ("hms", Format::Laptime),
+    ("hms", Format::Hms),
     ("unix timestamp", Format::Timestamp),
     ("unix time stamp", Format::Timestamp),
     ("unix time", Format::Timestamp),
@@ -409,6 +409,8 @@ pub static DATE_PARTS: Phrases<Format> = Phrases::new(&[
     ("day of week", Format::Weekday),
     ("day of the week", Format::Weekday),
     ("weekday", Format::Weekday),
+    ("week of month", Format::WeekOfMonth),
+    ("week of the month", Format::WeekOfMonth),
 ]);
 
 /// What a weather line asks for.
@@ -654,4 +656,120 @@ pub fn is_line_word(w: &str) -> bool {
             | "mean"
             | "line"
     ) || w.strip_prefix("line").is_some_and(|n| !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()))
+}
+
+/// The zone of a US state, an Australian state or territory, a Canadian province or a
+/// part of the UK, by its usual code; read only in "time in qld".
+pub fn region_zone(code: &str) -> Option<&'static str> {
+    const NEW_YORK: &str = "America/New_York";
+    const CHICAGO: &str = "America/Chicago";
+    const DENVER: &str = "America/Denver";
+    const LOS_ANGELES: &str = "America/Los_Angeles";
+    Some(match code {
+        "ct" | "de" | "fl" | "ga" | "ky" | "me" | "md" | "ma" | "nh" | "nj" | "ny" | "nc" | "oh" | "pa" | "ri"
+        | "sc" | "vt" | "va" | "wv" | "dc" => NEW_YORK,
+        "al" | "ar" | "il" | "ia" | "ks" | "la" | "mn" | "ms" | "mo" | "ne" | "nd" | "ok" | "sd" | "tn" | "tx"
+        | "wi" => CHICAGO,
+        "co" | "mt" | "nm" | "ut" | "wy" => DENVER,
+        "ca" | "nv" | "or" | "wa" => LOS_ANGELES,
+        "az" => "America/Phoenix",
+        "id" => "America/Boise",
+        "mi" => "America/Detroit",
+        "ak" => "America/Anchorage",
+        "hi" => "Pacific/Honolulu",
+        "nsw" | "act" => "Australia/Sydney",
+        "qld" => "Australia/Brisbane",
+        "vic" => "Australia/Melbourne",
+        "tas" => "Australia/Hobart",
+        "sa" => "Australia/Adelaide",
+        "nt" => "Australia/Darwin",
+        "eng" | "sco" | "wal" | "ni" => "Europe/London",
+        "bc" => "America/Vancouver",
+        "ab" => "America/Edmonton",
+        "sk" => "America/Regina",
+        "mb" => "America/Winnipeg",
+        "qc" => "America/Toronto",
+        "nb" => "America/Moncton",
+        "ns" | "pei" => "America/Halifax",
+        "nl" => "America/St_Johns",
+        _ => return None,
+    })
+}
+
+/// The country an adjective names: "japanese" is Japan, for "japanese time".
+pub fn demonym(word: &str) -> Option<&'static str> {
+    Some(match word {
+        "american" => "united states",
+        "argentine" | "argentinian" => "argentina",
+        "australian" => "australia",
+        "austrian" => "austria",
+        "bangladeshi" => "bangladesh",
+        "belgian" => "belgium",
+        "brazilian" => "brazil",
+        "british" => "united kingdom",
+        "bulgarian" => "bulgaria",
+        "canadian" => "canada",
+        "chilean" => "chile",
+        "chinese" => "china",
+        "colombian" => "colombia",
+        "croatian" => "croatia",
+        "czech" => "czech republic",
+        "danish" => "denmark",
+        "dutch" => "netherlands",
+        "egyptian" => "egypt",
+        "emirati" => "united arab emirates",
+        "english" => "england",
+        "estonian" => "estonia",
+        "ethiopian" => "ethiopia",
+        "filipino" | "philippine" => "philippines",
+        "finnish" => "finland",
+        "french" => "france",
+        "german" => "germany",
+        "greek" => "greece",
+        "hungarian" => "hungary",
+        "icelandic" => "iceland",
+        "indian" => "india",
+        "indonesian" => "indonesia",
+        "iranian" => "iran",
+        "iraqi" => "iraq",
+        "irish" => "ireland",
+        "israeli" => "israel",
+        "italian" => "italy",
+        "japanese" => "japan",
+        "kazakh" | "kazakhstani" => "kazakhstan",
+        "kenyan" => "kenya",
+        "korean" => "south korea",
+        "latvian" => "latvia",
+        "lithuanian" => "lithuania",
+        "malaysian" => "malaysia",
+        "mexican" => "mexico",
+        "mongolian" => "mongolia",
+        "moroccan" => "morocco",
+        "nepali" | "nepalese" => "nepal",
+        "nigerian" => "nigeria",
+        "norwegian" => "norway",
+        "pakistani" => "pakistan",
+        "peruvian" => "peru",
+        "polish" => "poland",
+        "portuguese" => "portugal",
+        "qatari" => "qatar",
+        "romanian" => "romania",
+        "russian" => "russia",
+        "saudi" => "saudi arabia",
+        "scottish" => "scotland",
+        "serbian" => "serbia",
+        "singaporean" => "singapore",
+        "slovak" => "slovakia",
+        "spanish" => "spain",
+        "swedish" => "sweden",
+        "swiss" => "switzerland",
+        "taiwanese" => "taiwan",
+        "thai" => "thailand",
+        "turkish" => "turkey",
+        "ukrainian" => "ukraine",
+        "uzbek" => "uzbekistan",
+        "venezuelan" => "venezuela",
+        "vietnamese" => "vietnam",
+        _ => return None,
+    })
 }

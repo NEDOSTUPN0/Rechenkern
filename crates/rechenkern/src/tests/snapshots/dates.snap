@@ -340,6 +340,10 @@ day of the week                              → Wednesday
 day of the week of March 9, 2024             → Saturday
 weekday                                      → Wednesday
 weekday of March 9, 2024                     → Saturday
+week of month                                → 4
+week of month of March 9, 2024               → 2
+week of the month                            → 4
+week of the month of March 9, 2024           → 2
 
 // Events
 gta 6                                        → Thu, 19 Nov 2026 (probably)

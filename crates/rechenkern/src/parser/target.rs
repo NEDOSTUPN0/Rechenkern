@@ -13,6 +13,15 @@ impl Parser<'_> {
     /// One conversion step after `expr`, or `None` if there is none.
     pub(super) fn conversion(&mut self, expr: &Expr) -> Result<Option<Expr>> {
         let start = self.pos;
+        // "2 hours to 1.5x": played at that speed.
+        if self.cur().is_some_and(|t| t.is_word("to"))
+            && let Some(Tok::Num(speed)) = self.toks.get(self.pos + 1).map(|t| &t.tok)
+            && self.toks.get(self.pos + 2).is_some_and(|t| t.word() == Some("x") && !t.space_before)
+            && self.toks.len() == self.pos + 3
+        {
+            self.pos += 3;
+            return Ok(Some(Expr::binary(Op::At, expr.clone(), Expr::Number(*speed))));
+        }
         if self.converter_allowed(Converter::Rounding) && self.eat_rounding_word() {
             let dir = self.direction();
             return self.rounded_to(expr, dir).map(Some);
@@ -56,6 +65,16 @@ impl Parser<'_> {
             return Ok(None);
         }
         self.pos += 1;
+        // "today as yyyy-MM-dd", "now as HH:mm": the rest of the line is the template.
+        if is_moment(expr)
+            && let Some(first) = self.toks.get(self.pos)
+        {
+            let rest = self.src[first.start..self.toks[self.toks.len() - 1].end].trim();
+            if is_date_pattern(rest) {
+                self.pos = self.toks.len();
+                return Ok(Some(Expr::Convert(expr.clone().boxed(), Target::Pattern(rest.to_string()))));
+            }
+        }
 
         // "meters in 10 km", "seconds in a day": how many of the unit fit.
         if let (Expr::BareUnit(unit), "in") = (expr, keyword.as_str())
@@ -509,10 +528,12 @@ impl Parser<'_> {
             let mut units = vec![unit];
             loop {
                 let mut p = self.clone();
-                if !(p.eat_word("and") || p.eat_sym(",")) {
+                // "in feet and inches", "in years & months", or just "in lb oz".
+                let joined = p.eat_word("and") || p.eat_sym(",") || p.eat_sym("&");
+                let Some(unit) = p.unit_expr(true) else { break };
+                if !joined && unit.dim() != units[0].dim() {
                     break;
                 }
-                let Some(unit) = p.unit_expr(true) else { break };
                 *self = p;
                 units.push(unit);
             }
@@ -587,6 +608,7 @@ impl Parser<'_> {
 fn converter(target: &Target) -> Converter {
     match target {
         Target::Unit(_) | Target::Cast(_) => Converter::Unit,
+        Target::Pattern(_) => Converter::DatePart,
         Target::Units(units) if units.iter().any(Unit::is_money) => Converter::Unit,
         Target::Units(_) => Converter::Parts,
         Target::Per(_) => Converter::Rate,
@@ -603,11 +625,13 @@ fn converter(target: &Target) -> Converter {
             Format::Percent => Converter::Percentage,
             Format::Multiplier => Converter::Multiplier,
             Format::Timespan => Converter::Timespan,
-            Format::Laptime => Converter::Laptime,
+            Format::Laptime | Format::Hms => Converter::Laptime,
             Format::Timestamp => Converter::Timestamp,
             Format::Date => Converter::Date,
             Format::Iso => Converter::Iso8601,
-            Format::Weekday | Format::WeekNumber | Format::DayOfYear | Format::DayOfMonth => Converter::DatePart,
+            Format::Weekday | Format::WeekNumber | Format::DayOfYear | Format::DayOfMonth | Format::WeekOfMonth => {
+                Converter::DatePart
+            }
             Format::Pitch | Format::Midi => Converter::Pitch,
             Format::Dms => Converter::Dms,
             Format::Megapixels | Format::Frames => Converter::Number,
@@ -616,6 +640,17 @@ fn converter(target: &Target) -> Converter {
 }
 
 /// A date or time, or a time zone conversion of one.
+/// A date template: only pattern letters and separators, with a year, month, day or hour
+/// written as people write them in templates ("yyyy", "MM", "dd", "HH").
+fn is_date_pattern(text: &str) -> bool {
+    let allowed = |c: char| "yMdHhmsaEZ".contains(c) || " -/:.,'T".contains(c);
+    let marked = ["yy", "MM", "dd", "HH", "hh", "mm", "EEE"].iter().any(|p| text.contains(p));
+    // "yyyy" alone, or parts with separators; not a word like "add".
+    let separated = text.chars().any(|c| " -/:.,".contains(c));
+    let repeated = text.chars().all(|c| text.starts_with(c));
+    marked && text.chars().all(allowed) && (separated || repeated)
+}
+
 fn is_moment(expr: &Expr) -> bool {
     match expr {
         Expr::Time(_) | Expr::InZone(..) => true,
