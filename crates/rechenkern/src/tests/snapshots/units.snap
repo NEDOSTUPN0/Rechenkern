@@ -3106,9 +3106,9 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 nigerian naira in EUR                    → €1.13
 2.5 nigerian nairas                          → ₦2.50
 2.5 nigerian nairas in EUR                   → €1.13
-2.5 night                                    → 2.5 days
+2.5 night                                    → 2.5 nights
 2.5 night in s                               → 216,000 seconds
-2.5 nights                                   → 2.5 days
+2.5 nights                                   → 2.5 nights
 2.5 nights in s                              → 216,000 seconds
 2.5 nio                                      → 2.50 NIO
 2.5 nio in EUR                               → €1.13

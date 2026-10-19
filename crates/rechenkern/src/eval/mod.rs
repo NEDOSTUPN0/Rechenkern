@@ -568,7 +568,7 @@ impl Env<'_> {
                     .and_then(|l| l.value.clone())
                     .ok_or_else(|| Error::new(format!("line {n} has no answer")))
             }
-            LineRef::Sum | LineRef::Average => {
+            LineRef::Sum | LineRef::Average | LineRef::Stat(_) => {
                 // Totals right above take the same lines: "sum", then "sum in EUR" or "average".
                 let first = self.lines.len()
                     - self
@@ -593,6 +593,9 @@ impl Env<'_> {
                     .filter(|v| matches!(v, Value::Quantity(_) | Value::Percent(_) | Value::Duration(_)))
                     .collect();
                 block.reverse();
+                if let LineRef::Stat(func) = line {
+                    return self.call(func, block);
+                }
                 let count = block.len();
                 let mut values = block.into_iter();
                 let Some(first) = values.next() else {

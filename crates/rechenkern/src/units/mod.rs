@@ -226,6 +226,36 @@ static REGISTRY: LazyLock<Registry> = LazyLock::new(table::build);
 /// so their definitions live as long as the program.
 static CUSTOM: RwLock<Vec<&'static UnitDef>> = RwLock::new(Vec::new());
 
+/// Names of the units declared in lines, by their quantity's slot.
+static DECLARED: RwLock<Vec<String>> = RwLock::new(Vec::new());
+
+/// A unit of its own kind declared in a line: `widgets = new unit`. The same name is the
+/// same unit everywhere; there is room for `dim::DECLARED` names.
+pub(crate) fn declare(singular: &str, plural: &str) -> Option<Unit> {
+    let mut declared = DECLARED.write().unwrap_or_else(PoisonError::into_inner);
+    let slot = match declared.iter().position(|n| n == singular) {
+        Some(slot) => slot,
+        None if declared.len() < dim::DECLARED => {
+            declared.push(singular.to_string());
+            declared.len() - 1
+        }
+        None => return None,
+    };
+    let def = UnitDef {
+        symbol: singular.to_string(),
+        name: singular.to_string(),
+        plural: plural.to_string(),
+        dim: Dim::declared(slot),
+        scale: Number::ONE,
+        offset: Number::ZERO,
+        spelled: true,
+        tight: false,
+        calendar: None,
+        currency: None,
+    };
+    define(def).map(Unit::of)
+}
+
 /// Adds a unit after the built-in ones, or finds the same one added before.
 pub(crate) fn define(def: UnitDef) -> Option<UnitId> {
     let builtin = registry().defs.len();

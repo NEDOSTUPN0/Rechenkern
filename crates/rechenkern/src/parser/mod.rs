@@ -42,6 +42,8 @@ pub struct Scope<'a> {
     pub radix: Cell<Option<u32>>,
     /// Variables set in a base other than ten: `mask = 0xFF`.
     pub radixes: &'a HashMap<String, u32>,
+    /// Units declared in earlier lines, by their spellings in lowercase: `widgets = new unit`.
+    pub declared: &'a HashMap<String, Unit>,
     /// Finds places the engine doesn't know, if the host can.
     pub places: &'a dyn Fn(&str) -> Option<CustomPlace>,
     /// Weather phrases are read: off when looking for data in text.
@@ -254,6 +256,11 @@ impl<'a> Parser<'a> {
             return Ok(None);
         }
         let name = name_toks.iter().filter_map(Token::word).collect::<Vec<_>>().join(" ").to_lowercase();
+        // "widgets = new unit"
+        let rest = &self.toks[eq + 1..];
+        if name_toks.len() == 1 && rest.len() == 2 && rest[0].is_word("new") && rest[1].is_word("unit") {
+            return Ok(Some(Stmt::Unit(name)));
+        }
         let op = match self.toks[eq].tok {
             Tok::Sym("+=") => Some(Op::Add),
             Tok::Sym("-=") => Some(Op::Sub),
@@ -303,6 +310,7 @@ impl<'a> Parser<'a> {
             scaled: Cell::new(false),
             radix: Cell::new(None),
             radixes: outer.radixes,
+            declared: outer.declared,
             places: outer.places,
             weather: outer.weather,
         };

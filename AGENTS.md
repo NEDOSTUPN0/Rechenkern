@@ -272,7 +272,14 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - `sum`, `total` and `average` take the lines above, up to a blank line, a
   heading or an earlier total; totals right after a total take the same lines
   (`sum`, then `sum in EUR` or `average`). A total with a hashtag takes only the
-  lines with that tag (`sum #food`); `eval::Line::tags` keeps them.
+  lines with that tag (`sum #food`); `eval::Line::tags` keeps them. `median`, `max`,
+  `min`, `count` and `std dev` as the whole line (`LineRef::Stat`) take the same lines;
+  SoulverCore leaves them to its UI. `previous line` is `prev`.
+- `widgets = new unit` declares a unit of its own kind for the lines below
+  (`Stmt::Unit`, `Names::units`): `$2/widget * 10 widgets` = $20. Each name takes one of
+  `dim::DECLARED` free base quantities, for the whole program.
+- `Features::labels_as_variables` (off, as in SoulverCore) makes `Rent: $1,500` set `rent`.
+- Nights are a unit of their own, a day each: `nights in March 12 to March 25` = 13 nights.
 - Numbers in text: a clock time and a day with words between are that day at that
   time (`3pm cats June 5`), as in SoulverCore.
 - A plain whole answer is in the base of the last number written in one (`0xff + 0b11`

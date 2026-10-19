@@ -110,6 +110,7 @@ impl SheetLine {
             effects: Effects {
                 line: Line { value: None, kind: LineKind::Blank, tags: Vec::new() },
                 assigned: None,
+                declared: None,
                 defined: None,
                 clears_vars: false,
                 reads: Reads::default(),
@@ -469,7 +470,11 @@ impl Sheet {
             if needed {
                 let (answer, effects) = self.work_out(i, &names, &above);
                 let old = &self.lines[i].effects;
-                if old.line.kind != effects.line.kind || old.clears_vars != effects.clears_vars {
+                let declared = |e: &Effects| e.declared.as_ref().map(|(_, unit)| unit.clone());
+                if old.line.kind != effects.line.kind
+                    || old.clears_vars != effects.clears_vars
+                    || declared(old) != declared(&effects)
+                {
                     // Totals and "prev" below may now take other lines.
                     all_from = all_from.min(i + 1);
                 }
@@ -540,6 +545,7 @@ impl Sheet {
         let effects = Effects {
             line: Line { value: answer.as_ref().ok().map(Answer::reference), kind: LineKind::Total, tags: Vec::new() },
             assigned: None,
+            declared: None,
             defined: None,
             clears_vars: false,
             reads: Reads { names: Vec::new(), lines: (start..i).collect(), clock: false },

@@ -85,7 +85,7 @@ pub const KEYWORDS: &[&str] = &[
     "in", "to", "as", "into", "of", "on", "off", "at", "per", "plus", "minus", "times", "multiplied",
     "divided", "mod", "modulo", "and", "or", "xor", "ago", "from", "after", "before", "until", "till",
     "since", "between", "next", "last", "this", "now", "today", "tomorrow", "yesterday", "time", "date", "noon",
-    "midnight", "am", "pm", "percent", "pct", "percentage", "squared", "cubed", "rounded", "nearest", "power",
+    "midday", "midnight", "am", "pm", "percent", "pct", "percentage", "squared", "cubed", "rounded", "nearest", "power",
     "square", "cubic", "remainder", "twice", "double", "triple", "quadruple", "permutation", "permutations",
     "combination", "combinations", "choose", "difference", "later", "base", "timestamp", "current", "unix",
     "epoch", "week", "day", "month", "year", "true", "false",
@@ -551,7 +551,7 @@ pub fn three_months(w: &str) -> Option<i8> {
 pub fn which(w: &str) -> Option<Which> {
     match w {
         "next" => Some(Which::Next),
-        "last" => Some(Which::Last),
+        "last" | "previous" => Some(Which::Last),
         "this" => Some(Which::This),
         _ => None,
     }

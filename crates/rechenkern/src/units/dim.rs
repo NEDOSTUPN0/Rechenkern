@@ -2,9 +2,25 @@
 
 use std::fmt;
 
-const BASES: usize = 10;
-const NAMES: [&str; BASES] =
-    ["length", "mass", "time", "current", "temperature", "amount", "angle", "data", "money", "workdays"];
+const BASES: usize = 10 + DECLARED;
+/// Slots for units declared in lines: `widgets = new unit`. Each is a quantity of its own.
+pub const DECLARED: usize = 4;
+const NAMES: [&str; BASES] = [
+    "length",
+    "mass",
+    "time",
+    "current",
+    "temperature",
+    "amount",
+    "angle",
+    "data",
+    "money",
+    "workdays",
+    "declared unit",
+    "declared unit",
+    "declared unit",
+    "declared unit",
+];
 
 /// Exponents of the base quantities, e.g. speed is `length¹·time⁻¹`.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Default, Debug)]
@@ -44,6 +60,11 @@ impl Dim {
     pub const INDUCTANCE: Dim = Dim::MAGNETIC_FLUX.div(Dim::CURRENT);
     pub const ANGULAR_VELOCITY: Dim = Dim::ANGLE.div(Dim::TIME);
     pub const DATA_RATE: Dim = Dim::DATA.div(Dim::TIME);
+
+    /// The quantity of the `slot`th declared unit.
+    pub const fn declared(slot: usize) -> Dim {
+        Dim::base(10 + slot)
+    }
 
     const fn base(i: usize) -> Dim {
         let mut d = [0; BASES];

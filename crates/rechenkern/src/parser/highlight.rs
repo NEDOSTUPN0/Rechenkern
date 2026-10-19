@@ -209,8 +209,8 @@ impl Parser<'_> {
                 Some(TokenKind::Connector)
             }
             "for" if self.significant(i) => Some(TokenKind::Connector),
-            "now" | "today" | "tomorrow" | "yesterday" | "noon" | "midnight" | "am" | "pm" | "next" | "last"
-            | "this" | "date" | "time" | "current" | "epoch" => Some(TokenKind::Date),
+            "now" | "today" | "tomorrow" | "yesterday" | "noon" | "midday" | "midnight" | "am" | "pm" | "next"
+            | "last" | "this" | "date" | "time" | "current" | "epoch" => Some(TokenKind::Date),
             _ => None,
         };
         if let Some(kind) = kind {

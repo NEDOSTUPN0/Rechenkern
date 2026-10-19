@@ -312,7 +312,11 @@ impl<'a> Parser<'a> {
     /// A unit spelled `text`: the host's own units first, then built-in ones as
     /// the unit system reads them.
     pub(super) fn lookup_unit(&self, text: &str) -> Option<Unit> {
-        let unit = match self.scope.units.lookup(text) {
+        let declared = || match self.scope.declared.is_empty() {
+            true => None,
+            false => self.scope.declared.get(&text.to_lowercase()).cloned(),
+        };
+        let unit = match self.scope.units.lookup(text).or_else(declared) {
             Some(unit) => unit,
             None => self.config().unit_system.adapt(text, registry().lookup(text)?),
         };

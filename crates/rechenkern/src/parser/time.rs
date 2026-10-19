@@ -150,9 +150,9 @@ impl Parser<'_> {
                 let hour = to_24h(n.to_i64().unwrap_or(-1), p.ampm())?;
                 Some(TimeExpr::Clock { hour, minute: 0, second: Number::ZERO, on: None })
             }
-            Tok::Word(w) if matches!(w.to_lowercase().as_str(), "noon" | "midnight") => {
+            Tok::Word(w) if matches!(w.to_lowercase().as_str(), "noon" | "midday" | "midnight") => {
                 p.pos += 1;
-                let hour = if w.eq_ignore_ascii_case("noon") { 12 } else { 0 };
+                let hour = if w.eq_ignore_ascii_case("midnight") { 0 } else { 12 };
                 Some(TimeExpr::Clock { hour, minute: 0, second: Number::ZERO, on: None })
             }
             _ => None,
@@ -162,10 +162,21 @@ impl Parser<'_> {
         self.clock_tail(TimeExpr::Clock { hour, minute, second, on: Some(date.boxed()) })
     }
 
+    /// A weekday or a period at token `i`: "previous monday", "previous month".
+    pub(super) fn date_follows_at(&self, i: usize) -> bool {
+        self.lower(i).is_some_and(|w| {
+            words::weekday(&w).is_some()
+                || matches!(
+                    w.as_str(),
+                    "week" | "month" | "year" | "quarter" | "spring" | "summer" | "autumn" | "fall" | "winter"
+                )
+        })
+    }
+
     /// A date word follows: tomorrow, a weekday, "on March 3"...
     pub(super) fn date_follows(&self) -> bool {
         let Some(w) = self.lower(self.pos) else { return false };
-        matches!(w.as_str(), "today" | "tomorrow" | "yesterday" | "on" | "next" | "last" | "this")
+        matches!(w.as_str(), "today" | "tomorrow" | "yesterday" | "on" | "next" | "last" | "previous" | "this")
             || words::weekday(&w).is_some()
             || words::month(&w).is_some()
             || matches!(self.toks.get(self.pos).map(|t| &t.tok), Some(Tok::Date { .. }))
@@ -284,9 +295,9 @@ impl Parser<'_> {
                 return Ok(Some(Expr::Time(TimeExpr::Now)));
             }
             "time" | "date" | "difference" => return self.time_phrase(&w),
-            "noon" | "midnight" => {
+            "noon" | "midday" | "midnight" => {
                 self.pos += 1;
-                let hour = if w == "noon" { 12 } else { 0 };
+                let hour = if w == "midnight" { 0 } else { 12 };
                 return self.clock_tail(TimeExpr::Clock { hour, minute: 0, second: Number::ZERO, on: None }).map(Some);
             }
             "in" if self.operand_follows(1) => {
@@ -373,7 +384,7 @@ impl Parser<'_> {
             "today" => return day(self, 1, 0),
             "tomorrow" => return day(self, 1, 1),
             "yesterday" => return day(self, 1, -1),
-            "next" | "last" | "this" => {
+            "next" | "last" | "previous" | "this" => {
                 let which = words::which(&w).unwrap_or(Which::This);
                 if let Some((weekday, _)) = words::weekday(&next) {
                     self.pos += 2;
@@ -798,7 +809,17 @@ impl Parser<'_> {
                 let w = p.lower(p.pos).unwrap_or_default();
                 matches!(
                     w.as_str(),
-                    "now" | "today" | "tomorrow" | "yesterday" | "next" | "last" | "this" | "noon" | "midnight"
+                    "now"
+                        | "today"
+                        | "tomorrow"
+                        | "yesterday"
+                        | "next"
+                        | "last"
+                        | "previous"
+                        | "this"
+                        | "noon"
+                        | "midday"
+                        | "midnight"
                 ) || words::month(&w).is_some()
                     || words::three_months(&w).is_some()
                     || words::weekday(&w).is_some()

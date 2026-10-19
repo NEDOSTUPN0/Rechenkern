@@ -606,7 +606,24 @@ impl Parser<'_> {
         let followed_by_args =
             self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_word("between") || t.is_sym("("))
                 || self.amount_follows(1);
+        // A statistic of the lines above, as the whole line: "median", "std dev in EUR".
+        if self.pos == 0
+            && !followed_by_args
+            && let Some((func, n)) = self.line_statistic()
+        {
+            self.pos += n;
+            return Ok(Some(Expr::Line(LineRef::Stat(func))));
+        }
         let line = match w.as_str() {
+            // "previous line", "previous answer"
+            "prev" | "previous"
+                if self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("line") || t.is_word("answer")) =>
+            {
+                self.pos += 1;
+                LineRef::Previous
+            }
+            // "previous monday", "previous month" are dates.
+            "previous" if self.date_follows_at(self.pos + 1) => return Ok(None),
             "prev" | "previous" | "ans" | "answer" | "above" => LineRef::Previous,
             "sum" | "total" | "subtotal" if !followed_by_args => LineRef::Sum,
             "average" | "avg" | "mean" if !followed_by_args => LineRef::Average,
@@ -626,6 +643,32 @@ impl Parser<'_> {
         };
         self.pos += 1;
         Ok(Some(Expr::Line(line)))
+    }
+
+    /// `median`, `max`, `min`, `count`, `std dev` alone, or before a conversion or a hashtag.
+    fn line_statistic(&self) -> Option<(Func, usize)> {
+        let (func, n) = [
+            ("median", Func::Median),
+            ("max", Func::Max),
+            ("maximum", Func::Max),
+            ("min", Func::Min),
+            ("minimum", Func::Min),
+            ("count", Func::Count),
+        ]
+        .iter()
+        .find(|(w, _)| self.words_at(self.pos, &[w]))
+        .map(|&(_, f)| (f, 1))
+        .or_else(|| {
+            [&["std", "dev"][..], &["stdev"], &["stddev"], &["standard", "deviation"]]
+                .iter()
+                .find(|ws| self.words_at(self.pos, ws))
+                .map(|ws| (Func::StdDev, ws.len()))
+        })?;
+        let ends = match self.toks.get(self.pos + n) {
+            None => true,
+            Some(t) => ["in", "to", "as"].iter().any(|w| t.is_word(w)) || t.is_sym("#"),
+        };
+        ends.then_some((func, n))
     }
 
     /// "twenty five", "seven".

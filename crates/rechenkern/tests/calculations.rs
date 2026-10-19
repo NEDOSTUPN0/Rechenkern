@@ -885,6 +885,11 @@ fn dates() {
         ("in 3 days", "Sat, 26 Sep 2026"),
         ("next friday", "Fri, 25 Sep 2026"),
         ("last monday", "Mon, 21 Sep 2026"),
+        ("previous monday", "Mon, 21 Sep 2026"),
+        ("previous quarter", "1 Apr – 30 Jun 2026"),
+        ("midday", "12:00"),
+        ("nights in March 12 to March 25", "13 nights"),
+        ("March 12 to March 25 in nights", "13 nights"),
         ("friday", "Fri, 25 Sep 2026"),
         ("wednesday", "Wed, 23 Sep 2026"),
         ("next week", "Wed, 30 Sep 2026"),
@@ -1233,6 +1238,13 @@ fn sheets() {
     assert_eq!(sheet("# Costs\nLunch: $20\nTaxi: $15\ntotal"), "$35.00");
     assert_eq!(sheet("10\n20\naverage"), "15");
     assert_eq!(sheet("10\nprev * 2"), "20");
+    assert_eq!(sheet("10\nprevious line * 2"), "20");
+    assert_eq!(sheet("10\n20\n30\n60\nmedian"), "25");
+    assert_eq!(sheet("10\n20\n30\n60\nmax\nmin\ncount"), "4");
+    assert_eq!(sheet("10\n20\n30\n60\nstd dev"), "21.60246899");
+    assert_eq!(sheet("$5 #a\n$7 #b\n$9 #a\nmax #a"), "$9.00");
+    assert_eq!(sheet("widgets = new unit\n5 widgets + 3 widgets"), "8 widgets");
+    assert_eq!(sheet("widgets = new unit\n$2/widget * 10 widgets"), "$20.00");
     assert_eq!(sheet("10\n20\nline1 + line 2"), "30");
     assert_eq!(sheet("a = 5\n---\na"), "<none>");
 }

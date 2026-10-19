@@ -228,6 +228,9 @@ pub struct Features {
     pub historical_weather_queries: bool,
     /// A dash between spaces ends a label, as a colon does: `Coffee - 12.50` is 12.50.
     pub dash_separated_labels: bool,
+    /// A label names a variable, as SoulverCore's `generateVariablesFromLabels`:
+    /// `Rent: $1,500`, then `rent * 12`.
+    pub labels_as_variables: bool,
     /// A list marker starting a line is no value: `1. `, `a) `, `- `, `• `.
     pub list_marker_parsing: bool,
     /// A unit and a number starting a line are a label: `Day 8 $50`, `Week 4: 30 km`.
@@ -261,6 +264,7 @@ impl Default for Features {
             dynamic_place_queries: true,
             historical_weather_queries: true,
             dash_separated_labels: false,
+            labels_as_variables: false,
             list_marker_parsing: true,
             ordinal_label_parsing: false,
             proper_fraction_parsing: false,

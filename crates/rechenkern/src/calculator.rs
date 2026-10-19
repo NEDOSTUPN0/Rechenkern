@@ -15,6 +15,7 @@ use crate::inflation::InflationProvider;
 use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::{self, Scope};
 use crate::rates::{RateProvider, RateTable, Rates};
+use crate::units::Unit;
 use crate::value::Value;
 use crate::weather::WeatherProvider;
 
@@ -168,6 +169,7 @@ impl Calculator {
         let mut effects = Effects {
             line: Line { value: None, kind, tags: tags.clone() },
             assigned: None,
+            declared: None,
             defined: None,
             clears_vars: false,
             reads: Reads::default(),
@@ -180,6 +182,13 @@ impl Calculator {
         let asked = track.then_some(&asked);
         let body = &trimmed[self.label_end(trimmed, names, asked)..];
         let result = self.evaluate(body, names, lines, asked, &mut effects);
+        if self.config.features.labels_as_variables
+            && effects.assigned.is_none()
+            && let Ok(Some((answer, false))) = &result
+            && let Some(name) = label_name(&trimmed[..trimmed.len() - body.len()])
+        {
+            effects.assigned = Some((name, answer.reference(), None));
+        }
         if let Some(asked) = asked {
             effects.reads.names.extend(asked.take());
         }
@@ -247,7 +256,7 @@ impl Calculator {
         let is_function = |name: &str| names.functions.contains_key(name);
         let empty = CustomUnits::default();
         let places = |name: &str| self.find_place(name);
-        let scope = self.scope(&is_var, &is_function, &names.radixes, &places, self.units().unwrap_or(&empty), true);
+        let scope = self.scope(&is_var, &is_function, names, &places, self.units().unwrap_or(&empty), true);
         out.extend(parser::highlight::highlight(body, start + trimmed.len() - body.len(), &scope));
         out
     }
@@ -266,8 +275,7 @@ impl Calculator {
         let is_var = |name: &str| probe.names.vars.contains_key(name);
         let is_function = |name: &str| probe.names.functions.contains_key(name);
         let empty = CustomUnits::default();
-        let scope =
-            probe.scope(&is_var, &is_function, &probe.names.radixes, &|_| None, probe.units().unwrap_or(&empty), true);
+        let scope = probe.scope(&is_var, &is_function, &probe.names, &|_| None, probe.units().unwrap_or(&empty), true);
         let Ok(Some(Stmt::Expr(Expr::Custom { args, .. }))) = parser::parse(text, &scope) else { return None };
         let env = probe.env(&probe.names, &[]);
         args.iter()
@@ -286,8 +294,7 @@ impl Calculator {
         let is_var = |name: &str| self.names.vars.contains_key(name);
         let is_function = |name: &str| self.names.functions.contains_key(name);
         let empty = CustomUnits::default();
-        let scope =
-            self.scope(&is_var, &is_function, &self.names.radixes, &|_| None, self.units().unwrap_or(&empty), false);
+        let scope = self.scope(&is_var, &is_function, &self.names, &|_| None, self.units().unwrap_or(&empty), false);
         parser::values_in(text, &scope)
     }
 
@@ -314,7 +321,7 @@ impl Calculator {
         let is_function = |name: &str| names.asks(asked, name, true);
         let empty = CustomUnits::default();
         let places = |name: &str| self.find_place(name);
-        let scope = self.scope(&is_var, &is_function, &names.radixes, &places, self.units().unwrap_or(&empty), true);
+        let scope = self.scope(&is_var, &is_function, names, &places, self.units().unwrap_or(&empty), true);
         match parser::parse(&line[..at], &scope) {
             Ok(None) => at + dash,
             _ => 0,
@@ -334,12 +341,16 @@ impl Calculator {
         let is_var = |name: &str| names.asks(asked, name, false);
         let is_function = |name: &str| names.asks(asked, name, true);
         let places = |name: &str| self.find_place(name);
-        let scope = self.scope(&is_var, &is_function, &names.radixes, &places, self.units()?, true);
+        let scope = self.scope(&is_var, &is_function, names, &places, self.units()?, true);
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
         // "area(w, h) = w * h" defines a function and has no answer.
         if let Stmt::Function { name, params, body } = stmt {
             let function = UserFunction { params, body };
             effects.defined = Some((name, Arc::new(function)));
+            return Ok(None);
+        }
+        if let Stmt::Unit(name) = stmt {
+            effects.declared = Some(declare_unit(&name)?);
             return Ok(None);
         }
         let mut env = self.env(names, lines);
@@ -373,12 +384,15 @@ impl Calculator {
             }
         }
         let (expr, value, display, parts, is_total, name) = match stmt {
-            Stmt::If { .. } | Stmt::Function { .. } => unreachable!("branches and functions are dealt with above"),
+            Stmt::If { .. } | Stmt::Function { .. } | Stmt::Unit(_) => {
+                unreachable!("branches, functions and units are dealt with above")
+            }
             Stmt::Expr(expr) => {
                 let Some(expr) = env.branch(expr)? else { return Ok(None) };
                 let (value, display, parts) = env.answer_line(expr)?;
                 // "sum in EUR" and "average" are totals too.
-                let is_total = expr.contains(&|e| matches!(e, Expr::Line(LineRef::Sum | LineRef::Average)));
+                let is_total =
+                    expr.contains(&|e| matches!(e, Expr::Line(LineRef::Sum | LineRef::Average | LineRef::Stat(_))));
                 (expr, value, display, parts, is_total, None)
             }
             Stmt::Assign { name, op, expr } => {
@@ -429,7 +443,7 @@ impl Calculator {
         &'a self,
         is_var: &'a dyn Fn(&str) -> bool,
         is_function: &'a dyn Fn(&str) -> bool,
-        radixes: &'a HashMap<String, u32>,
+        names: &'a Names,
         places: &'a dyn Fn(&str) -> Option<CustomPlace>,
         units: &'a CustomUnits,
         weather: bool,
@@ -441,7 +455,8 @@ impl Calculator {
             units,
             scaled: Cell::new(false),
             radix: Cell::new(None),
-            radixes,
+            radixes: &names.radixes,
+            declared: &names.units,
             places,
             weather,
         }
@@ -454,6 +469,8 @@ pub(crate) struct Names {
     pub vars: HashMap<String, Value>,
     /// Variables set in a base other than ten, whose answers stay in it.
     pub radixes: HashMap<String, u32>,
+    /// Units declared in lines, by their spellings in lowercase.
+    pub units: HashMap<String, Unit>,
     pub functions: HashMap<String, Arc<UserFunction>>,
 }
 
@@ -469,6 +486,11 @@ impl Names {
                 Some(radix) => self.radixes.insert(name.clone(), *radix),
                 None => self.radixes.remove(name),
             };
+        }
+        if let Some((spellings, unit)) = &effects.declared {
+            for spelling in spellings {
+                self.units.insert(spelling.clone(), unit.clone());
+            }
         }
         if let Some((name, function)) = &effects.defined {
             self.functions.insert(name.clone(), function.clone());
@@ -493,6 +515,8 @@ pub(crate) struct Effects {
     pub line: Line,
     /// A variable set: `rent = $1,500`.
     pub assigned: Option<Assignment>,
+    /// A unit declared, with its spellings: `widgets = new unit`.
+    pub declared: Option<(Vec<String>, Unit)>,
     /// A function defined: `area(w, h) = w * h`.
     pub defined: Option<(String, Arc<UserFunction>)>,
     /// A divider that forgets the variables above it.
@@ -553,6 +577,27 @@ fn hashtags(line: &str) -> Vec<String> {
 }
 
 /// Removes a leading "Label:" from a line.
+/// A unit of its own kind named in the plural or singular: "widgets", "widget".
+fn declare_unit(name: &str) -> Result<(Vec<String>, Unit)> {
+    let singular = match name.strip_suffix('s') {
+        Some(stem) if !stem.ends_with('s') && !stem.is_empty() => stem,
+        _ => name,
+    };
+    let plural = if singular == name { format!("{name}s") } else { name.to_string() };
+    if crate::units::registry().lookup(singular).is_some() || crate::units::registry().lookup(&plural).is_some() {
+        return Err(crate::Error::new(format!("{name} is a unit already")));
+    }
+    let unit = crate::units::declare(singular, &plural).ok_or_else(|| crate::Error::new("too many declared units"))?;
+    Ok((vec![singular.to_string(), plural], unit))
+}
+
+/// The variable a label names: "Rent:" is `rent`, "Phone bill -" `phone bill`. Only words.
+fn label_name(label: &str) -> Option<String> {
+    let words = label.trim_end().trim_end_matches([':', '-', '–', '—']).split_whitespace().collect::<Vec<_>>();
+    let words_only = words.iter().all(|w| w.chars().all(char::is_alphabetic));
+    (!words.is_empty() && words.len() <= 6 && words_only).then(|| words.join(" ").to_lowercase())
+}
+
 fn strip_label(line: &str) -> &str {
     let bytes = line.as_bytes();
     for (i, c) in line.char_indices() {

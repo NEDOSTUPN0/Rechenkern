@@ -98,6 +98,11 @@ fn labels_and_markers() {
         &[("Day 8 $50", "$50.00"), ("Week 4 30 km", "30 km"), ("day 8", "8")],
     );
     answers(Features { list_marker_parsing: false, ..off() }, &[("1. 5 + 5", "10")]);
+    answers(
+        Features { labels_as_variables: true, ..off() },
+        &[("Rent: $1,500", "$1,500.00"), ("Phone bill: $40", "$40.00"), ("rent + phone bill", "$1,540.00")],
+    );
+    answers(off(), &[("Rent: $1,500", "$1,500.00"), ("rent * 2", "2")]);
     let mut comments = off();
     comments.comments.labels = false;
     comments.comments.brackets = false;

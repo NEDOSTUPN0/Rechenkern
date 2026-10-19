@@ -165,7 +165,9 @@ fn definitions() -> Vec<Def> {
             ])
             .spelled()
             .calendar(Cal::Hour, 1),
-        unit("d", "day", Dim::TIME, "86400").aliases(&["night", "nights"]).spelled().calendar(Cal::Day, 1),
+        unit("d", "day", Dim::TIME, "86400").spelled().calendar(Cal::Day, 1),
+        // Hotel nights: a day each, as in SoulverCore ("nights in March 12 to March 25").
+        unit("night", "night", Dim::TIME, "86400").spelled().calendar(Cal::Day, 1),
         unit("wk", "week", Dim::TIME, "604800").aliases(&["wks"]).spelled().calendar(Cal::Week, 1),
         unit("fortnight", "fortnight", Dim::TIME, "1209600").spelled().calendar(Cal::Week, 2),
         unit("mo", "month", Dim::TIME, "1")

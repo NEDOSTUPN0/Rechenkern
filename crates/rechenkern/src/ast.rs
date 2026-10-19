@@ -23,6 +23,8 @@ pub enum Stmt {
         params: Vec<String>,
         body: Expr,
     },
+    /// `widgets = new unit`: a unit of its own kind for later lines.
+    Unit(String),
     /// `if cond then stmt else stmt`.
     If {
         cond: Expr,
@@ -44,6 +46,7 @@ impl Stmt {
         let dated = |e: &Expr| matches!(e, Expr::Time(_) | Expr::InZone(..) | Expr::ZoneDiff(..) | Expr::Sky { .. });
         match self {
             Stmt::Expr(e) | Stmt::Assign { expr: e, .. } | Stmt::Function { body: e, .. } => e.contains(&dated),
+            Stmt::Unit(_) => false,
             Stmt::If { cond, then, otherwise } => {
                 cond.contains(&dated) || then.has_dates() || otherwise.as_ref().is_some_and(|s| s.has_dates())
             }
@@ -357,6 +360,8 @@ pub enum LineRef {
     /// Sum of the block of lines above.
     Sum,
     Average,
+    /// Another statistic of the block: `median`, `max`, `min`, `count`, `std dev`.
+    Stat(Func),
 }
 
 /// Which occurrence of a weekday or period: `next friday`, `last month`.
