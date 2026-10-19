@@ -107,9 +107,43 @@ fn vulgar_fraction(c: char) -> Option<(i64, i64)> {
         '¼' => (1, 4),
         '¾' => (3, 4),
         '⅕' => (1, 5),
+        '⅖' => (2, 5),
+        '⅗' => (3, 5),
+        '⅘' => (4, 5),
+        '⅙' => (1, 6),
+        '⅚' => (5, 6),
+        '⅐' => (1, 7),
         '⅛' => (1, 8),
+        '⅜' => (3, 8),
+        '⅝' => (5, 8),
+        '⅞' => (7, 8),
+        '⅑' => (1, 9),
+        '⅒' => (1, 10),
         _ => return None,
     })
+}
+
+/// The character for a fraction, as answers write it: `(3, 8)` is "⅜".
+pub(crate) fn vulgar_char(num: u128, den: u128) -> Option<char> {
+    let c = match (num, den) {
+        (1, 2) => '½',
+        (1, 3) => '⅓',
+        (2, 3) => '⅔',
+        (1, 4) => '¼',
+        (3, 4) => '¾',
+        (1, 5) => '⅕',
+        (2, 5) => '⅖',
+        (3, 5) => '⅗',
+        (4, 5) => '⅘',
+        (1, 6) => '⅙',
+        (5, 6) => '⅚',
+        (1, 8) => '⅛',
+        (3, 8) => '⅜',
+        (5, 8) => '⅝',
+        (7, 8) => '⅞',
+        _ => return None,
+    };
+    Some(c)
 }
 
 struct Lexer<'a> {
@@ -246,9 +280,12 @@ impl Lexer<'_> {
                 self.i += 1;
                 let frac = Number::ratio(a, b);
                 let end_offset = self.offset(self.i);
+                let src = self.src;
+                let whole = |t: &Token| src[t.start..t.end].bytes().all(|b| b.is_ascii_digit());
                 match self.tokens.last_mut() {
-                    // "1½" is one and a half.
-                    Some(Token { tok: Tok::Num(n), end, .. }) if !self.space => {
+                    // "1½" and "1 ½" are one and a half.
+                    Some(t @ Token { tok: Tok::Num(_), .. }) if !self.space || whole(t) => {
+                        let Token { tok: Tok::Num(n), end, .. } = t else { unreachable!() };
                         *n = *n + frac;
                         *end = end_offset;
                     }

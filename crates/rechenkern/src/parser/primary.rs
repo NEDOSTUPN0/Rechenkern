@@ -718,6 +718,12 @@ impl Parser<'_> {
     fn call(&mut self, func: Func, n: usize) -> Result<Option<Expr>> {
         let start = self.pos;
         self.pos += n;
+        // "random number from 1 to 5", "random number 1 through 5"
+        if func == Func::Random
+            && let Some(range) = self.random_range()
+        {
+            return Ok(Some(Expr::Call(func, range)));
+        }
         // "random" alone, "root 3 of 27", "log 20 base 4"
         let has_args = self.at_sym("(") || self.at_word("of") || self.at_word("between") || self.operand_follows(0);
         if !has_args {
@@ -793,6 +799,25 @@ impl Parser<'_> {
             }
         }
         Ok(Some(Expr::Call(func, args)))
+    }
+
+    /// The ends of a range after "random": "from 1 to 5", "1 through 5", "1-5".
+    fn random_range(&mut self) -> Option<Vec<Expr>> {
+        let at = self.pos + usize::from(self.toks.get(self.pos).is_some_and(|t| t.is_word("from")));
+        let number = |i: usize| match self.toks.get(i)?.tok {
+            Tok::Num(n) => Some(Expr::Number(n)),
+            _ => None,
+        };
+        let joined = self
+            .toks
+            .get(at + 1)
+            .is_some_and(|t| ["to", "through", "thru"].iter().any(|w| t.is_word(w)) || t.is_sym("-"));
+        let (low, high) = (number(at)?, number(at + 2)?);
+        if !joined {
+            return None;
+        }
+        self.pos = at + 3;
+        Some(vec![low, high])
     }
 
     /// A root after its degree: "4th root of 16", "fourth root of 16", "5 root of 100".

@@ -64,3 +64,6 @@ cot(1)
 0.5 as frac
 clamp 26 5 25
 fromunix(1559740303)
+random number 1 to 5
+random number from 1 to 5
+random number 1 through 5

@@ -336,7 +336,7 @@ fn fraction(n: Number, config: &Config) -> String {
     {
         let (num, den) = (d.mantissa().unsigned_abs(), 10u128.pow(d.scale()));
         let g = gcd(num, den);
-        return format!("{}{}/{}", if n.is_negative() { "-" } else { "" }, num / g, den / g);
+        return ratio(n.is_negative(), num / g, den / g);
     }
     let x = n.abs().to_f64();
     let (mut h0, mut h1, mut k0, mut k1) = (0i64, 1i64, 1i64, 0i64);
@@ -356,7 +356,18 @@ fn fraction(n: Number, config: &Config) -> String {
     if k1 == 0 || (h1 as f64 / k1 as f64 - x).abs() > 1e-9 {
         return number(n, config);
     }
-    format!("{}{h1}/{k1}", if n.is_negative() { "-" } else { "" })
+    ratio(n.is_negative(), h1.unsigned_abs() as u128, k1.unsigned_abs() as u128)
+}
+
+/// A fraction as SoulverCore writes it: "⅜", "1 ¼", "3 1/7", "7/13".
+fn ratio(negative: bool, num: u128, den: u128) -> String {
+    let sign = if negative { "-" } else { "" };
+    let (whole, rest) = (num / den, num % den);
+    let part = match crate::lexer::vulgar_char(rest, den) {
+        Some(c) => c.to_string(),
+        None => format!("{rest}/{den}"),
+    };
+    if whole == 0 { format!("{sign}{part}") } else { format!("{sign}{whole} {part}") }
 }
 
 fn gcd(a: u128, b: u128) -> u128 {

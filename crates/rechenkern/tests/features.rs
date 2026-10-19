@@ -115,7 +115,7 @@ fn numbers() {
         Features { misplaced_thousands_separator: MisplacedSeparator::Allow, ..off() },
         &[("1,0000", "10,000"), ("1,50", "1.5")],
     );
-    answers(Features { proper_fraction_parsing: true, ..off() }, &[("4 out of 10", "2/5"), ("10 of 20", "50%")]);
+    answers(Features { proper_fraction_parsing: true, ..off() }, &[("4 out of 10", "⅖"), ("10 of 20", "50%")]);
 }
 
 #[test]

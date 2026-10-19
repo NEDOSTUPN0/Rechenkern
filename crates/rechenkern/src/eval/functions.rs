@@ -168,35 +168,45 @@ impl Env<'_> {
                 )
             }
             Fact => factorial(x.clone()),
-            Sin | Cos | Tan | SinD | CosD | TanD => {
-                let degrees = matches!(func, SinD | CosD | TanD);
+            Sin | Cos | Tan | SinD | CosD | TanD | Cot | Csc | CotD | CscD => {
+                let degrees = matches!(func, SinD | CosD | TanD | CotD | CscD);
                 let rad = self.radians(x, degrees)?;
                 let r = match func {
                     Sin | SinD => rad.sin(),
                     Cos | CosD => rad.cos(),
-                    _ => rad.tan(),
+                    Tan | TanD => rad.tan(),
+                    Cot | CotD => 1.0 / rad.tan(),
+                    _ => 1.0 / rad.sin(),
                 };
+                if !r.is_finite() || r.abs() > 1e15 {
+                    bail!("result is not a real number");
+                }
                 // sin(pi) is 0, not 1.2e-16.
                 real(Some(Number::from_f64(if r.abs() < 1e-15 { 0.0 } else { r })))
             }
-            Asin | Acos | Atan | AsinD | AcosD | AtanD => {
+            Asin | Acos | Atan | AsinD | AcosD | AtanD | Acot | Acsc | AcotD | AcscD => {
                 let n = plain(x, "inverse trigonometry")?.to_f64();
                 let r = match func {
                     Asin | AsinD => n.asin(),
                     Acos | AcosD => n.acos(),
-                    _ => n.atan(),
+                    Atan | AtanD => n.atan(),
+                    // acot(0) is a right angle.
+                    Acot | AcotD => std::f64::consts::FRAC_PI_2 - n.atan(),
+                    _ => (1.0 / n).asin(),
                 };
                 if !r.is_finite() {
                     bail!("result is not a real number");
                 }
-                let degrees = matches!(func, AsinD | AcosD | AtanD) || self.config.angle_unit == AngleUnit::Degrees;
+                let degrees = matches!(func, AsinD | AcosD | AtanD | AcotD | AcscD)
+                    || self.config.angle_unit == AngleUnit::Degrees;
+                // An angle, as in SoulverCore: "asin(0.5)" = 0.5235987756 rad.
                 Ok(if degrees {
                     Value::Quantity(Quantity::new(Number::from_f64(r.to_degrees()), registry().get("°")))
                 } else {
-                    Value::number(Number::from_f64(r))
+                    Value::Quantity(Quantity::new(Number::from_f64(r), registry().get("rad")))
                 })
             }
-            Sinh | Cosh | Tanh | Asinh | Acosh | Atanh => {
+            Sinh | Cosh | Tanh | Asinh | Acosh | Atanh | Coth | Csch => {
                 let n = plain(x, "hyperbolic functions")?;
                 let f = match func {
                     Sinh => f64::sinh,
@@ -204,6 +214,8 @@ impl Env<'_> {
                     Tanh => f64::tanh,
                     Asinh => f64::asinh,
                     Acosh => f64::acosh,
+                    Coth => |x: f64| 1.0 / x.tanh(),
+                    Csch => |x: f64| 1.0 / x.sinh(),
                     _ => f64::atanh,
                 };
                 real(n.apply(f))

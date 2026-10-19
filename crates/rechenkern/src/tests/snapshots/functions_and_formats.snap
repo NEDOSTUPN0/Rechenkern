@@ -99,7 +99,7 @@ asin of 2, 8 and 4                           → <error: asin takes 1 argument>
 acos(16)                                     → <error: result is not a real number>
 acos(2, 8)                                   → <error: acos takes 1 argument>
 acos of 2, 8 and 4                           → <error: acos takes 1 argument>
-atan(16)                                     → 1.508377517
+atan(16)                                     → 1.508377517 rad
 atan(2, 8)                                   → <error: atan takes 1 argument>
 atan of 2, 8 and 4                           → <error: atan takes 1 argument>
 arcsin(16)                                   → <error: result is not a real number>
@@ -108,7 +108,7 @@ arcsin of 2, 8 and 4                         → <error: asin takes 1 argument>
 arccos(16)                                   → <error: result is not a real number>
 arccos(2, 8)                                 → <error: acos takes 1 argument>
 arccos of 2, 8 and 4                         → <error: acos takes 1 argument>
-arctan(16)                                   → 1.508377517
+arctan(16)                                   → 1.508377517 rad
 arctan(2, 8)                                 → <error: atan takes 1 argument>
 arctan of 2, 8 and 4                         → <error: atan takes 1 argument>
 sinh(16)                                     → 4,443,055.26
@@ -147,6 +147,42 @@ acosd of 2, 8 and 4                          → <error: acosd takes 1 argument>
 atand(16)                                    → 86.42366563°
 atand(2, 8)                                  → <error: atand takes 1 argument>
 atand of 2, 8 and 4                          → <error: atand takes 1 argument>
+cot(16)                                      → 3.326323196
+cot(2, 8)                                    → <error: cot takes 1 argument>
+cot of 2, 8 and 4                            → <error: cot takes 1 argument>
+csc(16)                                      → -3.47338826
+csc(2, 8)                                    → <error: csc takes 1 argument>
+csc of 2, 8 and 4                            → <error: csc takes 1 argument>
+acot(16)                                     → 0.06241881 rad
+acot(2, 8)                                   → <error: acot takes 1 argument>
+acot of 2, 8 and 4                           → <error: acot takes 1 argument>
+acsc(16)                                     → 0.0625407618 rad
+acsc(2, 8)                                   → <error: acsc takes 1 argument>
+acsc of 2, 8 and 4                           → <error: acsc takes 1 argument>
+arccot(16)                                   → 0.06241881 rad
+arccot(2, 8)                                 → <error: acot takes 1 argument>
+arccot of 2, 8 and 4                         → <error: acot takes 1 argument>
+arccsc(16)                                   → 0.0625407618 rad
+arccsc(2, 8)                                 → <error: acsc takes 1 argument>
+arccsc of 2, 8 and 4                         → <error: acsc takes 1 argument>
+coth(16)                                     → 1
+coth(2, 8)                                   → <error: coth takes 1 argument>
+coth of 2, 8 and 4                           → <error: coth takes 1 argument>
+csch(16)                                     → 0.0000002250703494
+csch(2, 8)                                   → <error: csch takes 1 argument>
+csch of 2, 8 and 4                           → <error: csch takes 1 argument>
+cotd(16)                                     → 3.487414444
+cotd(2, 8)                                   → <error: cotd takes 1 argument>
+cotd of 2, 8 and 4                           → <error: cotd takes 1 argument>
+cscd(16)                                     → 3.627955279
+cscd(2, 8)                                   → <error: cscd takes 1 argument>
+cscd of 2, 8 and 4                           → <error: cscd takes 1 argument>
+acotd(16)                                    → 3.576334375°
+acotd(2, 8)                                  → <error: acotd takes 1 argument>
+acotd of 2, 8 and 4                          → <error: acotd takes 1 argument>
+acscd(16)                                    → 3.583321698°
+acscd(2, 8)                                  → <error: acscd takes 1 argument>
+acscd of 2, 8 and 4                          → <error: acscd takes 1 argument>
 min(16)                                      → 16
 min(2, 8)                                    → 2
 min of 2, 8 and 4                            → 2
@@ -342,10 +378,13 @@ today as scientific                          → Wed, 23 Sep 2026
 0.75 as sci                                  → 7.5e-1
 today as sci                                 → Wed, 23 Sep 2026
 255 in fraction                              → 255
-0.75 as fraction                             → 3/4
+0.75 as fraction                             → ¾
 today as fraction                            → Wed, 23 Sep 2026
+255 in frac                                  → 255
+0.75 as frac                                 → ¾
+today as frac                                → Wed, 23 Sep 2026
 255 in fractions                             → 255
-0.75 as fractions                            → 3/4
+0.75 as fractions                            → ¾
 today as fractions                           → Wed, 23 Sep 2026
 255 in number                                → 255
 0.75 as number                               → 0.75

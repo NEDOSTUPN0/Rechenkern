@@ -121,8 +121,8 @@ fn alternatives(line: &str) -> Vec<String> {
 #[test]
 fn alternative_results() {
     assert_eq!(alternatives("255"), ["Hexadecimal 0xFF", "Binary 0b11111111", "Octal 0o377"]);
-    assert_eq!(alternatives("0.375"), ["Fraction 3/8"]);
-    assert_eq!(alternatives("20%"), ["Decimal 0.2", "Fraction 1/5"]);
+    assert_eq!(alternatives("0.375"), ["Fraction ⅜"]);
+    assert_eq!(alternatives("20%"), ["Decimal 0.2", "Fraction ⅕"]);
     assert_eq!(alternatives("1 / 7 * 10^9")[..1], ["Scientific 1.428571429e8"]);
     let km = alternatives("5 km");
     assert!(km.contains(&"Unit 3.106855961 mi".to_string()), "{km:?}");

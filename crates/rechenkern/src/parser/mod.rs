@@ -678,6 +678,20 @@ impl<'a> Parser<'a> {
                 self.pos += 1;
                 Ok(Expr::Not(self.unary()?.boxed()))
             }
+            // "~0xFF" is a bitwise not; "~5" stays "about 5", as in SoulverCore.
+            Tok::Sym("~")
+                if self.toks.get(self.pos + 1).is_some_and(|t| {
+                    !t.space_before
+                        && matches!(t.tok, Tok::Num(_))
+                        && self.src[t.start..]
+                            .get(..2)
+                            .is_some_and(|p| matches!(p, "0x" | "0X" | "0b" | "0B" | "0o" | "0O"))
+                }) =>
+            {
+                self.pos += 1;
+                let x = self.unary()?;
+                Ok(Expr::binary(Op::Sub, Expr::Neg(x.boxed()), Expr::Number(crate::number::Number::ONE)))
+            }
             Tok::Sym("√") => {
                 self.pos += 1;
                 Ok(Expr::Call(Func::Sqrt, vec![self.unary()?]))

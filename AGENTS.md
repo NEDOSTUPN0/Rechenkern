@@ -287,6 +287,10 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   SoulverCore (`Scope::radix`, `Names::radixes`). Negative or fractional answers, units
   and conversions (`in decimal`) are decimal.
 - `mod` and `%` take the sign of the divisor, as in SoulverCore: `-10 mod 3` = 2.
+- Fractions answer as SoulverCore writes them: `0.375 as fraction` = ⅜, `1.25 as frac` =
+  1 ¼, `22/7` = 3 1/7; `1 ¼` and `1¼` read back. Inverse trigonometry gives an angle
+  (`asin(0.5)` = 0.5235987756 rad). `~` is a bitwise not only before a number in a base
+  (`~0xFF` = -256); `~5` is "about 5", as in SoulverCore.
 - `K` glued to a number is a thousand, as in SoulverCore (`3K` = 3,000); kelvins take a
   space (`3 K`).
 - Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`.

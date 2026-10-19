@@ -343,6 +343,12 @@ impl Parser<'_> {
                 self.pos += 1;
                 return self.time_word();
             }
+            // "fromunix(1559740303)": the date of a timestamp.
+            "fromunix" if self.operand_follows(1) => {
+                self.pos += 1;
+                let seconds = self.unary()?;
+                return Ok(Some(Self::formatted(seconds, Format::Date)));
+            }
             "unix" | "epoch" | "timestamp" => {
                 self.pos += 1;
                 if matches!(next.as_str(), "time" | "timestamp") {
