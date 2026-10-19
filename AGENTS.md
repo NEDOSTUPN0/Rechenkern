@@ -284,7 +284,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - A date without a year is this year unless that is more than 270 days away.
   Holidays without a year are the next occurrence. In a range the other end
   decides, as in SoulverCore: `Dec 1 to Jan 31` ends next year, `days since Dec 25`
-  starts last year, `Jan 1 - Mar 1` is a range too. Holidays and quarters too
+  starts last year, `Jan 1 - Mar 1` is a range too. A period after `until`/`since`
+  counts from its first day (`days until March`, `days until next month` = to the 1st,
+  as in SoulverCore; but `days since last month` is a month ago). Holidays and quarters too
   (`days from Christmas`, `days since Q1`), and `halfway between`.
 - Events with a fixed date (`GTA 6 release date`) live in `words::EVENTS`;
   their note (`(probably)`) is display only (`Expr::Noted`), never part of a

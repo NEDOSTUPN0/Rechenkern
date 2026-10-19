@@ -447,7 +447,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Nothing but a conversion follows the value at the cursor.
-    fn value_ends(&mut self) -> bool {
+    pub(super) fn value_ends(&mut self) -> bool {
         match self.peek().map(|t| &t.tok) {
             None | Some(Tok::Sym("->")) => true,
             Some(Tok::Word(w)) => matches!(w.to_lowercase().as_str(), "in" | "to" | "as" | "into"),

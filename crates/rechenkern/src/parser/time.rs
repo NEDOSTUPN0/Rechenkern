@@ -497,6 +497,15 @@ impl Parser<'_> {
                 let [a, b] = self.pair()?;
                 return Ok(Some(timespan(Expr::Range(a.boxed(), b.boxed()))));
             }
+            // "time from 9am to 5pm"; "time from 9am" counts to now.
+            if self.date_starts(self.pos + 1) && self.eat_word("from") {
+                let a = self.additive()?;
+                let b = match self.range_word(&["to", "until", "till"]) {
+                    Some(through) => self.range_end(through)?,
+                    None => now(),
+                };
+                return Ok(Some(timespan(Expr::Range(a.boxed(), b.boxed()))));
+            }
             // "time Tokyo", "time at Tokyo now", "time now in Tokyo"
             self.eat_word("now");
             let mut p = self.clone();
@@ -580,11 +589,17 @@ impl Parser<'_> {
         let range = match w.as_str() {
             "until" | "till" | "to" if w != "to" || self.date_starts(self.pos + 1) => {
                 self.pos += 1;
-                Expr::Range(start().boxed(), self.additive()?.boxed())
+                Expr::Range(start().boxed(), self.date_or_period(true)?.boxed())
             }
             "since" => {
                 self.pos += 1;
-                Expr::Range(self.additive()?.boxed(), start().boxed())
+                Expr::Range(self.date_or_period(false)?.boxed(), start().boxed())
+            }
+            // "days in March 3 to May 30" is the days between them.
+            "in" if self.range_follows(self.pos + 1) => {
+                self.pos += 1;
+                let [a, b] = self.pair()?;
+                Expr::Range(a.boxed(), b.boxed())
             }
             "between" => {
                 self.pos += 1;
@@ -604,9 +619,10 @@ impl Parser<'_> {
             "in" | "left" | "remaining" => {
                 let left = w != "in";
                 let at = self.pos + if left { 2 } else { 1 };
-                // "the month" and "next month" name a period, but "days in month" is the unit's.
+                // "the month" and "next month" name a period, but "days in month" is the unit's;
+                // what is left is always of this one: "days left in month".
                 let the = usize::from(self.words_at(at, &["the"]));
-                let named = the == 1 || self.lower(at).is_some_and(|w| words::which(&w).is_some());
+                let named = the == 1 || left || self.lower(at).is_some_and(|w| words::which(&w).is_some());
                 let period = if named { self.named_period_at(at + the) } else { self.period_at(at) };
                 let Some((first, span, n)) = period.filter(|_| !left || self.words_at(at - 1, &["in"])) else {
                     return Ok(None);
@@ -626,6 +642,41 @@ impl Parser<'_> {
             _ => return Ok(None),
         };
         Ok(Some(Expr::Convert(range.boxed(), Target::Unit(unit.clone()))))
+    }
+
+    /// A date at the cursor, or the first day of a period: "March" in "days until March",
+    /// "Q4", "2027"; ahead, "next month" is the 1st, as in SoulverCore ("since last month"
+    /// is a month ago).
+    fn date_or_period(&mut self, ahead: bool) -> Result<Expr> {
+        let i = self.pos;
+        let named = ahead
+            && self.lower(i).is_some_and(|w| words::which(&w).is_some())
+            && self.lower(i + 1).is_some_and(|w| matches!(w.as_str(), "week" | "month" | "quarter" | "year"));
+        let period = if named { self.named_period_at(i) } else { self.period_at(i) };
+        if let Some((first, _, n)) = period {
+            let mut p = self.clone();
+            p.pos = i + n;
+            // Only the whole period: "March 3" is a date.
+            if named || p.value_ends() {
+                self.pos = i + n;
+                return Ok(first);
+            }
+        }
+        self.additive()
+    }
+
+    /// A date, then a word that ends a range, from token `i`: "March 3 to May 30".
+    fn range_follows(&self, i: usize) -> bool {
+        if !self.date_starts(i) {
+            return false;
+        }
+        let mut p = self.clone();
+        p.pos = i;
+        let saved = std::mem::replace(&mut p.in_list, true);
+        let Ok(a) = p.additive() else { return false };
+        p.in_list = saved;
+        let dates = matches!(&a, Expr::Binary(Op::Sub, x, y) if matches!((&**x, &**y), (Expr::Time(_), Expr::Time(_))));
+        dates || p.range_word(&["to", "until", "till"]).is_some()
     }
 
     /// A calendar period at token `i`: its first day, length and size in tokens.

@@ -799,6 +799,19 @@ fn currencies() {
 #[test]
 fn dates() {
     check(&[
+        ("days in March 3 to May 30", "88 days"),
+        ("days in March 3 - May 30", "88 days"),
+        ("weeks in March 3 to May 30", "12.57142857 weeks"),
+        ("weekdays in March 3 to May 30", "64 workdays"),
+        ("days until March", "159 days"),
+        ("days since March", "206 days"),
+        ("weeks until March", "22.71428571 weeks"),
+        ("days until next month", "8 days"),
+        ("days until next year", "100 days"),
+        ("days until 2027", "100 days"),
+        ("days left in month", "8 days"),
+        ("days until March 3", "161 days"),
+        ("time from 9am to 5pm", "8 hours"),
         ("year %", "72.76826484%"),
         ("month %", "75.34722222%"),
         ("week %", "37.20238095%"),
