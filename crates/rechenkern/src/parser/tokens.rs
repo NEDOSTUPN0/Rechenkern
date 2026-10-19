@@ -189,6 +189,10 @@ impl<'a> Parser<'a> {
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
             || (w == "cast" && ["to", "as", "into"].iter().any(|t| self.words_at(i + 1, &[t])))
+            // "flour 1 cup": a food before its amount.
+            || (matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_)))
+                && self.unit_at(i + 2, false).is_some_and(|(u, _)| matches!(u.dim(), Dim::MASS | Dim::VOLUME))
+                && self.food_at(i).is_some_and(|(_, n)| n == 1))
             // "sq ft", "cu m"
             || (matches!(w, "sq" | "cu") && self.unit_at(i + 1, false).is_some())
             || (matches!(w, "through" | "thru") && self.date_starts(i + 1))
@@ -660,7 +664,13 @@ impl<'a> Parser<'a> {
                 });
                 if let Some(close) = close {
                     let comment = (i + 1..close)
-                        .any(|k| self.toks[k].word().is_some() && !self.significant(k) && self.place_at(k).is_none());
+                        .any(|k| {
+                            self.toks[k].word().is_some()
+                                && !self.significant(k)
+                                && self.place_at(k).is_none()
+                                // "(1 cup of flour) in grams"
+                                && !(self.food_at(k).is_some() && self.toks[i + 1..k].iter().any(|t| matches!(t.tok, Tok::Num(_))))
+                        });
                     if comment {
                         keep[i..=close].iter_mut().for_each(|k| *k = false);
                         i = close;

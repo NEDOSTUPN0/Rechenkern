@@ -12,6 +12,7 @@ use crate::custom::{CustomPlace, CustomUnits, PlaceProvider};
 use crate::error::{Error, Result};
 use crate::eval::{Display, Env, Line, LineKind};
 use crate::inflation::InflationProvider;
+use crate::parser::Kept;
 use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::{self, Scope};
 use crate::rates::{RateProvider, RateTable, Rates};
@@ -181,13 +182,14 @@ impl Calculator {
         let asked = RefCell::new(Vec::new());
         let asked = track.then_some(&asked);
         let body = &trimmed[self.label_end(trimmed, names, asked)..];
-        let result = self.evaluate(body, names, lines, asked, &mut effects);
+        let label = &trimmed[..trimmed.len() - body.len()];
+        let result = self.evaluate(body, label, names, lines, asked, &mut effects);
         if self.config.features.labels_as_variables
             && effects.assigned.is_none()
             && let Ok(Some((answer, false))) = &result
             && let Some(name) = label_name(&trimmed[..trimmed.len() - body.len()])
         {
-            effects.assigned = Some((name, answer.reference(), None));
+            effects.assigned = Some((name, answer.reference(), Kept::default()));
         }
         if let Some(asked) = asked {
             effects.reads.names.extend(asked.take());
@@ -333,6 +335,7 @@ impl Calculator {
     fn evaluate(
         &self,
         line: &str,
+        label: &str,
         names: &Names,
         lines: &[Line],
         asked: Option<&RefCell<Vec<String>>>,
@@ -341,7 +344,9 @@ impl Calculator {
         let is_var = |name: &str| names.asks(asked, name, false);
         let is_function = |name: &str| names.asks(asked, name, true);
         let places = |name: &str| self.find_place(name);
-        let scope = self.scope(&is_var, &is_function, names, &places, self.units()?, true);
+        let mut scope = self.scope(&is_var, &is_function, names, &places, self.units()?, true);
+        // "flour: 200 g in cups": the label names the food.
+        scope.label_food = label_name(label).and_then(|name| crate::units::foods::named(&name));
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
         // "area(w, h) = w * h" defines a function and has no answer.
         if let Stmt::Function { name, params, body } = stmt {
@@ -429,12 +434,15 @@ impl Calculator {
         if scope.scaled.get() && matches!(display, Display::Auto) {
             display = Display::Scaled;
         }
-        let radix = match display {
-            Display::Radix(radix) => Some(radix),
-            _ => None,
+        let kept = Kept {
+            radix: match display {
+                Display::Radix(radix) => Some(radix),
+                _ => None,
+            },
+            food: food_of(expr),
         };
         let answer = env.describe(expr, value, display, parts, &self.config);
-        let assigned = name.map(|name| (name, answer.reference(), radix));
+        let assigned = name.map(|name| (name, answer.reference(), kept));
         Ok(Some((answer, is_total, assigned)))
     }
 
@@ -455,7 +463,8 @@ impl Calculator {
             units,
             scaled: Cell::new(false),
             radix: Cell::new(None),
-            radixes: &names.radixes,
+            kept: &names.kept,
+            label_food: None,
             declared: &names.units,
             places,
             weather,
@@ -467,8 +476,8 @@ impl Calculator {
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Names {
     pub vars: HashMap<String, Value>,
-    /// Variables set in a base other than ten, whose answers stay in it.
-    pub radixes: HashMap<String, u32>,
+    /// What variables keep besides their values: a base, a food.
+    pub kept: HashMap<String, Kept>,
     /// Units declared in lines, by their spellings in lowercase.
     pub units: HashMap<String, Unit>,
     pub functions: HashMap<String, Arc<UserFunction>>,
@@ -480,12 +489,9 @@ impl Names {
         if effects.clears_vars {
             *self = Names::default();
         }
-        if let Some((name, value, radix)) = &effects.assigned {
+        if let Some((name, value, kept)) = &effects.assigned {
             self.vars.insert(name.clone(), value.clone());
-            match radix {
-                Some(radix) => self.radixes.insert(name.clone(), *radix),
-                None => self.radixes.remove(name),
-            };
+            self.kept.insert(name.clone(), *kept);
         }
         if let Some((spellings, unit)) = &effects.declared {
             for spelling in spellings {
@@ -506,8 +512,8 @@ impl Names {
     }
 }
 
-/// A variable set, and the base its answer was in: `mask = 0xFF`.
-pub(crate) type Assignment = (String, Value, Option<u32>);
+/// A variable set, and what it keeps besides the value: `mask = 0xFF`.
+pub(crate) type Assignment = (String, Value, Kept);
 
 /// What a line did besides answering: what later lines see of it, and what it read.
 #[derive(Clone, Debug)]
@@ -577,6 +583,16 @@ fn hashtags(line: &str) -> Vec<String> {
 }
 
 /// Removes a leading "Label:" from a line.
+/// The food an amount is of: `2 cups of flour`, also converted (`... in grams`).
+fn food_of(expr: &Expr) -> Option<crate::units::foods::Food> {
+    match expr {
+        Expr::Food(_, food) => Some(*food),
+        Expr::Counted { food, .. } => Some(*food),
+        Expr::Convert(inner, _) => food_of(inner),
+        _ => None,
+    }
+}
+
 /// A unit of its own kind named in the plural or singular: "widgets", "widget".
 fn declare_unit(name: &str) -> Result<(Vec<String>, Unit)> {
     let singular = match name.strip_suffix('s') {

@@ -43,6 +43,11 @@ static ALL: LazyLock<Vec<(&'static str, Food)>> = LazyLock::new(|| {
 });
 
 /// Every food name, in table order.
+/// The food called `name`, in lowercase: "flour".
+pub fn named(name: &str) -> Option<Food> {
+    all().iter().find(|(n, _)| *n == name).map(|&(_, food)| food)
+}
+
 pub fn all() -> &'static [(&'static str, Food)] {
     &ALL
 }

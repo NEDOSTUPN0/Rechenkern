@@ -602,7 +602,7 @@ fn same_line(a: &Line, b: &Line) -> bool {
 
 fn same_assignment(a: &Option<Assignment>, b: &Option<Assignment>) -> bool {
     match (a, b) {
-        (Some((n, a, r)), Some((m, b, s))) => n == m && a.same_as(b) && r == s,
+        (Some((n, a, r)), Some((m, b, s))) => n == m && a.same_as(b) && r.same_as(s),
         (None, None) => true,
         _ => false,
     }

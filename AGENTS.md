@@ -128,7 +128,10 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - A food right after a weight or a volume, with or without `of`, is read with it
   (`Expr::Food`): `1 cup of flour`, `200 g sugar`, `1 cup melted butter`
   (`words::FOOD_STATES` don't change the weight). Food words stay comments
-  everywhere else; a variable of the same name wins.
+  everywhere else; a variable of the same name wins. A food may come before its amount
+  (`flour 1 cup in grams`) or be the label (`flour: 200 g in cups`), and a variable set
+  to an amount of food keeps it (`parser::Kept`: `flour = 2 cups of flour`, then
+  `flour in grams`).
 - A number before a counted food is `Expr::Counted`: a piece word makes it a weight
   (`1 stick of butter` = 113 g, `3 cloves of garlic`); a food counted by itself stays
   a count unless converted (`2 eggs` = 2, `2 large eggs in grams` = 100 g). The pieces

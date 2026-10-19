@@ -684,6 +684,9 @@ fn units() {
 fn cooking() {
     check(&[
         ("1 cup of flour in grams", "125 g"),
+        ("flour 1 cup in grams", "125 g"),
+        ("(1 cup of flour) in grams", "125 g"),
+        ("10% coffee 5", "5"),
         ("1 stick of butter", "113 g"),
         ("2 sticks butter in cups", "0.9955947137 cup"),
         ("3 cloves of garlic", "9 g"),
@@ -1273,6 +1276,8 @@ fn sheets() {
     assert_eq!(sheet("10\n20\n30\n60\nstd dev"), "21.60246899");
     assert_eq!(sheet("$5 #a\n$7 #b\n$9 #a\nmax #a"), "$9.00");
     assert_eq!(sheet("widgets = new unit\n5 widgets + 3 widgets"), "8 widgets");
+    assert_eq!(sheet("flour = 2 cups of flour\nflour in grams"), "250 g");
+    assert_eq!(sheet("flour: 200 g in cups"), "1.6 cup");
     assert_eq!(sheet("widgets = new unit\n$2/widget * 10 widgets"), "$20.00");
     assert_eq!(sheet("10\n20\nline1 + line 2"), "30");
     assert_eq!(sheet("a = 5\n---\na"), "<none>");

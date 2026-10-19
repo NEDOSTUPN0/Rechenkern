@@ -28,6 +28,28 @@ use crate::custom::{CustomPlace, CustomUnits};
 use crate::error::{Error, Result, bail};
 use crate::lexer::{self, Tok, Token};
 use crate::units::Unit;
+use crate::units::foods::Food;
+
+/// An amount in a weight or a volume: "200 g", "1 cup".
+fn weight_or_volume(expr: &Expr) -> bool {
+    matches!(expr, Expr::WithUnit(_, unit) if matches!(unit.dim(), crate::units::Dim::MASS | crate::units::Dim::VOLUME))
+}
+
+/// What a variable keeps besides its value, for the lines that read it.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Kept {
+    /// The base it was written in: `mask = 0xFF`.
+    pub radix: Option<u32>,
+    /// The food it is an amount of: `flour = 2 cups of flour`.
+    pub food: Option<Food>,
+}
+
+impl Kept {
+    pub fn same_as(&self, other: &Kept) -> bool {
+        let food = |k: &Kept| k.food.map(|f| f.grams_per_cup);
+        self.radix == other.radix && food(self) == food(other)
+    }
+}
 
 /// What the parser needs to know about the calculator.
 pub struct Scope<'a> {
@@ -40,8 +62,10 @@ pub struct Scope<'a> {
     pub scaled: Cell<bool>,
     /// The base of the last number written in one, or of a variable set in one: `0xff + 1`.
     pub radix: Cell<Option<u32>>,
-    /// Variables set in a base other than ten: `mask = 0xFF`.
-    pub radixes: &'a HashMap<String, u32>,
+    /// What variables keep besides their value: a base (`mask = 0xFF`), a food.
+    pub kept: &'a HashMap<String, Kept>,
+    /// The food a label names, for amounts without one: "flour: 200 g in cups".
+    pub label_food: Option<Food>,
     /// Units declared in earlier lines, by their spellings in lowercase: `widgets = new unit`.
     pub declared: &'a HashMap<String, Unit>,
     /// Finds places the engine doesn't know, if the host can.
@@ -309,7 +333,8 @@ impl<'a> Parser<'a> {
             units: outer.units,
             scaled: Cell::new(false),
             radix: Cell::new(None),
-            radixes: outer.radixes,
+            kept: outer.kept,
+            label_food: None,
             declared: outer.declared,
             places: outer.places,
             weather: outer.weather,
@@ -756,6 +781,10 @@ impl<'a> Parser<'a> {
             |expr: Expr, later: bool| Expr::binary(if later { Op::Add } else { Op::Sub }, time::now_for(&expr), expr);
         let mut expr = self.primary()?;
         if let Some(food) = self.food_after(&expr) {
+            expr = Expr::Food(expr.boxed(), food);
+        } else if let Some(food) = self.scope.label_food
+            && weight_or_volume(&expr)
+        {
             expr = Expr::Food(expr.boxed(), food);
         } else if is_plain(&expr)
             && let Some((grams, food, piece)) = self.counted_food()

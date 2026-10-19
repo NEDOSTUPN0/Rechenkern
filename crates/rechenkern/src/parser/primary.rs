@@ -449,10 +449,26 @@ impl Parser<'_> {
 
         if let Some((name, n)) = self.var_at(i) {
             self.pos += n;
-            if let Some(&radix) = self.scope.radixes.get(&name) {
-                self.scope.radix.set(Some(radix));
+            let kept = self.scope.kept.get(&name).copied().unwrap_or_default();
+            if kept.radix.is_some() {
+                self.scope.radix.set(kept.radix);
             }
-            return Ok(Some(Expr::Var(name)));
+            return Ok(Some(match kept.food {
+                Some(food) => Expr::Food(Expr::Var(name).boxed(), food),
+                None => Expr::Var(name),
+            }));
+        }
+        // "flour 1 cup in grams": the food before its amount.
+        if let Some((food, n)) = self.food_at(i)
+            && matches!(self.toks.get(i + n).map(|t| &t.tok), Some(Tok::Num(_)))
+        {
+            let mut p = self.clone();
+            p.pos += n;
+            let amount = p.primary()?;
+            if matches!(&amount, Expr::WithUnit(_, unit) if matches!(unit.dim(), Dim::MASS | Dim::VOLUME)) {
+                *self = p;
+                return Ok(Some(Expr::Food(amount.boxed(), food)));
+            }
         }
         // "Mach 2": the number comes after.
         if w == "mach"
