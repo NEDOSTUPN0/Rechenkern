@@ -9,7 +9,8 @@
 
 # Abbreviations. Standard time names the region's time all year, as people
 # use it ("EST" in summer); daylight time is a fixed offset in POSIX form,
-# where the sign is reversed ("EDT4" is UTC-4).
+# where the sign is reversed ("EDT4" is UTC-4). Names in capitals are words
+# too, so they count only in capitals ("CAT", not "cat").
 utc = UTC
 gmt = Etc/GMT
 z = UTC
@@ -41,8 +42,8 @@ atlantic time = America/Halifax
 nst = America/St_Johns
 ndt = NDT2:30
 bst = BST-1
-wet = Europe/Lisbon
-west = WEST-1
+WET = Europe/Lisbon
+WEST = WEST-1
 cet = Europe/Berlin
 cest = CEST-2
 eet = Europe/Athens
@@ -68,7 +69,23 @@ aedt = AEDT-11
 nzst = Pacific/Auckland
 nzdt = NZDT-13
 sast = Africa/Johannesburg
+CAT = Africa/Maputo
+EAT = Africa/Nairobi
+WAT = Africa/Lagos
+TRT = Europe/Istanbul
+msd = MSD-4
+bdt = Asia/Dhaka
+wita = Asia/Makassar
+WIT = Asia/Jayapura
+awdt = AWDT-9
+SST = Pacific/Pago_Pago
 brt = America/Sao_Paulo
+brst = BRST2
+ART = America/Argentina/Buenos_Aires
+clt = America/Santiago
+clst = CLST3
+cot = America/Bogota
+PET = America/Lima
 
 # Countries
 afghanistan = Asia/Kabul

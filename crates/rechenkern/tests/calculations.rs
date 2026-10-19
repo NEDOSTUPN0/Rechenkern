@@ -799,6 +799,13 @@ fn currencies() {
 #[test]
 fn dates() {
     check(&[
+        ("3pm EAT in UTC", "12:00 UTC"),
+        ("3pm CAT in UTC", "13:00 UTC"),
+        ("3pm WAT in UTC", "14:00 UTC"),
+        ("3pm ART in UTC", "18:00 UTC"),
+        ("3pm WITA in UTC", "07:00 UTC"),
+        ("3pm BRST in UTC", "17:00 UTC"),
+        ("3pm cat", "15:00"),
         ("NYE", "Thu, 31 Dec 2026"),
         ("Ramadan", "Sun, 7 Feb 2027"),
         ("end of Ramadan 2026", "Thu, 19 Mar 2026"),
@@ -1124,7 +1131,7 @@ fn time_zones() {
         ("time in port-au-prince", "14:30 EDT"),
         // Abbreviations only where they read back: Belize's "CST" would be Chicago's.
         ("3pm Belize", "15:00 UTC-6"),
-        ("3pm Kampala", "15:00 UTC+3"),
+        ("3pm Kampala", "15:00 EAT"),
         ("today as iso 8601", "2026-09-23T00:00:00-04:00"),
         ("3pm WEST in UTC", "14:00 UTC"),
         ("Jan 10 3pm EDT in UTC", "Sat, 10 Jan 2026 19:00 UTC"),

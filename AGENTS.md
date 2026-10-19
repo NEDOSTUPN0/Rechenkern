@@ -292,7 +292,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   their note (`(probably)`) is display only (`Expr::Noted`), never part of a
   calculation. Update or drop entries when the date changes or passes.
 - Daylight abbreviations (`EDT`, `AEDT`, `BST`) are fixed offsets; standard
-  ones (`EST`, `AEST`) follow the region all year, as people use them.
+  ones (`EST`, `AEST`) follow the region all year, as people use them. Those that
+  are words (`CAT`, `EAT`, `WET`) are written in capitals in `places.txt` and count
+  only in capitals.
   Answers show an abbreviation only if it reads back as the same time ("JST",
   "BST"), the offset otherwise: Belize's "CST" would be Chicago's (`UTC-6`).
 - Answers read back as the same value; that is what `answers_read_back` checks.

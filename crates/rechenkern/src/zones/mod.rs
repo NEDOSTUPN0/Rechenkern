@@ -93,8 +93,11 @@ static INDEX: LazyLock<TableMap<String, Listed>> = LazyLock::new(|| {
                 && name.len() <= 5
                 && !name.contains(' ')
                 && name != "zulu";
-            let upper = code || ACRONYMS.contains(&name);
-            index.insert(name.to_string(), Listed::parse(rest, kind, upper));
+            let upper = code || ACRONYMS.contains(&name.to_lowercase().as_str());
+            // Written in capitals in the file: a word too, so a place only in capitals.
+            let capitals_only = name.chars().any(char::is_uppercase);
+            let listed = Listed { capitals_only, ..Listed::parse(rest, kind, upper) };
+            index.insert(name.to_lowercase(), listed);
         }
     }
     // Cities from the zone database itself: "Asia/Almaty" -> "almaty". The
@@ -413,7 +416,9 @@ pub fn suggest(name: &str) -> Option<String> {
         (Some(listed), Some(city)) if city.0 < listed.0 => city,
         (listed, city) => listed.or(city)?,
     };
-    (distance <= limit).then(|| title_case(best))
+    // "west" is a zone only in capitals: "WEST".
+    let capitals = INDEX.get(best).is_some_and(|l| l.capitals_only || l.upper);
+    (distance <= limit).then(|| if capitals { best.to_uppercase() } else { title_case(best) })
 }
 
 /// Levenshtein distance from `a` to `b`, or anything above `limit` once it
