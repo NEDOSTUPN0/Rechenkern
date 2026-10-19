@@ -265,17 +265,23 @@ impl Env<'_> {
             }
         }
         // "100 USD × A$1.50/$" is A$150: an exchange rate cancels its currency.
-        let exchange = super::is_exchange_rate(&x.unit) || super::is_exchange_rate(&y_unit);
-        let product = x.unit.product(&y_unit);
-        if exchange && (product.is_money() || product.is_none() || super::is_exchange_rate(&product)) {
-            return Ok(Quantity::new(number, product));
+        if super::is_exchange_rate(&x.unit) || super::is_exchange_rate(&y_unit) {
+            let product = x.unit.product(&y_unit);
+            if product.is_money() || product.is_none() || super::is_exchange_rate(&product) {
+                return Ok(Quantity::new(number, product));
+            }
         }
         // "$500/month / 30 days" spreads the money over those days: $16.67/day.
         if divide && x.unit.dim() == Dim::MONEY.div(Dim::TIME) && y.unit.dim() == Dim::TIME {
             return Ok(Quantity::new(number, x.unit.numerator().product(&y_unit)));
         }
         let (unit, factor) = x.unit.mul(&y_unit, &|id| self.scale(id))?;
-        self.named_product(Quantity::new(number * factor, unit), &x.unit.product(&y_unit))
+        let q = Quantity::new(number * factor, unit);
+        // Most products have no unit of their own; only those that may are worked out again.
+        match registry().may_be_named(&q.unit) {
+            true => self.named_product(q, &x.unit.product(&y_unit)),
+            false => Ok(q),
+        }
     }
 
     /// Workdays that would cancel against hours are hours of work:

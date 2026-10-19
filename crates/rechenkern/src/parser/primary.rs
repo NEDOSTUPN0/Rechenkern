@@ -376,6 +376,8 @@ impl Parser<'_> {
     /// A food counted after a number, read past: "stick of butter", "cloves garlic", "garlic
     /// cloves", "large eggs". The grams in a piece, the food and whether a word named the piece.
     pub(super) fn counted_food(&mut self) -> Option<(Number, Food, bool)> {
+        // Most numbers are followed by an operator or nothing.
+        self.cur()?.word()?;
         let piece_at = |p: &Self, i: usize| {
             let word = p.lower(i)?;
             let word = word.strip_suffix('s').unwrap_or(&word).to_string();

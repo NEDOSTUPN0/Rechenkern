@@ -336,6 +336,9 @@ impl Parser<'_> {
     /// a value takes to grow to another, by a percentage each period (yearly unless said) or
     /// by an amount.
     fn time_to_reach(&self) -> Result<Option<Expr>> {
+        if !self.matches_at(1, &["from"]) {
+            return Ok(None);
+        }
         let unit = match self.lower(0).as_deref() {
             Some("time") => None,
             Some(_) => match self.unit_at(0, false) {
@@ -344,9 +347,6 @@ impl Parser<'_> {
             },
             None => return Ok(None),
         };
-        if !self.matches_at(1, &["from"]) {
-            return Ok(None);
-        }
         let Some(to) = self.find(2, &["to"]) else { return Ok(None) };
         let Some(at) = self.find(to + 1, &["at"]) else { return Ok(None) };
         // Anything else is ordinary text: "time from 9am to 5pm at work".
@@ -425,6 +425,9 @@ impl Parser<'_> {
 
     /// "$500 invested $1,000 returned": the gain as a multiple of what was put in (1x).
     fn investment_return(&self) -> Result<Option<Expr>> {
+        if !self.toks.iter().any(|t| t.is_word("returned")) {
+            return Ok(None);
+        }
         let Some(invested) = self.find(1, &["invested"]) else { return Ok(None) };
         let Some(returned) = self.find(invested + 2, &["returned"]) else { return Ok(None) };
         let start = if self.matches_at(0, &["return", "on"]) { 2 } else { 0 };

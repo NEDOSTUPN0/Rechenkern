@@ -300,20 +300,29 @@ impl Registry {
         self.per_amount.iter().find(|p| p.0 == id).map(|(_, rate, amount)| (rate, *amount))
     }
 
+    /// Whether a product of this kind can have a unit of its own: a force, a voltage...
+    pub fn may_be_named(&self, unit: &Unit) -> bool {
+        let dim = unit.dim();
+        dim == Dim::ACCELERATION || DERIVED.iter().any(|(d, _)| *d == dim)
+    }
+
     /// A product of units as a unit of its own: `V·A` is a watt, `lb·ft/s²` a poundal,
     /// `kN/m²` a kilopascal, `mAh·V` joules. None when the product reads well as it is:
     /// a single unit, a named compound (`kWh`), a torque (`N·m/s` too) or a length per a time
     /// squared (`km/h²`, but not `mi/(h·s)`).
     pub fn named_product(&self, unit: &Unit) -> Option<Unit> {
         let factors = unit.factors();
-        if factors.len() < 2 || self.compound_symbol(unit).is_some() {
+        if factors.len() < 2 {
             return None;
         }
         let dim = unit.dim();
-        let si = match DERIVED.iter().find(|(d, _)| *d == dim) {
+        let derived = DERIVED.iter().find(|(d, _)| *d == dim);
+        if (derived.is_none() && dim != Dim::ACCELERATION) || self.compound_symbol(unit).is_some() {
+            return None;
+        }
+        let si = match derived {
             Some((_, name)) => self.lookup(name)?,
-            None if dim == Dim::ACCELERATION => self.get("m").product(&self.get("s").pow(-2)),
-            None => return None,
+            None => self.get("m").product(&self.get("s").pow(-2)),
         };
         let kinds: Vec<(Dim, i8)> = factors.iter().map(|&(id, e)| (self.def(id).dim, e)).collect();
         let torque = kinds.contains(&(Dim::FORCE, 1)) && kinds.contains(&(Dim::LENGTH, 1));
