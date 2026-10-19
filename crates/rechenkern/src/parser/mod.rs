@@ -707,6 +707,10 @@ impl<'a> Parser<'a> {
         let mut expr = self.primary()?;
         if let Some(food) = self.food_after(&expr) {
             expr = Expr::Food(expr.boxed(), food);
+        } else if is_plain(&expr)
+            && let Some((grams, food, piece)) = self.counted_food()
+        {
+            expr = Expr::Counted { count: expr.boxed(), grams, food, piece };
         }
         loop {
             let Some(tok) = self.cur() else { return Ok(expr) };

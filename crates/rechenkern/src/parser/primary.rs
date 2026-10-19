@@ -373,6 +373,45 @@ impl Parser<'_> {
         Some(food)
     }
 
+    /// A food counted after a number, read past: "stick of butter", "cloves garlic", "garlic
+    /// cloves", "large eggs". The grams in a piece, the food and whether a word named the piece.
+    pub(super) fn counted_food(&mut self) -> Option<(Number, Food, bool)> {
+        let piece_at = |p: &Self, i: usize| {
+            let word = p.lower(i)?;
+            let word = word.strip_suffix('s').unwrap_or(&word).to_string();
+            words::FOOD_PIECES.contains(&word.as_str()).then_some(word)
+        };
+        let food_at = |p: &Self, mut i: usize| {
+            while p.lower(i).is_some_and(|w| words::FOOD_STATES.contains(&w.as_str())) {
+                i += 1;
+            }
+            // A variable named like a food is the variable.
+            if p.var_at(i).is_some() {
+                return None;
+            }
+            p.food_at(i).map(|(food, n)| (food, i + n))
+        };
+        let size = ["extra large", "small", "medium", "large", "jumbo"]
+            .into_iter()
+            .find_map(|s| self.phrase_len_at(self.pos, s).map(|n| (s, n)));
+        let i = self.pos + size.map_or(0, |(_, n)| n);
+        let found = if let Some(piece) = piece_at(self, i) {
+            // "stick of butter", "cloves garlic"
+            let of = usize::from(self.words_at(i + 1, &["of"]));
+            food_at(self, i + 1 + of).and_then(|(food, end)| Some((food.piece(&piece)?, food, true, end)))
+        } else {
+            let (food, end) = food_at(self, i)?;
+            match piece_at(self, end) {
+                // "garlic cloves"
+                Some(piece) => food.piece(&piece).map(|grams| (grams, food, true, end + 1)),
+                None => food.piece(size.map_or("each", |(s, _)| s)).map(|grams| (grams, food, false, end)),
+            }
+        };
+        let (grams, food, piece, end) = found?;
+        self.pos = end;
+        Some((grams, food, piece))
+    }
+
     /// A word in value position. `None` means the word is a comment.
     fn word(&mut self) -> Result<Option<Expr>> {
         let i = self.pos;

@@ -71,6 +71,14 @@ pub enum Expr {
     Noted(Box<Expr>, &'static str),
     /// An amount of a food, which converts between weight and volume: `1 cup of flour`.
     Food(Box<Expr>, Food),
+    /// A count of a food: `1 stick of butter` weighs 113 g, `2 eggs` are 2 but weigh 100 g
+    /// in a conversion. `piece` is a word for the piece ("stick"), which makes it a weight.
+    Counted {
+        count: Box<Expr>,
+        grams: Number,
+        food: Food,
+        piece: bool,
+    },
     Call(Func, Vec<Expr>),
     /// A call of a function defined in a line: `area(3, 4)`.
     Apply(String, Vec<Expr>),
@@ -214,7 +222,8 @@ impl Expr {
                 | Expr::Food(e, _)
                 | Expr::InZone(e, _)
                 | Expr::Convert(e, _)
-                | Expr::Round(e, _) => e.contains(f),
+                | Expr::Round(e, _)
+                | Expr::Counted { count: e, .. } => e.contains(f),
                 Expr::RatesOn(e, date) => e.contains(f) || date.contains(f),
                 _ => false,
             }

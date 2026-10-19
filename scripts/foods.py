@@ -9,7 +9,8 @@ Usage: scripts/foods.py FoodData_Central_sr_legacy_food_csv_2018-04 > crates/rec
 Each food below names the SR Legacy food and the household measure to take its weight from
 ("cup, packed", "tbsp"...). Without a measure the cup is used, else the tablespoon, the
 teaspoon or the fluid ounce. Names are what people write in recipes, lowercase; the first
-word of a phrase decides nothing, longer names simply win.
+word of a phrase decides nothing, longer names simply win. A food can also be counted
+("1 stick of butter", "2 large eggs"): its pieces come from household measures of one.
 """
 
 import csv
@@ -23,7 +24,8 @@ PLAIN = ["cup", "cup (8 fl oz)", "cup 8 fl oz", "tbsp", "tsp", "fl oz"]
 # Foods with a weight that isn't measured: water is a gram per milliliter.
 FIXED = {"water, tap water": Decimal("236.5882365")}
 
-# names | SR Legacy description | measure
+# names | SR Legacy description | measure | pieces: what one weighs, by its household measure
+# ("stick = stick"; "each" is a food counted by itself, "small"... its sizes)
 FOODS = """
 flour, all-purpose flour, all purpose flour, plain flour, white flour, wheat flour | Wheat flour, white, all-purpose, enriched, bleached |
 bread flour, strong flour | Wheat flour, white, bread, enriched |
@@ -83,7 +85,7 @@ chocolate syrup | Beverages, chocolate syrup |
 caramel sauce | Toppings, butterscotch or caramel | tbsp
 grenadine | Syrups, grenadine |
 
-butter, salted butter, unsalted butter | Butter, without salt |
+butter, salted butter, unsalted butter | Butter, without salt | | stick = stick; pat = pat (1" sq, 1/3" high)
 whipped butter | Butter, whipped, with salt |
 ghee, clarified butter, butter oil | Butter oil, anhydrous |
 margarine | Margarine, regular, 80% fat, composite, stick, with salt |
@@ -157,9 +159,9 @@ soy milk, soymilk | Soymilk, original and vanilla, unfortified |
 almond milk | Beverages, almond milk, sweetened, vanilla flavor, ready-to-drink |
 rice milk | Beverages, rice milk, unsweetened | fl oz (approximate weight, 1 serving)
 
-eggs, egg, beaten eggs, beaten egg, whole eggs | Egg, whole, raw, fresh | cup (4.86 large eggs)
-egg whites, egg white | Egg, white, raw, fresh |
-egg yolks, egg yolk | Egg, yolk, raw, fresh |
+eggs, egg, beaten eggs, beaten egg, whole eggs | Egg, whole, raw, fresh | cup (4.86 large eggs) | each = large; small = small; medium = medium; large = large; extra large = extra large; jumbo = jumbo
+egg whites, egg white | Egg, white, raw, fresh | | each = large
+egg yolks, egg yolk | Egg, yolk, raw, fresh | | each = large
 egg powder, powdered egg, dried egg | Egg, whole, dried | cup, sifted
 egg white powder, dried egg white | Egg, white, dried, powder, stabilized, glucose reduced | cup, sifted
 
@@ -313,9 +315,9 @@ red currants | Currants, red and white, raw |
 black currants, blackcurrants | Currants, european black, raw |
 mango, mangoes, mangos, diced mango | Mangos, raw | cup pieces
 pineapple, pineapple chunks | Pineapple, raw, all varieties | cup, chunks
-apples, apple, chopped apples, chopped apple, diced apple | Apples, raw, with skin (Includes foods for USDA's Food Distribution Program) | cup, quartered or chopped
+apples, apple, chopped apples, chopped apple, diced apple | Apples, raw, with skin (Includes foods for USDA's Food Distribution Program) | cup, quartered or chopped | each = medium (3" dia); medium = medium (3" dia); small = small (2-3/4" dia); large = large (3-1/4" dia)
 sliced apples, apple slices | Apples, raw, with skin (Includes foods for USDA's Food Distribution Program) | cup slices
-bananas, banana, mashed bananas, mashed banana | Bananas, raw | cup, mashed
+bananas, banana, mashed bananas, mashed banana | Bananas, raw | cup, mashed | each = medium (7" to 7-7/8" long); medium = medium (7" to 7-7/8" long); small = small (6" to 6-7/8" long); large = large (8" to 8-7/8" long)
 sliced bananas, sliced banana | Bananas, raw | cup, sliced
 oranges, orange segments | Oranges, raw, all commercial varieties | cup, sections
 peaches, sliced peaches | Peaches, yellow, raw | cup slices
@@ -342,15 +344,15 @@ arugula, rocket | Arugula, raw | cup
 lettuce, shredded lettuce | Lettuce, iceberg (includes crisphead types), raw | cup shredded
 broccoli, broccoli florets | Broccoli, raw | cup chopped
 cauliflower | Cauliflower, raw | cup chopped (1/2" pieces)
-carrots, carrot, chopped carrots | Carrots, raw | cup chopped
+carrots, carrot, chopped carrots | Carrots, raw | cup chopped | each = medium; medium = medium; small = small (5-1/2" long); large = large (7-1/4" to 8-/1/2" long)
 grated carrots, grated carrot, shredded carrots | Carrots, raw | cup grated
 sliced carrots | Carrots, raw | cup strips or slices
-onions, onion, chopped onions, chopped onion, diced onion | Onions, raw | cup, chopped
+onions, onion, chopped onions, chopped onion, diced onion | Onions, raw | cup, chopped | each = medium (2-1/2" dia); medium = medium (2-1/2" dia); small = small; large = large
 sliced onions | Onions, raw | cup, sliced
-garlic, minced garlic | Garlic, raw |
+garlic, minced garlic | Garlic, raw | | clove = clove
 celery, chopped celery | Celery, raw | cup chopped
 bell peppers, bell pepper, sweet peppers | Peppers, sweet, red, raw | cup, chopped
-tomatoes, tomato, chopped tomatoes, diced tomatoes | Tomatoes, red, ripe, raw, year round average | cup, chopped or sliced
+tomatoes, tomato, chopped tomatoes, diced tomatoes | Tomatoes, red, ripe, raw, year round average | cup, chopped or sliced | each = medium whole (2-3/5" dia); medium = medium whole (2-3/5" dia); small = small whole (2-2/5" dia); large = large whole (3" dia)
 cherry tomatoes | Tomatoes, red, ripe, raw, year round average | cup cherry tomatoes
 canned tomatoes | Tomatoes, red, ripe, canned, packed in tomato juice |
 tomato sauce | Tomato products, canned, sauce |
@@ -370,7 +372,7 @@ brussels sprouts | Brussels sprouts, raw |
 okra | Okra, raw |
 celeriac, celery root | Celeriac, raw |
 eggplant, aubergine | Eggplant, raw | cup, cubes
-potatoes, diced potatoes | Potatoes, flesh and skin, raw | cup, diced
+potatoes, potato, diced potatoes | Potatoes, flesh and skin, raw | cup, diced | each = Potato medium (2-1/4" to 3-1/4" dia); medium = Potato medium (2-1/4" to 3-1/4" dia); small = Potato small (1-3/4" to 2-1/2" dia); large = Potato large (3" to 4-1/4" dia)
 mashed potatoes | Potatoes, mashed, home-prepared, whole milk and butter added |
 sweet potatoes, sweet potato | Sweet potato, raw, unprepared (Includes foods for USDA's Food Distribution Program) | cup, cubes
 sauerkraut | Sauerkraut, canned, solids and liquids | cup
@@ -522,31 +524,45 @@ def main(folder):
         )
     rows = {}
 
-    def add(names, grams):
+    def add(names, grams, pieces=""):
         for name in names.split(","):
             name = name.strip()
             if name in rows:
                 sys.exit(f"{name}: listed twice")
-            rows[name] = grams
+            rows[name] = (grams, pieces)
 
     for names, grams in FIXED.items():
         add(names, grams)
     for line in FOODS.strip().splitlines():
         if not line.strip():
             continue
-        names, description, measure = (part.strip() for part in line.split("|"))
+        names, description, measure, *pieces = (part.strip() for part in line.split("|"))
         if description not in portions:
             sys.exit(f"{description}: not in SR Legacy")
         grams = grams_per_cup(portions[description], measure)
         if grams is None:
             known = "; ".join(m for _, m, _ in portions[description])
             sys.exit(f"{description}: no measure {measure or 'cup'} (has {known})")
-        add(names, grams)
+        add(names, grams, piece_weights(portions[description], pieces[0] if pieces else ""))
 
-    print("# Grams in a US cup (236.5882365 mL) of foods, for weight to volume and back.")
+    print("# Grams in a US cup (236.5882365 mL) of foods, for weight to volume and back, and the")
+    print("# grams in a piece of those that are counted (\"each\" is one, \"stick\", \"large\"...).")
     print("# From USDA FoodData Central SR Legacy (public domain); built by scripts/foods.py.")
     for name in sorted(rows):
-        print(f"{name} = {number(rows[name])}")
+        grams, pieces = rows[name]
+        print(f"{name} = {number(grams)}" + (f"; {pieces}" if pieces else ""))
+
+
+def piece_weights(portions, spec):
+    """ "stick = stick; pat = pat" -> "stick 113, pat 5": grams in one of each measure."""
+    weights = []
+    for item in filter(None, (p.strip() for p in spec.split(";"))):
+        piece, modifier = (part.strip() for part in item.split("="))
+        found = [grams / amount for amount, m, grams in portions if m == modifier and amount > 0]
+        if not found:
+            sys.exit(f"no measure {modifier} (has {'; '.join(m for _, m, _ in portions)})")
+        weights.append(f"{piece} {number(found[0])}")
+    return ", ".join(weights)
 
 
 if __name__ == "__main__":

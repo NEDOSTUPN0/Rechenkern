@@ -119,7 +119,7 @@ impl<'a> Parser<'a> {
 
     /// Length in tokens of `phrase` if the tokens from `i` spell it; numbers
     /// count as written: "base 16", "iso 8601".
-    fn phrase_len_at(&self, i: usize, phrase: &str) -> Option<usize> {
+    pub(super) fn phrase_len_at(&self, i: usize, phrase: &str) -> Option<usize> {
         let (mut rest, mut n) = (phrase, 0);
         loop {
             let tok = self.toks.get(i + n)?;

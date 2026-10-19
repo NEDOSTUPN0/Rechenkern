@@ -429,9 +429,12 @@ fn is_moment(expr: &Expr) -> bool {
 fn is_lone_value(expr: &Expr) -> bool {
     match expr {
         Expr::Number(_) | Expr::Bool(_) | Expr::BareUnit(_) | Expr::Time(_) | Expr::Var(_) | Expr::Line(_) => true,
-        Expr::WithUnit(e, _) | Expr::Percent(e) | Expr::Neg(e) | Expr::Noted(e, _) | Expr::Food(e, _) => {
-            is_lone_value(e)
-        }
+        Expr::WithUnit(e, _)
+        | Expr::Percent(e)
+        | Expr::Neg(e)
+        | Expr::Noted(e, _)
+        | Expr::Food(e, _)
+        | Expr::Counted { count: e, .. } => is_lone_value(e),
         Expr::InZone(e, _) => matches!(**e, Expr::Time(_)),
         Expr::Composite(parts) => parts.iter().all(is_lone_value),
         _ => false,

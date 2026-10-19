@@ -439,6 +439,9 @@ pub static SKY: Phrases<Sky> = Phrases::new(&[
 /// Foods by name: "1 cup of flour", "density of butter".
 pub static FOODS: LazyLock<Phrases<Food>> = LazyLock::new(|| Phrases::new(foods::all()));
 
+/// Words for a piece of a food, as `units/foods.txt` names them: "1 stick of butter".
+pub const FOOD_PIECES: &[&str] = &["stick", "pat", "clove"];
+
 /// Words before a food that don't change what a cup of it weighs: "1 cup melted butter".
 pub const FOOD_STATES: &[&str] = &[
     "fresh", "melted", "softened", "cold", "warm", "hot", "chilled", "unsalted", "salted", "organic", "raw",

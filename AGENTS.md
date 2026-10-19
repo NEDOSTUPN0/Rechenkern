@@ -129,6 +129,10 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   (`Expr::Food`): `1 cup of flour`, `200 g sugar`, `1 cup melted butter`
   (`words::FOOD_STATES` don't change the weight). Food words stay comments
   everywhere else; a variable of the same name wins.
+- A number before a counted food is `Expr::Counted`: a piece word makes it a weight
+  (`1 stick of butter` = 113 g, `3 cloves of garlic`); a food counted by itself stays
+  a count unless converted (`2 eggs` = 2, `2 large eggs in grams` = 100 g). The pieces
+  are in `units/foods.txt` after the cup, from USDA household measures.
 
 ## Answers
 

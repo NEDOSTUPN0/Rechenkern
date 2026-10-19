@@ -142,6 +142,7 @@ fn definitions() -> Vec<Def> {
     let pi = Number::parse(PI).unwrap();
     let days = |n: &str| Number::parse(n).unwrap() * Number::from_i64(DAY);
     let inch = Number::parse("0.0254").unwrap();
+    let tsp = Number::parse("0.00000492892159375").unwrap();
     vec![
         // Time
         unit("s", "second", Dim::TIME, "1")
@@ -274,6 +275,10 @@ fn definitions() -> Vec<Def> {
         ]),
         unit("tbsp", "tablespoon", Dim::VOLUME, "0.00001478676478125").aliases(&["Tbsp", "tbs"]),
         unit("tsp", "teaspoon", Dim::VOLUME, "0.00000492892159375"),
+        // Kitchen measures of spices, as US cookbooks have them: an eighth, a sixteenth, a 32nd of a teaspoon.
+        unit("dash", "dash", Dim::VOLUME, "1").scale(tsp / Number::from_i64(8)).plural("dashes").spelled(),
+        unit("pinch", "pinch", Dim::VOLUME, "1").scale(tsp / Number::from_i64(16)).plural("pinches").spelled(),
+        unit("smidgen", "smidgen", Dim::VOLUME, "1").scale(tsp / Number::from_i64(32)).spelled(),
         // The old British spoons: 5/8 and 5/24 of an imperial fluid ounce.
         unit("imp tbsp", "imperial tablespoon", Dim::VOLUME, "0.0000177581640625")
             .aliases(&["uk tablespoon", "uk tablespoons"]),

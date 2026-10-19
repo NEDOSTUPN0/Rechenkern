@@ -168,6 +168,18 @@ impl Env<'_> {
                 Some(dim) => self.weigh_or_measure(self.eval(inner)?, *food, dim)?,
                 None => self.eval(inner)?,
             },
+            Expr::Counted { count, grams, food, piece } => {
+                let count = self.eval(count)?;
+                let to = self.food_as.get();
+                if to.is_none() && !piece {
+                    return Ok(count);
+                }
+                let weight = self.mul(count, Value::Quantity(Quantity::new(*grams, registry().get("g"))))?;
+                match to {
+                    Some(dim) => self.weigh_or_measure(weight, *food, dim)?,
+                    None => weight,
+                }
+            }
             // "halfway between Jan 1 and March 1": dates without a year are read as a range.
             Expr::Call(Func::Midpoint, args) if args.len() == 2 && args.iter().any(time::yearless) => {
                 let (a, b) = self.range_ends(&args[0], &args[1])?;

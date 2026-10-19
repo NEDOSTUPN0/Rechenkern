@@ -1280,6 +1280,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 danish kroners in EUR                    → €1.13
 2.5 danish krones                            → 2.50 DKK
 2.5 danish krones in EUR                     → €1.13
+2.5 dash                                     → 2.5 dashes
+2.5 dash in L                                → 0.001540287998 L
+2.5 dashes                                   → 2.5 dashes
+2.5 dashes in L                              → 0.001540287998 L
 2.5 day                                      → 2.5 days
 2.5 day in s                                 → 216,000 seconds
 2.5 days                                     → 2.5 days
@@ -3310,6 +3314,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 picoseconds in s                         → 2.5e-12 seconds
 2.5 picosecs                                 → 2.5 ps
 2.5 picosecs in s                            → 2.5e-12 seconds
+2.5 pinch                                    → 2.5 pinches
+2.5 pinch in L                               → 0.000770143999 L
+2.5 pinches                                  → 2.5 pinches
+2.5 pinches in L                             → 0.000770143999 L
 2.5 pint                                     → 2.5 pints
 2.5 pint in L                                → 1.182941183 L
 2.5 pints                                    → 2.5 pints
@@ -3610,6 +3618,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 singapore dollars in EUR                 → €1.13
 2.5 sle                                      → 2.50 SLE
 2.5 sle in EUR                               → €1.13
+2.5 smidgen                                  → 2.5 smidgens
+2.5 smidgen in L                             → 0.0003850719995 L
+2.5 smidgens                                 → 2.5 smidgens
+2.5 smidgens in L                            → 0.0003850719995 L
 2.5 sol                                      → 2.5 SOL
 2.5 sol in EUR                               → €1.13
 2.5 solana                                   → 2.5 SOL

@@ -1131,6 +1131,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g poppy seeds in cups                    → 0.7102272727 cup
 1 cup of porridge oats in grams              → 81 g
 100 g porridge oats in cups                  → 1.234567901 cup
+1 cup of potato in grams                     → 150 g
+100 g potato in cups                         → 0.6666666667 cup
 1 cup of potato flour in grams               → 160 g
 100 g potato flour in cups                   → 0.625 cup
 1 cup of potatoes in grams                   → 150 g
