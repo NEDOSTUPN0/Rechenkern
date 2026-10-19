@@ -799,6 +799,12 @@ fn currencies() {
 #[test]
 fn dates() {
     check(&[
+        ("year %", "72.76826484%"),
+        ("month %", "75.34722222%"),
+        ("week %", "37.20238095%"),
+        ("day %", "60.41666667%"),
+        ("quarter %", "91.96105072%"),
+        ("day percentage", "60.41666667%"),
         ("today", "Wed, 23 Sep 2026"),
         ("tomorrow", "Thu, 24 Sep 2026"),
         ("today + 3 weeks", "Wed, 14 Oct 2026"),

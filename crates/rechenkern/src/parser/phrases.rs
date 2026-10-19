@@ -1,7 +1,7 @@
 //! Whole-line phrases: percentage questions and proportions.
 
 use super::Parser;
-use crate::ast::{Direction, Expr, Format, Func, GrowthResult, Op, Target, TaxPart, TimeExpr};
+use crate::ast::{Direction, Expr, Format, Func, GrowthResult, Op, Target, TaxPart, TimeExpr, Which};
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -26,6 +26,9 @@ impl Parser<'_> {
             return Ok(Some(expr));
         }
         if let Some(expr) = self.annual_return()? {
+            return Ok(Some(expr));
+        }
+        if let Some(expr) = self.progress() {
             return Ok(Some(expr));
         }
         if let Some(expr) = self.exchange_rate()? {
@@ -469,6 +472,29 @@ impl Parser<'_> {
             Some(target) => Expr::Convert(rate.boxed(), target),
             None => rate,
         }))
+    }
+
+    /// "year %", "day percentage": how much of this period has gone by.
+    fn progress(&self) -> Option<Expr> {
+        if self.toks.len() != 2 || !self.matches_at(1, &["%"]) {
+            return None;
+        }
+        let (start, next) = match self.lower(0)?.as_str() {
+            "day" => (TimeExpr::Today(0), TimeExpr::Today(1)),
+            "week" | "month" | "year" => {
+                let unit = match self.lower(0)?.as_str() {
+                    "week" => jiff::Unit::Week,
+                    "month" => jiff::Unit::Month,
+                    _ => jiff::Unit::Year,
+                };
+                (TimeExpr::PeriodStart(unit, Which::This), TimeExpr::PeriodStart(unit, Which::Next))
+            }
+            "quarter" => (TimeExpr::Quarter(Which::This), TimeExpr::Quarter(Which::Next)),
+            _ => return None,
+        };
+        let since = |t: TimeExpr| Expr::binary(Op::Sub, Expr::Time(t), Expr::Time(start.clone()));
+        let part = Expr::binary(Op::Div, since(TimeExpr::Now), since(next));
+        Some(Self::formatted(part, Format::Percent))
     }
 
     /// "ppi of 5.5 inch at 1920x1080": the pixels per inch of a screen.
