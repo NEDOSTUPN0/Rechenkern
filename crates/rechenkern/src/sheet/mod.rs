@@ -10,7 +10,7 @@ pub use export::{HtmlColors, HtmlOptions, TextOptions, TextStyle};
 
 use crate::answer::{Answer, Parts};
 use crate::ast::{Expr, Func, LineRef};
-use crate::calculator::{Calculator, Effects, Names, Reads};
+use crate::calculator::{Assignment, Calculator, Effects, Names, Reads};
 use crate::config::Config;
 use crate::error::{Error, Result};
 use crate::eval::{Display, Env, Line, LineKind};
@@ -154,7 +154,7 @@ impl SheetLine {
 
     /// The variable the line sets: "rent" in `rent = $1,500`.
     pub fn variable(&self) -> Option<&str> {
-        self.effects.assigned.as_ref().map(|(name, _)| name.as_str())
+        self.effects.assigned.as_ref().map(|(name, ..)| name.as_str())
     }
 
     /// The line reads the clock, so its answer changes with time.
@@ -477,7 +477,7 @@ impl Sheet {
                     changed_lines.insert(i);
                 }
                 if !same_assignment(&old.assigned, &effects.assigned) {
-                    changed_names.extend(old.assigned.iter().chain(&effects.assigned).map(|(n, _)| n.clone()));
+                    changed_names.extend(old.assigned.iter().chain(&effects.assigned).map(|(n, ..)| n.clone()));
                     // Subtotals and statistics leave out lines that set a variable.
                     changed_lines.insert(i);
                 }
@@ -594,9 +594,9 @@ fn same_line(a: &Line, b: &Line) -> bool {
         }
 }
 
-fn same_assignment(a: &Option<(String, Value)>, b: &Option<(String, Value)>) -> bool {
+fn same_assignment(a: &Option<Assignment>, b: &Option<Assignment>) -> bool {
     match (a, b) {
-        (Some((n, a)), Some((m, b))) => n == m && a.same_as(b),
+        (Some((n, a, r)), Some((m, b, s))) => n == m && a.same_as(b) && r == s,
         (None, None) => true,
         _ => false,
     }

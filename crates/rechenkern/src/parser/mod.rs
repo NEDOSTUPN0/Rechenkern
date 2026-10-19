@@ -17,6 +17,7 @@ mod weather;
 pub(crate) mod words;
 
 use std::cell::{Cell, OnceCell};
+use std::collections::HashMap;
 use std::rc::Rc;
 
 use jiff::tz::TimeZone;
@@ -37,6 +38,10 @@ pub struct Scope<'a> {
     pub units: &'a CustomUnits,
     /// Set when the line writes a number with a scale: `5M`, `2 billion`.
     pub scaled: Cell<bool>,
+    /// The base of the last number written in one, or of a variable set in one: `0xff + 1`.
+    pub radix: Cell<Option<u32>>,
+    /// Variables set in a base other than ten: `mask = 0xFF`.
+    pub radixes: &'a HashMap<String, u32>,
     /// Finds places the engine doesn't know, if the host can.
     pub places: &'a dyn Fn(&str) -> Option<CustomPlace>,
     /// Weather phrases are read: off when looking for data in text.
@@ -184,7 +189,11 @@ impl<'a> Parser<'a> {
             Some(expr) => Ok(expr),
             // Words that make no calculation: pick one of the values in the text.
             None => self.expr_to_end().or_else(|e| match e.is_unclear() && in_text {
-                true => self.value_in_text().ok_or(e),
+                true => {
+                    // "0xff = 255": the number picked from the text keeps its own base.
+                    self.scope.radix.set(None);
+                    self.value_in_text().ok_or(e)
+                }
                 false => Err(e),
             }),
         }
@@ -292,6 +301,8 @@ impl<'a> Parser<'a> {
             is_function: &is_function,
             units: outer.units,
             scaled: Cell::new(false),
+            radix: Cell::new(None),
+            radixes: outer.radixes,
             places: outer.places,
             weather: outer.weather,
         };

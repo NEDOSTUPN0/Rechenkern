@@ -275,6 +275,12 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   lines with that tag (`sum #food`); `eval::Line::tags` keeps them.
 - Numbers in text: a clock time and a day with words between are that day at that
   time (`3pm cats June 5`), as in SoulverCore.
+- A plain whole answer is in the base of the last number written in one (`0xff + 0b11`
+  = `0b100000010`, `0xFF & 0x0F` = `0xF`), and so are variables set in one, as in
+  SoulverCore (`Scope::radix`, `Names::radixes`). Negative or fractional answers, units
+  and conversions (`in decimal`) are decimal.
+- `K` glued to a number is a thousand, as in SoulverCore (`3K` = 3,000); kelvins take a
+  space (`3 K`).
 - Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`.
   A written amount of/on/off another is its share, as in SoulverCore (`10 of 20`
   = 50%, `$5 off $20` = 25%; `half of 10` = 5); words around the operator or a

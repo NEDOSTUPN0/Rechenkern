@@ -247,7 +247,7 @@ impl Calculator {
         let is_function = |name: &str| names.functions.contains_key(name);
         let empty = CustomUnits::default();
         let places = |name: &str| self.find_place(name);
-        let scope = self.scope(&is_var, &is_function, &places, self.units().unwrap_or(&empty), true);
+        let scope = self.scope(&is_var, &is_function, &names.radixes, &places, self.units().unwrap_or(&empty), true);
         out.extend(parser::highlight::highlight(body, start + trimmed.len() - body.len(), &scope));
         out
     }
@@ -266,7 +266,8 @@ impl Calculator {
         let is_var = |name: &str| probe.names.vars.contains_key(name);
         let is_function = |name: &str| probe.names.functions.contains_key(name);
         let empty = CustomUnits::default();
-        let scope = probe.scope(&is_var, &is_function, &|_| None, probe.units().unwrap_or(&empty), true);
+        let scope =
+            probe.scope(&is_var, &is_function, &probe.names.radixes, &|_| None, probe.units().unwrap_or(&empty), true);
         let Ok(Some(Stmt::Expr(Expr::Custom { args, .. }))) = parser::parse(text, &scope) else { return None };
         let env = probe.env(&probe.names, &[]);
         args.iter()
@@ -285,7 +286,8 @@ impl Calculator {
         let is_var = |name: &str| self.names.vars.contains_key(name);
         let is_function = |name: &str| self.names.functions.contains_key(name);
         let empty = CustomUnits::default();
-        let scope = self.scope(&is_var, &is_function, &|_| None, self.units().unwrap_or(&empty), false);
+        let scope =
+            self.scope(&is_var, &is_function, &self.names.radixes, &|_| None, self.units().unwrap_or(&empty), false);
         parser::values_in(text, &scope)
     }
 
@@ -312,7 +314,7 @@ impl Calculator {
         let is_function = |name: &str| names.asks(asked, name, true);
         let empty = CustomUnits::default();
         let places = |name: &str| self.find_place(name);
-        let scope = self.scope(&is_var, &is_function, &places, self.units().unwrap_or(&empty), true);
+        let scope = self.scope(&is_var, &is_function, &names.radixes, &places, self.units().unwrap_or(&empty), true);
         match parser::parse(&line[..at], &scope) {
             Ok(None) => at + dash,
             _ => 0,
@@ -332,7 +334,7 @@ impl Calculator {
         let is_var = |name: &str| names.asks(asked, name, false);
         let is_function = |name: &str| names.asks(asked, name, true);
         let places = |name: &str| self.find_place(name);
-        let scope = self.scope(&is_var, &is_function, &places, self.units()?, true);
+        let scope = self.scope(&is_var, &is_function, &names.radixes, &places, self.units()?, true);
         let Some(stmt) = parser::parse(line, &scope)? else { return Ok(None) };
         // "area(w, h) = w * h" defines a function and has no answer.
         if let Stmt::Function { name, params, body } = stmt {
@@ -360,7 +362,7 @@ impl Calculator {
         env: &Env,
         scope: &Scope,
         vars: &HashMap<String, Value>,
-    ) -> Result<Option<(Answer, bool, Option<(String, Value)>)>> {
+    ) -> Result<Option<(Answer, bool, Option<Assignment>)>> {
         // Pick the branch of "if ... then ... else ...".
         let mut stmt = stmt;
         while let Stmt::If { cond, then, otherwise } = stmt {
@@ -398,11 +400,27 @@ impl Calculator {
         }
         let mut parts = parts;
         let (value, mut display) = env.convert_result(expr, value, display, &mut parts)?;
+        // "0xff + 1" = 0x100, but "0xff in decimal" = 255.
+        if let Some(radix) = scope.radix.get()
+            && matches!(display, Display::Auto)
+            && !matches!(expr, Expr::Convert(..))
+            && let Value::Quantity(q) = &value
+            && q.unit.is_none()
+            && q.number.is_integer()
+            && !q.number.is_negative()
+            && q.number.to_i128().is_some()
+        {
+            display = Display::Radix(radix);
+        }
         if scope.scaled.get() && matches!(display, Display::Auto) {
             display = Display::Scaled;
         }
+        let radix = match display {
+            Display::Radix(radix) => Some(radix),
+            _ => None,
+        };
         let answer = env.describe(expr, value, display, parts, &self.config);
-        let assigned = name.map(|name| (name, answer.reference()));
+        let assigned = name.map(|name| (name, answer.reference(), radix));
         Ok(Some((answer, is_total, assigned)))
     }
 
@@ -411,11 +429,22 @@ impl Calculator {
         &'a self,
         is_var: &'a dyn Fn(&str) -> bool,
         is_function: &'a dyn Fn(&str) -> bool,
+        radixes: &'a HashMap<String, u32>,
         places: &'a dyn Fn(&str) -> Option<CustomPlace>,
         units: &'a CustomUnits,
         weather: bool,
     ) -> Scope<'a> {
-        Scope { config: &self.config, is_var, is_function, units, scaled: Cell::new(false), places, weather }
+        Scope {
+            config: &self.config,
+            is_var,
+            is_function,
+            units,
+            scaled: Cell::new(false),
+            radix: Cell::new(None),
+            radixes,
+            places,
+            weather,
+        }
     }
 }
 
@@ -423,6 +452,8 @@ impl Calculator {
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Names {
     pub vars: HashMap<String, Value>,
+    /// Variables set in a base other than ten, whose answers stay in it.
+    pub radixes: HashMap<String, u32>,
     pub functions: HashMap<String, Arc<UserFunction>>,
 }
 
@@ -432,8 +463,12 @@ impl Names {
         if effects.clears_vars {
             *self = Names::default();
         }
-        if let Some((name, value)) = &effects.assigned {
+        if let Some((name, value, radix)) = &effects.assigned {
             self.vars.insert(name.clone(), value.clone());
+            match radix {
+                Some(radix) => self.radixes.insert(name.clone(), *radix),
+                None => self.radixes.remove(name),
+            };
         }
         if let Some((name, function)) = &effects.defined {
             self.functions.insert(name.clone(), function.clone());
@@ -449,12 +484,15 @@ impl Names {
     }
 }
 
+/// A variable set, and the base its answer was in: `mask = 0xFF`.
+pub(crate) type Assignment = (String, Value, Option<u32>);
+
 /// What a line did besides answering: what later lines see of it, and what it read.
 #[derive(Clone, Debug)]
 pub(crate) struct Effects {
     pub line: Line,
     /// A variable set: `rent = $1,500`.
-    pub assigned: Option<(String, Value)>,
+    pub assigned: Option<Assignment>,
     /// A function defined: `area(w, h) = w * h`.
     pub defined: Option<(String, Arc<UserFunction>)>,
     /// A divider that forgets the variables above it.

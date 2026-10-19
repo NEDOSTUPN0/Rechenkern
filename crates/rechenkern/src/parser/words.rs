@@ -146,7 +146,7 @@ pub fn scale_word(w: &str) -> Option<Number> {
 /// (`5к`, `3М`) and Chinese (`5千`, `3万`).
 pub fn suffix_multiplier(w: &str) -> Option<Number> {
     Some(match w {
-        "k" | "к" | "К" | "千" => Number::pow10(3),
+        "k" | "K" | "к" | "К" | "千" => Number::pow10(3),
         "万" => Number::pow10(4),
         "M" | "М" => Number::pow10(6),
         "亿" => Number::pow10(8),
@@ -159,7 +159,6 @@ pub fn suffix_multiplier(w: &str) -> Option<Number> {
 /// Extra suffixes after currency amounts: `$5K`, `$3m`, `$7B`, `$10t`.
 pub fn money_multiplier(w: &str) -> Option<Number> {
     Some(match w {
-        "K" => Number::pow10(3),
         "m" => Number::pow10(6),
         "B" | "b" => Number::pow10(9),
         "t" => Number::pow10(12),

@@ -89,6 +89,8 @@ fn arithmetic() {
         ("2^64", "18,446,744,073,709,551,616"),
         ("2^100", "1.2676506e30"),
         ("5k", "5k"),
+        ("3K + 2", "3,002"),
+        ("3 K in celsius", "-270.15 °C"),
         ("5к + 5К", "10,000"),
         ("2М", "2,000,000"),
         ("5千", "5,000"),
@@ -149,13 +151,18 @@ fn decimal_separators() {
 #[test]
 fn bases_and_bits() {
     check(&[
-        ("0xFF + 1", "256"),
-        ("0b101", "5"),
+        ("0xFF + 1", "0x100"),
+        ("0b101", "0b101"),
+        ("0xff + 0b11", "0b100000010"),
+        ("0xff / 2", "127.5"),
+        ("0xff - 0x100", "-1"),
+        ("0xff + 1 in decimal", "256"),
+        ("0xff km", "255 km"),
         ("255 in hex", "0xFF"),
         ("99 in binary", "0b1100011"),
         ("0x9F31 to decimal", "40,753"),
         ("0b1000101 to octal", "0o105"),
-        ("0xFF & 0x0F", "15"),
+        ("0xFF & 0x0F", "0xF"),
         ("1 << 4", "16"),
         ("5 xor 3", "6"),
         ("hex(99)", "0x63"),
@@ -1209,6 +1216,8 @@ fn sheets() {
     assert_eq!(sheet("monthly rent = $2,150\nmonthly rent / 4 people"), "$537.50");
     assert_eq!(sheet("discount = 10%\ncost = $550\ncost - discount"), "$495.00");
     assert_eq!(sheet("x = 5\nx += 3\nx * 2"), "16");
+    assert_eq!(sheet("mask = 0xFF\nmask + 1"), "0x100");
+    assert_eq!(sheet("mask = 0xFF\nmask = 255\nmask + 1"), "256");
     assert_eq!(sheet("x = 5\nx *= 2\nx"), "10");
     assert_eq!(sheet("x = 10\nx /= 4"), "2.5");
     assert_eq!(sheet("10\n20\nsum"), "30");

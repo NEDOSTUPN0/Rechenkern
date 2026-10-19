@@ -17,6 +17,16 @@ impl Parser<'_> {
                 if let Some(date) = self.year_first_date(*n) {
                     return Ok(date);
                 }
+                // "0xff + 1": the answer is in the base of the last number written in one.
+                let radix = match self.src[tok.start..].get(..2).map(str::to_ascii_lowercase).as_deref() {
+                    Some("0x") => Some(16),
+                    Some("0b") => Some(2),
+                    Some("0o") => Some(8),
+                    _ => None,
+                };
+                if radix.is_some() && tok.end > tok.start + 2 {
+                    self.scope.radix.set(radix);
+                }
                 self.number(*n)
             }
             Tok::Clock { h, m, s } => {
@@ -422,6 +432,9 @@ impl Parser<'_> {
 
         if let Some((name, n)) = self.var_at(i) {
             self.pos += n;
+            if let Some(&radix) = self.scope.radixes.get(&name) {
+                self.scope.radix.set(Some(radix));
+            }
             return Ok(Some(Expr::Var(name)));
         }
         if let Some(expr) = self.weather()? {

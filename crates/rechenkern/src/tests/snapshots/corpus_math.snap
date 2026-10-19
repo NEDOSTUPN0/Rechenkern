@@ -49,7 +49,7 @@ two thirds of 90                             → 60
 5 == 5.0                                     → true
 is 17 prime                                  → true
 255 in hex                                   → 0xFF
-0xff + 0b11                                  → 258
+0xff + 0b11                                  → 0b100000010
 1/3 as fraction                              → 1/3
 6 is to 60 as 8 is to what                   → 80
 5 > 3 and 2 > 1                              → true
@@ -64,7 +64,7 @@ mid point of 3 and 7                         → 5
 
 // Not like SoulverCore yet
 cot(1)                                       → <error: unknown function "cot">
-0xFF & 0x0F                                  → 15
+0xFF & 0x0F                                  → 0xF
 0.5 as frac                                  → 0.5
 clamp 26 5 25                                → 25
 fromunix(1559740303)                         → <error: unknown function "fromunix">
