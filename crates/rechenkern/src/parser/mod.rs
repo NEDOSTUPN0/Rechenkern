@@ -212,6 +212,12 @@ impl<'a> Parser<'a> {
                 _ => p.pos += 1,
             }
         }
+        // "3pm cats June 5": a clock time and a day around words are that day at that time.
+        if let [a, b] = values.as_slice()
+            && let Some(joined) = day_at_clock(a, b).or_else(|| day_at_clock(b, a))
+        {
+            return Some(joined);
+        }
         // The last one wins a tie.
         values.into_iter().max_by_key(text_weight)
     }
@@ -807,6 +813,17 @@ fn text_weight(expr: &Expr) -> u8 {
     } else {
         1
     }
+}
+
+/// A day at a clock time, when `clock` is a time of day alone and `day` a date.
+fn day_at_clock(clock: &Expr, day: &Expr) -> Option<Expr> {
+    let Expr::Time(TimeExpr::Clock { hour, minute, second, on: None }) = clock else { return None };
+    let Expr::Time(TimeExpr::Date { .. } | TimeExpr::Weekday(..) | TimeExpr::Holiday { .. } | TimeExpr::Today(_)) = day
+    else {
+        return None;
+    };
+    let on = Some(day.clone().boxed());
+    Some(Expr::Time(TimeExpr::Clock { hour: *hour, minute: *minute, second: *second, on }))
 }
 
 /// A smaller number before an amount, as in "5-10 kg"; money subtracts: "$10-20".

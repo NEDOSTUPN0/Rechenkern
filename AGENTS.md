@@ -267,7 +267,10 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   week three weeks from now.
 - `sum`, `total` and `average` take the lines above, up to a blank line, a
   heading or an earlier total; totals right after a total take the same lines
-  (`sum`, then `sum in EUR` or `average`).
+  (`sum`, then `sum in EUR` or `average`). A total with a hashtag takes only the
+  lines with that tag (`sum #food`); `eval::Line::tags` keeps them.
+- Numbers in text: a clock time and a day with words between are that day at that
+  time (`3pm cats June 5`), as in SoulverCore.
 - Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`.
   A written amount of/on/off another is its share, as in SoulverCore (`10 of 20`
   = 50%, `$5 off $20` = 25%; `half of 10` = 5); words around the operator or a

@@ -68,6 +68,8 @@ pub(crate) enum LineKind {
 pub(crate) struct Line {
     pub value: Option<Value>,
     pub kind: LineKind,
+    /// Hashtags in the line, lowercase: "food" in "Coffee $5 #food".
+    pub tags: Vec<String>,
 }
 
 /// Everything a calculation can see.
@@ -80,6 +82,8 @@ pub(crate) struct Env<'a> {
     /// How deep calls of those functions go, to stop endless recursion.
     pub depth: Cell<u32>,
     pub lines: &'a [Line],
+    /// Hashtags of the line being worked out: "sum #food" adds up the lines tagged so.
+    pub tags: Vec<String>,
     pub rates: &'a Rates,
     /// Inside a conversion to a weight or a volume, amounts of food become that kind:
     /// "1 cup of flour + 1 cup of sugar in grams".
@@ -324,6 +328,7 @@ impl Env<'_> {
             functions: self.functions,
             depth: Cell::new(self.depth.get() + 1),
             lines: self.lines,
+            tags: self.tags.clone(),
             rates: self.rates,
             food_as: Cell::new(None),
             rate_date: Cell::new(self.rate_date.get()),
@@ -572,12 +577,14 @@ impl Env<'_> {
                     - self.lines.iter().rev().take_while(|l| l.kind == LineKind::Total).count();
                 // The line that ends the block counts too: it may stop being a heading.
                 self.reads.borrow_mut().lines.extend(first.saturating_sub(1)..self.lines.len());
+                let tagged = |l: &&Line| self.tags.is_empty() || l.tags.iter().any(|t| self.tags.contains(t));
                 let mut block: Vec<Value> = self
                     .lines
                     .iter()
                     .rev()
                     .skip_while(|l| l.kind == LineKind::Total)
                     .take_while(|l| l.kind == LineKind::Value)
+                    .filter(tagged)
                     .filter_map(|l| l.value.clone())
                     .filter(|v| matches!(v, Value::Quantity(_) | Value::Percent(_) | Value::Duration(_)))
                     .collect();

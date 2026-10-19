@@ -161,8 +161,12 @@ impl Calculator {
     ) -> (Result<Option<Answer>>, Effects) {
         let trimmed = line.trim();
         let kind = line_kind(trimmed);
+        let tags = match kind == LineKind::Value && self.config.features.comments.hashtags {
+            true => hashtags(trimmed),
+            false => Vec::new(),
+        };
         let mut effects = Effects {
-            line: Line { value: None, kind },
+            line: Line { value: None, kind, tags: tags.clone() },
             assigned: None,
             defined: None,
             clears_vars: false,
@@ -184,6 +188,7 @@ impl Calculator {
                 effects.line = Line {
                     value: Some(answer.reference()),
                     kind: if is_total { LineKind::Total } else { LineKind::Value },
+                    tags,
                 };
                 answer
             })
@@ -205,6 +210,7 @@ impl Calculator {
             functions: &names.functions,
             depth: Default::default(),
             lines,
+            tags: Vec::new(),
             rates: &self.rates,
             food_as: Default::default(),
             rate_date: Default::default(),
@@ -333,7 +339,10 @@ impl Calculator {
             effects.defined = Some((name, Arc::new(function)));
             return Ok(None);
         }
-        let env = self.env(names, lines);
+        let mut env = self.env(names, lines);
+        if self.config.features.comments.hashtags {
+            env.tags = hashtags(line);
+        }
         let result = self.evaluate_stmt(&stmt, &env, &scope, &names.vars);
         let mut reads = env.reads.take();
         reads.clock = env.now.peek().is_some();
@@ -483,6 +492,24 @@ pub(crate) fn line_kind(trimmed: &str) -> LineKind {
     } else {
         LineKind::Value
     }
+}
+
+/// The hashtags in a line, lowercase: "food" in "Coffee $5 #food".
+fn hashtags(line: &str) -> Vec<String> {
+    if !line.contains('#') {
+        return Vec::new();
+    }
+    let mut tags = Vec::new();
+    let mut rest = line;
+    while let Some(at) = rest.find('#') {
+        let before = rest[..at].chars().next_back();
+        let tag: String = rest[at + 1..].chars().take_while(|c| c.is_alphanumeric() || *c == '_').collect();
+        if before.is_none_or(char::is_whitespace) && tag.chars().next().is_some_and(char::is_alphabetic) {
+            tags.push(tag.to_lowercase());
+        }
+        rest = &rest[at + 1..];
+    }
+    tags
 }
 
 /// Removes a leading "Label:" from a line.

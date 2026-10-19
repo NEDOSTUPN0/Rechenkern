@@ -108,7 +108,7 @@ impl SheetLine {
             answer: Ok(None),
             running: None,
             effects: Effects {
-                line: Line { value: None, kind: LineKind::Blank },
+                line: Line { value: None, kind: LineKind::Blank, tags: Vec::new() },
                 assigned: None,
                 defined: None,
                 clears_vars: false,
@@ -538,7 +538,7 @@ impl Sheet {
         }
         .map(|value| answer_of(&env, value));
         let effects = Effects {
-            line: Line { value: answer.as_ref().ok().map(Answer::reference), kind: LineKind::Total },
+            line: Line { value: answer.as_ref().ok().map(Answer::reference), kind: LineKind::Total, tags: Vec::new() },
             assigned: None,
             defined: None,
             clears_vars: false,
@@ -584,7 +584,9 @@ fn answer_of(env: &Env, value: Value) -> Answer {
 }
 
 fn same_line(a: &Line, b: &Line) -> bool {
+    // A tag decides which totals take the line.
     a.kind == b.kind
+        && a.tags == b.tags
         && match (&a.value, &b.value) {
             (Some(a), Some(b)) => a.same_as(b),
             (None, None) => true,

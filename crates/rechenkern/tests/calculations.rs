@@ -799,6 +799,8 @@ fn currencies() {
 #[test]
 fn dates() {
     check(&[
+        ("3pm cats June 5", "Fri, 5 Jun 2026 15:00"),
+        ("June 5 cats 3pm", "Fri, 5 Jun 2026 15:00"),
         ("3pm Nara in UTC", "06:00 UTC"),
         ("3pm Parma in UTC", "13:00 UTC"),
         ("3pm Queenstown in UTC", "03:00 UTC"),
@@ -1199,6 +1201,11 @@ fn comments_and_labels() {
 #[test]
 fn sheets() {
     assert_eq!(sheet("rent = $1500\nrent * 12"), "$18,000.00");
+    let tagged = "Coffee $5 #food\nBus $3 #transport\nLunch $12 #food\nTaxi $20 #transport\n";
+    assert_eq!(sheet(&format!("{tagged}sum #food")), "$17.00");
+    assert_eq!(sheet(&format!("{tagged}average #food")), "$8.50");
+    assert_eq!(sheet(&format!("{tagged}sum #food\ntotal #transport")), "$23.00");
+    assert_eq!(sheet(&format!("{tagged}sum")), "$40.00");
     assert_eq!(sheet("monthly rent = $2,150\nmonthly rent / 4 people"), "$537.50");
     assert_eq!(sheet("discount = 10%\ncost = $550\ncost - discount"), "$495.00");
     assert_eq!(sheet("x = 5\nx += 3\nx * 2"), "16");
