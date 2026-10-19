@@ -799,6 +799,14 @@ fn currencies() {
 #[test]
 fn dates() {
     check(&[
+        ("NYE", "Thu, 31 Dec 2026"),
+        ("Ramadan", "Sun, 7 Feb 2027"),
+        ("end of Ramadan 2026", "Thu, 19 Mar 2026"),
+        ("Ramadan 2030", "Fri, 4 Jan 2030"),
+        ("Hanukkah", "Fri, 4 Dec 2026"),
+        ("end of Hanukkah", "Sat, 12 Dec 2026"),
+        ("Chanukah 2027", "Fri, 24 Dec 2027"),
+        ("days until Hanukkah", "72 days"),
         ("3 days ago at 5pm", "Sun, 20 Sep 2026 17:00"),
         ("2 weeks ago at 9:30am", "Wed, 9 Sep 2026 09:30"),
         ("3 days from now at 5pm", "Sat, 26 Sep 2026 17:00"),

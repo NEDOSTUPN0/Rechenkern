@@ -79,5 +79,5 @@ year %                                       → 72.76826484%
 10 km in 50 minutes                          → 5:00 min/km
 midday                                       → <none>
 previous monday                              → <error: no previous answer>
-NYE                                          → <none>
-start of Ramadan                             → <error: unexpected "of">
+NYE                                          → Thu, 31 Dec 2026
+start of Ramadan                             → Sun, 7 Feb 2027

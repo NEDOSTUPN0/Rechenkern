@@ -451,6 +451,14 @@ pub enum Holiday {
     OrthodoxChristmas,
     ChineseNewYear,
     ChineseNewYearsEve,
+    /// The evening Ramadan begins, the day before its first fast, as in SoulverCore.
+    RamadanStart,
+    /// The last day of Ramadan.
+    RamadanEnd,
+    /// The evening Hanukkah begins, the day before 25 Kislev.
+    HanukkahStart,
+    /// The eighth day of Hanukkah.
+    HanukkahEnd,
 }
 
 /// What `in`, `to` or `as` converts into.

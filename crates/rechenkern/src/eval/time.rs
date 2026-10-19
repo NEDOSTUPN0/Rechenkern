@@ -249,10 +249,7 @@ impl Env<'_> {
                 let date = match year {
                     Some(y) => holiday_date(*holiday, *y)?,
                     // The next one, counting today.
-                    None => {
-                        let this_year = holiday_date(*holiday, today.year())?;
-                        if this_year >= today { this_year } else { holiday_date(*holiday, today.year() + 1)? }
-                    }
+                    None => holiday_near(*holiday, today, true)?,
                 };
                 self.date_moment(date)
             }
@@ -339,12 +336,7 @@ impl Env<'_> {
                 Ok(Value::Moment(self.date_moment(date)?))
             }
             Expr::Time(TimeExpr::Holiday { holiday, year: None }) => {
-                let step = if after { 1 } else { -1 };
-                let date = (0..=1)
-                    .map(|k| holiday_date(*holiday, anchor.year() + step * k))
-                    .find(|d| d.as_ref().is_ok_and(|&d| if after { d >= anchor } else { d <= anchor }))
-                    .unwrap_or_else(|| holiday_date(*holiday, anchor.year() + step))?;
-                Ok(Value::Moment(self.date_moment(date)?))
+                Ok(Value::Moment(self.date_moment(holiday_near(*holiday, anchor, after)?)?))
             }
             Expr::Binary(Op::Add, date, by) => self.add(self.date_near(date, anchor, after)?, self.eval(by)?),
             Expr::Period(first, _) => self.date_near(first, anchor, after),
@@ -600,9 +592,40 @@ fn day_in_week(day: Weekday, week_start: Weekday) -> i64 {
     (day.to_monday_zero_offset() as i64 - week_start.to_monday_zero_offset() as i64).rem_euclid(7)
 }
 
+/// The holiday on or after `anchor`, or on or before it.
+fn holiday_near(holiday: Holiday, anchor: Date, after: bool) -> Result<Date> {
+    let years = [anchor.year() - 1, anchor.year(), anchor.year() + 1];
+    let dates = years.iter().filter_map(|&y| holiday_dates(holiday, y).ok()).flatten();
+    let found = match after {
+        true => dates.filter(|&d| d >= anchor).min(),
+        false => dates.filter(|&d| d <= anchor).max(),
+    };
+    match found {
+        Some(date) => Ok(date),
+        None => holiday_date(holiday, anchor.year()),
+    }
+}
+
+/// The holiday in `year`; the first one if it comes twice, as Ramadan can.
 fn holiday_date(holiday: Holiday, year: i16) -> Result<Date> {
+    match holiday_dates(holiday, year)?.first() {
+        Some(&date) => Ok(date),
+        None => bail!("no such holiday in {year}"),
+    }
+}
+
+/// Every day the holiday falls on in `year`.
+fn holiday_dates(holiday: Holiday, year: i16) -> Result<Vec<Date>> {
+    let ramadan = |end: bool| -> Result<Vec<Date>> {
+        let days_in = ramadan_months(year)?.into_iter().map(|(first, length)| match end {
+            true => first.checked_add(days(length - 1)),
+            false => first.checked_sub(days(1)),
+        });
+        let dates = days_in.collect::<std::result::Result<Vec<_>, _>>()?;
+        Ok(dates.into_iter().filter(|d| d.year() == year).collect())
+    };
     let d = |m: i8, d: i8| Date::new(year, m, d);
-    Ok(match holiday {
+    Ok(vec![match holiday {
         Holiday::NewYear => d(1, 1)?,
         Holiday::NewYearsEve => d(12, 31)?,
         Holiday::Valentines => d(2, 14)?,
@@ -621,7 +644,67 @@ fn holiday_date(holiday: Holiday, year: i16) -> Result<Date> {
         Holiday::BlackFriday => d(11, 1)?.nth_weekday_of_month(4, Weekday::Thursday)?.checked_add(days(1))?,
         Holiday::ChineseNewYear => chinese_new_year(year)?,
         Holiday::ChineseNewYearsEve => chinese_new_year(year)?.checked_sub(days(1))?,
-    })
+        Holiday::RamadanStart => return ramadan(false),
+        Holiday::RamadanEnd => return ramadan(true),
+        Holiday::HanukkahStart => kislev_25(year)?.checked_sub(days(1))?,
+        Holiday::HanukkahEnd => kislev_25(year)?.checked_add(days(7))?,
+    }])
+}
+
+/// The first days of the months of Ramadan near `year`, and their lengths, from the
+/// Umm al-Qura calendar (`data/ramadan.txt`).
+fn ramadan_months(year: i16) -> Result<Vec<(Date, i64)>> {
+    static TABLE: std::sync::LazyLock<Vec<(Date, i64)>> = std::sync::LazyLock::new(|| {
+        include_str!("../data/ramadan.txt")
+            .lines()
+            .filter(|l| !l.starts_with('#'))
+            .filter_map(|l| {
+                let (date, length) = l.split_once(' ')?;
+                Some((date.parse().ok()?, length.parse().ok()?))
+            })
+            .collect()
+    });
+    let near: Vec<_> = TABLE.iter().copied().filter(|(d, _)| (d.year() - year).abs() <= 1).collect();
+    if near.is_empty() {
+        let (first, last) = (TABLE[0].0.year(), TABLE[TABLE.len() - 1].0.year());
+        bail!("Ramadan is only known from {first} to {last}");
+    }
+    Ok(near)
+}
+
+/// 25 Kislev, the first day of Hanukkah, in the Hebrew year that ends in the autumn of
+/// the next Gregorian year (Calendrical Calculations, Reingold and Dershowitz).
+fn kislev_25(year: i16) -> Result<Date> {
+    let hebrew_year = year as i64 + 3761;
+    let new_year = hebrew_new_year(hebrew_year);
+    let year_length = hebrew_new_year(hebrew_year + 1) - new_year;
+    // Heshvan has 30 days in a complete year (355 or 385 days), Kislev 29 in a deficient one.
+    let heshvan = if year_length % 10 == 5 { 30 } else { 29 };
+    let rata_die = new_year + 30 + heshvan + 24;
+    // Day 719,163 of the common era is January 1, 1970.
+    Ok(Date::new(1970, 1, 1)?.checked_add(days(rata_die - 719_163))?)
+}
+
+/// The day (counted from January 1 of year 1) that the Hebrew year begins on, 1 Tishri.
+fn hebrew_new_year(year: i64) -> i64 {
+    const EPOCH: i64 = -1_373_427;
+    let elapsed = |y: i64| {
+        let months = (235 * y - 234).div_euclid(19);
+        let parts = 12_084 + 13_753 * months;
+        let day = 29 * months + parts.div_euclid(25_920);
+        // The new year never falls on a Sunday, Wednesday or Friday.
+        if (3 * (day + 1)).rem_euclid(7) < 3 { day + 1 } else { day }
+    };
+    let (before, this, next) = (elapsed(year - 1), elapsed(year), elapsed(year + 1));
+    // Years must be 353 to 356 or 383 to 386 days long.
+    let correction = if next - this == 356 {
+        2
+    } else if this - before == 382 {
+        1
+    } else {
+        0
+    };
+    EPOCH + this + correction
 }
 
 /// Days after January 21 that Chinese New Year falls on, from 1900 to 2100.
@@ -685,6 +768,23 @@ mod tests {
         assert_eq!(easter(2024).unwrap(), Date::new(2024, 3, 31).unwrap());
         assert_eq!(easter(2027).unwrap(), Date::new(2027, 3, 28).unwrap());
         assert_eq!(orthodox_easter(2024).unwrap(), Date::new(2024, 5, 5).unwrap());
+    }
+
+    #[test]
+    fn hanukkah_dates() {
+        assert_eq!(kislev_25(2026).unwrap(), Date::new(2026, 12, 5).unwrap());
+        assert_eq!(kislev_25(2027).unwrap(), Date::new(2027, 12, 25).unwrap());
+        assert_eq!(kislev_25(2030).unwrap(), Date::new(2030, 12, 21).unwrap());
+        assert_eq!(kislev_25(2000).unwrap(), Date::new(2000, 12, 22).unwrap());
+    }
+
+    #[test]
+    fn ramadan_dates() {
+        let start = |y| holiday_dates(Holiday::RamadanStart, y).unwrap();
+        assert_eq!(start(2027), [Date::new(2027, 2, 7).unwrap()]);
+        assert_eq!(start(2030), [Date::new(2030, 1, 4).unwrap(), Date::new(2030, 12, 25).unwrap()]);
+        assert_eq!(holiday_date(Holiday::RamadanEnd, 2027).unwrap(), Date::new(2027, 3, 8).unwrap());
+        assert!(ramadan_months(2100).is_err());
     }
 
     #[test]
