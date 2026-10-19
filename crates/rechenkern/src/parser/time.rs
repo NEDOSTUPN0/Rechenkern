@@ -292,6 +292,18 @@ impl Parser<'_> {
             "in" if self.operand_follows(1) => {
                 // "in 3 days"
                 self.pos += 1;
+                // "in 3 days at 5pm": a clock time on that day.
+                let mut p = self.clone();
+                if let Ok(amount) = p.unary()
+                    && let today @ Expr::Time(TimeExpr::Today(_)) = now_for(&amount)
+                {
+                    let at = p.pos;
+                    let date = p.date_tail(Expr::binary(Op::Add, today, amount))?;
+                    if p.pos > at {
+                        *self = p;
+                        return Ok(Some(date));
+                    }
+                }
                 let amount = self.multiplicative()?;
                 // "in Q3" is the quarter itself.
                 if let Expr::Period(..) = amount {

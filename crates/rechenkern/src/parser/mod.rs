@@ -432,10 +432,21 @@ impl<'a> Parser<'a> {
                 bail!("expected a length of time before \"{}\"", self.src[tok.start..tok.end].trim());
             }
             self.pos += len;
-            let mut rhs = self.multiplicative()?;
-            // "4 days from now" is a date, not a clock time.
-            if swap && matches!(rhs, Expr::Time(TimeExpr::Now)) {
+            // "now" alone: "3 days from now at 5pm" isn't "now at 5pm".
+            let mut rhs = if swap && self.words_at(self.pos, &["now"]) {
+                self.pos += 1;
+                Expr::Time(TimeExpr::Now)
+            } else {
+                self.multiplicative()?
+            };
+            // "4 days from now" is a date, not a clock time, and may have one: "at 5pm".
+            let from_today = swap && matches!(rhs, Expr::Time(TimeExpr::Now));
+            if from_today {
                 rhs = time::now_for(&lhs);
+            }
+            if from_today && matches!(rhs, Expr::Time(TimeExpr::Today(_))) {
+                lhs = self.date_tail(Expr::binary(op, rhs, lhs))?;
+                continue;
             }
             // "5-10 kg", "20-30 minutes in hours": a range of amounts, when nothing else follows.
             if tok.is_sym("-") && is_amount_range(&lhs, &rhs) && self.clone().value_ends() {
@@ -762,7 +773,10 @@ impl<'a> Parser<'a> {
                     }
                     "ago" | "later" => {
                         self.pos += 1;
-                        from_now(expr, w.eq_ignore_ascii_case("later"))
+                        let days = matches!(time::now_for(&expr), Expr::Time(TimeExpr::Today(_)));
+                        let moved = from_now(expr, w.eq_ignore_ascii_case("later"));
+                        // "3 days ago at 5pm"
+                        if days { self.date_tail(moved)? } else { moved }
                     }
                     // "3 days in the past", "2 weeks in the future"
                     "in" if ["past", "future"].iter().any(|w| self.words_at(self.pos + 1, &["the", w])) => {

@@ -74,7 +74,7 @@ days since Dec 25                            → 272 days
 // Not supported yet
 days until March                             → 159 days
 year %                                       → 72.76826484%
-3 days ago at 5pm                            → <error: can't multiply a date by a date>
+3 days ago at 5pm                            → Sun, 20 Sep 2026 17:00
 3.5 hours as hms                             → 03:30:00
 10 km in 50 minutes                          → 5:00 min/km
 midday                                       → <none>

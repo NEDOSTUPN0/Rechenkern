@@ -799,6 +799,11 @@ fn currencies() {
 #[test]
 fn dates() {
     check(&[
+        ("3 days ago at 5pm", "Sun, 20 Sep 2026 17:00"),
+        ("2 weeks ago at 9:30am", "Wed, 9 Sep 2026 09:30"),
+        ("3 days from now at 5pm", "Sat, 26 Sep 2026 17:00"),
+        ("3 days later at noon", "Sat, 26 Sep 2026 12:00"),
+        ("in 3 days at 5pm", "Sat, 26 Sep 2026 17:00"),
         ("days in March 3 to May 30", "88 days"),
         ("days in March 3 - May 30", "88 days"),
         ("weeks in March 3 to May 30", "12.57142857 weeks"),
