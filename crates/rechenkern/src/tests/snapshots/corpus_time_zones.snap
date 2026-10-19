@@ -17,13 +17,13 @@ sunrise in Tokyo                             → Thu, 24 Sep 2026 05:30 JST
 sunrise in Texas                             → <error: don't know where exactly "Texas" is: name a city>
 
 // Places that need a closer look
-time in Washington                           → 11:30 PDT
-time in San Juan                             → 15:30 UTC-3
-time in Pasadena                             → 13:30 CDT
-time in Nara                                 → 18:30 GMT
-time in Parma                                → 23:30 UTC+5
-time in Queenstown                           → 20:30 SAST
-time in San Sebastián                        → 12:30 UTC-6
+time in Washington                           → 14:30 EDT
+time in San Juan                             → 14:30 UTC-4
+time in Pasadena                             → 11:30 PDT
+time in Nara                                 → Thu, 24 Sep 2026 03:30 JST
+time in Parma                                → 20:30 CEST
+time in Queenstown                           → Thu, 24 Sep 2026 06:30 NZST
+time in San Sebastián                        → 20:30 CEST
 
 // Times elsewhere
 time in Tokyo when 9am in London             → 17:00 JST

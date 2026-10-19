@@ -799,6 +799,14 @@ fn currencies() {
 #[test]
 fn dates() {
     check(&[
+        ("3pm Nara in UTC", "06:00 UTC"),
+        ("3pm Parma in UTC", "13:00 UTC"),
+        ("3pm Queenstown in UTC", "03:00 UTC"),
+        ("3pm San Sebastián in UTC", "13:00 UTC"),
+        ("3pm Washington in UTC", "19:00 UTC"),
+        ("3pm Washington state in UTC", "22:00 UTC"),
+        ("3pm San Juan in UTC", "19:00 UTC"),
+        ("3pm Pasadena in UTC", "22:00 UTC"),
         ("3pm EAT in UTC", "12:00 UTC"),
         ("3pm CAT in UTC", "13:00 UTC"),
         ("3pm WAT in UTC", "14:00 UTC"),

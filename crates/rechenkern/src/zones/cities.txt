@@ -365,6 +365,7 @@ acilia castel fusano ostia antica	Europe/Rome	41.76	12.33
 acireale	Europe/Rome	37.61	15.17
 acmer	Asia/Kolkata	26.45	74.64
 acocks green	Europe/London	52.45	-1.82
+aconibe	Africa/Malabo	1.30	10.94
 acopiara	America/Fortaleza	-6.10	-39.45
 acornhoek	Africa/Johannesburg	-24.59	31.09
 acquaviva delle fonti	Europe/Rome	40.90	16.84
@@ -547,6 +548,7 @@ aeussere neustadt	Europe/Berlin	51.07	13.76
 af'abet	Africa/Asmara	16.19	38.69
 afak	Asia/Baghdad	32.06	45.25
 affery	Africa/Abidjan	6.32	-3.95
+affoltern	Europe/Zurich	47.42	8.51
 affton	America/Chicago	38.55	-90.33
 afgooye	Africa/Mogadishu	2.14	45.12
 afif	Asia/Riyadh	23.91	42.92
@@ -704,6 +706,7 @@ agía varvára	Europe/Athens	37.99	23.66
 agüimes	Atlantic/Canary	27.91	-15.45
 ah lel	Asia/Yangon	16.92	96.06
 ahabaja	Asia/Tehran	31.32	48.68
+ahal	Asia/Ashgabat	38.22	58.02
 aham'madabad	Asia/Kolkata	23.03	72.59
 ahamadabad	Asia/Kolkata	23.03	72.59
 ahamadabada	Asia/Kolkata	23.03	72.59
@@ -1229,7 +1232,7 @@ al laziqiyah	Asia/Damascus	35.53	35.79
 al lith	Asia/Riyadh	20.15	40.27
 al līth	Asia/Riyadh	20.15	40.27
 al madina	Asia/Riyadh	24.47	39.61
-al madinah	Asia/Riyadh	24.47	39.61
+al madinah	Asia/Baghdad	30.96	47.27
 al madinah al munawwarah	Asia/Riyadh	24.47	39.61
 al madīnah	Asia/Baghdad	30.96	47.27
 al mahallah al kubra	Africa/Cairo	30.97	31.17
@@ -1366,6 +1369,7 @@ al wasitah	Africa/Cairo	29.34	31.21
 al wasl	Asia/Dubai	25.20	55.26
 al wāsiţah	Africa/Cairo	29.34	31.21
 al xudayda	Asia/Aden	14.80	42.95
+al yahudiya	Asia/Tehran	32.65	51.67
 al yamun	Asia/Hebron	32.49	35.23
 al yarmuk	Asia/Damascus	33.47	36.30
 al yarmūk	Asia/Damascus	33.47	36.30
@@ -1490,6 +1494,7 @@ albertslund	Europe/Copenhagen	55.66	12.36
 albertville	America/Chicago	34.27	-86.21
 albi	Europe/Paris	43.93	2.15
 albignasego	Europe/Rome	45.35	11.87
+albisrieden	Europe/Zurich	47.37	8.49
 albjukuehrokju	America/Denver	35.08	-106.65
 albla	Asia/Jerusalem	31.77	35.22
 alblasserdam	Europe/Amsterdam	51.87	4.66
@@ -1660,6 +1665,7 @@ ali mendjeli	Africa/Algiers	36.25	6.57
 ali sabih	Africa/Djibouti	11.16	42.71
 ali shahr	Asia/Tehran	28.93	51.07
 aliaga	Europe/Istanbul	38.80	26.97
+aliamanu	Pacific/Honolulu	21.36	-157.92
 aliamanu / salt lakes / foster village	Pacific/Honolulu	21.36	-157.92
 aliamanu salt lakes foster village	Pacific/Honolulu	21.36	-157.92
 alianca	America/Recife	-7.60	-35.23
@@ -1861,6 +1867,7 @@ altotonga	America/Mexico_City	19.77	-97.25
 altrincham	Europe/London	53.39	-2.35
 altstadt nord	Europe/Berlin	50.94	6.96
 altstadt sud	Europe/Berlin	50.93	6.96
+altstetten	Europe/Zurich	47.39	8.49
 altuf'yevskiy	Europe/Moscow	55.88	37.58
 altuf’yevskiy	Europe/Moscow	55.88	37.58
 altus	America/Chicago	34.64	-99.33
@@ -1956,7 +1963,7 @@ amarante	America/Fortaleza	-6.24	-42.85
 amarante do maranhao	America/Fortaleza	-5.57	-46.74
 amarante do maranhão	America/Fortaleza	-5.57	-46.74
 amarapura	Asia/Yangon	21.91	96.05
-amaravati	Asia/Kolkata	20.93	77.75
+amaravati	Asia/Kolkata	16.51	80.52
 amargadhi	Asia/Kathmandu	29.30	80.58
 amargaḍhi̇̄	Asia/Kathmandu	29.30	80.58
 amargosa	America/Bahia	-13.03	-39.60
@@ -2358,7 +2365,7 @@ andizhon	Asia/Tashkent	40.78	72.35
 andizjan	Asia/Tashkent	40.78	72.35
 andkhoy	Asia/Kabul	36.95	65.12
 andol	Asia/Kolkata	17.81	78.08
-andong	Asia/Shanghai	40.13	124.39
+andong	Asia/Seoul	36.57	128.72
 andorinha	America/Bahia	-10.34	-39.84
 andorra la vella	Europe/Andorra	42.51	1.52
 andover	Europe/London	51.21	-1.49
@@ -2420,6 +2427,7 @@ anhanguera	America/Sao_Paulo	-23.43	-46.79
 anhua	Asia/Shanghai	33.51	105.05
 anicuns	America/Sao_Paulo	-16.46	-49.96
 anie	Africa/Lome	7.75	1.20
+anisoc	Africa/Malabo	1.87	10.77
 anié	Africa/Lome	7.75	1.20
 anjad	Asia/Kolkata	22.04	75.06
 anjala	Europe/Helsinki	60.68	26.83
@@ -2502,7 +2510,7 @@ anqrt	Europe/Istanbul	39.92	32.85
 anrananarivea	Indian/Antananarivo	-18.91	47.54
 ans	Europe/Brussels	50.66	5.52
 ansan	Asia/Seoul	37.32	126.82
-ansan si	Asia/Shanghai	41.12	122.99
+ansan si	Asia/Seoul	37.32	126.82
 ansanas	Asia/Shanghai	41.12	122.99
 ansano	Asia/Shanghai	41.12	122.99
 ansansi	Asia/Seoul	37.32	126.82
@@ -3054,6 +3062,7 @@ arraial do cabo	America/Sao_Paulo	-22.97	-42.03
 arraijan	America/Panama	8.94	-79.64
 arraiján	America/Panama	8.94	-79.64
 arras	Europe/Paris	50.29	2.78
+arrasate	Europe/Madrid	43.06	-2.49
 arrasate / mondragon	Europe/Madrid	43.06	-2.49
 arrasate / mondragón	Europe/Madrid	43.06	-2.49
 arrasate mondragon	Europe/Madrid	43.06	-2.49
@@ -3657,6 +3666,7 @@ aurora do para	America/Belem	-2.13	-47.56
 aurora do pará	America/Belem	-2.13	-47.56
 aurād	Asia/Kolkata	18.25	77.42
 ausa	Asia/Kolkata	18.25	76.50
+aussersihl	Europe/Zurich	47.38	8.52
 austin	America/Chicago	30.27	-97.74
 austino	America/Chicago	30.27	-97.74
 austinopolis	America/Chicago	30.27	-97.74
@@ -3936,6 +3946,7 @@ aïn taya	Africa/Algiers	36.79	3.29
 aïn temouchent	Africa/Algiers	35.30	-1.14
 aïn touta	Africa/Algiers	35.38	5.90
 añatuya	America/Argentina/Cordoba	-28.46	-62.83
+añisoc	Africa/Malabo	1.87	10.77
 ağdaş	Asia/Baku	40.65	47.47
 ağrı	Europe/Istanbul	39.71	43.04
 aībak	Asia/Kabul	36.26	68.02
@@ -4074,6 +4085,7 @@ bad driburg	Europe/Berlin	51.73	9.02
 bad duerkheim	Europe/Berlin	49.46	8.17
 bad dürkheim	Europe/Berlin	49.46	8.17
 bad essen	Europe/Berlin	52.32	8.33
+bad friedrichshall	Europe/Berlin	49.23	9.22
 bad harzburg	Europe/Berlin	51.88	10.56
 bad hersfeld	Europe/Berlin	50.87	9.71
 bad homburg vor der hoehe	Europe/Berlin	50.23	8.62
@@ -4299,7 +4311,7 @@ baia mare	Europe/Bucharest	47.66	23.57
 baia sprie	Europe/Bucharest	47.66	23.69
 baiao	America/Belem	-2.79	-49.67
 baibli	Africa/Abidjan	7.18	-7.30
-baicheng	Asia/Shanghai	23.89	106.63
+baicheng	Asia/Shanghai	45.62	122.83
 baicheng jiedao	Asia/Shanghai	23.89	106.63
 baichihe	Asia/Shanghai	36.12	119.53
 baicoi	Europe/Bucharest	45.03	25.85
@@ -4947,7 +4959,7 @@ bao shan shi	Asia/Shanghai	25.12	99.16
 bao son	Asia/Shanghai	25.12	99.16
 bao tou	Asia/Shanghai	40.65	109.84
 bao tou shi	Asia/Shanghai	40.65	109.84
-bao'an	Asia/Shanghai	22.55	114.07
+bao'an	Asia/Shanghai	22.55	113.88
 bao'an centre	Asia/Shanghai	22.58	113.92
 baoan	Asia/Shanghai	22.55	113.88
 baoan'	Asia/Shanghai	22.55	113.88
@@ -5383,7 +5395,7 @@ batken	Asia/Bishkek	40.06	70.82
 batley	Europe/London	53.70	-1.63
 batm	Asia/Jakarta	1.15	104.02
 batman	Europe/Istanbul	37.89	41.13
-batna	Asia/Kolkata	25.59	85.14
+batna	Africa/Algiers	35.56	6.17
 bato	Asia/Manila	13.35	123.37
 batoeng panggol	Asia/Makassar	-0.49	117.15
 baton rouge	America/Chicago	30.44	-91.19
@@ -5697,6 +5709,7 @@ bek'ojī	Africa/Addis_Ababa	7.53	39.25
 bekalta	Africa/Tunis	35.62	10.99
 bekasi	Asia/Jakarta	-6.23	106.99
 bekasis	Asia/Jakarta	-6.23	106.99
+bekasmegyer	Europe/Budapest	47.60	19.04
 bekaso	Asia/Jakarta	-6.23	106.99
 bekes	Europe/Budapest	46.77	21.13
 bekescsaba	Europe/Budapest	46.68	21.10
@@ -6725,6 +6738,7 @@ bisyakapateunam	Asia/Kolkata	17.68	83.20
 bisyukekeu	Asia/Bishkek	42.87	74.59
 biszkek	Asia/Bishkek	42.87	74.59
 bisālgarh	Asia/Kolkata	23.68	91.28
+bit hamban	Asia/Tehran	34.31	47.06
 bitam	Africa/Libreville	2.08	11.50
 bitkine	Africa/Ndjamena	11.98	18.21
 bitlis	Europe/Istanbul	38.40	42.11
@@ -7562,7 +7576,7 @@ brickworks estate	Asia/Singapore	1.29	103.81
 bridgend	Europe/London	51.51	-3.58
 bridgeport	America/New_York	41.18	-73.19
 bridgeton	America/New_York	39.43	-75.23
-bridgetown	America/Los_Angeles	45.52	-122.68
+bridgetown	America/Barbados	13.11	-59.62
 bridgeview	America/Chicago	41.75	-87.80
 bridgewater	America/New_York	40.60	-74.65
 bridgwater	Europe/London	51.13	-3.00
@@ -7803,6 +7817,7 @@ bu yi nuo si ai li si	America/Argentina/Buenos_Aires	-34.61	-58.38
 bu'aale	Africa/Mogadishu	1.08	42.58
 bu'ake	Africa/Abidjan	7.69	-5.03
 bu'enosa a'iresa	America/Argentina/Buenos_Aires	-34.61	-58.38
+bu'in zahra	Asia/Tehran	35.77	50.06
 bua yai	Asia/Bangkok	15.59	102.43
 buake	Africa/Abidjan	7.69	-5.03
 buan	Asia/Seoul	35.73	126.73
@@ -8111,6 +8126,7 @@ bundibugyo	Africa/Kampala	0.71	30.06
 bundoora	Australia/Melbourne	-37.70	145.06
 bundu	Asia/Kolkata	23.16	85.59
 bungku	Asia/Makassar	-2.55	121.97
+bungo takada	Asia/Tokyo	33.56	131.45
 bungo takada shi	Asia/Tokyo	33.56	131.45
 bungoma	Africa/Nairobi	0.56	34.56
 bungu	Africa/Dar_es_Salaam	-7.63	39.06
@@ -8472,6 +8488,7 @@ béguédo	Africa/Ouagadougou	11.78	-0.73
 béja	Africa/Tunis	36.73	9.18
 béjar	Europe/Madrid	40.39	-5.76
 béjaïa	Africa/Algiers	36.76	5.08
+békásmegyer	Europe/Budapest	47.60	19.04
 békés	Europe/Budapest	46.77	21.13
 békéscsaba	Europe/Budapest	46.68	21.10
 bélabo	Africa/Douala	4.93	13.30
@@ -8583,6 +8600,7 @@ bīrpur	Asia/Kolkata	26.51	87.01
 bīsalpur	Asia/Kolkata	28.29	79.80
 bīshah	Asia/Riyadh	20.00	42.61
 břeclav	Europe/Prague	48.76	16.88
+bū'īn zahrā	Asia/Tehran	35.77	50.06
 būkān	Asia/Tehran	36.52	46.21
 būlāq abū al ilā	Africa/Cairo	30.06	31.23
 būlāq abū al ‘ilā	Africa/Cairo	30.06	31.23
@@ -8592,6 +8610,7 @@ būndu	Asia/Kolkata	23.16	85.59
 būr fu'ād	Africa/Cairo	31.24	32.32
 būr fu’ād	Africa/Cairo	31.24	32.32
 būsh	Africa/Cairo	29.15	31.13
+bū’īn zahrā	Asia/Tehran	35.77	50.06
 bạc liêu	Asia/Ho_Chi_Minh	9.29	105.73
 bạch mai	Asia/Bangkok	20.98	105.83
 bản na hỷ	Asia/Ho_Chi_Minh	19.56	104.53
@@ -8996,7 +9015,7 @@ canberra	Australia/Sydney	-35.28	149.13
 canby	America/Los_Angeles	45.26	-122.69
 cancau	Asia/Shanghai	34.76	113.65
 canchzhou	Asia/Shanghai	38.31	116.85
-cancun	Asia/Shanghai	43.88	125.32
+cancun	America/Cancun	21.17	-86.85
 cancuna	Asia/Shanghai	43.88	125.32
 cancún	America/Cancun	21.17	-86.85
 candaba	Asia/Manila	15.10	120.83
@@ -9131,6 +9150,7 @@ caozhou	Asia/Shanghai	35.24	115.47
 cap haitien	America/Port-au-Prince	19.76	-72.20
 cap haïtien	America/Port-au-Prince	19.76	-72.20
 cap nhi tan	Asia/Shanghai	45.75	126.65
+cap rouge	America/Toronto	46.75	-71.35
 capacho nuevo	America/Caracas	7.82	-72.31
 capalaba	Australia/Brisbane	-27.54	153.20
 capanema	America/Belem	-1.20	-47.18
@@ -9514,7 +9534,7 @@ cavo pavulo	America/Sao_Paulo	-23.55	-46.64
 cawnpore	Asia/Kolkata	26.47	80.35
 cawnporne	Asia/Kolkata	26.47	80.35
 caxambu	America/Sao_Paulo	-21.98	-44.93
-caxias	America/Sao_Paulo	-22.79	-43.31
+caxias	America/Fortaleza	-4.86	-43.36
 caxias do sul	America/Sao_Paulo	-29.17	-51.18
 caxito	Africa/Luanda	-8.58	13.66
 cay	Europe/Istanbul	38.59	31.03
@@ -9651,6 +9671,7 @@ center point	America/Chicago	33.65	-86.68
 centereach	America/New_York	40.86	-73.10
 centerville	America/New_York	39.63	-84.16
 cento	Europe/Rome	44.73	11.29
+central 14th street	America/New_York	38.94	-77.03
 central 14th street / spring road	America/New_York	38.94	-77.03
 central city	America/Phoenix	33.44	-112.06
 central coast	Australia/Sydney	-33.43	151.37
@@ -9660,6 +9681,7 @@ central islip	America/New_York	40.79	-73.20
 central lonsdale	America/Vancouver	49.33	-123.07
 central point	America/Los_Angeles	42.38	-122.92
 central saanich	America/Vancouver	48.57	-123.42
+central th street	America/New_York	38.94	-77.03
 central th street spring road	America/New_York	38.94	-77.03
 centralia	America/Los_Angeles	46.72	-122.95
 centralniy	Europe/Moscow	59.93	30.36
@@ -9848,6 +9870,7 @@ chaidari	Europe/Athens	38.01	23.67
 chaigou	Asia/Shanghai	36.25	119.62
 chaihe	Asia/Shanghai	44.76	129.68
 chainterampant	Asia/Karachi	25.40	68.38
+chaita	Asia/Kolkata	25.77	85.88
 chaiyaphum	Asia/Bangkok	15.81	102.03
 chaj kchou	Asia/Shanghai	20.03	110.35
 chajari	America/Argentina/Cordoba	-30.75	-57.98
@@ -9941,6 +9964,7 @@ chanchun	Asia/Shanghai	43.88	125.32
 chanchun'	Asia/Shanghai	43.88	125.32
 chanchzhi	Asia/Shanghai	36.18	113.11
 chanchzhou	Asia/Shanghai	31.77	119.95
+chand chaur	Asia/Kolkata	25.73	85.79
 chanda	Asia/Kolkata	19.95	79.30
 chandameta	Asia/Kolkata	22.19	78.73
 chandannagar	Asia/Kolkata	22.86	88.37
@@ -10650,6 +10674,7 @@ chikugo	Asia/Tokyo	33.21	130.49
 chikuma	Asia/Tokyo	36.53	138.09
 chikurayo	America/Lima	-6.77	-79.85
 chikusei	Asia/Tokyo	36.32	139.98
+chikushino	Asia/Tokyo	33.50	130.52
 chikushino shi	Asia/Tokyo	33.50	130.52
 chilakalurupet	Asia/Kolkata	16.09	80.17
 chilakalūrupet	Asia/Kolkata	16.09	80.17
@@ -11815,7 +11840,7 @@ conception bay south	America/St_Johns	47.50	-53.00
 conchal	America/Sao_Paulo	-22.33	-47.17
 conchas	America/Sao_Paulo	-23.02	-48.01
 concon	America/Santiago	-32.92	-71.52
-concordia	America/Denver	31.76	-106.49
+concordia	America/Argentina/Cordoba	-31.39	-58.02
 concordia do para	America/Belem	-2.00	-47.95
 concón	America/Santiago	-32.92	-71.52
 concórdia	America/Sao_Paulo	-27.23	-52.03
@@ -13132,6 +13157,7 @@ demiyivka	Europe/Kyiv	50.40	30.52
 demnate	Africa/Casablanca	31.73	-7.01
 dempasar	Asia/Makassar	-8.65	115.22
 dempassar	Asia/Makassar	-8.65	115.22
+demra	Asia/Dhaka	23.71	90.48
 den chai	Asia/Bangkok	17.98	100.05
 den den	Africa/Tunis	36.81	10.11
 den helder	Europe/Amsterdam	52.96	4.76
@@ -13245,6 +13271,7 @@ desna	Europe/Kyiv	50.52	30.68
 desnogorsk	Europe/Moscow	54.15	33.28
 desnyanskyi	Europe/Kyiv	51.51	31.32
 desoto	America/Chicago	32.59	-96.86
+despatch	Africa/Johannesburg	-33.80	25.46
 dessalines	America/Port-au-Prince	19.26	-72.52
 dessau	Europe/Berlin	51.84	12.25
 dessie	Africa/Addis_Ababa	11.13	39.63
@@ -13419,6 +13446,7 @@ diamantino	America/Cuiaba	-14.41	-56.45
 diamniadio	Africa/Dakar	14.72	-17.18
 diamond bar	America/Los_Angeles	34.03	-117.81
 diamond harbour	Asia/Kolkata	22.19	88.19
+diamond head	Pacific/Honolulu	21.28	-157.81
 diamond head / kapahulu / saint louis heights	Pacific/Honolulu	21.28	-157.81
 diamond head kapahulu saint louis heights	Pacific/Honolulu	21.28	-157.81
 dianbu	Asia/Shanghai	36.70	120.35
@@ -13903,6 +13931,7 @@ donipuro	Europe/Kyiv	48.47	35.04
 donipuropetoroushiku	Europe/Kyiv	48.47	35.04
 donjeck	Europe/Kyiv	48.02	37.80
 donna	America/Chicago	26.17	-98.05
+donostia	Europe/Madrid	43.31	-1.97
 donostia / san sebastián	Europe/Madrid	43.31	-1.97
 donostia san sebastián	Europe/Madrid	43.31	-1.97
 donskoy	Europe/Moscow	53.97	38.33
@@ -14767,7 +14796,7 @@ edinbo	Europe/London	55.95	-3.20
 edinboarch	Europe/London	55.95	-3.20
 edinborg	Europe/London	55.95	-3.20
 edinburc	Europe/London	55.95	-3.20
-edinburg	Europe/London	55.95	-3.20
+edinburg	America/Chicago	26.30	-98.16
 edinburga	Europe/London	55.95	-3.20
 edinburgas	Europe/London	55.95	-3.20
 edinburgh	Europe/London	55.95	-3.20
@@ -15536,6 +15565,7 @@ esmeralda	America/Havana	21.85	-78.12
 esmeraldas	America/Guayaquil	0.96	-79.65
 esmirna	Europe/Istanbul	38.41	27.14
 esna	Africa/Cairo	25.29	32.55
+espahan	Asia/Tehran	32.65	51.67
 espargos	Atlantic/Cape_Verde	16.76	-22.94
 esparreguera	Europe/Madrid	41.54	1.87
 esparza	America/Costa_Rica	9.99	-84.67
@@ -15692,7 +15722,7 @@ eyvān	Asia/Tehran	33.83	46.31
 ez zahra	Africa/Tunis	36.75	10.31
 ezeiza	America/Argentina/Buenos_Aires	-34.85	-58.52
 ezhome	Asia/Kolkata	12.03	75.28
-ezhou	Asia/Shanghai	30.40	114.89
+ezhou	Asia/Shanghai	30.40	114.83
 ezhudesam	Asia/Kolkata	8.27	77.14
 ezhupunna	Asia/Kolkata	9.82	76.30
 ezhva	Europe/Moscow	61.81	50.73
@@ -16163,7 +16193,7 @@ fochville	Africa/Johannesburg	-26.49	27.49
 focsani	Europe/Bucharest	45.70	27.18
 focșani	Europe/Bucharest	45.70	27.18
 foggia	Europe/Rome	41.46	15.55
-foggy bottom	America/New_York	38.90	-77.06
+foggy bottom	America/New_York	38.90	-77.05
 foinix	America/Phoenix	33.45	-112.07
 fokino	Asia/Vladivostok	42.97	132.41
 fokvaros	Africa/Johannesburg	-33.93	18.42
@@ -16293,6 +16323,7 @@ fosjan	Asia/Shanghai	23.03	113.13
 foso	Africa/Accra	5.70	-1.29
 fossano	Europe/Rome	44.55	7.72
 foster city	America/Los_Angeles	37.56	-122.27
+foster village	Pacific/Honolulu	21.36	-157.92
 fot	Europe/Budapest	47.62	19.19
 fotowasu	America/Chicago	32.73	-97.32
 fou hsin	Asia/Shanghai	42.02	121.66
@@ -16455,7 +16486,7 @@ friesoythe	Europe/Berlin	53.02	7.86
 frijtaun	Africa/Freetown	8.49	-13.24
 frinton on sea	Europe/London	51.83	1.24
 frischgewaagd	Africa/Johannesburg	-27.39	30.95
-frisco	America/Los_Angeles	37.77	-122.42
+frisco	America/Chicago	33.15	-96.82
 frita'una	Africa/Freetown	8.49	-13.24
 fritaun	Africa/Freetown	8.49	-13.24
 fritauna	Africa/Freetown	8.49	-13.24
@@ -16590,6 +16621,7 @@ fukiage fujimi	Asia/Tokyo	36.10	139.45
 fukuchiyama	Asia/Tokyo	35.30	135.12
 fukuecho	Asia/Tokyo	32.70	128.85
 fukuechō	Asia/Tokyo	32.70	128.85
+fukui	Asia/Tokyo	36.06	136.22
 fukui shi	Asia/Tokyo	36.06	136.22
 fukumitsu	Asia/Tokyo	36.56	136.87
 fukuoka	Asia/Tokyo	33.60	130.42
@@ -16758,6 +16790,7 @@ ga no no	America/New_York	40.71	-74.01
 ga rankuwa	Africa/Johannesburg	-25.62	27.99
 gaa ding	Asia/Shanghai	31.22	121.46
 gaalkacyo	Africa/Mogadishu	6.77	47.43
+gabai	Asia/Tehran	32.65	51.67
 gabalpuro	Asia/Kolkata	23.17	79.95
 gabane	Africa/Gaborone	-24.67	25.78
 gabela	Africa/Luanda	-10.85	14.38
@@ -17045,6 +17078,7 @@ garça	America/Sao_Paulo	-22.21	-49.66
 gashua	Africa/Lagos	12.87	11.04
 gasiyabad	Asia/Kolkata	28.67	77.44
 gaspar	America/Sao_Paulo	-26.93	-48.96
+gasteiz	Europe/Madrid	42.85	-2.67
 gasteiz / vitoria	Europe/Madrid	42.85	-2.67
 gasteiz vitoria	Europe/Madrid	42.85	-2.67
 gastonia	America/New_York	35.26	-81.19
@@ -17062,6 +17096,7 @@ gaukhati	Asia/Kolkata	26.18	91.75
 gaur	Asia/Kathmandu	26.76	85.28
 gaurela	Asia/Kolkata	22.75	81.90
 gauribidanur	Asia/Kolkata	13.61	77.52
+gauriganj	Asia/Kolkata	26.21	81.69
 gauripur	Asia/Kolkata	26.08	89.96
 gaurnadi	Asia/Dhaka	22.97	90.22
 gautaborg	Europe/Stockholm	57.71	11.97
@@ -17911,6 +17946,7 @@ goyanju	Asia/Seoul	35.15	126.92
 goyerkata	Asia/Kolkata	26.70	89.03
 goyerkāta	Asia/Kolkata	26.70	89.03
 goygol	Asia/Baku	40.59	46.32
+goyman	Asia/Tehran	34.64	50.88
 goz beida	Africa/Ndjamena	12.23	21.41
 goālpāra	Asia/Kolkata	26.18	90.63
 gqeberha	Africa/Johannesburg	-33.96	25.61
@@ -18120,7 +18156,7 @@ guadalajara de buga	America/Bogota	3.90	-76.30
 guadalajara i jalisco	America/Mexico_City	20.68	-103.35
 guadalakhara	America/Mexico_City	20.68	-103.35
 guadalaxara	America/Mexico_City	20.68	-103.35
-guadalupe	America/Mexico_City	19.49	-99.11
+guadalupe	America/Monterrey	25.68	-100.26
 guadalupe hidalgo	America/Mexico_City	19.49	-99.11
 guadalupe victoria	America/Monterrey	24.45	-104.12
 guadarahara	America/Mexico_City	20.68	-103.35
@@ -18332,7 +18368,7 @@ gueret	Europe/Paris	46.17	1.87
 guergentepe	Europe/Istanbul	40.79	37.60
 guerou	Africa/Nouakchott	17.08	-12.04
 gueroymak	Europe/Istanbul	38.58	42.02
-guerpinar	Europe/Istanbul	40.99	28.61
+guerpinar	Europe/Istanbul	40.99	28.60
 guersu	Europe/Istanbul	40.22	29.19
 guessabo	Africa/Abidjan	6.74	-6.95
 guestrow	Europe/Berlin	53.80	12.17
@@ -18425,6 +18461,7 @@ guli	Asia/Shanghai	28.88	120.03
 gulin	Asia/Shanghai	28.04	105.81
 guliston	Asia/Tashkent	40.50	68.78
 gulou	Asia/Shanghai	30.18	106.17
+gulshan	Asia/Dhaka	23.79	90.41
 gulu	Africa/Kampala	2.77	32.30
 gulābpura	Asia/Kolkata	25.90	74.66
 gulāothi	Asia/Kolkata	28.59	77.79
@@ -18691,7 +18728,7 @@ güngören merter	Europe/Istanbul	41.01	28.89
 günzburg	Europe/Berlin	48.46	10.28
 gürgentepe	Europe/Istanbul	40.79	37.60
 güroymak	Europe/Istanbul	38.58	42.02
-gürpınar	Europe/Istanbul	40.99	28.61
+gürpınar	Europe/Istanbul	40.99	28.60
 gürsu	Europe/Istanbul	40.22	29.19
 güstrow	Europe/Berlin	53.80	12.17
 gütersloh	Europe/Berlin	51.91	8.38
@@ -18891,7 +18928,7 @@ hailun	Asia/Shanghai	47.45	126.92
 hailākāndi	Asia/Kolkata	24.68	92.56
 haimabaraga	Europe/Berlin	53.55	9.99
 haimbarga	Europe/Berlin	53.55	9.99
-haimen	Asia/Shanghai	28.70	121.47
+haimen	Asia/Shanghai	23.19	116.61
 haines city	America/New_York	28.11	-81.62
 haining	Asia/Shanghai	30.54	120.69
 hainovara	Europe/Berlin	52.37	9.73
@@ -19832,7 +19869,7 @@ hillerod	Europe/Copenhagen	55.93	12.30
 hillerød	Europe/Copenhagen	55.93	12.30
 hilliard	America/New_York	40.03	-83.16
 hillsboro	America/Los_Angeles	45.52	-122.99
-hillsborough	America/New_York	40.48	-74.63
+hillsborough	America/New_York	40.51	-74.67
 hilo	Pacific/Honolulu	19.73	-155.09
 hilosima si	Asia/Tokyo	34.40	132.45
 hilsa	Asia/Kolkata	25.32	85.28
@@ -20009,6 +20046,8 @@ ho tse shih	Asia/Shanghai	35.24	115.47
 ho'ava peso'a	America/Fortaleza	-7.12	-34.86
 hoa binh	Asia/Bangkok	20.82	105.34
 hoa cuong	Asia/Ho_Chi_Minh	16.04	108.18
+hoa lu	Asia/Bangkok	20.26	105.98
+hoa lư	Asia/Bangkok	20.26	105.98
 hoa thanh	Asia/Ho_Chi_Minh	11.29	106.13
 hoai bac	Asia/Shanghai	33.97	116.79
 hoai hoa	Asia/Shanghai	27.56	110.00
@@ -20039,6 +20078,7 @@ hodmezovasarhely	Europe/Budapest	46.42	20.33
 hodonin	Europe/Prague	48.85	17.13
 hodonín	Europe/Prague	48.85	17.13
 hoefdaborg	Africa/Johannesburg	-33.93	18.42
+hoengg	Europe/Zurich	47.40	8.50
 hoensbroek	Europe/Amsterdam	50.92	5.93
 hoerde	Europe/Berlin	51.48	7.50
 hoerstel	Europe/Berlin	52.30	7.58
@@ -20196,6 +20236,7 @@ honmachi	Asia/Tokyo	32.50	130.60
 honnali	Asia/Kolkata	14.24	75.65
 honnavar	Asia/Kolkata	14.28	74.44
 honnāli	Asia/Kolkata	14.24	75.65
+honokai hale	Pacific/Honolulu	21.34	-158.10
 honolulu	Pacific/Honolulu	21.31	-157.86
 honovere	Europe/Berlin	52.37	9.73
 hoofddorp	Europe/Amsterdam	52.30	4.69
@@ -20825,6 +20866,7 @@ hòa cường	Asia/Ho_Chi_Minh	16.04	108.18
 hòa thành	Asia/Ho_Chi_Minh	11.29	106.13
 hódmezővásárhely	Europe/Budapest	46.42	20.33
 hôpital saint louis	Europe/Paris	48.88	2.37
+höngg	Europe/Zurich	47.40	8.50
 hörde	Europe/Berlin	51.48	7.50
 hörstel	Europe/Berlin	52.30	7.58
 hötting	Europe/Vienna	47.27	11.37
@@ -21208,7 +21250,7 @@ ilaro	Africa/Lagos	6.89	3.01
 ilave	America/Lima	-16.08	-69.67
 ilawa	Europe/Warsaw	53.60	19.57
 ilbav	Europe/Kyiv	49.84	24.02
-ilchester	America/New_York	39.25	-76.76
+ilchester	America/New_York	39.23	-76.79
 ile des soeurs	America/Toronto	45.46	-73.55
 ile ife	Africa/Lagos	7.48	4.56
 ilebo	Africa/Lubumbashi	-4.33	20.59
@@ -21265,6 +21307,7 @@ ilu benin	Africa/Lagos	6.34	5.63
 ilu djibouti	Africa/Djibouti	11.59	43.15
 ilu zanzibar	Africa/Dar_es_Salaam	-6.16	39.20
 ilula	Africa/Dar_es_Salaam	-7.68	36.04
+ilvov	Europe/Kyiv	49.84	24.02
 ilyvo	Europe/Kyiv	49.84	24.02
 ilām	Asia/Kathmandu	26.91	87.93
 il’skiy	Europe/Moscow	44.84	38.57
@@ -21605,6 +21648,7 @@ isanlu itedoijowa	Africa/Lagos	8.27	5.84
 isaratov	Europe/Saratov	51.54	45.99
 isatambula	Europe/Istanbul	41.01	28.95
 isawa	Asia/Tokyo	35.65	138.63
+isbahan	Asia/Tehran	32.65	51.67
 ischewsk	Europe/Samara	56.85	53.20
 ischia	Europe/Rome	40.74	13.95
 ischia porto	Europe/Rome	40.74	13.95
@@ -21674,7 +21718,7 @@ iskitim	Asia/Novosibirsk	54.64	83.30
 isla	America/Mexico_City	18.03	-95.53
 isla cristina	Europe/Madrid	37.20	-7.32
 isla vista	America/Los_Angeles	34.41	-119.86
-islamabad	Asia/Dhaka	22.34	91.83
+islamabad	Asia/Karachi	33.72	73.04
 islamabada	Asia/Karachi	33.72	73.04
 islamabadas	Asia/Karachi	33.72	73.04
 islamabade	Asia/Karachi	33.72	73.04
@@ -22584,6 +22628,7 @@ jeruzsalem	Asia/Jerusalem	31.77	35.22
 jesi	Europe/Rome	43.52	13.24
 jesselton	Asia/Kuching	5.97	116.07
 jessore	Asia/Dhaka	23.17	89.21
+jessore cantonment	Asia/Dhaka	23.18	89.18
 jesus del monte	America/Mexico_City	19.38	-99.29
 jesus maria	America/Lima	-12.07	-77.04
 jesus menendez	America/Havana	21.16	-76.48
@@ -22749,7 +22794,7 @@ jiaoxian	Asia/Shanghai	36.28	120.00
 jiaozhou	Asia/Shanghai	36.28	120.00
 jiaozuo	Asia/Shanghai	35.24	113.24
 jiaping	Asia/Shanghai	28.99	106.35
-jiashan	Asia/Shanghai	32.78	117.96
+jiashan	Asia/Shanghai	30.85	120.93
 jiasi	Asia/Shanghai	29.12	106.45
 jiawang	Asia/Shanghai	34.43	117.44
 jiawang zhen	Asia/Shanghai	34.42	117.47
@@ -23445,7 +23490,7 @@ kabida	Africa/Luanda	-5.56	12.19
 kabil	Asia/Kabul	34.53	69.17
 kabilpor	Asia/Kolkata	20.95	72.96
 kabin buri	Asia/Bangkok	13.95	101.72
-kabinda	Africa/Luanda	-5.56	12.19
+kabinda	Africa/Lubumbashi	-6.14	24.48
 kabinida	Africa/Luanda	-5.56	12.19
 kabirwala	Asia/Karachi	30.40	71.86
 kabkabiyah	Africa/Khartoum	13.65	24.08
@@ -23814,6 +23859,7 @@ kalher	Asia/Kolkata	19.25	73.02
 kalhorod	Europe/Kyiv	48.02	37.80
 kali	America/Bogota	3.43	-76.52
 kalia	Asia/Dhaka	23.04	89.63
+kaliakair	Asia/Dhaka	24.07	90.22
 kalianget	Asia/Jakarta	-7.05	113.94
 kalibo	Asia/Manila	11.71	122.36
 kalicut	Asia/Kolkata	11.25	75.78
@@ -24019,6 +24065,7 @@ kampal	Africa/Kampala	0.32	32.58
 kampala	Africa/Kampala	0.32	32.58
 kampalla	Africa/Kampala	0.32	32.58
 kampalo	Africa/Kampala	0.32	32.58
+kampanda	Asia/Tehran	34.31	47.06
 kampar	Asia/Kuala_Lumpur	4.30	101.15
 kampen	Europe/Amsterdam	52.55	5.91
 kampene	Africa/Lubumbashi	-3.60	26.67
@@ -24087,6 +24134,7 @@ kampwgrandh	America/Campo_Grande	-20.44	-54.65
 kamra	Asia/Karachi	33.85	72.39
 kamsar	Africa/Conakry	10.65	-14.62
 kamthi	Asia/Kolkata	21.22	79.20
+kamuhanda	Africa/Kigali	-1.97	29.98
 kamuhanda / ruyenzi	Africa/Kigali	-1.97	29.98
 kamuhanda ruyenzi	Africa/Kigali	-1.97	29.98
 kamuli	Africa/Kampala	0.95	33.12
@@ -24315,6 +24363,7 @@ kaouara	Africa/Abidjan	10.09	-5.19
 kaoueni	Indian/Mayotte	-12.77	45.22
 kaouéni	Indian/Mayotte	-12.77	45.22
 kapadvanj	Asia/Kolkata	23.02	73.07
+kapahulu	Pacific/Honolulu	21.28	-157.81
 kapala	Africa/Kampala	0.32	32.58
 kapalakiko	America/Los_Angeles	37.77	-122.42
 kapan	Asia/Yerevan	39.21	46.41
@@ -24332,10 +24381,11 @@ kapiri mposhi	Africa/Lusaka	-13.97	28.67
 kapit	Asia/Kuching	2.00	112.93
 kapkaupunki	Africa/Johannesburg	-33.93	18.42
 kaplinn	Africa/Johannesburg	-33.93	18.42
-kapolei	Pacific/Honolulu	21.34	-158.06
+kapolei	Pacific/Honolulu	21.34	-158.10
 kapolei villages	Pacific/Honolulu	21.34	-158.07
 kaposvar	Europe/Budapest	46.37	17.80
 kaposvár	Europe/Budapest	46.37	17.80
+kaposztasmegyer	Europe/Budapest	47.59	19.12
 kapotnya	Europe/Moscow	55.64	37.79
 kappiyara	Asia/Kolkata	8.25	77.26
 kapren	Asia/Kolkata	25.41	76.07
@@ -24511,6 +24561,7 @@ karlstadt	Europe/Berlin	49.96	9.77
 karmala	Asia/Kolkata	18.41	75.19
 karmana	Asia/Tehran	30.28	57.08
 karmi'el	Asia/Jerusalem	32.91	35.30
+karmisin	Asia/Tehran	34.31	47.06
 karmi’el	Asia/Jerusalem	32.91	35.30
 karmpala	Asia/Baghdad	32.62	44.02
 karmāla	Asia/Kolkata	18.41	75.19
@@ -24628,9 +24679,9 @@ kashghr	Asia/Urumqi	39.47	75.99
 kashi	Asia/Kolkata	25.32	83.01
 kashi shi	Asia/Urumqi	39.47	75.99
 kashiba	Asia/Tokyo	34.53	135.71
-kashihara	Asia/Tokyo	34.58	135.62
+kashihara	Asia/Tokyo	34.51	135.79
 kashihara shi	Asia/Tokyo	34.51	135.79
-kashima	Asia/Tokyo	33.11	130.09
+kashima	Asia/Tokyo	35.97	140.64
 kashima shi	Asia/Tokyo	35.97	140.64
 kashin	Europe/Moscow	57.36	37.61
 kashing	Asia/Shanghai	30.75	120.75
@@ -24746,6 +24797,7 @@ katobu	Asia/Makassar	-4.83	122.73
 katoke	Africa/Kampala	0.76	30.68
 katol	Asia/Kolkata	21.27	78.59
 katomanzu	Asia/Kathmandu	27.70	85.32
+katori	Asia/Tokyo	35.90	140.50
 katori shi	Asia/Tokyo	35.90	140.50
 katoro	Africa/Dar_es_Salaam	-3.00	31.93
 katowice	Europe/Warsaw	50.26	19.02
@@ -26622,6 +26674,7 @@ kosi	Asia/Kolkata	27.79	77.44
 kosice	Europe/Bratislava	48.71	21.26
 kosigi	Asia/Kolkata	15.86	77.24
 kosire	Europe/Prague	50.07	14.36
+kosmichnyi	Europe/Kyiv	47.78	35.22
 koson	Asia/Samarkand	39.04	65.58
 kosong	Asia/Seoul	38.38	128.47
 kosonsoy	Asia/Tashkent	41.25	71.55
@@ -27167,7 +27220,7 @@ kudus	Asia/Jerusalem	31.77	35.22
 kudymkar	Asia/Yekaterinburg	59.02	54.65
 kudāl	Asia/Kolkata	16.01	73.69
 kuecuekcekmece	Europe/Istanbul	40.99	28.77
-kuecuekcigli	Europe/Istanbul	38.51	27.06
+kuecuekcigli	Europe/Istanbul	38.50	27.05
 kuedzhuekdzhekmedzhe	Europe/Istanbul	40.99	28.77
 kuehbehk	America/Toronto	46.81	-71.21
 kuehnka	America/Guayaquil	-2.90	-79.00
@@ -27445,6 +27498,7 @@ kurkavun	Asia/Kolkata	28.46	77.03
 kurla	Asia/Urumqi	41.76	86.15
 kurlya	Asia/Urumqi	41.76	86.15
 kurnool	Asia/Kolkata	15.83	78.04
+kurobe	Asia/Tokyo	36.90	137.45
 kurobe shi	Asia/Tokyo	36.90	137.45
 kuroda	Asia/Tokyo	35.35	136.78
 kuroishi	Asia/Tokyo	40.65	140.58
@@ -27565,7 +27619,7 @@ kuyera	Africa/Addis_Ababa	7.30	38.65
 kuyintavo	Asia/Shanghai	36.06	120.38
 kuz'minki	Europe/Moscow	55.70	37.80
 kuzhithurai	Asia/Kolkata	8.32	77.19
-kuznetsk	Asia/Novokuznetsk	53.76	87.14
+kuznetsk	Europe/Moscow	53.12	46.60
 kuznetsk sibirskiy	Asia/Novokuznetsk	53.76	87.14
 kuzon	Europe/Moscow	55.79	49.12
 kuz’minki	Europe/Moscow	55.70	37.80
@@ -27806,6 +27860,7 @@ kyzylorda	Asia/Qyzylorda	44.85	65.51
 kyōtanabe	Asia/Tokyo	34.80	135.77
 kyōtango	Asia/Tokyo	35.61	135.04
 kyŏngsŏng	Asia/Pyongyang	41.59	129.61
+káposztásmegyer	Europe/Budapest	47.59	19.12
 káto lakatámeia	Asia/Nicosia	35.12	33.33
 káto polemídia	Asia/Nicosia	34.70	32.99
 kâhta	Europe/Istanbul	37.79	38.62
@@ -27837,7 +27892,7 @@ künzelsau	Europe/Berlin	49.28	9.68
 kürten	Europe/Berlin	51.05	7.27
 kütahya	Europe/Istanbul	39.42	29.98
 küçükçekmece	Europe/Istanbul	40.99	28.77
-küçükçiğli	Europe/Istanbul	38.51	27.06
+küçükçiğli	Europe/Istanbul	38.50	27.05
 kādiganpalli	Asia/Kolkata	12.52	78.21
 kādīpur	Asia/Kolkata	28.77	77.16
 kāgal	Asia/Kolkata	16.58	74.32
@@ -28327,7 +28382,7 @@ laisu	Asia/Shanghai	29.27	105.78
 laitan	Asia/Shanghai	30.18	106.49
 laitumkhrah	Asia/Kolkata	25.57	91.90
 laiu si	Asia/Shanghai	36.19	117.66
-laiwu	Asia/Shanghai	23.35	116.68
+laiwu	Asia/Shanghai	36.19	117.66
 laixi	Asia/Shanghai	36.86	120.53
 laiyang	Asia/Shanghai	36.98	120.71
 laizhou	Asia/Shanghai	37.18	119.94
@@ -28720,11 +28775,13 @@ lauda konigshofen	Europe/Berlin	49.57	9.71
 lauda königshofen	Europe/Berlin	49.57	9.71
 lauderdale lakes	America/New_York	26.17	-80.21
 lauderhill	America/New_York	26.14	-80.21
+laudio	Europe/Madrid	43.14	-2.96
 laudio / llodio	Europe/Madrid	43.14	-2.96
 laudio llodio	Europe/Madrid	43.14	-2.96
 lauf an der pegnitz	Europe/Berlin	49.51	11.28
 laukaa	Europe/Helsinki	62.41	25.95
 laukkai	Asia/Yangon	23.70	98.76
+launani valley	Pacific/Honolulu	21.48	-157.99
 launceston	Australia/Hobart	-41.44	147.13
 laungowal	Asia/Kolkata	30.19	75.68
 laungowāl	Asia/Kolkata	30.19	75.68
@@ -28761,6 +28818,7 @@ lawas	Asia/Kuching	4.86	115.41
 lawksawk	Asia/Yangon	21.25	96.87
 lawndale	America/Los_Angeles	33.89	-118.35
 lawngtlai	Asia/Kolkata	22.53	92.90
+lawodike	Asia/Damascus	35.53	35.79
 lawrence	America/Chicago	38.97	-95.24
 lawrence park south	America/Toronto	43.72	-79.41
 lawrenceville	America/New_York	33.96	-83.99
@@ -28954,6 +29012,7 @@ lemon grove	America/Los_Angeles	32.74	-117.03
 lemont	America/Chicago	41.67	-88.00
 lemoore	America/Los_Angeles	36.30	-119.78
 lempaeaelae	Europe/Helsinki	61.32	23.75
+lemperk	Europe/Kyiv	49.84	24.02
 lempäälä	Europe/Helsinki	61.32	23.75
 lenbe	America/Port-au-Prince	19.71	-72.40
 lencois paulista	America/Sao_Paulo	-22.60	-48.80
@@ -29206,6 +29265,7 @@ librevilis	Africa/Libreville	0.39	9.45
 libreville	Africa/Libreville	0.39	9.45
 librevilo	Africa/Libreville	0.39	9.45
 librvil	Africa/Libreville	0.39	9.45
+libsia	Europe/Berlin	51.34	12.37
 libvil	Africa/Libreville	0.39	9.45
 libāspur	Asia/Kolkata	28.75	77.15
 licata	Europe/Rome	37.10	13.94
@@ -30002,6 +30062,7 @@ lower earley	Europe/London	51.43	-0.92
 lower hutt	Pacific/Auckland	-41.22	174.92
 lower lonsdale	America/Vancouver	49.31	-123.07
 lower moyamensing	America/New_York	39.92	-75.16
+lower punchbowl	Pacific/Honolulu	21.32	-157.83
 lower sackville	America/Halifax	44.78	-63.68
 lower west side	America/Chicago	41.85	-87.67
 lower wong tai sin estate (i & ii)	Asia/Hong_Kong	22.34	114.19
@@ -30368,7 +30429,7 @@ lushui	Asia/Shanghai	25.82	98.86
 lustenau	Europe/Vienna	47.43	9.66
 luta	Asia/Shanghai	38.91	121.60
 lutece	Europe/Paris	48.85	2.35
-lutes mountain	America/Moncton	46.14	-64.91
+lutes mountain	America/Moncton	46.15	-64.91
 lutetia	Europe/Paris	48.85	2.35
 lutetia parisorum	Europe/Paris	48.85	2.35
 lutherville timonium	America/New_York	39.44	-76.61
@@ -31117,7 +31178,7 @@ makabe	Asia/Tokyo	36.27	140.10
 makacikala	Europe/Moscow	42.98	47.50
 makadisu	Africa/Mogadishu	2.04	45.34
 makak	Africa/Douala	3.55	11.03
-makakilo	Pacific/Honolulu	21.35	-158.09
+makakilo	Pacific/Honolulu	21.34	-158.10
 makakilo / kapolei / honokai hale	Pacific/Honolulu	21.34	-158.10
 makakilo city	Pacific/Honolulu	21.35	-158.09
 makakilo kapolei honokai hale	Pacific/Honolulu	21.34	-158.10
@@ -31151,6 +31212,7 @@ makhatxkala	Europe/Moscow	42.98	47.50
 makhdumpur	Asia/Kolkata	25.07	84.97
 makhiachkhuala	Europe/Moscow	42.98	47.50
 maki	Asia/Tokyo	37.75	138.88
+makiki	Pacific/Honolulu	21.32	-157.83
 makiki / lower punchbowl / tantalus	Pacific/Honolulu	21.32	-157.83
 makiki lower punchbowl tantalus	Pacific/Honolulu	21.32	-157.83
 makindu	Africa/Nairobi	-2.28	37.82
@@ -31530,7 +31592,7 @@ mangueirinha	America/Sao_Paulo	-25.94	-52.18
 manhala	Asia/Karachi	31.53	74.55
 manhatano	America/New_York	40.78	-73.97
 manhatn	America/New_York	40.78	-73.97
-manhattan	America/New_York	40.71	-74.01
+manhattan	America/New_York	40.78	-73.97
 manhattan beach	America/Los_Angeles	33.88	-118.41
 manhattan valley	America/New_York	40.79	-73.97
 manhattanville	America/New_York	40.78	-73.97
@@ -33732,7 +33794,9 @@ moncton	America/Moncton	46.09	-64.80
 mondlo	Africa/Johannesburg	-27.98	30.72
 mondovi	Europe/Rome	44.40	7.82
 mondovì	Europe/Rome	44.40	7.82
+mondragon	Europe/Madrid	43.06	-2.49
 mondragone	Europe/Rome	41.11	13.89
+mondragón	Europe/Madrid	43.06	-2.49
 monfalcone	Europe/Rome	45.80	13.53
 monforte de lemos	Europe/Madrid	42.52	-7.51
 mong cai	Asia/Bangkok	21.52	107.97
@@ -33886,7 +33950,7 @@ montevidiyo	America/Montevideo	-34.90	-56.19
 montevitiyo	America/Montevideo	-34.90	-56.19
 montfermeil	Europe/Paris	48.90	2.58
 montgeron	Europe/Paris	48.71	2.45
-montgomery	Asia/Karachi	30.67	73.10
+montgomery	America/Chicago	32.37	-86.30
 montgomery village	America/New_York	39.18	-77.20
 monthey	Europe/Zurich	46.25	6.95
 montichiari	Europe/Rome	45.41	10.40
@@ -34123,7 +34187,7 @@ mot'a	Africa/Addis_Ababa	11.08	37.87
 motala	Europe/Stockholm	58.54	15.04
 motatan	America/Caracas	9.39	-70.59
 motatán	America/Caracas	9.39	-70.59
-motherwell	Europe/London	55.79	-3.99
+motherwell	Africa/Johannesburg	-33.79	25.59
 mothihari	Asia/Kolkata	26.65	84.92
 mothīhāri	Asia/Kolkata	26.65	84.92
 motijheel	Asia/Dhaka	23.73	90.42
@@ -35479,7 +35543,7 @@ nanterre	Europe/Paris	48.89	2.21
 nantes	Europe/Paris	47.22	-1.55
 nantet	Asia/Kolkata	19.16	77.31
 nantetu	Asia/Kolkata	19.16	77.31
-nanto	Asia/Tokyo	36.51	136.89
+nanto	Asia/Tokyo	36.57	136.91
 nanto shi	Asia/Tokyo	36.57	136.91
 nantong	Asia/Shanghai	32.03	120.87
 nantou	Asia/Shanghai	22.72	113.29
@@ -35539,7 +35603,7 @@ naqadeh	Asia/Tehran	36.96	45.39
 naqoya	Asia/Tokyo	35.18	136.91
 naqādah	Africa/Cairo	25.90	32.72
 nar'yan mar	Europe/Moscow	67.64	53.00
-nara	Africa/Bamako	15.17	-7.29
+nara	Asia/Tokyo	34.69	135.80
 nara shi	Asia/Tokyo	34.69	135.80
 narai mumba'i	Asia/Kolkata	19.04	73.02
 narail	Asia/Dhaka	23.16	89.50
@@ -35689,6 +35753,7 @@ natitingou	Africa/Porto-Novo	10.30	1.38
 natividade	America/Sao_Paulo	-21.04	-41.97
 natona	Asia/Dhaka	22.05	90.03
 natore	Asia/Dhaka	24.41	88.99
+natori	Asia/Tokyo	38.17	140.88
 natori shi	Asia/Tokyo	38.17	140.88
 nattakam	Asia/Kolkata	9.55	76.51
 nattappettai	Asia/Kolkata	12.82	79.75
@@ -36078,7 +36143,7 @@ new berlin	America/Chicago	42.98	-88.11
 new bern	America/New_York	35.11	-77.04
 new bombay	Asia/Kolkata	19.04	73.02
 new braunfels	America/Chicago	29.70	-98.12
-new brighton	America/Chicago	45.07	-93.20
+new brighton	Africa/Johannesburg	-33.90	25.60
 new britain	America/New_York	41.66	-72.78
 new brunswick	America/New_York	40.49	-74.45
 new cairo	Africa/Cairo	30.03	31.47
@@ -36243,6 +36308,8 @@ ngã bảy	Asia/Ho_Chi_Minh	9.81	105.82
 ngã năm	Asia/Ho_Chi_Minh	9.57	105.60
 ngūr	Asia/Kolkata	23.54	93.37
 nha be	Asia/Ho_Chi_Minh	10.70	106.74
+nha bich	Asia/Ho_Chi_Minh	11.49	106.69
+nha bích	Asia/Ho_Chi_Minh	11.49	106.69
 nha tram	Asia/Ho_Chi_Minh	12.25	109.19
 nha trang	Asia/Ho_Chi_Minh	12.25	109.19
 nha tranga	Asia/Ho_Chi_Minh	12.25	109.19
@@ -36424,8 +36491,6 @@ ningsiafu	Asia/Shanghai	38.47	106.27
 ningyang	Asia/Shanghai	35.76	116.79
 ning’er	Asia/Shanghai	23.04	101.04
 ninh ba	Asia/Shanghai	29.88	121.55
-ninh binh	Asia/Bangkok	20.26	105.98
-ninh bình	Asia/Bangkok	20.26	105.98
 ninh hoa	Asia/Ho_Chi_Minh	12.49	109.12
 ninh hòa	Asia/Ho_Chi_Minh	12.49	109.12
 nino jesus	Europe/Madrid	40.41	-3.67
@@ -36457,6 +36522,7 @@ nis	Europe/Belgrade	43.32	21.90
 nisang	Asia/Kolkata	29.69	76.75
 niscemi	Europe/Rome	37.15	14.39
 nischni nowgorod	Europe/Moscow	56.33	44.00
+nishi tokyo	Asia/Tokyo	35.73	139.54
 nishi tokyo shi	Asia/Tokyo	35.73	139.54
 nishiarai	Asia/Tokyo	35.78	139.78
 nishifukuma	Asia/Tokyo	33.77	130.47
@@ -36593,6 +36659,8 @@ noborito	Asia/Tokyo	35.62	139.56
 nobosibileuseukeu	Asia/Novosibirsk	55.02	82.93
 nobosimpirsk	Asia/Novosibirsk	55.02	82.93
 nobres	America/Cuiaba	-14.72	-56.33
+nocchad	Asia/Kolkata	11.53	75.75
+nocchād	Asia/Kolkata	11.53	75.75
 nocera inferiore	Europe/Rome	40.75	14.65
 nocera superiore	Europe/Rome	40.74	14.67
 nochistlan de mejia	America/Mexico_City	21.36	-102.85
@@ -37487,6 +37555,7 @@ oeljanovsk	Europe/Ulyanovsk	54.33	48.39
 oer erkenschwick	Europe/Berlin	51.64	7.26
 oerebro	Europe/Stockholm	59.27	15.21
 oeremce	Asia/Urumqi	43.80	87.60
+oerlikon	Europe/Zurich	47.41	8.54
 oerlinghausen	Europe/Berlin	51.95	8.66
 oernskoeldsvik	Europe/Stockholm	63.29	18.72
 oestermalm	Europe/Stockholm	59.34	18.08
@@ -37503,6 +37572,8 @@ ogaki	Asia/Tokyo	35.35	136.62
 ogaminana	Africa/Lagos	7.59	6.22
 ogawa	Asia/Tokyo	34.97	136.97
 ogawamachi	Asia/Tokyo	36.05	139.27
+ogbia	Africa/Lagos	4.69	6.32
+ogbia town	Africa/Lagos	4.69	6.32
 ogbomoso	Africa/Lagos	8.13	4.24
 ogden	America/Denver	41.22	-111.97
 ogembo	Africa/Nairobi	-0.80	34.73
@@ -38376,6 +38447,7 @@ paiçandu	America/Sao_Paulo	-23.46	-52.05
 pajanana	Europe/Warsaw	52.41	16.93
 pajara	Atlantic/Canary	28.35	-14.11
 pajok	Africa/Juba	3.87	32.48
+paju	Asia/Seoul	37.76	126.77
 pak chong	Asia/Bangkok	14.71	101.42
 pak hai chhi	Asia/Shanghai	21.48	109.12
 pak kiu chiu chhi	Asia/Tokyo	33.85	130.85
@@ -38936,7 +39008,7 @@ parla	Europe/Madrid	40.24	-3.77
 parli vaijnath	Asia/Kolkata	18.85	76.53
 parli vaijnāth	Asia/Kolkata	18.85	76.53
 parlier	America/Los_Angeles	36.61	-119.53
-parma	Asia/Yekaterinburg	58.01	56.25
+parma	Europe/Rome	44.80	10.33
 parma heights	America/New_York	41.39	-81.76
 parminkam	Europe/London	52.48	-1.90
 parnaiba	America/Fortaleza	-2.90	-41.78
@@ -41656,6 +41728,7 @@ qiqihar chhi	Asia/Shanghai	47.34	123.96
 qiqihar shi	Asia/Shanghai	47.34	123.96
 qir	Asia/Tehran	28.48	53.03
 qir moav	Asia/Amman	31.18	35.70
+qirmisin	Asia/Tehran	34.31	47.06
 qiryat ata	Asia/Jerusalem	32.81	35.11
 qiryat bialik	Asia/Jerusalem	32.83	35.09
 qiryat hayovel	Asia/Jerusalem	31.77	35.17
@@ -43287,6 +43360,7 @@ ruvo di puglia	Europe/Rome	41.12	16.48
 ruwa	Africa/Harare	-17.89	31.24
 ruwandiz	Asia/Baghdad	36.61	44.52
 ruy barbosa	America/Bahia	-12.28	-40.49
+ruyenzi	Africa/Kigali	-1.97	29.98
 ruyin	Asia/Shanghai	32.90	115.82
 ruzayevka	Europe/Moscow	54.06	44.95
 ruzomberok	Europe/Bratislava	49.07	19.31
@@ -43610,7 +43684,7 @@ saga	Asia/Tokyo	33.23	130.30
 sagae	Asia/Tokyo	38.37	140.27
 sagaing	Asia/Yangon	21.88	95.98
 sagalo	Africa/Bamako	12.20	-10.70
-sagamihara	Asia/Tokyo	35.60	139.32
+sagamihara	Asia/Tokyo	35.57	139.24
 sagamikhara	Asia/Tokyo	35.57	139.24
 sagar	Asia/Kolkata	14.16	75.03
 sagara	Asia/Tokyo	34.69	138.20
@@ -43653,6 +43727,7 @@ sahawar	Asia/Kolkata	27.80	78.83
 sahdzahanabad	Asia/Kolkata	28.65	77.23
 sahibabad daulotpur	Asia/Kolkata	28.75	77.11
 sahibganj	Asia/Kolkata	25.24	87.63
+sahindere	Europe/Istanbul	40.14	43.12
 sahivala	Asia/Karachi	30.67	73.10
 sahivalas	Asia/Karachi	30.67	73.10
 sahiwal	Asia/Karachi	31.97	72.33
@@ -43772,6 +43847,7 @@ saint lin laurentides	America/Toronto	45.85	-73.77
 saint lo	Europe/Paris	49.12	-1.09
 saint louis	Africa/Dakar	16.02	-16.49
 saint louis de terrebonne	America/Toronto	45.70	-73.79
+saint louis heights	Pacific/Honolulu	21.28	-157.81
 saint louis park	America/Chicago	44.95	-93.35
 saint loup	Europe/Paris	43.28	5.43
 saint léonard	America/Toronto	45.59	-73.60
@@ -43826,6 +43902,8 @@ sainte catherine	America/Toronto	45.40	-73.58
 sainte foy	America/Toronto	46.78	-71.29
 sainte foy les lyon	Europe/Paris	45.73	4.80
 sainte foy lès lyon	Europe/Paris	45.73	4.80
+sainte foy sillery cap rouge	America/Toronto	46.76	-71.35
+sainte foy–sillery–cap rouge	America/Toronto	46.76	-71.35
 sainte genevieve des bois	Europe/Paris	48.65	2.32
 sainte geneviève des bois	Europe/Paris	48.65	2.32
 sainte julie	America/Toronto	45.58	-73.33
@@ -43941,7 +44019,7 @@ salduie	Europe/Madrid	41.66	-0.88
 sale al jadida	Africa/Casablanca	34.00	-6.74
 salehieh	Asia/Tehran	35.51	51.19
 salekhard	Asia/Yekaterinburg	66.53	66.61
-salem	Asia/Jerusalem	31.77	35.22
+salem	Asia/Kolkata	11.65	78.16
 salema	Asia/Kolkata	11.65	78.16
 salerno	Europe/Rome	40.68	14.79
 salesopolis	America/Sao_Paulo	-23.53	-45.85
@@ -43986,6 +44064,7 @@ salqin	Asia/Damascus	36.14	36.45
 salqīn	Asia/Damascus	36.14	36.45
 salsomaggiore terme	Europe/Rome	44.82	9.99
 salt lake city	America/Denver	40.76	-111.89
+salt lakes	Pacific/Honolulu	21.36	-157.92
 salt river	America/Phoenix	33.45	-112.07
 salta	America/Argentina/Salta	-24.81	-65.42
 salta llaqta	America/Argentina/Salta	-24.81	-65.42
@@ -44108,7 +44187,6 @@ samch’ŏn	Asia/Pyongyang	38.36	125.33
 samdari	Asia/Kolkata	25.81	72.58
 samfya	Africa/Lusaka	-11.36	29.56
 samho rodongjagu	Asia/Pyongyang	39.95	127.87
-saminaka	Africa/Lagos	10.41	8.69
 samitah	Asia/Riyadh	16.60	42.94
 samjiyon up	Asia/Pyongyang	41.80	128.32
 samjiyŏn ŭp	Asia/Pyongyang	41.80	128.32
@@ -44131,7 +44209,6 @@ samsun	Europe/Istanbul	41.28	36.34
 samthar	Asia/Kolkata	25.84	78.91
 samtredia	Asia/Tbilisi	42.15	42.34
 samu pa'ulu	America/Sao_Paulo	-23.55	-46.64
-samunakar	Africa/Lagos	10.41	8.69
 samurou	Asia/Kolkata	24.70	93.90
 samut prakan	Asia/Bangkok	13.60	100.60
 samut sakhon	Asia/Bangkok	13.55	100.27
@@ -44220,7 +44297,7 @@ san chaung	Asia/Yangon	17.10	96.10
 san chose	America/Los_Angeles	37.34	-121.89
 san choze	America/Los_Angeles	37.34	-121.89
 san clemente	America/Los_Angeles	33.43	-117.61
-san cristobal	America/Mexico_City	19.60	-99.06
+san cristobal	America/Caracas	7.77	-72.24
 san cristobal de las casas	America/Merida	16.73	-92.64
 san cristobal ecatepec	America/Mexico_City	19.60	-99.06
 san cristobal ecatepec de morelos	America/Mexico_City	19.60	-99.06
@@ -44402,7 +44479,7 @@ san lorenzo de esmeraldas	America/Guayaquil	1.29	-78.84
 san louis potosi	America/Monterrey	22.15	-100.97
 san lucas sacatepequez	America/Guatemala	14.61	-90.66
 san lucas sacatepéquez	America/Guatemala	14.61	-90.66
-san luis	America/Fortaleza	-2.53	-44.30
+san luis	America/Argentina/San_Luis	-33.29	-66.32
 san luis de la paz	America/Mexico_City	21.30	-100.51
 san luis de since	America/Bogota	9.24	-75.15
 san luis de sincé	America/Bogota	9.24	-75.15
@@ -44453,7 +44530,7 @@ san migel de tukuman	America/Argentina/Tucuman	-26.82	-65.21
 san migel deh tukuman	America/Argentina/Tucuman	-26.82	-65.21
 san migel' de tukuman	America/Argentina/Tucuman	-26.82	-65.21
 san migel' deh tukuman	America/Argentina/Tucuman	-26.82	-65.21
-san miguel	America/Los_Angeles	32.72	-117.16
+san miguel	America/El_Salvador	13.48	-88.18
 san miguel ajusco	America/Mexico_City	19.22	-99.20
 san miguel coatlinchan	America/Mexico_City	19.45	-98.87
 san miguel coatlinchán	America/Mexico_City	19.45	-98.87
@@ -44506,7 +44583,7 @@ san pawl il baħar	Europe/Malta	35.95	14.42
 san pawlo	America/Sao_Paulo	-23.55	-46.64
 san pe dor su la	America/Tegucigalpa	15.51	-88.03
 san pedra sula	America/Tegucigalpa	15.51	-88.03
-san pedro	America/Tegucigalpa	15.51	-88.03
+san pedro	Africa/Abidjan	4.75	-6.64
 san pedro alcantara	Europe/Madrid	36.49	-4.99
 san pedro alcántara	Europe/Madrid	36.49	-4.99
 san pedro ayampuc	America/Guatemala	14.78	-90.45
@@ -44573,7 +44650,7 @@ san sebastian de los reyes	Europe/Madrid	40.56	-3.63
 san sebastian de mariquita	America/Bogota	5.20	-74.89
 san sebastian el grande	America/Mexico_City	20.53	-103.43
 san sebastiano	Europe/Rome	45.65	10.26
-san sebastián	America/Guatemala	14.56	-91.65
+san sebastián	Europe/Madrid	43.31	-1.97
 san sebastián de los reyes	Europe/Madrid	40.56	-3.63
 san sebastián de mariquita	America/Bogota	5.20	-74.89
 san sebastián el grande	America/Mexico_City	20.53	-103.43
@@ -44873,7 +44950,7 @@ sant'jago de kuba	America/Havana	20.02	-75.82
 sant'jago de kubae	America/Havana	20.02	-75.82
 sant'jago de los kabal'eros	America/Santo_Domingo	19.45	-70.69
 sant'jago de los trejnta kabal'eros	America/Santo_Domingo	19.45	-70.69
-santa ana	Asia/Manila	14.52	121.08
+santa ana	America/Los_Angeles	33.75	-117.87
 santa ana chiautempan	America/Mexico_City	19.31	-98.19
 santa ana de los cuatro rios de cuenca	America/Guayaquil	-2.90	-79.00
 santa ana xalmimilulco	America/Mexico_City	19.21	-98.38
@@ -45895,6 +45972,7 @@ sedhiou	Africa/Dakar	12.71	-15.56
 sedniejos	Australia/Sydney	-33.87	151.21
 sedrata	Africa/Algiers	36.13	7.53
 seeb	Asia/Muscat	23.67	58.19
+seebach	Europe/Zurich	47.42	8.55
 seeheim jugenheim	Europe/Berlin	49.77	8.65
 seelze	Europe/Berlin	52.40	9.59
 seen (kreis 3)	Europe/Zurich	47.48	8.77
@@ -45919,6 +45997,7 @@ segrate	Europe/Rome	45.49	9.30
 seguela	Africa/Abidjan	7.96	-6.67
 seguin	America/Chicago	29.57	-97.96
 segundo ensanche	Europe/Madrid	42.81	-1.64
+sehitler	Europe/Istanbul	40.59	43.09
 sehnde	Europe/Berlin	52.31	9.97
 sehore	Asia/Kolkata	23.20	77.08
 sehwan	Asia/Karachi	26.42	67.86
@@ -47344,6 +47423,7 @@ siguatepeque	America/Tegucigalpa	14.60	-87.83
 siguiri	Africa/Conakry	11.42	-9.17
 sihanoukville	Asia/Phnom_Penh	10.61	103.53
 siheungdong	Asia/Seoul	37.45	126.91
+sihlfeld	Europe/Zurich	47.37	8.51
 sihningz	Asia/Shanghai	36.63	101.76
 sihor	Asia/Kolkata	21.71	71.96
 sihora	Asia/Kolkata	23.49	80.10
@@ -48325,6 +48405,7 @@ spokane	America/Los_Angeles	47.66	-117.43
 spokane valley	America/Los_Angeles	47.67	-117.24
 spoleto	Europe/Rome	42.74	12.74
 spring hill	America/New_York	28.48	-82.53
+spring road	America/New_York	38.94	-77.03
 spring valley	America/Los_Angeles	36.11	-115.25
 springboro	America/New_York	39.55	-84.23
 springdale	America/Chicago	36.19	-94.13
@@ -48721,8 +48802,7 @@ suancheng hsien	Asia/Shanghai	30.95	118.76
 suang ja san	Asia/Shanghai	46.68	131.13
 suar	Asia/Kolkata	29.03	79.06
 suarez	America/Bogota	2.95	-76.70
-suay	Asia/Manila	10.05	122.84
-subang	Asia/Kuala_Lumpur	3.15	101.53
+subang	Asia/Jakarta	-6.57	107.76
 subang dzhaja	Asia/Kuala_Lumpur	3.04	101.58
 subang jaya	Asia/Kuala_Lumpur	3.04	101.58
 subangjaya	Asia/Kuala_Lumpur	3.04	101.58
@@ -49643,6 +49723,8 @@ tabouk	Asia/Riyadh	28.40	36.57
 tabount	Africa/Casablanca	30.90	-6.92
 taboão da serra	America/Sao_Paulo	-23.63	-46.79
 tabrez	Asia/Tehran	38.08	46.29
+tabreze	Asia/Tehran	38.08	46.29
+tabrezion	Asia/Tehran	38.08	46.29
 tabris	Asia/Tehran	38.08	46.29
 tabriz	Asia/Tehran	38.08	46.29
 tabrizo	Asia/Tehran	38.08	46.29
@@ -49710,7 +49792,9 @@ tafresh	Asia/Tehran	34.69	50.02
 taft	Asia/Tehran	31.74	54.20
 taftan	Asia/Karachi	28.95	61.59
 tafí viejo	America/Argentina/Tucuman	-26.73	-65.26
+tagajo	Asia/Tokyo	38.30	141.00
 tagajo shi	Asia/Tokyo	38.30	141.00
+tagajō	Asia/Tokyo	38.30	141.00
 tagajō shi	Asia/Tokyo	38.30	141.00
 taganrog	Europe/Moscow	47.24	38.91
 taganskiy	Europe/Moscow	55.73	37.67
@@ -49752,6 +49836,7 @@ tai po	Asia/Hong_Kong	22.45	114.17
 tai shui hang	Asia/Hong_Kong	22.41	114.22
 tai tiong chhi	Asia/Taipei	24.15	120.68
 tai wai	Asia/Hong_Kong	22.37	114.18
+tai wan foo	Asia/Taipei	22.99	120.21
 tai wo hau	Asia/Hong_Kong	22.37	114.12
 tai yuan	Asia/Shanghai	37.87	112.56
 tai yuan shi	Asia/Shanghai	37.87	112.56
@@ -50080,7 +50165,7 @@ tamuín	America/Mexico_City	22.01	-98.78
 tamworth	Europe/London	52.63	-1.70
 tan an	Asia/Ho_Chi_Minh	10.54	106.41
 tan binh	Asia/Ho_Chi_Minh	10.80	106.66
-tan chau	Asia/Shanghai	37.37	118.02
+tan chau	Asia/Ho_Chi_Minh	10.80	105.24
 tan du	Asia/Shanghai	27.80	114.93
 tan ge lang	Asia/Jakarta	-6.18	106.63
 tan giang	Asia/Shanghai	24.82	118.57
@@ -50113,7 +50198,7 @@ tanay	Asia/Manila	14.50	121.28
 tanba	Asia/Tokyo	35.16	135.04
 tanca	Africa/Casablanca	35.77	-5.80
 tanchang chengguanzhen	Asia/Shanghai	34.04	104.39
-tanda	Africa/Cairo	30.79	31.00
+tanda	Asia/Kolkata	26.55	82.66
 tandag	Asia/Manila	9.08	126.20
 tandahimba	Africa/Dar_es_Salaam	-10.75	39.63
 tandai	Pacific/Guadalcanal	-9.45	159.95
@@ -50221,6 +50306,7 @@ tansen	Asia/Kathmandu	27.87	83.55
 tanshan	Asia/Shanghai	39.64	118.18
 tanshan'	Asia/Shanghai	39.64	118.18
 tanta	Africa/Cairo	30.79	31.00
+tantalus	Pacific/Honolulu	21.32	-157.83
 tantou	Asia/Shanghai	22.75	113.83
 tantoyuca	America/Mexico_City	21.35	-98.23
 tantuhsien	Asia/Shanghai	32.21	119.46
@@ -50431,6 +50517,7 @@ tavşanlı	Europe/Istanbul	39.54	29.50
 tawakule	Asia/Urumqi	37.76	80.22
 tawaramoto	Asia/Tokyo	34.55	135.79
 tawau	Asia/Kuching	4.24	117.89
+tawrez	Asia/Tehran	38.08	46.29
 taxco de alarcon	America/Mexico_City	18.56	-99.61
 taxco de alarcón	America/Mexico_City	18.56	-99.61
 taxkent	Asia/Tashkent	41.26	69.22
@@ -51850,6 +51937,7 @@ tottenham	Europe/London	51.60	-0.07
 tottenham hale	Europe/London	51.59	-0.06
 totteridge	Europe/London	51.63	-0.20
 totton	Europe/London	50.92	-1.49
+tottori	Asia/Tokyo	35.50	134.23
 tottori shi	Asia/Tokyo	35.50	134.23
 touagui	Africa/Abidjan	5.43	-6.56
 touba	Africa/Dakar	14.86	-15.88
@@ -52780,6 +52868,7 @@ tŏkch’ŏn	Asia/Pyongyang	39.75	126.26
 třebíč	Europe/Prague	49.21	15.88
 třinec	Europe/Prague	49.68	18.67
 tūndla	Asia/Kolkata	27.21	78.24
+tūnis	Africa/Cairo	26.61	31.69
 tūnēri	Asia/Kolkata	11.70	75.63
 tūyserkān	Asia/Tehran	34.55	48.44
 tŭytepa	Asia/Tashkent	41.03	69.36
@@ -52890,6 +52979,7 @@ ueda	Asia/Tokyo	36.40	138.28
 uekimachi mono	Asia/Tokyo	32.90	130.69
 uekimachi mōno	Asia/Tokyo	32.90	130.69
 uelzen	Europe/Berlin	52.96	10.57
+uemraniye	Europe/Istanbul	41.02	29.12
 ueno ebisumachi	Asia/Tokyo	34.76	136.13
 uenohara	Asia/Tokyo	35.62	139.12
 uenye	Europe/Istanbul	41.14	37.29
@@ -53095,7 +53185,6 @@ umm shawkah	Africa/Khartoum	13.32	33.77
 umm suqaym	Asia/Dubai	25.15	55.21
 umm şalāl muḩammad	Asia/Qatar	25.42	51.41
 umranie	Europe/Istanbul	41.02	29.12
-umraniye	Europe/Istanbul	41.02	29.12
 umred	Asia/Kolkata	20.85	79.32
 umreth	Asia/Kolkata	22.70	73.12
 umuahia	Africa/Lagos	5.52	7.49
@@ -53157,6 +53246,7 @@ unterhaching	Europe/Berlin	48.07	11.62
 unterkrozingen	Europe/Berlin	47.92	7.69
 unterschleissheim	Europe/Berlin	48.28	11.58
 unterschleißheim	Europe/Berlin	48.28	11.58
+unterstrass	Europe/Zurich	47.40	8.54
 untolovo	Europe/Moscow	60.01	30.21
 unzen	Asia/Tokyo	32.77	130.25
 uong sioh	Asia/Shanghai	30.25	115.05
@@ -54327,7 +54417,7 @@ visaginas	Europe/Vilnius	55.60	26.44
 visak	Asia/Kolkata	17.68	83.20
 visakha	Asia/Kolkata	17.68	83.20
 visakhapatanama	Asia/Kolkata	17.68	83.20
-visakhapatnam	Asia/Kolkata	17.73	83.32
+visakhapatnam	Asia/Kolkata	17.68	83.20
 visakhapatnamas	Asia/Kolkata	17.68	83.20
 visakhapattanam	Asia/Kolkata	17.68	83.20
 visakhapattanama	Asia/Kolkata	17.68	83.20
@@ -55421,6 +55511,7 @@ winterhude	Europe/Berlin	53.59	10.01
 winterswijk	Europe/Amsterdam	51.97	6.72
 winterthur	Europe/Zurich	47.51	8.72
 winthrop	America/New_York	42.38	-70.98
+wipkingen	Europe/Zurich	47.40	8.53
 wipperfuerth	Europe/Berlin	51.12	7.40
 wipperfürth	Europe/Berlin	51.12	7.40
 wiradesa	Asia/Jakarta	-6.89	109.62
@@ -55494,6 +55585,7 @@ wolfsberg	Europe/Vienna	46.84	14.84
 wolfsburg	Europe/Berlin	52.42	10.78
 wolgograd	Europe/Volgograd	48.71	44.50
 wollert	Australia/Melbourne	-37.58	145.03
+wollishofen	Europe/Zurich	47.34	8.53
 wollongong	Australia/Sydney	-34.42	150.89
 wollongong city centre	Australia/Sydney	-34.43	150.89
 wolmaransstad	Africa/Johannesburg	-27.20	25.98
@@ -56158,6 +56250,7 @@ yaguachi nuevo	America/Guayaquil	-2.10	-79.69
 yaguajay	America/Havana	22.33	-79.24
 yahaba	Asia/Tokyo	39.61	141.15
 yahotyn	Europe/Kyiv	50.28	31.76
+yahudiya	Asia/Tehran	32.65	51.67
 yahyali	Europe/Istanbul	38.10	35.36
 yahyalı	Europe/Istanbul	38.10	35.36
 yai hsien	Asia/Shanghai	18.25	109.51
@@ -56730,7 +56823,7 @@ yongji	Asia/Shanghai	34.87	110.44
 yongjia	Asia/Shanghai	28.00	120.67
 yongjian	Asia/Shanghai	25.43	100.21
 yongjing	Asia/Taipei	23.92	120.55
-yongkang	Asia/Shanghai	28.88	120.03
+yongkang	Asia/Taipei	23.02	120.26
 yongle	Asia/Shanghai	31.01	109.50
 yongning	Asia/Shanghai	22.76	108.48
 yongping	Asia/Shanghai	34.29	105.27
@@ -57149,7 +57242,7 @@ zapwpan khalyskw	America/Mexico_City	20.72	-103.39
 zaqatala	Asia/Baku	41.63	46.64
 zaqreb	Europe/Zagreb	45.81	15.98
 zaragosa	Europe/Madrid	41.66	-0.88
-zaragoza	America/Tijuana	32.50	-117.00
+zaragoza	Europe/Madrid	41.66	-0.88
 zarand	Asia/Tehran	30.81	56.56
 zaranj	Asia/Kabul	30.96	61.86
 zarate	America/Argentina/Buenos_Aires	-34.10	-59.02
@@ -57624,6 +57717,7 @@ zuerich (kreis 2)	Europe/Zurich	47.34	8.52
 zuerich (kreis 2) / wollishofen	Europe/Zurich	47.34	8.53
 zuerich (kreis 3)	Europe/Zurich	47.36	8.50
 zuerich (kreis 3) / sihlfeld	Europe/Zurich	47.37	8.51
+zuerich (kreis 4)	Europe/Zurich	47.38	8.52
 zuerich (kreis 4) / aussersihl	Europe/Zurich	47.38	8.52
 zuerich (kreis 6)	Europe/Zurich	47.39	8.54
 zuerich (kreis 6) / unterstrass	Europe/Zurich	47.40	8.54
@@ -57675,6 +57769,7 @@ zvečan	Europe/Belgrade	42.91	20.84
 zvishavane	Africa/Harare	-20.33	30.07
 zvolen	Europe/Bratislava	48.57	19.15
 zvyahel	Europe/Kyiv	50.59	27.61
+zwaag	Europe/Amsterdam	52.67	5.08
 zwedru	Africa/Monrovia	6.07	-8.14
 zweibruecken	Europe/Berlin	49.25	7.37
 zweibrücken	Europe/Berlin	49.25	7.37
@@ -57719,6 +57814,7 @@ zürich (kreis 2)	Europe/Zurich	47.34	8.52
 zürich (kreis 2) / wollishofen	Europe/Zurich	47.34	8.53
 zürich (kreis 3)	Europe/Zurich	47.36	8.50
 zürich (kreis 3) / sihlfeld	Europe/Zurich	47.37	8.51
+zürich (kreis 4)	Europe/Zurich	47.38	8.52
 zürich (kreis 4) / aussersihl	Europe/Zurich	47.38	8.52
 zürich (kreis 6)	Europe/Zurich	47.39	8.54
 zürich (kreis 6) / unterstrass	Europe/Zurich	47.40	8.54
@@ -57850,6 +57946,7 @@ złotów	Europe/Warsaw	53.36	17.04
 ústí nad labem	Europe/Prague	50.66	14.03
 übach palenberg	Europe/Berlin	50.92	6.12
 überlingen	Europe/Berlin	47.77	9.17
+ümraniye	Europe/Istanbul	41.02	29.12
 ünye	Europe/Istanbul	41.14	37.29
 ürgüp	Europe/Istanbul	38.63	34.91
 ürümqi	Asia/Urumqi	43.80	87.60
@@ -58034,6 +58131,7 @@ złotów	Europe/Warsaw	53.36	17.04
 şafwá	Asia/Riyadh	26.65	49.96
 şafwān	Asia/Baghdad	30.12	47.72
 şafāshahr	Asia/Tehran	30.61	53.20
+şahindere	Europe/Istanbul	40.14	43.12
 şalālah	Asia/Muscat	17.02	54.09
 şanlıurfa	Europe/Istanbul	37.17	38.79
 şarkîkaraağaç	Europe/Istanbul	38.08	31.37
@@ -58042,6 +58140,7 @@ złotów	Europe/Warsaw	53.36	17.04
 şaḩneh	Asia/Tehran	34.48	47.69
 şaḩnāyā	Asia/Damascus	33.43	36.23
 şebin karahisar	Europe/Istanbul	40.29	38.42
+şehitler	Europe/Istanbul	40.59	43.09
 şemdinli	Europe/Istanbul	37.31	44.57
 şemikler	Europe/Istanbul	38.47	27.10
 şereflikoçhisar	Europe/Istanbul	38.94	33.54

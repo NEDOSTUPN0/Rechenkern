@@ -527,7 +527,8 @@ mod tests {
         // is not the city, which keeps other time.
         assert_eq!(latitude("texas"), None);
         assert_eq!(latitude("pst"), None);
-        assert_eq!(latitude("washington"), None);
+        assert_eq!(latitude("washington state"), None);
+        assert_eq!(latitude("washington"), Some(38.9));
         let new_york = zone_location(&TimeZone::get("America/New_York").unwrap()).unwrap();
         assert_eq!((new_york.latitude, new_york.longitude), (40.71, -74.01));
     }

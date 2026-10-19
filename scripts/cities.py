@@ -15,6 +15,9 @@ import unicodedata
 ALTERNATES_FROM = 500_000
 # Cities named like an English word must be this big to count ("Reading" yes, "Time" no).
 WORD_NAMES_FROM = 200_000
+# An alternate name stands for a city as if it had this much of its population: a
+# smaller city of that name wins ("Parma" is Italy's, not an old name of Perm).
+ALTERNATE_WEIGHT = 0.15
 # Words too common in calculations to ever mean a city.
 STOPWORDS = {"sale", "man", "gold", "hub", "bush", "delta", "mango", "lion", "shaping", "lander", "terminus"}
 
@@ -48,7 +51,7 @@ def degrees(text):
 
 def main(cities_path, words_path):
     words = {w.strip().lower() for w in open(words_path, encoding="latin-1") if w.strip().isalpha()}
-    best = {}  # key -> (population, zone, latitude, longitude)
+    best = {}  # key -> (weighed population, zone, latitude, longitude)
     for line in open(cities_path, encoding="utf-8"):
         fields = line.rstrip("\n").split("\t")
         name, ascii_name, alternates, zone = fields[1], fields[2], fields[3], fields[17]
@@ -56,20 +59,28 @@ def main(cities_path, words_path):
         population = int(fields[14] or 0)
         if not zone:
             continue
+        country = fields[8]
         names = {key(name), key(ascii_name)}
+        # "Donostia / San Sebastián" goes by either name.
+        names |= {key(part) for n in (name, ascii_name) if " / " in n for part in n.split(" / ")}
+        # "Nara-shi" is the city of Nara.
+        if country == "JP":
+            names |= {n.removesuffix(" shi") for n in names if n.endswith(" shi")}
         if population < WORD_NAMES_FROM:
             names -= words
+        alternate_names = set()
         if population >= ALTERNATES_FROM:
             for alt in alternates.split(","):
                 # Skip airport codes like "OZH" and alternates that are words ("Deli" for Delhi).
                 if ASCII.match(alt) and not (alt.isupper() and len(alt) <= 4) and key(alt) not in words:
-                    names.add(key(alt))
-        for n in names:
+                    alternate_names.add(key(alt))
+        for n in names | alternate_names:
             if len(n) < 3 or n in STOPWORDS:
                 continue
-            # The most populous place wins a shared name.
-            if n not in best or best[n][0] < population:
-                best[n] = (population, zone, latitude, longitude)
+            # The most populous place wins a shared name; an alternate name counts for less.
+            weight = population * (ALTERNATE_WEIGHT if n not in names else 1)
+            if n not in best or best[n][0] < weight:
+                best[n] = (weight, zone, latitude, longitude)
 
     # Names as typed: "Fort St. John" is "fort st john", "'Afak" is "afak", "Banī Na‘īm" is "banī na īm".
     extra = {}
