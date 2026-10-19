@@ -264,6 +264,12 @@ impl Env<'_> {
                 return Ok(Quantity::new(number, money));
             }
         }
+        // "100 USD × A$1.50/$" is A$150: an exchange rate cancels its currency.
+        let exchange = super::is_exchange_rate(&x.unit) || super::is_exchange_rate(&y_unit);
+        let product = x.unit.product(&y_unit);
+        if exchange && (product.is_money() || product.is_none() || super::is_exchange_rate(&product)) {
+            return Ok(Quantity::new(number, product));
+        }
         // "$500/month / 30 days" spreads the money over those days: $16.67/day.
         if divide && x.unit.dim() == Dim::MONEY.div(Dim::TIME) && y.unit.dim() == Dim::TIME {
             return Ok(Quantity::new(number, x.unit.numerator().product(&y_unit)));

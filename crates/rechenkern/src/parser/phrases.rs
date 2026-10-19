@@ -5,7 +5,7 @@ use crate::ast::{Direction, Expr, Format, Func, GrowthResult, Op, Target, TaxPar
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
-use crate::units::{Dim, registry};
+use crate::units::{Dim, Unit, registry};
 
 impl Parser<'_> {
     /// Tries phrases such as "20 is what % of 200" on the whole line.
@@ -26,6 +26,9 @@ impl Parser<'_> {
             return Ok(Some(expr));
         }
         if let Some(expr) = self.annual_return()? {
+            return Ok(Some(expr));
+        }
+        if let Some(expr) = self.exchange_rate()? {
             return Ok(Some(expr));
         }
         if let Some(expr) = self.time_to_reach()? {
@@ -362,8 +365,8 @@ impl Parser<'_> {
         }
         let reg = registry();
         // "3 days 8 hours": an amount per a period takes a time in that period and shorter ones.
-        let parts = |longest: &crate::units::Unit| {
-            let size = |u: &crate::units::Unit| u.single().map_or(Number::ZERO, |d| d.scale);
+        let parts = |longest: &Unit| {
+            let size = |u: &Unit| u.single().map_or(Number::ZERO, |d| d.scale);
             ["yr", "mo", "wk", "d", "h", "min", "s"]
                 .map(|s| reg.get(s))
                 .into_iter()
@@ -434,6 +437,38 @@ impl Parser<'_> {
         let (a, b) = (self.part(start, invested)?, self.part(second, returned)?);
         let gain = Expr::binary(Op::Div, Expr::binary(Op::Sub, b, a.clone()), a);
         Ok(Some(Self::formatted(gain, format)))
+    }
+
+    /// "exchange rate from 100 USD to 150 AUD" = A$1.50/$, the rate two amounts make;
+    /// "exchange rate from USD to EUR" is a unit of one in the other.
+    fn exchange_rate(&self) -> Result<Option<Expr>> {
+        let mut i = usize::from(self.matches_at(0, &["the"]));
+        if !self.matches_at(i, &["exchange", "rate"]) {
+            return Ok(None);
+        }
+        i += 2;
+        if ["from", "for", "of", "between"].iter().any(|w| self.matches_at(i, &[w])) {
+            i += 1;
+        }
+        let Some(to) = ["to", "and"].iter().filter_map(|w| self.find(i + 1, &[w])).min() else { return Ok(None) };
+        let a = self.part(i, to)?;
+        // "... to 150 AUD in USD/AUD": the rate converted.
+        let (b, target) = match self.part(to + 1, self.toks.len())? {
+            Expr::Convert(b, target) => (*b, Some(target)),
+            b => (b, None),
+        };
+        let money = |e: &Expr| e.edge_unit(true).is_some_and(Unit::is_money);
+        let rate = match (&a, &b) {
+            (Expr::BareUnit(from), Expr::BareUnit(to)) if from.is_money() && to.is_money() => {
+                Expr::Convert(a.boxed(), Target::Unit(to.clone()))
+            }
+            _ if money(&a) && money(&b) => Expr::binary(Op::Per, b, a),
+            _ => return Ok(None),
+        };
+        Ok(Some(match target {
+            Some(target) => Expr::Convert(rate.boxed(), target),
+            None => rate,
+        }))
     }
 
     /// "ppi of 5.5 inch at 1920x1080": the pixels per inch of a screen.
@@ -778,7 +813,7 @@ struct Rate {
     /// The rate ends in a percentage, so it compounds.
     percent: bool,
     /// What it is per: 2 years in "every 2 years".
-    period: Option<(Number, crate::units::Unit)>,
+    period: Option<(Number, Unit)>,
 }
 
 const GROWTH_PHRASES: &[(&[&str], GrowthResult)] = &[

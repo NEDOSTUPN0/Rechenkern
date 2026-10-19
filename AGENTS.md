@@ -313,6 +313,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   list (`1,2,3`).
 - `$` means `Config::dollar` (USD by default). Lowercase currency codes that
   are English words (`all`, `try`, `top`...) only work in uppercase.
+- A currency per another is an exchange rate (`exchange rate from 100 USD to 150 AUD`
+  = A$1.50/$): it cancels its currency against an amount (`100 USD * 1.5 AUD/USD` =
+  A$150) and turns round in a conversion (`in USD/AUD` = $0.67/A$), never at market rates.
 - Cents, pence and satoshis (`currency::MINOR_UNITS`) are money units worth a
   fraction of their currency; answers show them in the whole currency.
 - The sun needs a city or an airport (`zones::locate`); regions and zone names

@@ -33,7 +33,7 @@ $100 split 4 ways                            → $25.00
 $30 × 4 days                                 → $120.00
 
 // Not supported yet
-exchange rate from USD to EUR                → <error: can't make a range from money to money>
+exchange rate from USD to EUR                → €0.90
 $100 from 1990 is worth what today           → $257.80
 investment required for $1,000/month at 5%   → <error: expected a value at the end>
 income tax on $100,000 in US                 → <error: only a date or a time can be in a time zone, not money>

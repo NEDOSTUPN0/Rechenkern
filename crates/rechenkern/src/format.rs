@@ -389,6 +389,9 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config, false);
             }
+            if let Some(text) = exchange_rate(q, config) {
+                return text;
+            }
             if let Some(text) = pace(q, config) {
                 return text;
             }
@@ -396,6 +399,21 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         }
     };
     with_unit(&digits, q.number, &q.unit)
+}
+
+/// A currency per another as money per a symbol: "A$1.50/$", "€0.90/$".
+fn exchange_rate(q: &Quantity, config: &Config) -> Option<String> {
+    let (top, bottom) = match *q.unit.factors() {
+        [(top, 1), (bottom, -1)] | [(bottom, -1), (top, 1)] => (top, bottom),
+        _ => return None,
+    };
+    let reg = registry();
+    let (top, bottom) = (reg.def(top).currency?, reg.def(bottom).currency?);
+    // A rate in yen keeps cents: "¥1.50/$", not "¥2/$".
+    let top_cents = Currency { decimals: top.decimals.max(2), ..*top };
+    let amount = money(&Quantity::new(q.number, registry().currency(top.code)?), &top_cents, config, false);
+    let (symbol, _) = currency_symbol(bottom, config);
+    Some(format!("{amount}/{symbol}"))
 }
 
 /// Minutes per a length as a runner reads it: "5:30 min/km".
@@ -427,12 +445,7 @@ fn money(q: &Quantity, currency: &Currency, config: &Config, written_scale: bool
     let minor = q.unit.factors().iter().map(|&(id, _)| registry().def(id)).find(|d| d.currency.is_some());
     let n = q.number * minor.map_or(Number::ONE, |d| d.scale);
     let decimals = currency.decimals as u32;
-    let custom = f.symbols.iter().find(|s| s.code.eq_ignore_ascii_case(currency.code));
-    let (symbol, position) = match (custom, currency.symbol) {
-        (Some(custom), _) => (custom.symbol.as_str(), custom.position),
-        (None, Some(symbol)) if f.currency_symbols => (symbol, SymbolPosition::Before),
-        _ => (currency.code, SymbolPosition::AfterWithSpace),
-    };
+    let (symbol, position) = currency_symbol(currency, config);
     // Before a code "K", "B" and "m" would be kelvins, bytes and meters: "2.5bn MMK".
     let after = matches!(position, SymbolPosition::After | SymbolPosition::AfterWithSpace);
     let scales = match f.scalars {
@@ -464,6 +477,17 @@ fn money(q: &Quantity, currency: &Currency, config: &Config, written_scale: bool
     let rest: Vec<(UnitId, i8)> =
         q.unit.factors().iter().copied().filter(|&(id, _)| registry().def(id).currency.is_none()).collect();
     with_unit(&amount, n, &unit_from(&rest))
+}
+
+/// How a currency is written, and where: "$" before the amount, "KZT" after it.
+fn currency_symbol<'a>(currency: &'a Currency, config: &'a Config) -> (&'a str, SymbolPosition) {
+    let f = &config.formatting;
+    let custom = f.symbols.iter().find(|s| s.code.eq_ignore_ascii_case(currency.code));
+    match (custom, currency.symbol) {
+        (Some(custom), _) => (custom.symbol.as_str(), custom.position),
+        (None, Some(symbol)) if f.currency_symbols => (symbol, SymbolPosition::Before),
+        _ => (currency.code, SymbolPosition::AfterWithSpace),
+    }
 }
 
 fn unit_from(factors: &[(UnitId, i8)]) -> Unit {

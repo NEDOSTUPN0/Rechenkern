@@ -655,6 +655,13 @@ impl Env<'_> {
                 }
                 self.to_unit(self.div(Value::number(Number::ONE), Value::Quantity(q))?, unit)
             }
+            // An exchange rate the other way round: "A$1.50/$ in USD/AUD" = $0.67/A$.
+            Value::Quantity(q) if is_exchange_rate(&q.unit) && q.unit.pow(-1).same_as(unit) => {
+                if q.number.is_zero() {
+                    bail!("division by zero");
+                }
+                Ok(Value::Quantity(Quantity::new(Number::ONE / q.number, unit.clone())))
+            }
             Value::Quantity(q) => Ok(Value::Quantity(self.convert_quantity(&q, unit)?)),
             Value::Duration(d) => Ok(Value::Quantity(self.duration_in(&d, unit)?)),
             // "100 frames at 24 fps in seconds"
@@ -912,4 +919,10 @@ pub(crate) fn weight_or_volume(target: &Target) -> Option<Dim> {
         _ => return None,
     };
     matches!(dim, Dim::MASS | Dim::VOLUME).then_some(dim)
+}
+
+/// A currency per another: "A$1.50/$".
+pub(crate) fn is_exchange_rate(unit: &Unit) -> bool {
+    let money = |id: UnitId| registry().def(id).currency.is_some();
+    matches!(unit.factors(), &[(a, x), (b, y)] if x * y == -1 && x.abs() == 1 && money(a) && money(b))
 }
