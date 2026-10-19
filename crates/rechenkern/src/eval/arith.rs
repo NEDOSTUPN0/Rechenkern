@@ -337,6 +337,8 @@ impl Env<'_> {
         let (Value::Quantity(x), Value::Quantity(y)) = (a, b) else { bail!("remainder needs two numbers") };
         let y = if y.unit.is_none() { y } else { self.convert_quantity(&y, &x.unit)? };
         let r = x.number.checked_rem(y.number).ok_or_else(|| Error::new("division by zero"))?;
+        // The sign of the divisor, as in SoulverCore and on a clock: "-10 mod 3" = 2.
+        let r = if !r.is_zero() && r.is_negative() != y.number.is_negative() { r + y.number } else { r };
         Ok(Value::Quantity(Quantity::new(r, x.unit)))
     }
 
