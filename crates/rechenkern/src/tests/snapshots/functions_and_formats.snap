@@ -24,6 +24,12 @@ cubed root of 2, 8 and 4                     → <error: cbrt takes 1 argument>
 root(16)                                     → <error: root takes 2 arguments>
 root(2, 8)                                   → 2.828427125
 root of 2, 8 and 4                           → 12
+nthroot(16)                                  → <error: nthroot takes 2 arguments>
+nthroot(2, 8)                                → 1.090507733
+nthroot of 2, 8 and 4                        → <error: nthroot takes 2 arguments>
+pow(16)                                      → <error: pow takes 2 arguments>
+pow(2, 8)                                    → 256
+pow of 2, 8 and 4                            → <error: pow takes 2 arguments>
 exp(16)                                      → 8,886,110.521
 exp(2, 8)                                    → <error: exp takes 1 argument>
 exp of 2, 8 and 4                            → <error: exp takes 1 argument>
@@ -70,7 +76,7 @@ factorial(16)                                → 20,922,789,888,000
 factorial(2, 8)                              → <error: fact takes 1 argument>
 factorial of 2, 8 and 4                      → <error: fact takes 1 argument>
 round(16)                                    → 16
-round(2, 8)                                  → <error: round takes 1 argument>
+round(2, 8)                                  → 2
 round of 2, 8 and 4                          → 12
 ceil(16)                                     → 16
 ceil(2, 8)                                   → <error: ceil takes 1 argument>

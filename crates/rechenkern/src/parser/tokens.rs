@@ -322,6 +322,10 @@ impl<'a> Parser<'a> {
         if word.eq_ignore_ascii_case("in") || (!after_number && (article || (word_unit && !after_slash))) {
             return None;
         }
+        // "3 weekdays" are workdays, but "today as weekday" is the day of the week.
+        if after_number && (word.eq_ignore_ascii_case("weekday") || word.eq_ignore_ascii_case("weekdays")) {
+            return Some((registry().get("workday"), 1));
+        }
         // "5 H", "5 S", "5 T": hours, seconds and tonnes after a number, as in SoulverCore.
         if after_number && let Some(name) = [("H", "h"), ("S", "s"), ("T", "t")].iter().find(|(w, _)| *w == word) {
             return Some((registry().get(name.1), 1));

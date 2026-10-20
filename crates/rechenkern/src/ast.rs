@@ -312,6 +312,10 @@ pub enum Func {
     Sqrt,
     Cbrt,
     Root,
+    /// `nthroot(27, 3)`: a root with its degree last; parsed as `Root`.
+    NthRoot,
+    /// `pow(2, 10)`: parsed as a power.
+    Pow,
     Exp,
     Ln,
     Log,

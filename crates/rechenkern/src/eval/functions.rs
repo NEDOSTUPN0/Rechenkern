@@ -125,6 +125,8 @@ impl Env<'_> {
         }
         match func {
             Log | Clamp | Root | Midpoint | Perm | Comb => {}
+            // "round(3.456, 2)": to decimal places.
+            Round if args.len() == 2 => {}
             _ => arity(1)?,
         }
         let Some(x) = args.first() else { bail!("missing a value") };
@@ -137,9 +139,16 @@ impl Env<'_> {
                 self.root(&args[1], n)
             }
             Abs | Round | Ceil | Floor | Trunc | Int => {
+                let places = match args.get(1) {
+                    Some(places) => u32::try_from(integer(places, "round")?)
+                        .ok()
+                        .filter(|p| *p <= 28)
+                        .ok_or_else(|| Error::new("round takes 0 to 28 decimal places"))?,
+                    None => 0,
+                };
                 let f = |n: Number| match func {
                     Abs => n.abs(),
-                    Round => n.round_dp(0),
+                    Round => n.round_dp(places),
                     Ceil => n.ceil(),
                     Floor => n.floor(),
                     _ => n.trunc(),

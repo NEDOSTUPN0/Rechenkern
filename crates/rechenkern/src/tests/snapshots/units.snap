@@ -1,6 +1,5 @@
 ---
 source: crates/rechenkern/src/tests/snapshots.rs
-assertion_line: 38
 ---
 2.5 "                                        → 2.5
 2.5 " in m                                   → 2.5
@@ -142,6 +141,8 @@ assertion_line: 38
 2.5 DZD in EUR                               → €1.13
 2.5 EB                                       → 2.5 EB
 2.5 EB in B                                  → 2,500,000,000,000,000,000 B
+2.5 EBps                                     → 2.5 EB/s
+2.5 EBps in bps                              → 20,000,000,000,000,000,000 bps
 2.5 EGP                                      → 2.50 EGP
 2.5 EGP in EUR                               → €1.13
 2.5 ERN                                      → 2.50 ERN
@@ -224,10 +225,14 @@ assertion_line: 38
 2.5 Gelectron volts in J                     → 4.005441585e-10 J
 2.5 GiB                                      → 2.5 GiB
 2.5 GiB in B                                 → 2,684,354,560 B
+2.5 GiBps                                    → 2.5 GiB/s
+2.5 GiBps in bps                             → 21,474,836,480 bps
 2.5 Gib                                      → 2.5 Gibit
 2.5 Gib in B                                 → 335,544,320 B
 2.5 Gibit                                    → 2.5 Gibit
 2.5 Gibit in B                               → 335,544,320 B
+2.5 Gibps                                    → 2.5 Gibit/s
+2.5 Gibps in bps                             → 2,684,354,560 bps
 2.5 Gmetric ton                              → 2.5 Gt
 2.5 Gmetric ton in kg                        → 2,500,000,000,000 kg
 2.5 Gmetric tonne                            → 2.5 Gt
@@ -313,10 +318,14 @@ assertion_line: 38
 2.5 Kbps in bps                              → 2,500 bps
 2.5 KiB                                      → 2.5 KiB
 2.5 KiB in B                                 → 2,560 B
+2.5 KiBps                                    → 2.5 KiB/s
+2.5 KiBps in bps                             → 20,480 bps
 2.5 Kib                                      → 2.5 Kibit
 2.5 Kib in B                                 → 320 B
 2.5 Kibit                                    → 2.5 Kibit
 2.5 Kibit in B                               → 320 B
+2.5 Kibps                                    → 2.5 Kibit/s
+2.5 Kibps in bps                             → 2,560 bps
 2.5 Kč                                       → 2.50 CZK
 2.5 Kč in EUR                                → €1.13
 2.5 L                                        → 2.5 L
@@ -353,8 +362,10 @@ assertion_line: 38
 2.5 MBps in bps                              → 20,000,000 bps
 2.5 MDL                                      → 2.50 MDL
 2.5 MDL in EUR                               → €1.13
+2.5 MF                                       → 2.5 MF
 2.5 MGA                                      → 2.50 MGA
 2.5 MGA in EUR                               → €1.13
+2.5 MH                                       → 2.5 MH
 2.5 MHz                                      → 2.5 MHz
 2.5 MHz in Hz                                → 2,500,000 Hz
 2.5 MJ                                       → 2.5 MJ
@@ -385,6 +396,7 @@ assertion_line: 38
 2.5 MW in W                                  → 2,500,000 W
 2.5 MWK                                      → 2.50 MWK
 2.5 MWK in EUR                               → €1.13
+2.5 MWb                                      → 2.5 MWb
 2.5 MWh                                      → 2.5 MWh
 2.5 MWh in J                                 → 9,000,000,000 J
 2.5 MX$                                      → MX$2.50
@@ -413,10 +425,14 @@ assertion_line: 38
 2.5 Melectron volts in J                     → 4.005441585e-13 J
 2.5 MiB                                      → 2.5 MiB
 2.5 MiB in B                                 → 2,621,440 B
+2.5 MiBps                                    → 2.5 MiB/s
+2.5 MiBps in bps                             → 20,971,520 bps
 2.5 Mib                                      → 2.5 Mibit
 2.5 Mib in B                                 → 327,680 B
 2.5 Mibit                                    → 2.5 Mibit
 2.5 Mibit in B                               → 327,680 B
+2.5 Mibps                                    → 2.5 Mibit/s
+2.5 Mibps in bps                             → 2,621,440 bps
 2.5 Ml                                       → 2.5 ML
 2.5 Ml in L                                  → 2,500,000 L
 2.5 Mmetric ton                              → 2.5 Mt
@@ -479,6 +495,8 @@ assertion_line: 38
 2.5 PAB in EUR                               → €1.13
 2.5 PB                                       → 2.5 PB
 2.5 PB in B                                  → 2,500,000,000,000,000 B
+2.5 PBps                                     → 2.5 PB/s
+2.5 PBps in bps                              → 20,000,000,000,000,000 bps
 2.5 PEN                                      → 2.50 PEN
 2.5 PEN in EUR                               → €1.13
 2.5 PEPE                                     → 2.5 PEPE
@@ -509,6 +527,8 @@ assertion_line: 38
 2.5 Pib in B                                 → 351,843,720,888,320 B
 2.5 Pibit                                    → 2.5 Pibit
 2.5 Pibit in B                               → 351,843,720,888,320 B
+2.5 PostScript point                         → 2.5 pt
+2.5 PostScript point in m                    → 0.0008819444444 m
 2.5 QAR                                      → 2.50 QAR
 2.5 QAR in EUR                               → €1.13
 2.5 R$                                       → R$2.50
@@ -621,10 +641,14 @@ assertion_line: 38
 2.5 Telectron volts in J                     → 0.0000004005441585 J
 2.5 TiB                                      → 2.5 TiB
 2.5 TiB in B                                 → 2,748,779,069,440 B
+2.5 TiBps                                    → 2.5 TiB/s
+2.5 TiBps in bps                             → 21,990,232,555,520 bps
 2.5 Tib                                      → 2.5 Tibit
 2.5 Tib in B                                 → 343,597,383,680 B
 2.5 Tibit                                    → 2.5 Tibit
 2.5 Tibit in B                               → 343,597,383,680 B
+2.5 Tibps                                    → 2.5 Tibit/s
+2.5 Tibps in bps                             → 2,748,779,069,440 bps
 2.5 Torr                                     → 2.5 Torr
 2.5 Torr in Pa                               → 333.3059211 Pa
 2.5 UAH                                      → ₴2.50
@@ -698,6 +722,12 @@ assertion_line: 38
 2.5 Yb in B                                  → 3.125e23 B
 2.5 Ybit                                     → 2.5 Ybit
 2.5 Ybit in B                                → 3.125e23 B
+2.5 YiB                                      → 2.5 YiB
+2.5 YiB in B                                 → 3.022314549e24 B
+2.5 Yib                                      → 2.5 Yibit
+2.5 Yib in B                                 → 3.777893186e23 B
+2.5 Yibit                                    → 2.5 Yibit
+2.5 Yibit in B                               → 3.777893186e23 B
 2.5 ZAR                                      → 2.50 ZAR
 2.5 ZAR in EUR                               → €1.13
 2.5 ZB                                       → 2.5 ZB
@@ -708,6 +738,12 @@ assertion_line: 38
 2.5 Zb in B                                  → 312,500,000,000,000,000,000 B
 2.5 Zbit                                     → 2.5 Zbit
 2.5 Zbit in B                                → 312,500,000,000,000,000,000 B
+2.5 ZiB                                      → 2.5 ZiB
+2.5 ZiB in B                                 → 2.951479052e21 B
+2.5 Zib                                      → 2.5 Zibit
+2.5 Zib in B                                 → 368,934,881,474,191,032,320 B
+2.5 Zibit                                    → 2.5 Zibit
+2.5 Zibit in B                               → 368,934,881,474,191,032,320 B
 2.5 ac                                       → 2.5 ac
 2.5 ac in m2                                 → 10,117.14106 m²
 2.5 acre                                     → 2.5 ac
@@ -730,6 +766,8 @@ assertion_line: 38
 2.5 ada in EUR                               → €1.13
 2.5 aed                                      → 2.50 AED
 2.5 aed in EUR                               → €1.13
+2.5 af                                       → 2.5 acre-feet
+2.5 af in L                                  → 3,083,704.594 L
 2.5 afghan afghani                           → 2.50 AFN
 2.5 afghan afghani in EUR                    → €1.13
 2.5 afghan afghanis                          → 2.50 AFN
@@ -1030,6 +1068,8 @@ assertion_line: 38
 2.5 brunei dollars in EUR                    → €1.13
 2.5 bsd                                      → 2.50 BSD
 2.5 bsd in EUR                               → €1.13
+2.5 bsh                                      → 2.5 bu
+2.5 bsh in L                                 → 88.09767542 L
 2.5 bsv                                      → 2.5 BSV
 2.5 bsv in EUR                               → €1.13
 2.5 btc                                      → 2.5 BTC
@@ -1448,6 +1488,8 @@ assertion_line: 38
 2.5 dynes in N                               → 0.000025 N
 2.5 dzd                                      → 2.50 DZD
 2.5 dzd in EUR                               → €1.13
+2.5 eBps                                     → 2.5 EB/s
+2.5 eBps in bps                              → 20,000,000,000,000,000,000 bps
 2.5 eV                                       → 2.5 eV
 2.5 eV in J                                  → 4.005441585e-19 J
 2.5 east caribbean dollar                    → 2.50 XCD
@@ -1612,6 +1654,10 @@ assertion_line: 38
 2.5 foot-pound in J                          → 3.389544871 J
 2.5 foot-pounds                              → 2.5 lbf·ft
 2.5 foot-pounds in J                         → 3.389544871 J
+2.5 force pound                              → 2.5 lbf
+2.5 force pound in N                         → 11.12055404 N
+2.5 force pounds                             → 2.5 lbf
+2.5 force pounds in N                        → 11.12055404 N
 2.5 forint                                   → 2.50 HUF
 2.5 forint in EUR                            → €1.13
 2.5 forints                                  → 2.50 HUF
@@ -2102,6 +2148,8 @@ assertion_line: 38
 2.5 kC                                       → 2.5 kC
 2.5 kCal                                     → 2.5 kcal
 2.5 kCal in J                                → 10,460 J
+2.5 kF                                       → 2.5 kF
+2.5 kH                                       → 2.5 kH
 2.5 kHz                                      → 2.5 kHz
 2.5 kHz in Hz                                → 2,500 Hz
 2.5 kJ                                       → 2.5 kJ
@@ -2117,6 +2165,7 @@ assertion_line: 38
 2.5 kV in V                                  → 2,500 V
 2.5 kW                                       → 2.5 kW
 2.5 kW in W                                  → 2,500 W
+2.5 kWb                                      → 2.5 kWb
 2.5 kWh                                      → 2.5 kWh
 2.5 kWh in J                                 → 9,000,000 J
 2.5 kazakh tenge                             → ₸2.50
@@ -2205,6 +2254,8 @@ assertion_line: 38
 2.5 kiloelectronvolt in J                    → 4.005441585e-16 J
 2.5 kiloelectronvolts                        → 2.5 keV
 2.5 kiloelectronvolts in J                   → 4.005441585e-16 J
+2.5 kilofarad                                → 2.5 kF
+2.5 kilofarads                               → 2.5 kF
 2.5 kilogram                                 → 2.5 kg
 2.5 kilogram force                           → 2.5 kgf
 2.5 kilogram force in N                      → 24.516625 N
@@ -2215,6 +2266,9 @@ assertion_line: 38
 2.5 kilograms                                → 2.5 kg
 2.5 kilograms-force                          → 2.5 kgf
 2.5 kilograms-force in N                     → 24.516625 N
+2.5 kilohenries                              → 2.5 kH
+2.5 kilohenry                                → 2.5 kH
+2.5 kilohenrys                               → 2.5 kH
 2.5 kilohertz                                → 2.5 kHz
 2.5 kilohertz in Hz                          → 2,500 Hz
 2.5 kilojoule                                → 2.5 kJ
@@ -2251,6 +2305,8 @@ assertion_line: 38
 2.5 kilomole in mol                          → 2,500 mol
 2.5 kilomoles                                → 2.5 kmol
 2.5 kilomoles in mol                         → 2,500 mol
+2.5 kilomols                                 → 2.5 kmol
+2.5 kilomols in mol                          → 2,500 mol
 2.5 kilonewton                               → 2.5 kN
 2.5 kilonewton in N                          → 2,500 N
 2.5 kilonewtons                              → 2.5 kN
@@ -2276,7 +2332,10 @@ assertion_line: 38
 2.5 kilopounds per square inch               → 2.5 ksi
 2.5 kilopounds per square inch in Pa         → 17,236,893.23 Pa
 2.5 kilos                                    → 2.5 kg
+2.5 kilosiemen                               → 2.5 kS
 2.5 kilosiemens                              → 2.5 kS
+2.5 kilotesla                                → 2.5 kiloteslas
+2.5 kiloteslas                               → 2.5 kiloteslas
 2.5 kilotonne                                → 2.5 kilotonnes
 2.5 kilotonne in kg                          → 2,500,000 kg
 2.5 kilotonnes                               → 2.5 kilotonnes
@@ -2297,6 +2356,8 @@ assertion_line: 38
 2.5 kilowatt-hours in J                      → 9,000,000 J
 2.5 kilowatts                                → 2.5 kW
 2.5 kilowatts in W                           → 2,500 W
+2.5 kiloweber                                → 2.5 kWb
+2.5 kilowebers                               → 2.5 kWb
 2.5 kiloℓ                                    → 2.5 kL
 2.5 kiloℓ in L                               → 2,500 L
 2.5 kina                                     → 2.50 PGK
@@ -2409,6 +2470,7 @@ assertion_line: 38
 2.5 kzt in EUR                               → €0.00
 2.5 kΩ                                       → 2.5 kΩ
 2.5 kΩ in Ω                                  → 2,500 Ω
+2.5 k℧                                       → 2.5
 2.5 l                                        → 2.5 L
 2.5 lak                                      → 2.50 LAK
 2.5 lak in EUR                               → €1.13
@@ -2676,6 +2738,11 @@ assertion_line: 38
 2.5 megaelectronvolt in J                    → 4.005441585e-13 J
 2.5 megaelectronvolts                        → 2.5 MeV
 2.5 megaelectronvolts in J                   → 4.005441585e-13 J
+2.5 megafarad                                → 2.5 MF
+2.5 megafarads                               → 2.5 MF
+2.5 megahenries                              → 2.5 MH
+2.5 megahenry                                → 2.5 MH
+2.5 megahenrys                               → 2.5 MH
 2.5 megahertz                                → 2.5 MHz
 2.5 megahertz in Hz                          → 2,500,000 Hz
 2.5 megajoule                                → 2.5 MJ
@@ -2714,6 +2781,9 @@ assertion_line: 38
 2.5 megapound per square inch in Pa          → 17,236,893,233 Pa
 2.5 megapounds per square inch               → 2.5 Mpsi
 2.5 megapounds per square inch in Pa         → 17,236,893,233 Pa
+2.5 megasiemens                              → 2.5 megasiemens
+2.5 megatesla                                → 2.5 megateslas
+2.5 megateslas                               → 2.5 megateslas
 2.5 megatonne                                → 2.5 Mt
 2.5 megatonne in kg                          → 2,500,000,000 kg
 2.5 megatonnes                               → 2.5 Mt
@@ -2730,6 +2800,8 @@ assertion_line: 38
 2.5 megawatt hours in J                      → 9,000,000,000 J
 2.5 megawatts                                → 2.5 MW
 2.5 megawatts in W                           → 2,500,000 W
+2.5 megaweber                                → 2.5 MWb
+2.5 megawebers                               → 2.5 MWb
 2.5 megaℓ                                    → 2.5 ML
 2.5 megaℓ in L                               → 2,500,000 L
 2.5 meter                                    → 2.5 m
@@ -2840,10 +2912,13 @@ assertion_line: 38
 2.5 micromol                                 → 2.5 µmol
 2.5 micromol in mol                          → 0.0000025 mol
 2.5 micromolar                               → 2.5 µM
+2.5 micromolars                              → 2.5 µM
 2.5 micromole                                → 2.5 µmol
 2.5 micromole in mol                         → 0.0000025 mol
 2.5 micromoles                               → 2.5 µmol
 2.5 micromoles in mol                        → 0.0000025 mol
+2.5 micromols                                → 2.5 µmol
+2.5 micromols in mol                         → 0.0000025 mol
 2.5 micron                                   → 2.5 µm
 2.5 micron in m                              → 0.0000025 m
 2.5 micronewton                              → 2.5 µN
@@ -2864,6 +2939,7 @@ assertion_line: 38
 2.5 microseconds in s                        → 0.0000025 seconds
 2.5 microsecs                                → 2.5 µs
 2.5 microsecs in s                           → 0.0000025 seconds
+2.5 microsiemen                              → 2.5 µS
 2.5 microsiemens                             → 2.5 µS
 2.5 microtesla                               → 2.5 µT
 2.5 microteslas                              → 2.5 µT
@@ -2948,10 +3024,13 @@ assertion_line: 38
 2.5 millimol                                 → 2.5 mmol
 2.5 millimol in mol                          → 0.0025 mol
 2.5 millimolar                               → 2.5 mM
+2.5 millimolars                              → 2.5 mM
 2.5 millimole                                → 2.5 mmol
 2.5 millimole in mol                         → 0.0025 mol
 2.5 millimoles                               → 2.5 mmol
 2.5 millimoles in mol                        → 0.0025 mol
+2.5 millimols                                → 2.5 mmol
+2.5 millimols in mol                         → 0.0025 mol
 2.5 millinewton                              → 2.5 mN
 2.5 millinewton in N                         → 0.0025 N
 2.5 millinewtons                             → 2.5 mN
@@ -2972,6 +3051,7 @@ assertion_line: 38
 2.5 milliseconds in s                        → 0.0025 seconds
 2.5 millisecs                                → 2.5 ms
 2.5 millisecs in s                           → 0.0025 seconds
+2.5 millisiemen                              → 2.5 mS
 2.5 millisiemens                             → 2.5 mS
 2.5 millitesla                               → 2.5 mT
 2.5 milliteslas                              → 2.5 mT
@@ -3019,6 +3099,7 @@ assertion_line: 38
 2.5 mo in s                                  → 6,574,365 seconds
 2.5 mol                                      → 2.5 mol
 2.5 molar                                    → 2.5 M
+2.5 molars                                   → 2.5 M
 2.5 moldovan lei                             → 2.50 MDL
 2.5 moldovan lei in EUR                      → €1.13
 2.5 moldovan leis                            → 2.50 MDL
@@ -3029,6 +3110,7 @@ assertion_line: 38
 2.5 moldovan leus in EUR                     → €1.13
 2.5 mole                                     → 2.5 mol
 2.5 moles                                    → 2.5 mol
+2.5 mols                                     → 2.5 mol
 2.5 monero                                   → 2.5 XMR
 2.5 monero in EUR                            → €1.13
 2.5 moneros                                  → 2.5 XMR
@@ -3089,6 +3171,7 @@ assertion_line: 38
 2.5 mzn in EUR                               → €1.13
 2.5 mΩ                                       → 2.5 mΩ
 2.5 mΩ in Ω                                  → 0.0025 Ω
+2.5 m℧                                       → 2.5 m
 2.5 nC                                       → 2.5 nC
 2.5 nF                                       → 2.5 nF
 2.5 nH                                       → 2.5 nH
@@ -3155,10 +3238,13 @@ assertion_line: 38
 2.5 nanomol                                  → 2.5 nmol
 2.5 nanomol in mol                           → 0.0000000025 mol
 2.5 nanomolar                                → 2.5 nM
+2.5 nanomolars                               → 2.5 nM
 2.5 nanomole                                 → 2.5 nmol
 2.5 nanomole in mol                          → 0.0000000025 mol
 2.5 nanomoles                                → 2.5 nmol
 2.5 nanomoles in mol                         → 0.0000000025 mol
+2.5 nanomols                                 → 2.5 nmol
+2.5 nanomols in mol                          → 0.0000000025 mol
 2.5 nanonewton                               → 2.5 nN
 2.5 nanonewton in N                          → 0.0000000025 N
 2.5 nanonewtons                              → 2.5 nN
@@ -3323,6 +3409,8 @@ assertion_line: 38
 2.5 ozf-in in J                              → 0.01765387954 J
 2.5 ozt                                      → 2.5 oz t
 2.5 ozt in kg                                → 0.077758692 kg
+2.5 pBps                                     → 2.5 PB/s
+2.5 pBps in bps                              → 20,000,000,000,000,000 bps
 2.5 pC                                       → 2.5 pC
 2.5 pF                                       → 2.5 pF
 2.5 pa'anga                                  → 2.50 TOP
@@ -3446,6 +3534,7 @@ assertion_line: 38
 2.5 picometres                               → 2.5 picometers
 2.5 picometres in m                          → 2.5e-12 m
 2.5 picomolar                                → 2.5 picomolar
+2.5 picomolars                               → 2.5 picomolar
 2.5 picosec                                  → 2.5 ps
 2.5 picosec in s                             → 2.5e-12 seconds
 2.5 picosecond                               → 2.5 ps
@@ -3492,6 +3581,10 @@ assertion_line: 38
 2.5 polygon in EUR                           → €1.13
 2.5 polygons                                 → 2.5 POL
 2.5 polygons in EUR                          → €1.13
+2.5 postscript point                         → 2.5 pt
+2.5 postscript point in m                    → 0.0008819444444 m
+2.5 postscript points                        → 2.5 pt
+2.5 postscript points in m                   → 0.0008819444444 m
 2.5 pound                                    → 2.5 lb
 2.5 pound in kg                              → 1.133980925 kg
 2.5 pound force                              → 2.5 lbf
@@ -3545,6 +3638,8 @@ assertion_line: 38
 2.5 psi in Pa                                → 17,236.89323 Pa
 2.5 pt                                       → 2.5 pt
 2.5 pt in m                                  → 0.0008819444444 m
+2.5 pts                                      → 2.5 pt
+2.5 pts in m                                 → 0.0008819444444 m
 2.5 pula                                     → 2.50 BWP
 2.5 pula in EUR                              → €1.13
 2.5 pulas                                    → 2.50 BWP
@@ -3759,6 +3854,7 @@ assertion_line: 38
 2.5 short tons in kg                         → 2,267.96185 kg
 2.5 shp                                      → 2.50 SHP
 2.5 shp in EUR                               → €1.13
+2.5 siemen                                   → 2.5 siemens
 2.5 siemens                                  → 2.5 siemens
 2.5 sierra leonean leone                     → 2.50 SLE
 2.5 sierra leonean leone in EUR              → €1.13
@@ -3836,12 +3932,18 @@ assertion_line: 38
 2.5 sqmiles in m2                            → 6,474,970.276 m²
 2.5 sqmm                                     → 2.5 mm²
 2.5 sqmm in m2                               → 0.0000025 m²
+2.5 sqnm                                     → 2.5 nm²
+2.5 sqnm in m2                               → 2.5e-18 m²
+2.5 squm                                     → 2.5 µm²
+2.5 squm in m2                               → 2.5e-12 m²
 2.5 sqyard                                   → 2.5 yd²
 2.5 sqyard in m2                             → 2.0903184 m²
 2.5 sqyards                                  → 2.5 yd²
 2.5 sqyards in m2                            → 2.0903184 m²
 2.5 sqyd                                     → 2.5 yd²
 2.5 sqyd in m2                               → 2.0903184 m²
+2.5 sqµm                                     → 2.5 µm²
+2.5 sqµm in m2                               → 2.5e-12 m²
 2.5 srd                                      → 2.50 SRD
 2.5 srd in EUR                               → €1.13
 2.5 sri lanka rupee                          → 2.50 LKR
@@ -4385,6 +4487,20 @@ assertion_line: 38
 2.5 yens in EUR                              → €0.02
 2.5 yer                                      → 2.50 YER
 2.5 yer in EUR                               → €1.13
+2.5 yib                                      → 2.5 YiB
+2.5 yib in B                                 → 3.022314549e24 B
+2.5 yobibit                                  → 2.5 Yibit
+2.5 yobibit in B                             → 3.777893186e23 B
+2.5 yobibits                                 → 2.5 Yibit
+2.5 yobibits in B                            → 3.777893186e23 B
+2.5 yobibyte                                 → 2.5 YiB
+2.5 yobibyte in B                            → 3.022314549e24 B
+2.5 yobibytes                                → 2.5 YiB
+2.5 yobibytes in B                           → 3.022314549e24 B
+2.5 yobioctet                                → 2.5 YiB
+2.5 yobioctet in B                           → 3.022314549e24 B
+2.5 yobioctets                               → 2.5 YiB
+2.5 yobioctets in B                          → 3.022314549e24 B
 2.5 yottabit                                 → 2.5 Ybit
 2.5 yottabit in B                            → 3.125e23 B
 2.5 yottabits                                → 2.5 Ybit
@@ -4411,6 +4527,18 @@ assertion_line: 38
 2.5 zambian kwachas in EUR                   → €1.13
 2.5 zar                                      → 2.50 ZAR
 2.5 zar in EUR                               → €1.13
+2.5 zebibit                                  → 2.5 Zibit
+2.5 zebibit in B                             → 368,934,881,474,191,032,320 B
+2.5 zebibits                                 → 2.5 Zibit
+2.5 zebibits in B                            → 368,934,881,474,191,032,320 B
+2.5 zebibyte                                 → 2.5 ZiB
+2.5 zebibyte in B                            → 2.951479052e21 B
+2.5 zebibytes                                → 2.5 ZiB
+2.5 zebibytes in B                           → 2.951479052e21 B
+2.5 zebioctet                                → 2.5 ZiB
+2.5 zebioctet in B                           → 2.951479052e21 B
+2.5 zebioctets                               → 2.5 ZiB
+2.5 zebioctets in B                          → 2.951479052e21 B
 2.5 zettabit                                 → 2.5 Zbit
 2.5 zettabit in B                            → 312,500,000,000,000,000,000 B
 2.5 zettabits                                → 2.5 Zbit
@@ -4423,6 +4551,8 @@ assertion_line: 38
 2.5 zettaoctet in B                          → 2.5e21 B
 2.5 zettaoctets                              → 2.5 ZB
 2.5 zettaoctets in B                         → 2.5e21 B
+2.5 zib                                      → 2.5 ZiB
+2.5 zib in B                                 → 2.951479052e21 B
 2.5 zloty                                    → 2.50 PLN
 2.5 zloty in EUR                             → €1.13
 2.5 zlotys                                   → 2.50 PLN
@@ -4486,6 +4616,7 @@ assertion_line: 38
 2.5 µs in s                                  → 0.0000025 seconds
 2.5 µΩ                                       → 2.5 µΩ
 2.5 µΩ in Ω                                  → 0.0000025 Ω
+2.5 µ℧                                       → 2.5
 2.5 Å                                        → 2.5 Å
 2.5 Å in m                                   → 2.5e-10 m
 2.5 ångström                                 → 2.5 Å
@@ -4496,9 +4627,13 @@ assertion_line: 38
 2.5 μC                                       → 2.5 μC
 2.5 μF                                       → 2.5 μF
 2.5 μH                                       → 2.5 μH
+2.5 μHz                                      → 2.5 μHz
+2.5 μHz in Hz                                → 0.0000025 Hz
 2.5 μL                                       → 2.5 μL
 2.5 μL in L                                  → 0.0000025 L
 2.5 μM                                       → 2.5 μM
+2.5 μN                                       → 2.5 μN
+2.5 μN in N                                  → 0.0000025 N
 2.5 μS                                       → 2.5 μS
 2.5 μT                                       → 2.5 μT
 2.5 μWb                                      → 2.5 μWb
@@ -4512,16 +4647,17 @@ assertion_line: 38
 2.5 μmol in mol                              → 0.0000025 mol
 2.5 μs                                       → 2.5 μs
 2.5 μs in s                                  → 0.0000025 seconds
+2.5 μ℧                                       → 2.5
 2.5 ֏                                        → 2.50 AMD
 2.5 ֏ in EUR                                 → €1.13
 2.5 ৳                                        → 2.50 BDT
 2.5 ৳ in EUR                                 → €1.13
 2.5 ฿                                        → ฿2.50
 2.5 ฿ in EUR                                 → €1.13
-2.5 ′                                        → 2.5
-2.5 ′ in rad                                 → 2.5 rad
-2.5 ″                                        → 2.5
-2.5 ″ in rad                                 → 2.5
+2.5 ′                                        → 2.5 arcmin
+2.5 ′ in rad                                 → 0.0007272205217 rad
+2.5 ″                                        → 2.5 arcsec
+2.5 ″ in rad                                 → 0.00001212034203 rad
 2.5 ₡                                        → 2.50 CRC
 2.5 ₡ in EUR                                 → €1.13
 2.5 ₦                                        → ₦2.50
@@ -4563,6 +4699,7 @@ assertion_line: 38
 2.5 ℉                                        → 2.5 °F
 2.5 ℉ in K                                   → 256.7611111 K
 2.5 ℓ                                        → 2.5 L
+2.5 ℧                                        → 2.5 siemens
 2.5 元                                        → CN¥2.50
 2.5 元 in EUR                                 → €1.13
 2.5 円                                        → ¥3

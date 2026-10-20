@@ -206,8 +206,8 @@ const SCALES_BEFORE_CODES: &[(i32, &str)] = &[(12, "tn"), (9, "bn"), (6, "M"), (
 /// Scales in their systems, biggest first: plain numbers take SI letters, money its own.
 fn scales(system: Option<ScalarSystem>) -> &'static [(i32, &'static str)] {
     match system {
-        None => &[(12, "T"), (9, "G"), (6, "M"), (3, "k")],
-        Some(ScalarSystem::Standard) => &[(12, "T"), (9, "B"), (6, "M"), (3, "K")],
+        None => &[(15, "P"), (12, "T"), (9, "G"), (6, "M"), (3, "k")],
+        Some(ScalarSystem::Standard) => &[(15, "P"), (12, "T"), (9, "B"), (6, "M"), (3, "K")],
         Some(ScalarSystem::Lowercase) => &[(12, "t"), (9, "b"), (6, "m"), (3, "k")],
         Some(ScalarSystem::British) => &[(12, "tn"), (9, "bn"), (6, "m"), (3, "k")],
         Some(ScalarSystem::Russian) => &[(12, " трлн"), (9, " млрд"), (6, " млн"), (3, " тыс.")],

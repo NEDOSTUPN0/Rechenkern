@@ -970,6 +970,15 @@ impl Parser<'_> {
         if func == Func::Log && self.eat_word("base") {
             args.push(self.unary()?);
         }
+        // "pow(2, 10)", "nthroot(27, 3)"
+        match (func, args.as_slice()) {
+            (Func::Pow, [base, exp]) => return Ok(Some(Expr::binary(Op::Pow, base.clone(), exp.clone()))),
+            (Func::NthRoot, [x, degree]) => return Ok(Some(Expr::Call(Func::Root, vec![degree.clone(), x.clone()]))),
+            (Func::Pow | Func::NthRoot, _) => {
+                bail!("{} takes 2 arguments", if func == Func::Pow { "pow" } else { "nthroot" })
+            }
+            _ => {}
+        }
         // "clamp 26 between 5 and 25", "clamp 4 from 5 to 25", "clamp 20 5 25"
         if func == Func::Clamp && args.len() == 1 {
             if self.eat_word("between") {

@@ -152,6 +152,8 @@ pub fn suffix_multiplier(w: &str) -> Option<Number> {
         "亿" => Number::pow10(8),
         "G" | "Г" => Number::pow10(9),
         "T" | "Т" => Number::pow10(12),
+        // Quadrillions: "3P", Russian "3П", British "3Pn".
+        "P" | "П" | "Pn" => Number::pow10(15),
         _ => return None,
     })
 }
@@ -233,6 +235,8 @@ pub static FUNCTIONS: Phrases<Func> = Phrases::new(&[
     ("squared root", Func::Sqrt),
     ("cubed root", Func::Cbrt),
     ("root", Func::Root),
+    ("nthroot", Func::NthRoot),
+    ("pow", Func::Pow),
     ("exp", Func::Exp),
     ("ln", Func::Ln),
     ("natural log", Func::Ln),

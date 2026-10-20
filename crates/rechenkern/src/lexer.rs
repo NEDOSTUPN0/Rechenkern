@@ -282,6 +282,11 @@ impl Lexer<'_> {
         !self.space && matches!(self.tokens.last(), Some(Token { tok: Tok::Num(_), .. }))
     }
 
+    /// A number came last, maybe with a space between: "3 ′" is still minutes of arc.
+    fn after_number_spaced(&self) -> bool {
+        matches!(self.tokens.last(), Some(Token { tok: Tok::Num(_), .. }))
+    }
+
     fn run(&mut self) {
         while let Some(c) = self.peek(0) {
             let start = self.i;
@@ -322,7 +327,7 @@ impl Lexer<'_> {
             } else if (c.is_alphabetic() && !matches!(c, 'º' | 'ˆ')) || c == '_' {
                 let tok = self.word();
                 self.push(tok, start);
-            } else if CURRENCY_SIGNS.contains(c) || matches!(c, '℃' | '℉') {
+            } else if CURRENCY_SIGNS.contains(c) || matches!(c, '℃' | '℉' | '℧') {
                 // Signs that stand for a word: "$", "℃".
                 self.i += 1;
                 self.push(Tok::Word(c.to_string()), start);
@@ -330,7 +335,7 @@ impl Lexer<'_> {
                 self.i += 1;
                 if !self.options.quotes {
                     self.space = true;
-                } else if self.after_number() {
+                } else if self.after_number() || (c == '″' && self.after_number_spaced()) {
                     // "30″" is arcseconds, as in SoulverCore; "5'10\"" feet and inches.
                     self.push(Tok::Sym(if c == '″' { "″" } else { "\"" }), start);
                 } else {
@@ -343,7 +348,7 @@ impl Lexer<'_> {
                 }
             } else if matches!(c, '\'' | '′' | '’') {
                 self.i += 1;
-                if self.after_number() {
+                if self.after_number() || (c == '′' && self.after_number_spaced()) {
                     self.push(Tok::Sym(if c == '′' { "′" } else { "'" }), start);
                 }
             } else if let Some(&(text, sym)) =

@@ -281,6 +281,19 @@ impl Env<'_> {
         }
         let (unit, factor) = x.unit.mul(&y_unit, &|id| self.scale(id))?;
         let q = Quantity::new(number * factor, unit);
+        // "$15/hour × 40 hours/week" is $600/week: a time per a time moves a rate to its period.
+        if !divide {
+            let rate_by_share = |rate: &Unit, share: &Unit| {
+                let period = time_per_time(share)?;
+                let per_time = rate.factors().iter().any(|&(id, e)| e < 0 && Unit::of(id).dim() == Dim::TIME);
+                per_time.then(|| rate.numerator().product(&period.pow(-1)))
+            };
+            if let Some(target) = rate_by_share(&x.unit, &y.unit).or_else(|| rate_by_share(&y.unit, &x.unit))
+                && let Ok(converted) = self.convert_quantity(&q, &target)
+            {
+                return Ok(converted);
+            }
+        }
         // Most products have no unit of their own; only those that may are worked out again.
         match registry().may_be_named(&q.unit) {
             true => self.named_product(q, &x.unit.product(&y_unit)),
@@ -493,4 +506,15 @@ fn bitwise(op: Op, a: Value, b: Value) -> Result<Value> {
 fn plain_rates(q: Quantity) -> Quantity {
     let (unit, multiplier) = q.unit.plain_rates();
     Quantity::new(q.number * multiplier, unit)
+}
+
+/// The period of a time per a time, as "week" in "hours/week".
+fn time_per_time(unit: &Unit) -> Option<Unit> {
+    let &[(a, ea), (b, eb)] = unit.factors() else { return None };
+    let time = |id| Unit::of(id).dim() == Dim::TIME;
+    match (ea, eb) {
+        (1, -1) if time(a) && time(b) => Some(Unit::of(b)),
+        (-1, 1) if time(a) && time(b) => Some(Unit::of(a)),
+        _ => None,
+    }
 }

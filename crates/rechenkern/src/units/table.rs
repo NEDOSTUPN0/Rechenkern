@@ -58,6 +58,8 @@ const DATA: &[Prefix] = &[
     bin("Ti", "tebi", 40),
     bin("Pi", "pebi", 50),
     bin("Ei", "exbi", 60),
+    bin("Zi", "zebi", 70),
+    bin("Yi", "yobi", 80),
 ];
 
 /// A unit definition before it gets an id.
@@ -405,12 +407,19 @@ fn definitions() -> Vec<Def> {
             .scale(Number::ratio(5, 9))
             .aliases(&["rankine"]),
         // Frequency
-        unit("Hz", "hertz", Dim::FREQUENCY, "1")
-            .plural("hertz")
-            .prefixes(&[KILO, MEGA, GIGA, TERA, MILLI, MICRO, NANO]),
+        unit("Hz", "hertz", Dim::FREQUENCY, "1").plural("hertz").prefixes(&[
+            KILO,
+            MEGA,
+            GIGA,
+            TERA,
+            MILLI,
+            MICRO,
+            MICRO_GREEK,
+            NANO,
+        ]),
         unit("fps", "frame per second", Dim::FREQUENCY, "1").plural("frames per second"),
         // Mechanics
-        unit("N", "newton", Dim::FORCE, "1").prefixes(&[KILO, MEGA, GIGA, MILLI, MICRO, NANO]),
+        unit("N", "newton", Dim::FORCE, "1").prefixes(&[KILO, MEGA, GIGA, MILLI, MICRO, MICRO_GREEK, NANO]),
         unit("dyn", "dyne", Dim::FORCE, "0.00001"),
         // The speed of sound at sea level (ISA, 15 °C).
         unit("mach", "mach", Dim::SPEED, "340.294").plural("mach").aliases(&["Mach"]).spelled(),
@@ -472,24 +481,31 @@ fn definitions() -> Vec<Def> {
         // "C", "F", "H", "S" and "T" alone are Celsius, Fahrenheit, hours, seconds and tonnes, as in
         // SoulverCore (`Parser::unit_at` reads the last three, after a number only).
         unit("C", "coulomb", Dim::CHARGE, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO, PICO]).prefixed_only(),
-        unit("F", "farad", Dim::CAPACITANCE, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO, PICO]).prefixed_only(),
+        unit("F", "farad", Dim::CAPACITANCE, "1")
+            .prefixes(&[KILO, MEGA, MILLI, MICRO, MICRO_GREEK, NANO, PICO])
+            .prefixed_only(),
         unit("H", "henry", Dim::INDUCTANCE, "1")
             .plural("henries")
             .aliases(&["henrys"])
-            .prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO])
+            .prefixes(&[KILO, MEGA, MILLI, MICRO, MICRO_GREEK, NANO])
             .prefixed_only(),
         unit("S", "siemens", Dim::CONDUCTANCE, "1")
             .plural("siemens")
-            .aliases(&["mho", "mhos"])
+            .aliases(&["mho", "mhos", "siemen", "℧"])
             .prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK])
             .prefixed_only(),
-        unit("Wb", "weber", Dim::MAGNETIC_FLUX, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO]),
+        // "MS" stays milliseconds, as in SoulverCore: megasiemens are written out.
+        unit("MS", "megasiemens", Dim::CONDUCTANCE, "1000000").plural("megasiemens").spelled().prefixed_only(),
+        unit("Wb", "weber", Dim::MAGNETIC_FLUX, "1").prefixes(&[KILO, MEGA, MILLI, MICRO, MICRO_GREEK, NANO]),
         unit("Mx", "maxwell", Dim::MAGNETIC_FLUX, "0.00000001"),
         unit("T", "tesla", Dim::FLUX_DENSITY, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO]).prefixed_only(),
+        // "kT" is knots and "MT" tonnes, as in SoulverCore: kiloteslas and megateslas are written out.
+        unit("kT", "kilotesla", Dim::FLUX_DENSITY, "1000").spelled().prefixed_only(),
+        unit("MT", "megatesla", Dim::FLUX_DENSITY, "1000000").spelled().prefixed_only(),
         unit("gauss", "gauss", Dim::FLUX_DENSITY, "0.0001").plural("gauss").spelled(),
-        unit("mol", "mole", Dim::AMOUNT, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO]),
+        unit("mol", "mole", Dim::AMOUNT, "1").aliases(&["mols"]).prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO]),
         // Molar concentration, a mole per liter; glued to a number "M" is a million ("5M").
-        unit("M", "molar", Dim::AMOUNT.div(Dim::VOLUME), "1000").plural("molar").prefixes(&[
+        unit("M", "molar", Dim::AMOUNT.div(Dim::VOLUME), "1000").plural("molar").aliases(&["molars"]).prefixes(&[
             MILLI,
             MICRO,
             MICRO_GREEK,
@@ -569,6 +585,18 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("", &["MBps", "mBps"], "MB/s"),
     ("", &["GBps", "gBps"], "GB/s"),
     ("", &["TBps", "tBps"], "TB/s"),
+    ("", &["PBps", "pBps"], "PB/s"),
+    ("", &["EBps", "eBps"], "EB/s"),
+    ("", &["KiBps"], "KiB/s"),
+    ("", &["MiBps"], "MiB/s"),
+    ("", &["GiBps"], "GiB/s"),
+    ("", &["TiBps"], "TiB/s"),
+    ("", &["Kibps"], "Kibit/s"),
+    ("", &["Mibps"], "Mibit/s"),
+    ("", &["Gibps"], "Gibit/s"),
+    ("", &["Tibps"], "Tibit/s"),
+    ("", &["sqnm"], "nm^2"),
+    ("", &["squm", "sqµm"], "µm^2"),
     ("", &["kilo", "kilos"], "kg"),
     ("", &["sqm"], "m^2"),
     ("", &["sqkm"], "km^2"),
@@ -607,6 +635,8 @@ const EXTRA: &[(&str, &str)] = &[
     ("Tib", "Tibit"),
     ("Pib", "Pibit"),
     ("Eib", "Eibit"),
+    ("Zib", "Zibit"),
+    ("Yib", "Yibit"),
     ("mb", "MB"),
     ("gb", "GB"),
     ("tb", "TB"),
@@ -617,6 +647,8 @@ const EXTRA: &[(&str, &str)] = &[
     ("tib", "TiB"),
     ("pib", "PiB"),
     ("eib", "EiB"),
+    ("zib", "ZiB"),
+    ("yib", "YiB"),
     ("mcg", "µg"),
     // Lowercase "mj" is megajoules, as in SoulverCore.
     ("kj", "kJ"),
@@ -625,6 +657,17 @@ const EXTRA: &[(&str, &str)] = &[
     ("KV", "kV"),
     ("kCal", "kcal"),
     ("millimol", "mmol"),
+    ("millimols", "mmol"),
+    ("micromols", "µmol"),
+    ("kilomols", "kmol"),
+    ("bsh", "bu"),
+    ("af", "acre-foot"),
+    ("pts", "pt"),
+    ("PostScript point", "pt"),
+    ("postscript point", "pt"),
+    ("postscript points", "pt"),
+    ("force pound", "lbf"),
+    ("force pounds", "lbf"),
     ("micromol", "µmol"),
     ("nanomol", "nmol"),
     ("micron", "µm"),
