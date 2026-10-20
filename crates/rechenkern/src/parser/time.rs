@@ -213,16 +213,35 @@ impl Parser<'_> {
         self.time_word_date()
     }
 
-    /// "first monday of the month", "last friday of October", "the 15th of next month".
+    /// "first monday of the month", "last friday of October", "third friday in March",
+    /// "last day of February", "first day of next month", "the first of next month".
     pub(super) fn day_in_month(&mut self) -> Result<Option<Expr>> {
         let Some((nth, n)) = self.nth_at(self.pos) else { return Ok(None) };
-        let Some((weekday, _)) = self.lower(self.pos + n).and_then(|w| words::weekday(&w)) else { return Ok(None) };
-        if !self.words_at(self.pos + n + 1, &["of"]) {
-            return Ok(None);
-        }
-        self.pos += n + 2;
+        let Some(len) = self.day_in_month_at(self.pos + n) else { return Ok(None) };
+        let pick = match self.lower(self.pos + n).and_then(|w| words::weekday(&w)) {
+            Some((weekday, _)) => MonthDay::Nth(nth, weekday),
+            None => MonthDay::Day(nth),
+        };
+        self.pos += n + len;
         let month = self.month_of()?;
-        Ok(Some(Expr::Time(TimeExpr::InMonth(MonthDay::Nth(nth, weekday), month))))
+        Ok(Some(Expr::Time(TimeExpr::InMonth(pick, month))))
+    }
+
+    /// After an ordinal at token `i`: a weekday or "day" (or nothing), then "of" or "in"
+    /// a month. The length of the words before the month.
+    pub(super) fn day_in_month_at(&self, i: usize) -> Option<usize> {
+        let day = self.lower(i).is_some_and(|w| w == "day" || words::weekday(&w).is_some());
+        let at = i + usize::from(day);
+        let of = self.words_at(at, &["of"]) && (day || self.month_follows_at(at + 1));
+        (of || (self.words_at(at, &["in"]) && self.month_follows_at(at + 1))).then_some(at + 1 - i)
+    }
+
+    /// A month at token `i`: "March", "the month", "next month", "this month".
+    fn month_follows_at(&self, i: usize) -> bool {
+        self.lower(i).is_some_and(|w| words::month(&w).is_some())
+            || [&["the", "month"][..], &["month"], &["next", "month"], &["this", "month"], &["last", "month"]]
+                .iter()
+                .any(|ws| self.words_at(i, ws))
     }
 
     /// "first", "2nd", "last" at token `i`: which one, and its length in tokens.

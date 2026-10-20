@@ -217,6 +217,7 @@ impl Env<'_> {
                 let pick_in = |d: Date| -> Result<Date> {
                     Ok(match *pick {
                         MonthDay::Nth(n, weekday) => d.first_of_month().nth_weekday_of_month(n, weekday)?,
+                        MonthDay::Day(-1) => d.last_of_month(),
                         MonthDay::Day(day) => Date::new(d.year(), d.month(), day)
                             .map_err(|_| Error::new(format!("that month has no day {day}")))?,
                     })

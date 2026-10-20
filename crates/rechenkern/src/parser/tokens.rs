@@ -194,10 +194,8 @@ impl<'a> Parser<'a> {
             // "zł10", "CHF10": a currency glued before its amount.
             // "zł10", "apr3": letters with digits glued after them.
             || (word.ends_with(|c: char| c.is_ascii_digit()) && (self.glued_money(i).is_some() || self.glued_date(i).is_some()))
-            // "first monday of the month"
-            || (self.words_at(i + 2, &["of"])
-                && self.nth_at(i).is_some_and(|(_, n)| n == 1)
-                && self.lower(i + 1).is_some_and(|w| words::weekday(&w).is_some()))
+            // "first monday of the month", "first day in March"
+            || (self.nth_at(i).is_some_and(|(_, n)| n == 1) && self.day_in_month_at(i + 1).is_some())
             // "flour 1 cup": a food before its amount.
             || (matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_)))
                 && self.unit_at(i + 2, false).is_some_and(|(u, _)| matches!(u.dim(), Dim::MASS | Dim::VOLUME))
