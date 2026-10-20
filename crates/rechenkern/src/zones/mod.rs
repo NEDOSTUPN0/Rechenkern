@@ -227,6 +227,49 @@ pub fn find(name: &str) -> Option<TimeZone> {
     city(name).and_then(|c| TimeZone::get(c.zone).ok())
 }
 
+/// A city of `cities.txt` by lowercase name, past listed places: "waw" when "WAW" is the airport.
+pub(crate) fn find_city(name: &str) -> Option<TimeZone> {
+    city(name).and_then(|c| TimeZone::get(c.zone).ok())
+}
+
+/// A name without its diacritics, if it had any: "curaçao" -> "curacao", "côte d'ivoire" -> "cote d'ivoire".
+pub(crate) fn without_diacritics(name: &str) -> Option<String> {
+    if name.is_ascii() {
+        return None;
+    }
+    let mut out = String::with_capacity(name.len());
+    for c in name.chars() {
+        let plain = match c {
+            'à' | 'á' | 'â' | 'ã' | 'ä' | 'å' | 'ā' | 'ă' | 'ą' => "a",
+            'ç' | 'ć' | 'č' => "c",
+            'ď' | 'đ' | 'ð' => "d",
+            'è' | 'é' | 'ê' | 'ë' | 'ē' | 'ė' | 'ę' | 'ě' => "e",
+            'ğ' => "g",
+            'ì' | 'í' | 'î' | 'ï' | 'ī' | 'ı' | 'į' => "i",
+            'ł' | 'ľ' => "l",
+            'ñ' | 'ń' | 'ň' => "n",
+            'ò' | 'ó' | 'ô' | 'õ' | 'ö' | 'ø' | 'ō' | 'ő' => "o",
+            'ř' => "r",
+            'ś' | 'š' | 'ş' | 'ș' => "s",
+            'ť' | 'ţ' | 'ț' => "t",
+            'ù' | 'ú' | 'û' | 'ü' | 'ū' | 'ů' | 'ű' => "u",
+            'ý' | 'ÿ' => "y",
+            'ź' | 'ż' | 'ž' => "z",
+            'æ' => "ae",
+            'œ' => "oe",
+            'ß' => "ss",
+            'þ' => "th",
+            '’' | 'ʻ' => "'",
+            c => {
+                out.push(c);
+                continue;
+            }
+        };
+        out.push_str(plain);
+    }
+    (out != name).then_some(out)
+}
+
 /// What kind of place a name is.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PlaceKind {
@@ -353,6 +396,12 @@ pub fn locate(name: &str) -> Option<Location> {
     };
     let (latitude, longitude) = listed.or_else(city).or_else(zone_city)?;
     Some(Location { zone, latitude, longitude })
+}
+
+/// Where a city of `cities.txt` is, past listed places: "waw" when "WAW" is the airport.
+pub(crate) fn locate_city(name: &str) -> Option<Location> {
+    let c = city(name)?;
+    Some(Location { zone: TimeZone::get(c.zone).ok()?, latitude: c.latitude, longitude: c.longitude })
 }
 
 /// Great-circle distance between two places in kilometers, on a sphere of the Earth's mean radius.

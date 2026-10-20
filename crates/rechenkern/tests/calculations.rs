@@ -1649,3 +1649,25 @@ fn second_sweep_wrong_answers() {
     assert_eq!(sheet("10\n20\ntotal of the above\n30\nsubtotal"), "30");
     assert_eq!(sheet("10\n20\naverage above"), "15");
 }
+
+#[test]
+fn second_sweep_places() {
+    check(&[
+        ("time in WAW", "20:30 CEST"),
+        ("time in SAN", "11:30 PDT"),
+        ("time in MAD", "20:30 CEST"),
+        ("time in HNL", "08:30 HST"),
+        ("time in TSE", "23:30 UTC+5"),
+        ("time in PBI", "14:30 EDT"),
+        ("time in HRK", "21:30 EEST"),
+        ("3pm MAD", "15:00 CEST"),
+        ("10 MAD in USD", "$1.03"),
+        ("time in Waw", "Thu, 24 Sep 2026 01:00 UTC+6:30"),
+        ("time in Curaçao", "14:30 UTC-4"),
+        ("time in Côte d'Ivoire", "18:30 GMT"),
+        ("time in Republic of the Congo", "19:30 WAT"),
+        ("time in New Caledonia", "Thu, 24 Sep 2026 05:30 UTC+11"),
+        ("time in nir", "19:30 BST"),
+        ("sunrise in Curaçao", "06:25 UTC-4"),
+    ]);
+}

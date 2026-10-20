@@ -706,7 +706,7 @@ pub fn region_zone(code: &str) -> Option<&'static str> {
         "tas" => "Australia/Hobart",
         "sa" => "Australia/Adelaide",
         "nt" => "Australia/Darwin",
-        "eng" | "sco" | "wal" | "ni" => "Europe/London",
+        "eng" | "sco" | "sct" | "wal" | "wls" | "ni" | "nir" => "Europe/London",
         "bc" => "America/Vancouver",
         "ab" => "America/Edmonton",
         "sk" => "America/Regina",

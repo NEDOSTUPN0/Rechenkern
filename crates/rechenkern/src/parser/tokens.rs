@@ -421,6 +421,19 @@ impl<'a> Parser<'a> {
                 let zone = zones::corrected(&text, zone, options.code_correction);
                 return Some((text, zone, ends[n - 1] - i));
             }
+            // "Curaçao" as "Curacao", when only the plain spelling is listed.
+            if let Some(plain) = zones::without_diacritics(&text)
+                && let Some(zone) = zones::find(&plain)
+            {
+                return Some((plain, zone, ends[n - 1] - i));
+            }
+            // "WAW" is the airport, "Waw" the town.
+            if lowercase_code
+                && zones::capitals_only(&text)
+                && let Some(zone) = zones::find_city(&text)
+            {
+                return Some((text, zone, ends[n - 1] - i));
+            }
             text.truncate(text.len().saturating_sub(words[n - 1].len() + 1));
         }
         // "japanese time", "time in kazakh": a country by its adjective, only with "time".
@@ -439,6 +452,12 @@ impl<'a> Parser<'a> {
                 latitude,
                 longitude,
             }),
+            // "waw" is the town, "WAW" the airport.
+            None if self.toks[i].word().is_some_and(|w| w.chars().any(char::is_lowercase))
+                && zones::capitals_only(&name) =>
+            {
+                zones::locate_city(&name)
+            }
             None => zones::locate(&name),
         };
         Some((location, n))
