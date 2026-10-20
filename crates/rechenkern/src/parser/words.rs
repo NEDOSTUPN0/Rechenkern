@@ -631,6 +631,20 @@ pub fn weekday(w: &str) -> Option<(Weekday, bool)> {
     })
 }
 
+/// The unit of time a period adjective names: "$100 daily", "in monthly".
+pub fn period_word(w: &str) -> Option<&'static str> {
+    Some(match w {
+        "hourly" => "h",
+        "daily" => "d",
+        "weekly" => "wk",
+        "biweekly" | "fortnightly" => "fortnight",
+        "monthly" => "mo",
+        "quarterly" => "quarter",
+        "yearly" | "annual" | "annually" | "annualized" => "yr",
+        _ => return None,
+    })
+}
+
 /// Words that make a whole line a cadence: "daily", "monthly".
 pub fn is_cadence_word(w: &str) -> bool {
     matches!(

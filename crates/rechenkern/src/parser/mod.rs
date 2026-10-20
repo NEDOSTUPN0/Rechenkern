@@ -847,6 +847,13 @@ impl<'a> Parser<'a> {
                         // "3 days ago at 5pm"
                         if days { self.date_tail(moved)? } else { moved }
                     }
+                    // "$100 daily", "$50,000 annual": a rate.
+                    w if expr.edge_unit(false).is_some()
+                        && let Some(period) = words::period_word(w) =>
+                    {
+                        self.pos += 1;
+                        Expr::binary(Op::Per, expr, Expr::BareUnit(crate::units::registry().get(period)))
+                    }
                     // "3 days in the past", "2 weeks in the future"
                     "in" if ["past", "future"].iter().any(|w| self.words_at(self.pos + 1, &["the", w])) => {
                         let later = self.words_at(self.pos + 1, &["the", "future"]);

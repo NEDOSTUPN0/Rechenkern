@@ -485,6 +485,11 @@ impl Parser<'_> {
             self.pos += 1;
             return Some(Target::Format(Format::Multiplier));
         }
+        // "in monthly", "as yearly": per that period.
+        if let Some(period) = self.lower(self.pos).and_then(|w| words::period_word(&w)) {
+            self.pos += 1;
+            return Some(Target::Per(registry().get(period)));
+        }
         if self.cur().is_some_and(|t| t.is_word("per") || t.is_sym("/")) {
             let mut p = self.clone();
             p.pos += 1;
