@@ -92,6 +92,18 @@ impl Parser<'_> {
                 (h, m) => Expr::binary(Op::Add, part(h, "h"), part(m, "min")),
             });
         }
+        // "5:30/km": minutes and seconds a kilometer, a pace.
+        if m < 60
+            && self.toks.get(self.pos).is_some_and(|t| t.is_sym("/"))
+            && self.unit_at(self.pos + 1, true).is_some_and(|(u, _)| u.dim() == Dim::LENGTH)
+        {
+            let minutes = Expr::binary(
+                Op::Add,
+                Expr::Number(Number::from_i64(h.into())),
+                Expr::Number(Number::ratio(m.into(), 60)),
+            );
+            return Some(Expr::WithUnit(minutes.boxed(), reg.get("min")));
+        }
         let time_unit = |i: usize| self.unit_at(i, true).filter(|(u, _)| u.dim() == Dim::TIME);
         let converted = ["in", "to", "as", "into"].iter().any(|w| self.words_at(self.pos, &[w]));
         let (unit, len) = match converted {

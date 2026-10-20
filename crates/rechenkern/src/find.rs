@@ -56,6 +56,32 @@ pub enum DataKind {
     Timestamp,
     /// "2026-09-23T14:30:00Z".
     Iso8601,
+    /// Digits as written, leading zeros too: "007", "2026".
+    Digits,
+    /// "0b1011"
+    BinaryNumber,
+    /// "0o17"
+    OctalNumber,
+    /// "0xFF"
+    HexNumber,
+    /// "01:00:10:12"
+    Timecode,
+    /// A screen resolution: "1920x1080".
+    Resolution,
+    /// A musical note: "A4", "C#5".
+    Pitch,
+    Frequency,
+    Power,
+    Pressure,
+    Angle,
+    /// "30 mpg", "8 L/100km".
+    FuelEconomy,
+    /// "100 Mbps", "50 MB/s".
+    TransferSpeed,
+    /// A run of spaces, tabs or line breaks.
+    Whitespace,
+    /// A word the engine reads: "in", "of", "if".
+    Keyword,
 }
 
 /// Something found in a text.
@@ -115,7 +141,20 @@ impl Calculator {
             }) else {
                 continue;
             };
-            let Some(kind) = wanted(&value_kinds(&expr, &value, end.is_some())) else { continue };
+            let mut kinds = value_kinds(&expr, &value, end.is_some());
+            // "0xFF", "007": numbers as written.
+            let written = &text[range.clone()];
+            if kinds.first() == Some(&DataKind::Number) || kinds.first() == Some(&DataKind::Timestamp) {
+                let radix = match written.get(..2).map(str::to_ascii_lowercase).as_deref() {
+                    Some("0x") => Some(DataKind::HexNumber),
+                    Some("0b") => Some(DataKind::BinaryNumber),
+                    Some("0o") => Some(DataKind::OctalNumber),
+                    _ => None,
+                };
+                let digits = written.bytes().all(|b| b.is_ascii_digit()).then_some(DataKind::Digits);
+                kinds.splice(0..0, radix.into_iter().chain(digits));
+            }
+            let Some(kind) = wanted(&kinds) else { continue };
             let value = match kind {
                 DataKind::Timestamp => match env.convert(
                     value,
@@ -155,6 +194,7 @@ impl Calculator {
                     if money { wanted(&[DataKind::Currency]) } else { None }
                 }
                 TokenKind::Boolean => wanted(&[DataKind::Boolean]),
+                TokenKind::Keyword | TokenKind::Converter | TokenKind::Connector => wanted(&[DataKind::Keyword]),
                 _ => None,
             };
             if let Some(kind) = kind {
@@ -232,6 +272,19 @@ impl Scanner<'_> {
         Ok(found)
     }
 
+    /// The first piece of `kind` not taken yet, wherever it is: "tomorrow QF 123" gives the
+    /// flight and the day in any order, as SoulverCore's `ObjectParser` scans unordered.
+    pub fn take(&mut self, kind: DataKind) -> Result<Found> {
+        let index = self
+            .found
+            .iter()
+            .position(|f| f.kind == kind)
+            .ok_or_else(|| Error::new(format!("no {kind:?} in \"{}\"", self.text.trim())))?;
+        let found = self.found.remove(index);
+        self.at = self.at.max(found.range.end);
+        Ok(found)
+    }
+
     /// A piece of `kind` anywhere in the text, without moving on.
     pub fn find(&self, kind: DataKind) -> Option<&Found> {
         self.found.iter().find(|f| f.kind == kind)
@@ -259,8 +312,11 @@ const ALL: &[DataKind] = &[
     DataKind::DateInterval,
     DataKind::Iso8601,
     DataKind::Date,
+    DataKind::Timecode,
     DataKind::Laptime,
     DataKind::Duration,
+    DataKind::Resolution,
+    DataKind::Pitch,
     DataKind::Money,
     DataKind::Percentage,
     DataKind::Temperature,
@@ -270,6 +326,12 @@ const ALL: &[DataKind] = &[
     DataKind::Area,
     DataKind::Speed,
     DataKind::DataSize,
+    DataKind::Frequency,
+    DataKind::Power,
+    DataKind::Pressure,
+    DataKind::Angle,
+    DataKind::FuelEconomy,
+    DataKind::TransferSpeed,
     DataKind::Quantity,
     DataKind::Number,
     DataKind::Boolean,
@@ -294,7 +356,17 @@ fn value_kinds(expr: &Expr, value: &Value, interval: bool) -> Vec<DataKind> {
         }
         Value::Quantity(q) if q.unit.is_money() => vec![DataKind::Money, DataKind::Quantity],
         Value::Quantity(q) => {
+            let fuel = q.unit.single().is_some_and(|d| d.symbol == "L/100km")
+                || (q.unit.factors().len() == 2
+                    && q.unit.factors().iter().any(|&(id, _)| crate::units::Unit::of(id).dim() == Dim::VOLUME)
+                    && q.unit.factors().iter().any(|&(id, _)| crate::units::Unit::of(id).dim() == Dim::LENGTH));
             let specific = match q.unit.dim() {
+                _ if fuel => Some(DataKind::FuelEconomy),
+                Dim::FREQUENCY => Some(DataKind::Frequency),
+                Dim::POWER => Some(DataKind::Power),
+                Dim::PRESSURE => Some(DataKind::Pressure),
+                Dim::ANGLE => Some(DataKind::Angle),
+                Dim::DATA_RATE => Some(DataKind::TransferSpeed),
                 Dim::TEMPERATURE => Some(DataKind::Temperature),
                 Dim::LENGTH => Some(DataKind::Length),
                 Dim::MASS => Some(DataKind::Mass),
@@ -313,6 +385,9 @@ fn value_kinds(expr: &Expr, value: &Value, interval: bool) -> Vec<DataKind> {
         Value::Duration(d) if d.laptime => vec![DataKind::Laptime, DataKind::Duration],
         Value::Duration(_) => vec![DataKind::Duration],
         Value::Bool(_) => vec![DataKind::Boolean],
+        Value::Timecode(_) => vec![DataKind::Timecode],
+        Value::Resolution(_) => vec![DataKind::Resolution],
+        Value::Pitch(_) => vec![DataKind::Pitch],
         _ => Vec::new(),
     }
 }
@@ -337,6 +412,18 @@ fn period_ends(env: &crate::eval::Env, span: Value) -> Result<(Value, Value)> {
 /// Links, email addresses and hashtags: whole words of the text.
 fn raw_data(text: &str) -> Vec<(Range<usize>, DataKind)> {
     let mut out = Vec::new();
+    // Runs of whitespace.
+    let mut run: Option<usize> = None;
+    for (i, c) in text.char_indices().chain([(text.len(), 'x')]) {
+        match (c.is_whitespace(), run) {
+            (true, None) => run = Some(i),
+            (false, Some(start)) => {
+                out.push((start..i, DataKind::Whitespace));
+                run = None;
+            }
+            _ => {}
+        }
+    }
     let mut at = 0;
     for word in text.split_inclusive(char::is_whitespace) {
         let start = at;

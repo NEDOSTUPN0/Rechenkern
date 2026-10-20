@@ -17,6 +17,14 @@ impl Parser<'_> {
     pub(super) fn distance_at(&self, i: usize) -> Option<(Ends, usize)> {
         if self.words_at(i, &["distance"]) {
             let from = i + 1;
+            // "distance to London from Tokyo"
+            if self.words_at(from, &["to"])
+                && let Some((_, n)) = self.place_at(from + 1)
+                && self.words_at(from + 1 + n, &["from"])
+                && let Some((_, m)) = self.place_at(from + 2 + n)
+            {
+                return Some(([(from + 2 + n, from + 2 + n + m), (from + 1, from + 1 + n)], 3 + n + m));
+            }
             let first = from + usize::from(self.words_at(from, &["from"]) || self.words_at(from, &["between"]));
             let (ends, end) = self.place_pair_at(first)?;
             return Some((ends, end - i));
@@ -63,6 +71,8 @@ pub(super) enum Geo {
 
 const GEO_WORDS: &[(&str, Geo)] = &[
     ("coordinates", Geo::Coordinates),
+    ("coordinate", Geo::Coordinates),
+    ("location", Geo::Coordinates),
     ("gps", Geo::Coordinates),
     ("latitude", Geo::Latitude),
     ("longitude", Geo::Longitude),
@@ -77,8 +87,9 @@ impl Parser<'_> {
             GEO_WORDS.iter().find(|(word, _)| *word == w).map(|&(_, g)| g)
         };
         if let Some(what) = geo(i) {
-            // "gps coordinates of"
-            let mut k = i + 1 + usize::from(what == Geo::Coordinates && self.words_at(i + 1, &["coordinates"]));
+            // "gps coordinates of", "gps coordinate of"
+            let gps = self.words_at(i + 1, &["coordinates"]) || self.words_at(i + 1, &["coordinate"]);
+            let mut k = i + 1 + usize::from(what == Geo::Coordinates && gps);
             if !(self.words_at(k, &["of"]) || self.words_at(k, &["for"])) {
                 return None;
             }

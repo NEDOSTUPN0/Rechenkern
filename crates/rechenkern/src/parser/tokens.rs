@@ -191,7 +191,7 @@ impl<'a> Parser<'a> {
             || (i == 0 && words::is_cadence_word(w) && self.config().features.cadence_parsing && self.var_at(0).is_none())
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
-            || (w == "cast" && ["to", "as", "into"].iter().any(|t| self.words_at(i + 1, &[t])))
+            || (w == "cast" && ["to", "as", "into", "in"].iter().any(|t| self.words_at(i + 1, &[t])))
             || (w == "diff" && (self.words_at(i + 1, &["between"]) || self.zone_at(i + 1).is_some()))
             // "zł10", "CHF10": a currency glued before its amount.
             // "zł10", "apr3": letters with digits glued after them.
@@ -234,6 +234,7 @@ impl<'a> Parser<'a> {
             || self.distance_at(i).is_some()
             || self.coordinates_at(i).is_some()
             || self.geo_of_number_at(i).is_some()
+            || self.metal_price_at(i).is_some()
             || self.note_at(i).is_some()
             || self.place_sky_at(i).is_some()
             || self.density_at(i).is_some()
@@ -261,6 +262,13 @@ impl<'a> Parser<'a> {
 
     /// A food named at token `i` and its length in tokens: "olive oil".
     pub(super) fn food_at(&self, i: usize) -> Option<(Food, usize)> {
+        // "half & half" is the cream, not a bitwise and.
+        if self.words_at(i, &["half"])
+            && self.toks.get(i + 1).is_some_and(|t| t.is_sym("&"))
+            && self.words_at(i + 2, &["half"])
+        {
+            return words::FOODS.starting_with("half").find(|(name, _)| *name == "half and half").map(|&(_, f)| (f, 3));
+        }
         self.phrase_at(i, &words::FOODS)
     }
 

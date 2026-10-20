@@ -544,6 +544,11 @@ impl Parser<'_> {
             self.pos += 2;
             return Ok(Some(Expr::WithUnit(Expr::Number(*n).boxed(), registry().get("mach"))));
         }
+        if let Some((code, n)) = self.metal_price_at(i) {
+            self.pos += n;
+            let ounce = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().currency(code).expect("a metal"));
+            return Ok(Some(Expr::Convert(ounce.boxed(), Target::Unit(self.dollar()))));
+        }
         if let Some(expr) = self.weather()? {
             return Ok(Some(expr));
         }
@@ -671,6 +676,25 @@ impl Parser<'_> {
             bail!("unknown function \"{}\"", self.toks[i].word().unwrap_or(w));
         }
         Ok(None)
+    }
+
+    /// "gold price", "price of silver", "gold spot price" at token `i`: a troy ounce of the
+    /// metal in money, its code and the phrase's length.
+    pub(super) fn metal_price_at(&self, i: usize) -> Option<(&'static str, usize)> {
+        let metal = |k: usize| match self.lower(k)?.as_str() {
+            "gold" => Some("XAU"),
+            "silver" => Some("XAG"),
+            "platinum" => Some("XPT"),
+            "palladium" => Some("XPD"),
+            _ => None,
+        };
+        let spot = usize::from(self.words_at(i, &["spot"]));
+        if self.words_at(i + spot, &["price", "of"]) {
+            return Some((metal(i + spot + 2)?, spot + 3));
+        }
+        let code = metal(i)?;
+        let spot = usize::from(self.words_at(i + 1, &["spot"]));
+        self.words_at(i + 1 + spot, &["price"]).then_some((code, 2 + spot))
     }
 
     /// A musical note converted to a frequency at token `i`: "C#4 in Hz", "Bb3 to Hz".

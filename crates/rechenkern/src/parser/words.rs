@@ -361,6 +361,8 @@ pub static FORMATS: Phrases<Format> = Phrases::new(&[
     ("frac", Format::Fraction),
     ("fractions", Format::Fraction),
     ("number", Format::Number),
+    ("plain number", Format::Decimal),
+    ("musical note", Format::Pitch),
     ("num", Format::Number),
     ("%", Format::Percent),
     ("percent", Format::Percent),

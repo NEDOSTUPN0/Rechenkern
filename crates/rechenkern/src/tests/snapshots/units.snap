@@ -145,6 +145,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 EBps in bps                              → 20,000,000,000,000,000,000 bps
 2.5 EGP                                      → 2.50 EGP
 2.5 EGP in EUR                               → €1.13
+2.5 EOS                                      → 2.5 EOS
+2.5 EOS in EUR                               → €1.13
 2.5 ERN                                      → 2.50 ERN
 2.5 ERN in EUR                               → €1.13
 2.5 ETB                                      → 2.50 ETB
@@ -181,6 +183,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 GB in B                                  → 2,500,000,000 B
 2.5 GBP                                      → £2.50
 2.5 GBP in EUR                               → €2.81
+2.5 GBX                                      → £0.03
+2.5 GBX in EUR                               → €0.03
+2.5 GBp                                      → £0.03
+2.5 GBp in EUR                               → €0.03
 2.5 GBps                                     → 2.5 GB/s
 2.5 GBps in bps                              → 20,000,000,000 bps
 2.5 GEL                                      → 2.50 GEL
@@ -257,6 +263,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 HKD$ in EUR                              → €1.13
 2.5 HNL                                      → 2.50 HNL
 2.5 HNL in EUR                               → €1.13
+2.5 HRK                                      → €0.33
+2.5 HRK in EUR                               → €0.33
 2.5 HTG                                      → 2.50 HTG
 2.5 HTG in EUR                               → €1.13
 2.5 HUF                                      → 2.50 HUF
@@ -345,8 +353,12 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 LSL in EUR                               → €1.13
 2.5 LTC                                      → 2.5 LTC
 2.5 LTC in EUR                               → €1.13
+2.5 LTL                                      → €0.72
+2.5 LTL in EUR                               → €0.72
 2.5 LUNA                                     → 2.5 LUNA
 2.5 LUNA in EUR                              → €1.13
+2.5 LVL                                      → €3.56
+2.5 LVL in EUR                               → €3.56
 2.5 LYD                                      → 2.500 LYD
 2.5 LYD in EUR                               → €1.13
 2.5 M                                        → 2.5 M
@@ -569,6 +581,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 SHP in EUR                               → €1.13
 2.5 SLE                                      → 2.50 SLE
 2.5 SLE in EUR                               → €1.13
+2.5 SLL                                      → 0.00 SLE
+2.5 SLL in EUR                               → €0.00
 2.5 SOL                                      → 2.5 SOL
 2.5 SOL in EUR                               → €1.13
 2.5 SOS                                      → 2.50 SOS
@@ -577,6 +591,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 SRD in EUR                               → €1.13
 2.5 SSP                                      → 2.50 SSP
 2.5 SSP in EUR                               → €1.13
+2.5 STD                                      → 0.00 STN
+2.5 STD in EUR                               → €0.00
 2.5 STN                                      → 2.50 STN
 2.5 STN in EUR                               → €1.13
 2.5 SUI                                      → 2.5 SUI
@@ -732,14 +748,22 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 ZAR in EUR                               → €1.13
 2.5 ZB                                       → 2.5 ZB
 2.5 ZB in B                                  → 2.5e21 B
+2.5 ZMK                                      → 0.00 ZMW
+2.5 ZMK in EUR                               → €0.00
 2.5 ZMW                                      → 2.50 ZMW
 2.5 ZMW in EUR                               → €1.13
+2.5 ZWG                                      → 2.50 ZWG
+2.5 ZWG in EUR                               → €1.13
+2.5 ZWL                                      → 0.00 ZWG
+2.5 ZWL in EUR                               → €0.00
 2.5 Zb                                       → 2.5 Zbit
 2.5 Zb in B                                  → 312,500,000,000,000,000,000 B
 2.5 Zbit                                     → 2.5 Zbit
 2.5 Zbit in B                                → 312,500,000,000,000,000,000 B
 2.5 ZiB                                      → 2.5 ZiB
 2.5 ZiB in B                                 → 2.951479052e21 B
+2.5 ZiG                                      → 2.50 ZWG
+2.5 ZiG in EUR                               → €1.13
 2.5 Zib                                      → 2.5 Zibit
 2.5 Zib in B                                 → 368,934,881,474,191,032,320 B
 2.5 Zibit                                    → 2.5 Zibit
@@ -876,6 +900,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 aruban florin in EUR                     → €1.13
 2.5 aruban florins                           → 2.50 AWG
 2.5 aruban florins in EUR                    → €1.13
+2.5 aruban guilder                           → 2.50 AWG
+2.5 aruban guilder in EUR                    → €1.13
+2.5 aruban guilders                          → 2.50 AWG
+2.5 aruban guilders in EUR                   → €1.13
 2.5 astronomical unit                        → 2.5 au
 2.5 astronomical unit in m                   → 373,994,676,750 m
 2.5 astronomical units                       → 2.5 au
@@ -1292,6 +1320,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 coulombs                                 → 2.5 coulombs
 2.5 crc                                      → 2.50 CRC
 2.5 crc in EUR                               → €1.13
+2.5 croatian kuna                            → €0.33
+2.5 croatian kuna in EUR                     → €0.33
 2.5 ct                                       → 2.5 ct
 2.5 ct in kg                                 → 0.0005 kg
 2.5 cuban peso                               → 2.50 CUP
@@ -1528,6 +1558,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 emirati dirhams in EUR                   → €1.13
 2.5 ems                                      → 2.5 em
 2.5 ems in m                                 → 0.01058333333 m
+2.5 eos                                      → 2.5 EOS
+2.5 eos in EUR                               → €1.13
 2.5 erg                                      → 2.5 ergs
 2.5 erg in J                                 → 0.00000025 J
 2.5 ergs                                     → 2.5 ergs
@@ -1636,6 +1668,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 fl oz in L                               → 0.07393382391 L
 2.5 fl. oz                                   → 2.5 fl oz
 2.5 fl. oz in L                              → 0.07393382391 L
+2.5 florin                                   → 2.50 AWG
+2.5 florin in EUR                            → €1.13
+2.5 florins                                  → 2.50 AWG
+2.5 florins in EUR                           → €1.13
 2.5 floz                                     → 2.5 fl oz
 2.5 floz in L                                → 0.07393382391 L
 2.5 fluid ounce                              → 2.5 fl oz
@@ -1837,10 +1873,14 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 gtt in L                                 → 0.000125 L
 2.5 guarani                                  → 3 PYG
 2.5 guarani in EUR                           → €1.13
+2.5 guaranies                                → 3 PYG
+2.5 guaranies in EUR                         → €1.13
 2.5 guaranis                                 → 3 PYG
 2.5 guaranis in EUR                          → €1.13
 2.5 guaraní                                  → 3 PYG
 2.5 guaraní in EUR                           → €1.13
+2.5 guaraníes                                → 3 PYG
+2.5 guaraníes in EUR                         → €1.13
 2.5 guaranís                                 → 3 PYG
 2.5 guaranís in EUR                          → €1.13
 2.5 guatemalan quetzal                       → 2.50 GTQ
@@ -2440,6 +2480,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 kt in mph                                → 2.87694862 mph
 2.5 kts                                      → 2.5 kn
 2.5 kts in mph                               → 2.87694862 mph
+2.5 kuna                                     → €0.33
+2.5 kuna in EUR                              → €0.33
+2.5 kunas                                    → €0.33
+2.5 kunas in EUR                             → €0.33
 2.5 kuwaiti dinar                            → 2.500 KWD
 2.5 kuwaiti dinar in EUR                     → €1.13
 2.5 kuwaiti dinars                           → 2.500 KWD
@@ -2482,6 +2526,14 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 lari in EUR                              → €1.13
 2.5 laris                                    → 2.50 GEL
 2.5 laris in EUR                             → €1.13
+2.5 lati                                     → €3.56
+2.5 lati in EUR                              → €3.56
+2.5 lats                                     → €3.56
+2.5 lats in EUR                              → €3.56
+2.5 latvian lati                             → €3.56
+2.5 latvian lati in EUR                      → €3.56
+2.5 latvian lats                             → €3.56
+2.5 latvian lats in EUR                      → €3.56
 2.5 lb                                       → 2.5 lb
 2.5 lb in kg                                 → 1.133980925 kg
 2.5 lb-ft                                    → 2.5 lbf·ft
@@ -2574,6 +2626,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 lira in EUR                              → €1.13
 2.5 liras                                    → ₺2.50
 2.5 liras in EUR                             → €1.13
+2.5 litai                                    → €0.72
+2.5 litai in EUR                             → €0.72
+2.5 litas                                    → €0.72
+2.5 litas in EUR                             → €0.72
 2.5 litecoin                                 → 2.5 LTC
 2.5 litecoin in EUR                          → €1.13
 2.5 litecoins                                → 2.5 LTC
@@ -2584,6 +2640,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 liters                                   → 2.5 L
 2.5 liters per 100 kilometers                → 2.5 L/100km
 2.5 liters per 100 kilometers in m2          → 0.000000025 m²
+2.5 lithuanian litai                         → €0.72
+2.5 lithuanian litai in EUR                  → €0.72
+2.5 lithuanian litas                         → €0.72
+2.5 lithuanian litas in EUR                  → €0.72
 2.5 litre                                    → 2.5 L
 2.5 litres                                   → 2.5 L
 2.5 lkr                                      → 2.50 LKR
@@ -3357,12 +3417,26 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 npr in EUR                               → €1.13
 2.5 ns                                       → 2.5 ns
 2.5 ns in s                                  → 0.0000000025 seconds
+2.5 ntd                                      → NT$2.50
+2.5 ntd in EUR                               → €1.13
+2.5 ntds                                     → NT$2.50
+2.5 ntds in EUR                              → €1.13
 2.5 nzd                                      → NZ$2.50
 2.5 nzd in EUR                               → €1.13
 2.5 octet                                    → 2.5 B
 2.5 octets                                   → 2.5 B
 2.5 ohm                                      → 2.5 Ω
 2.5 ohms                                     → 2.5 Ω
+2.5 old sierra leonean leone                 → 0.00 SLE
+2.5 old sierra leonean leone in EUR          → €0.00
+2.5 old sierra leonean leones                → 0.00 SLE
+2.5 old sierra leonean leones in EUR         → €0.00
+2.5 old são tomé dobra                       → 0.00 STN
+2.5 old são tomé dobra in EUR                → €0.00
+2.5 old são tomé dobras                      → 0.00 STN
+2.5 old são tomé dobras in EUR               → €0.00
+2.5 old zambian kwacha                       → 0.00 ZMW
+2.5 old zambian kwacha in EUR                → €0.00
 2.5 omani rial                               → 2.500 OMR
 2.5 omani rial in EUR                        → €1.13
 2.5 omani rials                              → 2.500 OMR
@@ -3457,6 +3531,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 pataca in EUR                            → €1.13
 2.5 patacas                                  → 2.50 MOP
 2.5 patacas in EUR                           → €1.13
+2.5 paʻanga                                  → 2.50 TOP
+2.5 paʻanga in EUR                           → €1.13
 2.5 pc                                       → 2.5 pc
 2.5 pc in m                                  → 77,141,939,537,284,183 m
 2.5 pdl                                      → 2.5 pdl
@@ -3650,6 +3726,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 pyg in EUR                               → €1.13
 2.5 qar                                      → 2.50 QAR
 2.5 qar in EUR                               → €1.13
+2.5 qatari rial                              → 2.50 QAR
+2.5 qatari rial in EUR                       → €1.13
+2.5 qatari rials                             → 2.50 QAR
+2.5 qatari rials in EUR                      → €1.13
 2.5 qatari riyal                             → 2.50 QAR
 2.5 qatari riyal in EUR                      → €1.13
 2.5 qatari riyals                            → 2.50 QAR
@@ -4106,6 +4186,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 terawatt hours in J                      → 9,000,000,000,000,000 J
 2.5 terawatts                                → 2.5 TW
 2.5 terawatts in W                           → 2,500,000,000,000 W
+2.5 terra                                    → 2.5 LUNA
+2.5 terra in EUR                             → €1.13
+2.5 terras                                   → 2.5 LUNA
+2.5 terras in EUR                            → €1.13
 2.5 tesla                                    → 2.5 teslas
 2.5 teslas                                   → 2.5 teslas
 2.5 tether                                   → 2.5 USDT
@@ -4553,12 +4637,22 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 zettaoctets in B                         → 2.5e21 B
 2.5 zib                                      → 2.5 ZiB
 2.5 zib in B                                 → 2.951479052e21 B
+2.5 zimbabwe gold                            → 2.50 ZWG
+2.5 zimbabwe gold in EUR                     → €1.13
+2.5 zimbabwe golds                           → 2.50 ZWG
+2.5 zimbabwe golds in EUR                    → €1.13
+2.5 zimbabwean dollar                        → 0.00 ZWG
+2.5 zimbabwean dollar in EUR                 → €0.00
+2.5 zimbabwean dollars                       → 0.00 ZWG
+2.5 zimbabwean dollars in EUR                → €0.00
 2.5 zloty                                    → 2.50 PLN
 2.5 zloty in EUR                             → €1.13
 2.5 zlotys                                   → 2.50 PLN
 2.5 zlotys in EUR                            → €1.13
 2.5 zmw                                      → 2.50 ZMW
 2.5 zmw in EUR                               → €1.13
+2.5 zwg                                      → 2.50 ZWG
+2.5 zwg in EUR                               → €1.13
 2.5 zł                                       → 2.50 PLN
 2.5 zł in EUR                                → €1.13
 2.5 złoty                                    → 2.50 PLN
@@ -4648,6 +4742,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 μs                                       → 2.5 μs
 2.5 μs in s                                  → 0.0000025 seconds
 2.5 μ℧                                       → 2.5
+2.5 лв                                       → 2.50 BGN
+2.5 лв in EUR                                → €1.13
+2.5 лвs                                      → 2.50 BGN
+2.5 лвs in EUR                               → €1.13
+2.5 руб                                      → ₽2.50
+2.5 руб in EUR                               → €0.03
+2.5 руб.                                     → ₽2.50
+2.5 руб. in EUR                              → €0.03
+2.5 рубs                                     → ₽2.50
+2.5 рубs in EUR                              → €0.03
 2.5 ֏                                        → 2.50 AMD
 2.5 ֏ in EUR                                 → €1.13
 2.5 ৳                                        → 2.50 BDT

@@ -27,8 +27,11 @@ impl Parser<'_> {
         if let Some(expr) = self.time_saved()? {
             return Ok(Some(expr));
         }
-        // "frames between 00:00:10:00 and 00:00:20:00"
-        if self.matches_at(0, &["frames", "between"]) {
+        if let Some(expr) = self.discount()? {
+            return Ok(Some(expr));
+        }
+        // "frames between 00:00:10:00 and 00:00:20:00", "frames in 00:01:00:00 to 00:02:00:00"
+        if ["between", "in", "from"].iter().any(|w| self.matches_at(0, &["frames", w])) {
             let mut p = self.sub(2, self.toks.len());
             let [a, b] = p.pair()?;
             return Ok(Some(Self::formatted(Expr::Range(a.boxed(), b.boxed()), Format::Frames)));
@@ -498,15 +501,17 @@ impl Parser<'_> {
         }))
     }
 
-    /// "year %", "day percentage": how much of this period has gone by.
+    /// "year %", "day percentage", "days %": how much of this period has gone by.
     fn progress(&self) -> Option<Expr> {
         if self.toks.len() != 2 || !self.matches_at(1, &["%"]) {
             return None;
         }
-        let (start, next) = match self.lower(0)?.as_str() {
+        let word = self.lower(0)?;
+        let word = word.strip_suffix('s').unwrap_or(&word);
+        let (start, next) = match word {
             "day" => (TimeExpr::Today(0), TimeExpr::Today(1)),
             "week" | "month" | "year" => {
-                let unit = match self.lower(0)?.as_str() {
+                let unit = match word {
                     "week" => jiff::Unit::Week,
                     "month" => jiff::Unit::Month,
                     _ => jiff::Unit::Year,
@@ -521,12 +526,11 @@ impl Parser<'_> {
         Some(Self::formatted(part, Format::Percent))
     }
 
-    /// "ppi of 5.5 inch at 1920x1080": the pixels per inch of a screen.
+    /// "ppi of 5.5 inch at 1920x1080", "density of 27 inch at 2560x1440": the pixels per inch of a screen.
     fn screen_density(&self) -> Result<Option<Expr>> {
-        if !(self.matches_at(0, &["ppi"]) || self.matches_at(0, &["dpi"])) {
-            return Ok(None);
-        }
-        let start = 1 + usize::from(self.matches_at(1, &["of"]));
+        let words = [&["ppi"][..], &["dpi"], &["density"], &["pixel", "density"], &["pixels", "per", "inch"]];
+        let Some(n) = words.iter().find(|w| self.matches_at(0, w)).map(|w| w.len()) else { return Ok(None) };
+        let start = n + usize::from(self.matches_at(n, &["of"]));
         let resolution = (start + 1..self.toks.len()).find_map(|i| Some((i, self.resolution_at(i)?)));
         let Some((at, (width, height, n))) = resolution else {
             return Ok(None);
@@ -546,7 +550,8 @@ impl Parser<'_> {
     /// £50,000 in UK", "effective tax rate for €80,000 in Germany".
     fn income_tax(&self) -> Result<Option<Expr>> {
         let len = self.toks.len();
-        let tax = self.toks.iter().any(|t| t.is_word("tax")) || (0..len).any(|i| self.matches_at(i, &["take", "home"]));
+        let tax = self.toks.iter().any(|t| t.is_word("tax"))
+            || (0..len).any(|i| self.matches_at(i, &["take", "home"]) || self.matches_at(i, &["net", "income"]));
         if !tax {
             return Ok(None);
         }
@@ -610,6 +615,23 @@ impl Parser<'_> {
         let speed = self.part(at + 1, self.toks.len())?;
         let faster = Expr::binary(Op::At, time.clone(), speed);
         Ok(Some(Expr::binary(Op::Sub, time, faster)))
+    }
+
+    /// "$80 after 15% discount", "$80 with a 15% discount": the price with that much off.
+    fn discount(&self) -> Result<Option<Expr>> {
+        let len = self.toks.len();
+        if len < 4 || !["discount", "off", "rebate", "markdown"].iter().any(|w| self.matches_at(len - 1, &[w])) {
+            return Ok(None);
+        }
+        let Some(at) = (1..len - 2).find(|&i| self.matches_at(i, &["after"]) || self.matches_at(i, &["with"])) else {
+            return Ok(None);
+        };
+        let start = at + 1 + usize::from(self.matches_at(at + 1, &["a"]));
+        let Ok(share) = self.part(start, len - 1) else { return Ok(None) };
+        if !matches!(share, Expr::Percent(_)) {
+            return Ok(None);
+        }
+        Ok(Some(Expr::binary(Op::Off, share, self.part(0, at)?)))
     }
 
     /// "investment required for $1,000/month at 5%": what pays that much a year at the

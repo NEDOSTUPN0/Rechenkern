@@ -139,3 +139,54 @@ fn scanning_in_order() {
     assert!(scanner.number().is_err());
     assert_eq!(scanner.find(DataKind::Date).unwrap().text, "tomorrow");
 }
+
+#[test]
+fn more_kinds() {
+    use DataKind::*;
+    let kinds = [
+        HexNumber,
+        BinaryNumber,
+        Digits,
+        Timecode,
+        Resolution,
+        FuelEconomy,
+        TransferSpeed,
+        Frequency,
+        Power,
+        Pressure,
+        Angle,
+        Number,
+    ];
+    let text = "0xFF and 0b101, code 007, at 01:00:10:12 on 1920x1080, 30 mpg, 100 Mbps, 440 Hz, 5 kW, 2 bar, 90°, 3.5";
+    let kinds_found: Vec<String> =
+        calc().find(text, &kinds).iter().map(|f| format!("{:?} {}", f.kind, f.text)).collect();
+    assert_eq!(
+        kinds_found,
+        [
+            "HexNumber 0xFF",
+            "BinaryNumber 0b101",
+            "Digits 007",
+            "Timecode 01:00:10:12",
+            "Resolution 1920x1080",
+            "FuelEconomy 30 mpg",
+            "TransferSpeed 100 Mbps",
+            "Frequency 440 Hz",
+            "Power 5 kW",
+            "Pressure 2 bar",
+            "Angle 90°",
+            "Number 3.5",
+        ]
+    );
+    let words = calc().find("5 km in miles", &[Whitespace, Keyword]);
+    let words: Vec<String> = words.iter().map(|f| format!("{:?} {:?}", f.kind, f.text)).collect();
+    assert_eq!(words, ["Whitespace \" \"", "Whitespace \" \"", "Keyword \"in\"", "Whitespace \" \""]);
+}
+
+#[test]
+fn scanning_in_any_order() {
+    let calc = calc();
+    let mut scanner = calc.scanner("tomorrow QF 123");
+    assert_eq!(scanner.take(DataKind::Number).unwrap().text, "123");
+    assert_eq!(scanner.take(DataKind::Date).unwrap().text, "tomorrow");
+    assert!(scanner.take(DataKind::Date).is_err());
+}

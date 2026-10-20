@@ -56,7 +56,8 @@ impl Parser<'_> {
             return Ok(Some(Expr::Range(expr.clone().boxed(), self.range_end(through)?.boxed())));
         }
         // "5 km cast to miles": the number kept, the unit changed.
-        if self.words_at(self.pos, &["cast"]) && ["to", "as", "into"].iter().any(|w| self.words_at(self.pos + 1, &[w]))
+        if self.words_at(self.pos, &["cast"])
+            && ["to", "as", "into", "in"].iter().any(|w| self.words_at(self.pos + 1, &[w]))
         {
             let mut p = self.clone();
             p.pos += 2;
@@ -75,6 +76,15 @@ impl Parser<'_> {
             return Ok(None);
         }
         self.pos += 1;
+        // "5:30/km in /mile": a pace in minutes per another length.
+        if self.cur().is_some_and(|t| t.is_sym("/"))
+            && expr.edge_unit(true).is_some_and(|u| u.dim() == Dim::TIME.div(Dim::LENGTH))
+            && let Some((length, n)) = self.unit_at(self.pos + 1, true).filter(|(u, _)| u.dim() == Dim::LENGTH)
+        {
+            self.pos += 1 + n;
+            let pace = registry().get("min").product(&length.pow(-1));
+            return Ok(Some(Expr::Convert(expr.clone().boxed(), Target::Unit(pace))));
+        }
         // "3pm in 24 hour", "15:45 to 12-hour time": the clock it is shown on; "in 24 hours" moves it.
         if is_moment(expr)
             && let Some((h24, n)) = self.clock_style_at(self.pos)
@@ -145,6 +155,28 @@ impl Parser<'_> {
             target => target,
         };
         if let Some(target) = target {
+            // "5 minutes 20 seconds as frames @ 24 fps": that many seconds of frames.
+            if let Target::Format(Format::Frames) = &target
+                && let Some(fps) = self.fps_after()
+            {
+                let seconds = Expr::Convert(expr.clone().boxed(), Target::Unit(registry().get("s")));
+                let frames = Expr::binary(Op::Mul, Parser::formatted(seconds, Format::Number), Expr::Number(fps));
+                let whole = Expr::Round(frames.boxed(), Rounding::Places(0, Direction::Nearest));
+                return Ok(Some(Parser::formatted(whole, Format::Frames)));
+            }
+            // "27 inch in px with 326 ppi": pixels at that density.
+            if let Target::Unit(unit) = &target
+                && unit.same_as(&registry().get("px"))
+                && let Some(density) = self.density_after()?
+            {
+                let inches = Expr::Convert(expr.clone().boxed(), Target::Unit(registry().get("in")));
+                let dots = Parser::formatted(
+                    Expr::Convert(density.boxed(), Target::Unit(registry().get("ppi"))),
+                    Format::Number,
+                );
+                let pixels = Expr::binary(Op::Mul, Parser::formatted(inches, Format::Number), dots);
+                return Ok(Some(Expr::WithUnit(pixels.boxed(), unit.clone())));
+            }
             // "9am in New York to Tokyo": the first zone says where the clock is.
             if let Target::Zone(zone) = &target
                 && matches!(expr, Expr::Time(TimeExpr::Clock { .. }))
@@ -676,6 +708,33 @@ fn is_date_pattern(text: &str) -> bool {
 }
 
 impl Parser<'_> {
+    /// "@ 24 fps", "at 30 fps" at the cursor, read past: the frame rate.
+    fn fps_after(&mut self) -> Option<Number> {
+        let at = self.cur().is_some_and(|t| t.is_sym("@") || t.is_word("at"));
+        let Some(Tok::Num(fps)) = self.toks.get(self.pos + 1).map(|t| &t.tok) else { return None };
+        let unit = self.toks.get(self.pos + 2).is_some_and(|t| t.is_word("fps"));
+        (at && unit).then(|| {
+            self.pos += 3;
+            *fps
+        })
+    }
+
+    /// "with 326 ppi", "at 300 dpi" at the cursor, read past: a pixel density.
+    fn density_after(&mut self) -> Result<Option<Expr>> {
+        if !self.cur().is_some_and(|t| t.is_word("with") || t.is_word("at")) {
+            return Ok(None);
+        }
+        let mut p = self.clone();
+        p.pos += 1;
+        let Ok(density) = p.unary() else { return Ok(None) };
+        let ppi = registry().get("ppi");
+        if !density.edge_unit(true).is_some_and(|u| u.dim() == ppi.dim()) {
+            return Ok(None);
+        }
+        *self = p;
+        Ok(Some(density))
+    }
+
     /// "24 hour", "24-hour time", "12h clock", "military time" at token `i`: whether the clock
     /// has 24 hours, and the length in tokens.
     fn clock_style_at(&self, i: usize) -> Option<(bool, usize)> {

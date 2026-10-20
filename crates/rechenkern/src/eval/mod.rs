@@ -849,6 +849,9 @@ impl Env<'_> {
             },
             Format::Frames => match value {
                 Value::Timecode(t) => (Value::number(Number::from_i64(t.frames)), Display::Frames),
+                Value::Quantity(q) if q.unit.is_none() && q.number.is_integer() => {
+                    (Value::Quantity(q), Display::Frames)
+                }
                 v => bail!("only a timecode has frames, not {}", v.kind()),
             },
             Format::Pitch => match &value {

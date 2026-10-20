@@ -395,6 +395,12 @@ today as fractions                           → Wed, 23 Sep 2026
 255 in number                                → 255
 0.75 as number                               → 0.75
 today as number                              → <error: can't make a date a plain number>
+255 in plain number                          → 255
+0.75 as plain number                         → 0.75
+today as plain number                        → Wed, 23 Sep 2026
+255 in musical note                          → <error: only a frequency has a pitch, not a number>
+0.75 as musical note                         → <error: only a frequency has a pitch, not a number>
+today as musical note                        → <error: only a frequency has a pitch, not a date>
 255 in num                                   → 255
 0.75 as num                                  → 0.75
 today as num                                 → <error: can't make a date a plain number>
@@ -503,7 +509,7 @@ today as megapixel                           → <error: only a resolution has m
 255 in mp                                    → <error: only a resolution has megapixels, not a number>
 0.75 as mp                                   → <error: only a resolution has megapixels, not a number>
 today as mp                                  → <error: only a resolution has megapixels, not a date>
-255 in frames                                → <error: only a timecode has frames, not a number>
+255 in frames                                → 255 frames
 0.75 as frames                               → <error: only a timecode has frames, not a number>
 today as frames                              → <error: only a timecode has frames, not a date>
 

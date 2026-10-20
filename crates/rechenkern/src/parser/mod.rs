@@ -298,9 +298,10 @@ impl<'a> Parser<'a> {
             return Ok(None);
         }
         let name = name_toks.iter().filter_map(Token::word).collect::<Vec<_>>().join(" ").to_lowercase();
-        // "widgets = new unit"
+        // "widgets = new unit", "widgets = new unit type"
         let rest = &self.toks[eq + 1..];
-        if name_toks.len() == 1 && rest.len() == 2 && rest[0].is_word("new") && rest[1].is_word("unit") {
+        let new_unit = rest.len() >= 2 && rest[0].is_word("new") && rest[1].is_word("unit");
+        if name_toks.len() == 1 && new_unit && (rest.len() == 2 || (rest.len() == 3 && rest[2].is_word("type"))) {
             return Ok(Some(Stmt::Unit(name)));
         }
         let op = match self.toks[eq].tok {

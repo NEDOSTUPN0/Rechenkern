@@ -3,7 +3,7 @@
 use jiff::Unit as Cal;
 
 use super::{Dim, Registry, Unit, UnitDef, UnitId};
-use crate::currency::{AMBIGUOUS_CODES, CURRENCIES, MINOR_UNITS, find};
+use crate::currency::{AMBIGUOUS_CODES, CURRENCIES, MINOR_UNITS, REPLACED_CURRENCIES, find};
 use crate::hash::TableMap;
 use crate::number::Number;
 
@@ -782,6 +782,22 @@ pub(super) fn build() -> Registry {
             scale: Number::pow10(-places),
             offset: Number::ZERO,
             spelled: true,
+            tight: false,
+            calendar: None,
+            currency: Some(currency),
+        });
+        b.register(id, aliases.iter().map(|a| a.to_string()), true);
+    }
+    for &(code, name, plural, aliases, per_new) in REPLACED_CURRENCIES {
+        let currency = find(code).expect("a replaced currency's successor is known");
+        let id = b.push(UnitDef {
+            symbol: aliases[0].into(),
+            name: name.into(),
+            plural: plural.into(),
+            dim: Dim::MONEY,
+            scale: Number::ONE / Number::parse(per_new).expect("a fixed rate"),
+            offset: Number::ZERO,
+            spelled: false,
             tight: false,
             calendar: None,
             currency: Some(currency),

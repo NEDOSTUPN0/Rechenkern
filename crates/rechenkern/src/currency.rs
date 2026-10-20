@@ -59,9 +59,9 @@ pub static CURRENCIES: &[Currency] = &[
     fiat("NZD", "New Zealand dollar", "New Zealand dollars", "NZ$", 2, &["NZ$", "new zealand dollar", "kiwi dollar"]),
     fiat("HKD", "Hong Kong dollar", "Hong Kong dollars", "HK$", 2, &["HK$", "hong kong dollar"]),
     fiat("SGD", "Singapore dollar", "Singapore dollars", "S$", 2, &["S$", "singapore dollar"]),
-    fiat("TWD", "New Taiwan dollar", "New Taiwan dollars", "NT$", 2, &["NT$", "taiwan dollar", "new taiwan dollar", "NTD"]),
+    fiat("TWD", "New Taiwan dollar", "New Taiwan dollars", "NT$", 2, &["NT$", "taiwan dollar", "new taiwan dollar", "NTD", "ntd"]),
     fiat("INR", "Indian rupee", "Indian rupees", "₹", 2, &["₹", "Rs", "rupee", "indian rupee"]),
-    fiat("RUB", "Russian ruble", "Russian rubles", "₽", 2, &["₽", "ruble", "rouble", "russian ruble", "russian rouble"]),
+    fiat("RUB", "Russian ruble", "Russian rubles", "₽", 2, &["₽", "руб", "руб.", "ruble", "rouble", "russian ruble", "russian rouble"]),
     fiat("KZT", "Kazakhstani tenge", "Kazakhstani tenges", "₸", 2, &["₸", "tenge", "kazakh tenge", "kazakhstani tenge"]),
     fiat("UAH", "Ukrainian hryvnia", "Ukrainian hryvnias", "₴", 2, &["₴", "hryvnia", "hryvnya", "ukrainian hryvnia"]),
     fiat("KRW", "South Korean won", "South Korean won", "₩", 0, &["₩", "korean won", "south korean won"]),
@@ -80,7 +80,7 @@ pub static CURRENCIES: &[Currency] = &[
     fiat("CZK", "Czech koruna", "Czech korunas", "", 2, &["Kč", "koruna", "czech koruna", "czech crown"]),
     fiat("HUF", "Hungarian forint", "Hungarian forints", "", 2, &["forint", "hungarian forint", "Ft"]),
     fiat("RON", "Romanian leu", "Romanian lei", "", 2, &["leu", "lei", "romanian leu", "romanian lei"]),
-    fiat("BGN", "Bulgarian lev", "Bulgarian leva", "", 2, &["lev", "leva", "bulgarian lev"]),
+    fiat("BGN", "Bulgarian lev", "Bulgarian leva", "", 2, &["лв", "lev", "leva", "bulgarian lev"]),
     fiat("ZAR", "South African rand", "South African rand", "", 2, &["rand", "south african rand"]),
     fiat("AED", "UAE dirham", "UAE dirhams", "", 2, &["dirham", "uae dirham", "emirati dirham"]),
     fiat("SAR", "Saudi riyal", "Saudi riyals", "", 2, &["riyal", "saudi riyal"]),
@@ -90,7 +90,7 @@ pub static CURRENCIES: &[Currency] = &[
     fiat("ANG", "Netherlands Antillean guilder", "Netherlands Antillean guilders", "", 2, &["netherlands antillean guilder"]),
     fiat("AOA", "Angolan kwanza", "Angolan kwanzas", "", 2, &["kwanza", "angolan kwanza"]),
     fiat("ARS", "Argentine peso", "Argentine pesos", "", 2, &["argentine peso"]),
-    fiat("AWG", "Aruban florin", "Aruban florins", "", 2, &["aruban florin"]),
+    fiat("AWG", "Aruban florin", "Aruban florins", "", 2, &["aruban florin", "aruban guilder", "florin"]),
     fiat("AZN", "Azerbaijani manat", "Azerbaijani manats", "", 2, &["₼", "manat", "azerbaijani manat"]),
     fiat("BAM", "Bosnia-Herzegovina convertible mark", "Bosnia-Herzegovina convertible marks", "", 2, &["convertible mark", "bosnia and herzegovina convertible mark"]),
     fiat("BBD", "Barbadian dollar", "Barbadian dollars", "", 2, &["barbadian dollar", "barbados dollar"]),
@@ -168,8 +168,8 @@ pub static CURRENCIES: &[Currency] = &[
     fiat("PEN", "Peruvian sol", "Peruvian soles", "", 2, &["soles", "peruvian sol", "peruvian soles"]),
     fiat("PGK", "Papua New Guinean kina", "Papua New Guinean kina", "", 2, &["kina", "papua new guinean kina"]),
     fiat("PKR", "Pakistani rupee", "Pakistani rupees", "", 2, &["pakistani rupee", "pakistan rupee"]),
-    fiat("PYG", "Paraguayan guarani", "Paraguayan guaranis", "", 0, &["guarani", "paraguayan guarani", "guaraní", "paraguayan guaraní"]),
-    fiat("QAR", "Qatari riyal", "Qatari riyals", "", 2, &["qatari riyal"]),
+    fiat("PYG", "Paraguayan guarani", "Paraguayan guaranis", "", 0, &["guarani", "paraguayan guarani", "guaraní", "paraguayan guaraní", "guaraníes", "guaranies"]),
+    fiat("QAR", "Qatari riyal", "Qatari riyals", "", 2, &["qatari riyal", "qatari rial"]),
     fiat("RSD", "Serbian dinar", "Serbian dinars", "", 2, &["serbian dinar"]),
     fiat("RWF", "Rwandan franc", "Rwandan francs", "", 0, &["rwandan franc", "rwanda franc"]),
     fiat("SBD", "Solomon Islands dollar", "Solomon Islands dollars", "", 2, &["solomon islands dollar"]),
@@ -187,7 +187,7 @@ pub static CURRENCIES: &[Currency] = &[
     fiat("TJS", "Tajikistani somoni", "Tajikistani somonis", "", 2, &["somoni", "tajikistani somoni"]),
     fiat("TMT", "Turkmenistani manat", "Turkmenistani manats", "", 2, &["turkmen manat", "turkmenistani manat"]),
     fiat("TND", "Tunisian dinar", "Tunisian dinars", "", 3, &["tunisian dinar"]),
-    fiat("TOP", "Tongan paʻanga", "Tongan paʻanga", "", 2, &["paanga", "pa'anga"]),
+    fiat("TOP", "Tongan paʻanga", "Tongan paʻanga", "", 2, &["paanga", "pa'anga", "paʻanga"]),
     fiat("TTD", "Trinidad and Tobago dollar", "Trinidad and Tobago dollars", "", 2, &["trinidad and tobago dollar"]),
     fiat("TZS", "Tanzanian shilling", "Tanzanian shillings", "", 2, &["tanzanian shilling"]),
     fiat("UGX", "Ugandan shilling", "Ugandan shillings", "", 0, &["ugandan shilling"]),
@@ -202,6 +202,7 @@ pub static CURRENCIES: &[Currency] = &[
     fiat("XPF", "CFP franc", "CFP francs", "", 0, &["cfp franc"]),
     fiat("YER", "Yemeni rial", "Yemeni rials", "", 2, &["yemeni rial"]),
     fiat("ZMW", "Zambian kwacha", "Zambian kwachas", "", 2, &["zambian kwacha"]),
+    fiat("ZWG", "Zimbabwe Gold", "Zimbabwe Gold", "", 2, &["ZiG", "zimbabwe gold"]),
     // Precious metals, priced per troy ounce.
     fiat("XAU", "troy ounce of gold", "troy ounces of gold", "", 4, &[]),
     fiat("XAG", "troy ounce of silver", "troy ounces of silver", "", 4, &[]),
@@ -243,17 +244,32 @@ pub static CURRENCIES: &[Currency] = &[
     crypto("BSV", "Bitcoin SV", "Bitcoin SV", &["bitcoin sv"]),
     crypto("DASH", "Dash", "Dash", &[]),
     crypto("NEO", "NEO", "NEO", &[]),
-    crypto("LUNA", "Terra", "Terra", &[]),
+    crypto("LUNA", "Terra", "Terra", &["terra"]),
+    crypto("EOS", "EOS", "EOS", &[]),
 ];
 
 /// Small units of a currency, worth 10^-places of it: (code, name, plural, aliases, places).
 pub static MINOR_UNITS: &[(&str, &str, &str, &[&str], i32)] = &[
     ("USD", "cent", "cents", &["¢"], 2),
     ("EUR", "euro cent", "euro cents", &[], 2),
-    ("GBP", "penny", "pence", &["pennies"], 2),
+    ("GBP", "penny", "pence", &["pennies", "GBX", "GBp"], 2),
     ("BTC", "satoshi", "satoshis", &["sats"], 8),
     ("ETH", "gwei", "gwei", &["GWEI", "Gwei"], 9),
     ("ETH", "wei", "wei", &[], 18),
+];
+
+/// Currencies that were replaced at a fixed rate: the currency now, the old one's name and plural,
+/// its spellings and how many of it made one of the new.
+#[rustfmt::skip]
+pub static REPLACED_CURRENCIES: &[(&str, &str, &str, &[&str], &str)] = &[
+    ("EUR", "Croatian kuna", "Croatian kuna", &["HRK", "kuna", "kunas"], "7.5345"),
+    ("EUR", "Lithuanian litas", "Lithuanian litai", &["LTL", "litas", "litai"], "3.4528"),
+    ("EUR", "Latvian lats", "Latvian lati", &["LVL", "lats", "lati"], "0.702804"),
+    ("ZMW", "old Zambian kwacha", "old Zambian kwacha", &["ZMK"], "1000"),
+    ("STN", "old São Tomé dobra", "old São Tomé dobras", &["STD"], "1000"),
+    ("SLE", "old Sierra Leonean leone", "old Sierra Leonean leones", &["SLL"], "1000"),
+    // Zimbabwe Gold took the dollar's place in April 2024.
+    ("ZWG", "Zimbabwean dollar", "Zimbabwean dollars", &["ZWL", "zimbabwean dollar"], "2498.7242"),
 ];
 
 /// Finds a currency by its ISO code (case-insensitive).
