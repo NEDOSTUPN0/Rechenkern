@@ -435,11 +435,12 @@ impl Parser<'_> {
         };
         let w = self.lower(self.pos).unwrap_or_default();
         let significant = match w.as_str() {
-            "dp" | "decimals" | "places" | "digits" => false,
+            "dp" | "decimals" | "places" | "place" | "digits" | "digit" => false,
             "decimal" => {
                 self.pos += 1;
-                self.eat_word("places");
-                self.eat_word("place");
+                for w in ["places", "place", "points", "point"] {
+                    self.eat_word(w);
+                }
                 return Ok(Some((Rounding::Places(count, dir), None)));
             }
             "sf" | "sig" | "significant" => true,
