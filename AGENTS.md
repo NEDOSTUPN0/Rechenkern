@@ -264,6 +264,11 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   range (`5-10 kg`, `5 to 10 kg`, `between 5 and 10 kg` = "5 – 10 kg"); a
   conversion converts both ends. In a calculation it subtracts (`5-10 kg * 2`
   = -15 kg), and so does money (`$10-20`), as in SoulverCore. The answer is text.
+- Period adjectives after an amount make a rate and convert as targets (`$100 daily` =
+  $100/day, `$50,000 a year in monthly`); count words too (`$10 twice a week` = $20/week,
+  `3 times per day`). A variable of the same name wins over a cadence word (`monthly`).
+- `in <place>` after a length of time only describes it: `3 nights in Paris` = 3 nights
+  (but `time in 3 hours in Tokyo` is the time there).
 - `if … then … else …`, `x if cond`, `x unless cond`: a false condition with
   no `else` gives no answer (and assigns nothing).
 - Compound growth (`$1,000 after 3 years at 7% compounding monthly`) is a
