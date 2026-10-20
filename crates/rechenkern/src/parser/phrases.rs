@@ -772,7 +772,8 @@ impl Parser<'_> {
             ("yearly", "year", 1),
             ("annually", "year", 1),
         ];
-        if !self.config().features.cadence_parsing || self.toks.is_empty() {
+        // A variable of the same name wins: "monthly = $500", then "monthly * 12".
+        if !self.config().features.cadence_parsing || self.toks.is_empty() || self.var_at(0).is_some() {
             return Ok(None);
         }
         let amount = |n: i64, unit: crate::units::Unit| Expr::WithUnit(Expr::Number(Number::from_i64(n)).boxed(), unit);

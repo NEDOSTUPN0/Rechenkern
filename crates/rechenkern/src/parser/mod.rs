@@ -643,6 +643,16 @@ impl<'a> Parser<'a> {
         if self.cur().is_some_and(|t| t.is_word("times")) && self.article_unit_at(self.pos + 1) {
             return Some((Op::Per, 2));
         }
+        // "3 times per day"
+        if self.cur().is_some_and(|t| t.is_word("times")) && self.per_unit_at(self.pos + 1) {
+            return Some((Op::Per, 2));
+        }
+        // "$10 twice a week": the amount that often.
+        if self.lower(self.pos).is_some_and(|w| count_word(&w).is_some())
+            && (self.article_unit_at(self.pos + 1) || self.per_unit_at(self.pos + 1))
+        {
+            return Some((Op::Mul, 0));
+        }
         // "3 times every 2 days"
         if self.cur().is_some_and(|t| t.is_word("times"))
             && self.words_at(self.pos + 1, &["every"])
@@ -728,16 +738,18 @@ impl<'a> Parser<'a> {
             Tok::Word(w) => {
                 let factor = match w.to_lowercase().as_str() {
                     "minus" | "negative" => -1,
-                    "twice" | "double" => 2,
+                    "double" => 2,
                     "triple" => 3,
                     "quadruple" => 4,
-                    _ => return self.power(),
+                    w => match count_word(w) {
+                        Some(n) => n,
+                        None => return self.power(),
+                    },
                 };
                 self.pos += 1;
                 self.eat_word("of");
-                // "twice a day", "twice per week" are rates.
-                let per = self.words_at(self.pos, &["per"]) && self.unit_at(self.pos + 1, false).is_some();
-                if self.article_unit_at(self.pos) || per {
+                // "twice a day", "once per week" are rates.
+                if self.article_unit_at(self.pos) || self.per_unit_at(self.pos) {
                     self.pos += 1;
                     let unit = self.unary()?;
                     return Ok(Expr::binary(Op::Per, Expr::Number(factor.into()), unit));
@@ -865,6 +877,16 @@ impl<'a> Parser<'a> {
                 _ => return Ok(expr),
             };
         }
+    }
+}
+
+/// How often a count word says: "once" a week, "twice" a day.
+fn count_word(w: &str) -> Option<i64> {
+    match w {
+        "once" => Some(1),
+        "twice" => Some(2),
+        "thrice" => Some(3),
+        _ => None,
     }
 }
 

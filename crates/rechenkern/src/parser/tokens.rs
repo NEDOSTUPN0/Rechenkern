@@ -184,9 +184,11 @@ impl<'a> Parser<'a> {
             || self.article_unit_at(i)
             // "for 2 hours" and "split 4 ways" only matter before an amount.
             || (w == "for" && self.duration_at(i + 1))
+            // "once a week", "thrice per day"
+            || (matches!(w, "once" | "thrice") && (self.article_unit_at(i + 1) || self.per_unit_at(i + 1)))
             || (matches!(w, "every" | "each") && self.counted_unit_at(i + 1))
             // "daily", "monthly until June": a cadence, as a whole line.
-            || (i == 0 && words::is_cadence_word(w) && self.config().features.cadence_parsing)
+            || (i == 0 && words::is_cadence_word(w) && self.config().features.cadence_parsing && self.var_at(0).is_none())
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
             || (w == "cast" && ["to", "as", "into"].iter().any(|t| self.words_at(i + 1, &[t])))
@@ -544,6 +546,11 @@ impl<'a> Parser<'a> {
             && self.unit_at(i + 1, false).is_some_and(|(u, n)| {
                 !(u.is_money() && self.toks.get(i + 1 + n).is_some_and(|t| matches!(t.tok, Tok::Num(_))))
             })
+    }
+
+    /// "per" and a unit at token `i`: "per week".
+    pub(super) fn per_unit_at(&self, i: usize) -> bool {
+        self.words_at(i, &["per"]) && self.unit_at(i + 1, false).is_some()
     }
 
     /// A number and a unit at token `i`: "2 weeks", "two weeks", "100 km".
