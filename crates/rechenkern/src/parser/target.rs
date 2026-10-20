@@ -32,6 +32,15 @@ impl Parser<'_> {
         {
             return Ok(Some(shifted(expr, op, amount)));
         }
+        // "time in Tokyo after 3 weeks"
+        if is_moment(expr) && self.words_at(self.pos, &["after"]) {
+            let mut p = self.clone();
+            p.pos += 1;
+            if let Some(amount) = p.time_amount() {
+                *self = p;
+                return Ok(Some(shifted(expr, Op::Add, amount)));
+            }
+        }
         // "March 9, 2024 day of the week"
         if is_moment(expr)
             && self.converter_allowed(Converter::DatePart)

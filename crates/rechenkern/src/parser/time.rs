@@ -655,7 +655,16 @@ impl Parser<'_> {
             }
             return Ok(Some(now()));
         }
-        Ok(Some(Expr::Time(TimeExpr::Today(0))))
+        // "date Tokyo", "date at Tokyo": the date there.
+        let today = Expr::Time(TimeExpr::Today(0));
+        let mut p = self.clone();
+        p.eat_word("at");
+        if let Some((zone, n)) = p.zone_at(p.pos) {
+            *self = p;
+            self.pos += n;
+            return Ok(Some(Expr::Convert(today.boxed(), Target::Zone(zone))));
+        }
+        Ok(Some(today))
     }
 
     /// `A and B` inside `between`; also `A to B` and `A - B`.
