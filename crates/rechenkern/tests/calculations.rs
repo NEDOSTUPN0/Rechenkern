@@ -1844,6 +1844,11 @@ fn third_sweep() {
         ("3 FORCEPOUND IN N", "13.34466485 N"),
         ("3 pi r ^ 2", "9.424777961"),
         ("00:01:00:12 at $50/hour", "$0.84"),
+        ("1 cup animal fat in grams", "205 g"),
+        ("1 cup figs in grams", "149 g"),
+        ("1 cup nutella in grams", "296 g"),
+        ("1 cup ice in grams", "216.88 g"),
+        ("1 cup cooked egg in grams", "220 g"),
     ]);
     // A tag takes the tagged lines of the whole sheet, across blocks and other totals.
     let blocks = "lunch $10 #food\ntaxi $5 #travel\nsum\n\ndinner $20 #food\n---\nsnack $3 #food\n";

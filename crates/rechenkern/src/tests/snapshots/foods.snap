@@ -9,6 +9,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g agave nectar in cups                   → 0.4545454545 cup
 1 cup of agave syrup in grams                → 220 g
 100 g agave syrup in cups                    → 0.4545454545 cup
+1 cup of alfalfa seeds in grams              → 33 g
+100 g alfalfa seeds in cups                  → 3.03030303 cup
 1 cup of alfalfa sprouts in grams            → 33 g
 100 g alfalfa sprouts in cups                → 3.03030303 cup
 1 cup of all purpose flour in grams          → 125 g
@@ -37,6 +39,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g amaranth in cups                       → 0.518134715 cup
 1 cup of amaranth leaves in grams            → 28 g
 100 g amaranth leaves in cups                → 3.571428571 cup
+1 cup of animal fat in grams                 → 205 g
+100 g animal fat in cups                     → 0.487804878 cup
 1 cup of anise seed in grams                 → 107.2 g
 100 g anise seed in cups                     → 0.9328358209 cup
 1 cup of aniseed in grams                    → 107.2 g
@@ -67,6 +71,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g arrowroot flour in cups                → 0.78125 cup
 1 cup of artichoke hearts in grams           → 168 g
 100 g artichoke hearts in cups               → 0.5952380952 cup
+1 cup of artichokes in grams                 → 168 g
+100 g artichokes in cups                     → 0.5952380952 cup
 1 cup of arugula in grams                    → 20 g
 100 g arugula in cups                        → 5 cup
 1 cup of asparagus in grams                  → 134 g
@@ -313,20 +319,28 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g chives in cups                         → 2.083333333 cup
 1 cup of chocolate chips in grams            → 168 g
 100 g chocolate chips in cups                → 0.5952380952 cup
+1 cup of chocolate hazelnut spread in grams  → 296 g
+100 g chocolate hazelnut spread in cups      → 0.3378378378 cup
 1 cup of chocolate morsels in grams          → 168 g
 100 g chocolate morsels in cups              → 0.5952380952 cup
+1 cup of chocolate powder in grams           → 88 g
+100 g chocolate powder in cups               → 1.136363636 cup
 1 cup of chocolate syrup in grams            → 300 g
 100 g chocolate syrup in cups                → 0.3333333333 cup
 1 cup of chopped apple in grams              → 125 g
 100 g chopped apple in cups                  → 0.8 cup
 1 cup of chopped apples in grams             → 125 g
 100 g chopped apples in cups                 → 0.8 cup
+1 cup of chopped boiled eggs in grams        → 136 g
+100 g chopped boiled eggs in cups            → 0.7352941176 cup
 1 cup of chopped carrots in grams            → 128 g
 100 g chopped carrots in cups                → 0.78125 cup
 1 cup of chopped celery in grams             → 101 g
 100 g chopped celery in cups                 → 0.9900990099 cup
 1 cup of chopped dates in grams              → 147 g
 100 g chopped dates in cups                  → 0.6802721088 cup
+1 cup of chopped hard-boiled eggs in grams   → 136 g
+100 g chopped hard-boiled eggs in cups       → 0.7352941176 cup
 1 cup of chopped hazelnuts in grams          → 115 g
 100 g chopped hazelnuts in cups              → 0.8695652174 cup
 1 cup of chopped onion in grams              → 160 g
@@ -393,6 +407,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g cooked chickpeas in cups               → 0.6097560976 cup
 1 cup of cooked couscous in grams            → 157 g
 100 g cooked couscous in cups                → 0.6369426752 cup
+1 cup of cooked egg in grams                 → 220 g
+100 g cooked egg in cups                     → 0.4545454545 cup
+1 cup of cooked eggs in grams                → 220 g
+100 g cooked eggs in cups                    → 0.4545454545 cup
 1 cup of cooked kidney beans in grams        → 177 g
 100 g cooked kidney beans in cups            → 0.5649717514 cup
 1 cup of cooked lentils in grams             → 198 g
@@ -473,6 +491,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g crumbled feta in cups                  → 0.6666666667 cup
 1 cup of crunchy peanut butter in grams      → 258 g
 100 g crunchy peanut butter in cups          → 0.3875968992 cup
+1 cup of crushed ice in grams                → 216.88 g
+100 g crushed ice in cups                    → 0.4610844707 cup
 1 cup of cumin in grams                      → 96 g
 100 g cumin in cups                          → 1.041666667 cup
 1 cup of cumin seeds in grams                → 96 g
@@ -493,6 +513,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g dehydrated apples in cups              → 1.666666667 cup
 1 cup of dehydrated apricots in grams        → 119 g
 100 g dehydrated apricots in cups            → 0.8403361345 cup
+1 cup of dehydrated carrot in grams          → 74 g
+100 g dehydrated carrot in cups              → 1.351351351 cup
 1 cup of dehydrated carrots in grams         → 74 g
 100 g dehydrated carrots in cups             → 1.351351351 cup
 1 cup of dehydrated peaches in grams         → 116 g
@@ -535,6 +557,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g dried blueberries in cups              → 0.625 cup
 1 cup of dried buttermilk in grams           → 120 g
 100 g dried buttermilk in cups               → 0.8333333333 cup
+1 cup of dried carrots in grams              → 74 g
+100 g dried carrots in cups                  → 1.351351351 cup
 1 cup of dried cranberries in grams          → 160 g
 100 g dried cranberries in cups              → 0.625 cup
 1 cup of dried currants in grams             → 144 g
@@ -559,6 +583,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g dried rosemary in cups                 → 1.893939394 cup
 1 cup of dried thyme in grams                → 43.2 g
 100 g dried thyme in cups                    → 2.314814815 cup
+1 cup of drinking chocolate in grams         → 88 g
+100 g drinking chocolate in cups             → 1.136363636 cup
 1 cup of dry bread crumbs in grams           → 108 g
 100 g dry bread crumbs in cups               → 0.9259259259 cup
 1 cup of dry bulgur in grams                 → 140 g
@@ -627,6 +653,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g feta in cups                           → 0.6666666667 cup
 1 cup of feta cheese in grams                → 150 g
 100 g feta cheese in cups                    → 0.6666666667 cup
+1 cup of figs in grams                       → 149 g
+100 g figs in cups                           → 0.6711409396 cup
 1 cup of filberts in grams                   → 135 g
 100 g filberts in cups                       → 0.7407407407 cup
 1 cup of fine salt in grams                  → 292 g
@@ -775,6 +803,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g hazelnut in cups                       → 0.7407407407 cup
 1 cup of hazelnut oil in grams               → 218 g
 100 g hazelnut oil in cups                   → 0.4587155963 cup
+1 cup of hazelnut spread in grams            → 296 g
+100 g hazelnut spread in cups                → 0.3378378378 cup
 1 cup of hazelnuts in grams                  → 135 g
 100 g hazelnuts in cups                      → 0.7407407407 cup
 1 cup of heavy cream in grams                → 238 g
@@ -797,8 +827,12 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g hulled barley in cups                  → 0.5434782609 cup
 1 cup of hummus in grams                     → 246 g
 100 g hummus in cups                         → 0.406504065 cup
+1 cup of ice in grams                        → 216.88 g
+100 g ice in cups                            → 0.4610844707 cup
 1 cup of ice cream in grams                  → 214 g
 100 g ice cream in cups                      → 0.4672897196 cup
+1 cup of ice cubes in grams                  → 216.88 g
+100 g ice cubes in cups                      → 0.4610844707 cup
 1 cup of icing sugar in grams                → 120 g
 100 g icing sugar in cups                    → 0.8333333333 cup
 1 cup of instant milk in grams               → 68 g
@@ -993,6 +1027,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g nonfat dry milk in cups                → 0.8333333333 cup
 1 cup of nonfat milk in grams                → 245 g
 100 g nonfat milk in cups                    → 0.4081632653 cup
+1 cup of nutella in grams                    → 296 g
+100 g nutella in cups                        → 0.3378378378 cup
 1 cup of nutmeg in grams                     → 112 g
 100 g nutmeg in cups                         → 0.8928571429 cup
 1 cup of oat bran in grams                   → 94 g
@@ -1243,6 +1279,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g sauerkraut in cups                     → 0.7042253521 cup
 1 cup of schmaltz in grams                   → 205 g
 100 g schmaltz in cups                       → 0.487804878 cup
+1 cup of scrambled egg in grams              → 220 g
+100 g scrambled egg in cups                  → 0.4545454545 cup
+1 cup of scrambled eggs in grams             → 220 g
+100 g scrambled eggs in cups                 → 0.4545454545 cup
 1 cup of seasoned bread crumbs in grams      → 120 g
 100 g seasoned bread crumbs in cups          → 0.8333333333 cup
 1 cup of self raising flour in grams         → 125 g
@@ -1339,6 +1379,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 100 g soy beans in cups                      → 0.5376344086 cup
 1 cup of soy flour in grams                  → 84 g
 100 g soy flour in cups                      → 1.19047619 cup
+1 cup of soy meal in grams                   → 122 g
+100 g soy meal in cups                       → 0.8196721311 cup
 1 cup of soy milk in grams                   → 243 g
 100 g soy milk in cups                       → 0.4115226337 cup
 1 cup of soy sauce in grams                  → 255 g
