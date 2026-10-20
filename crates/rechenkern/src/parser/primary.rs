@@ -117,6 +117,14 @@ impl Parser<'_> {
             self.pos += 1;
             return Ok(Expr::Number(value));
         }
+        // "100 frames": a count of video frames, as in SoulverCore.
+        if value.is_integer()
+            && self.cur().is_some_and(|t| t.is_word("frames") || t.is_word("frame"))
+            && !self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("per") || t.is_sym("/"))
+        {
+            self.pos += 1;
+            return Ok(Self::formatted(Expr::Number(value), Format::Frames));
+        }
         // "1.5x" is a plain multiplier.
         if self.cur().is_some_and(|t| t.word() == Some("x") && !t.space_before) && !self.operand_follows(1) {
             self.pos += 1;

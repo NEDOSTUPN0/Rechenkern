@@ -1738,6 +1738,7 @@ fn second_sweep_words() {
         ("10 aruban guilders in AWG", "10.00 AWG"),
         ("100 qatari rial in QAR", "100.00 QAR"),
         ("gold price in XAU", "1.0000 XAU"),
+        ("100 frames", "100 frames"),
     ]);
     let tags = "lunch $10 #food\ntaxi $15 #travel\ndinner $30 #food\n";
     assert_eq!(sheet(&format!("{tags}#food total")), "$40.00");
