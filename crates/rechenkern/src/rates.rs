@@ -64,6 +64,13 @@ pub trait RateProvider: Send + Sync {
     fn pending(&self) -> bool {
         false
     }
+
+    /// The rate from one currency to another the host knows better than by way of the dollar:
+    /// units of `to` for one `from`. `None` uses the table.
+    fn pair_rate(&self, from: &str, to: &str) -> Option<Number> {
+        let _ = (from, to);
+        None
+    }
 }
 
 /// Rates that come with the engine (`data/rates.txt`), for currencies a provider
@@ -124,6 +131,11 @@ impl Rates {
             None => Err("no exchange rates available".into()),
         });
         loaded.as_ref().map_err(|e| Error::new(e.clone()))
+    }
+
+    /// The provider's own rate between two currencies.
+    pub fn pair_rate(&self, from: &str, to: &str) -> Option<Number> {
+        self.provider.as_ref()?.pair_rate(from, to)
     }
 
     /// Value of one unit of `code` in US dollars; with `fallback` the bundled rates

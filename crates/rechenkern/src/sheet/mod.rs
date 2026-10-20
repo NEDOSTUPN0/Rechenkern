@@ -101,6 +101,8 @@ pub struct SheetLine {
     running: Option<Answer>,
     /// The host's formatting for this line only.
     formatting: Option<Formatting>,
+    /// A function the answer goes through.
+    transformer: Option<String>,
     effects: Effects,
 }
 
@@ -116,6 +118,7 @@ impl SheetLine {
             answer: Ok(None),
             running: None,
             formatting: None,
+            transformer: None,
             effects: Effects {
                 line: Line { value: None, kind: LineKind::Blank, tags: Vec::new() },
                 assigned: None,
@@ -435,31 +438,9 @@ impl Sheet {
             .filter(|l| l.effects.line.kind == LineKind::Value)
             .filter_map(|l| l.effects.line.value.clone())
             .collect();
-        if values.is_empty() {
-            return None;
-        }
-        let func = match statistic {
-            Statistic::Total => Func::Sum,
-            Statistic::Average => Func::Average,
-            Statistic::Count => Func::Count,
-            Statistic::Median => Func::Median,
-            Statistic::Min => Func::Min,
-            Statistic::Max => Func::Max,
-            Statistic::Lcm => Func::Lcm,
-            Statistic::Gcd => Func::Gcd,
-            Statistic::StandardDeviation => Func::StdDev,
-            Statistic::Reduction => Func::Sum,
-        };
         let names = Names::default();
         let env = self.calc.env(&names, &[]);
-        // "100, 20, 5": 100 - 20 - 5.
-        if statistic == Statistic::Reduction {
-            let mut values = values.into_iter();
-            let first = values.next()?;
-            let result = values.try_fold(first, |acc, v| env.sub(acc, v));
-            return Some(result.map(|value| answer_of(&env, value)));
-        }
-        Some(env.call(func, values).map(|value| answer_of(&env, value)))
+        crate::results::statistic_of(&env, statistic, values)
     }
 
     /// The line whose subtotal includes line `i`.
@@ -564,9 +545,32 @@ impl Sheet {
             Behaviour::Subtotal | Behaviour::GrandTotal => self.subtotal(i, names, above),
             _ => {
                 let (answer, effects) = self.calc.run(&line.text, names, above, true);
+                let (answer, effects) = match &line.transformer {
+                    Some(function) => self.transformed(function, answer, effects, names, above),
+                    None => (answer, effects),
+                };
                 (editing::formatted(answer, line.formatting.as_ref()), effects)
             }
         }
+    }
+
+    /// An answer put through a function: what later lines read is the function's answer.
+    fn transformed(
+        &self,
+        function: &str,
+        answer: Result<Option<Answer>>,
+        mut effects: Effects,
+        names: &Names,
+        above: &[Line],
+    ) -> (Result<Option<Answer>>, Effects) {
+        let Ok(Some(answer)) = answer else { return (answer, effects) };
+        // Answers read back as the same value.
+        let line = format!("{function}({})", answer.unformatted_text());
+        let (transformed, _) = self.calc.run(&line, names, above, false);
+        if let Ok(Some(t)) = &transformed {
+            effects.line.value = Some(t.reference());
+        }
+        (transformed, effects)
     }
 
     /// A subtotal or grand total line: the sum of the lines it takes.

@@ -82,6 +82,9 @@ pub enum DataKind {
     Whitespace,
     /// A word the engine reads: "in", "of", "if".
     Keyword,
+    /// Groups of digits with spaces or dashes between: "4111 1111 1111 1111", "555-123-4567".
+    /// The value is the digits alone, as text.
+    DigitSequence,
 }
 
 /// Something found in a text.
@@ -129,7 +132,10 @@ impl Calculator {
         let wanted = |candidates: &[DataKind]| candidates.iter().copied().find(|k| kinds.contains(k));
         for (range, kind) in raw_data(text) {
             if let Some(kind) = wanted(&[kind]) {
-                take(Found { kind, text: text[range.clone()].to_string(), range, value: None, end: None, place: None });
+                let written = text[range.clone()].to_string();
+                let value = (kind == DataKind::DigitSequence)
+                    .then(|| Value::Text(written.chars().filter(char::is_ascii_digit).collect()));
+                take(Found { kind, text: written, range, value, end: None, place: None });
             }
         }
         let env = self.env(&self.names, &self.lines);
@@ -251,6 +257,57 @@ impl Calculator {
         Scanner { found: self.find(text, ALL), text, at: 0 }
     }
 
+    /// A host type read out of a text: `let (n, day): (Number, Moment) = calc.read_as("130 copies yesterday")?`.
+    pub fn read_as<T: FromScanner>(&self, text: &str) -> Result<T> {
+        T::from_scanner(&mut self.scanner(text))
+    }
+
+    /// The two texts hold the same kinds of data in the same order, as SoulverCore's
+    /// `matchesStructure(of:)`: "QF1 at 3pm" and "BA2 at 9am".
+    pub fn same_structure(&self, a: &str, b: &str) -> bool {
+        let kinds = |text: &str| self.find(text, ALL).into_iter().map(|f| f.kind).collect::<Vec<_>>();
+        kinds(a) == kinds(b)
+    }
+
+    /// The text with the first piece of these kinds replaced by what `replace` gives for it
+    /// (`None` keeps it), as SoulverCore's `replacingFirst`.
+    pub fn replace_first(
+        &self,
+        text: &str,
+        kinds: &[DataKind],
+        replace: impl FnMut(&Found) -> Option<String>,
+    ) -> String {
+        self.replace_found(text, kinds, replace, true)
+    }
+
+    /// The text with every piece of these kinds replaced, as SoulverCore's `replacingAll`:
+    /// every price converted to euros.
+    pub fn replace_all(&self, text: &str, kinds: &[DataKind], replace: impl FnMut(&Found) -> Option<String>) -> String {
+        self.replace_found(text, kinds, replace, false)
+    }
+
+    fn replace_found(
+        &self,
+        text: &str,
+        kinds: &[DataKind],
+        mut replace: impl FnMut(&Found) -> Option<String>,
+        first: bool,
+    ) -> String {
+        let mut out = String::with_capacity(text.len());
+        let mut at = 0;
+        for found in self.find(text, kinds) {
+            let Some(new) = replace(&found) else { continue };
+            out.push_str(&text[at..found.range.start]);
+            out.push_str(&new);
+            at = found.range.end;
+            if first {
+                break;
+            }
+        }
+        out.push_str(&text[at..]);
+        out
+    }
+
     /// The word is a currency's name or code: "EUR", "yen", "$".
     fn currency_named(&self, word: &str) -> bool {
         crate::units::registry().lookup(word).is_some_and(|u| u.is_money())
@@ -259,6 +316,36 @@ impl Calculator {
     fn place_named(&self, name: &str) -> Option<Place> {
         let zone = crate::zones::find(&name.replace('-', " ").to_lowercase())?;
         Some(Place::written(name, zone))
+    }
+}
+
+/// A type read out of text piece by piece, as SoulverCore's `FromScanner`: implement it for a
+/// host type ("a flight and its day") and read it with `Calculator::read_as`.
+pub trait FromScanner: Sized {
+    fn from_scanner(scanner: &mut Scanner) -> Result<Self>;
+}
+
+impl FromScanner for Number {
+    fn from_scanner(scanner: &mut Scanner) -> Result<Number> {
+        scanner.number()
+    }
+}
+
+impl FromScanner for Moment {
+    fn from_scanner(scanner: &mut Scanner) -> Result<Moment> {
+        scanner.date()
+    }
+}
+
+impl<A: FromScanner, B: FromScanner> FromScanner for (A, B) {
+    fn from_scanner(scanner: &mut Scanner) -> Result<(A, B)> {
+        Ok((A::from_scanner(scanner)?, B::from_scanner(scanner)?))
+    }
+}
+
+impl<A: FromScanner, B: FromScanner, C: FromScanner> FromScanner for (A, B, C) {
+    fn from_scanner(scanner: &mut Scanner) -> Result<(A, B, C)> {
+        Ok((A::from_scanner(scanner)?, B::from_scanner(scanner)?, C::from_scanner(scanner)?))
     }
 }
 
@@ -308,6 +395,38 @@ impl Scanner<'_> {
 
     pub fn date(&mut self) -> Result<Moment> {
         self.scan(DataKind::Date)?.moment().cloned().ok_or_else(|| Error::new("not a date"))
+    }
+
+    /// The next of these words after the last piece taken, in any case, as SoulverCore's
+    /// `scanKeyword`: the host's own words, like "flight" or "gate".
+    pub fn keyword(&mut self, words: &[&str]) -> Result<String> {
+        let rest = &self.text[self.at..];
+        let mut at = 0;
+        for word in rest.split_inclusive(|c: char| !c.is_alphanumeric()) {
+            let start = at;
+            at += word.len();
+            let bare = word.trim_end_matches(|c: char| !c.is_alphanumeric());
+            if let Some(found) = words.iter().find(|w| w.eq_ignore_ascii_case(bare)) {
+                self.at += start + bare.len();
+                return Ok(found.to_string());
+            }
+        }
+        Err(Error::new(format!("none of {} in \"{}\"", words.join(", "), rest.trim())))
+    }
+
+    /// Every one of these words is in the text, as SoulverCore's `ensurePresent(words:)`.
+    pub fn ensure(&self, words: &[&str]) -> Result<()> {
+        let lower = self.text.to_lowercase();
+        let has = |w: &&str| lower.split(|c: char| !c.is_alphanumeric()).any(|word| word == w.to_lowercase());
+        match words.iter().find(|w| !has(w)) {
+            Some(missing) => Err(Error::new(format!("no \"{missing}\" in \"{}\"", self.text.trim()))),
+            None => Ok(()),
+        }
+    }
+
+    /// The next value of a type that reads itself from a scanner.
+    pub fn read<T: FromScanner>(&mut self) -> Result<T> {
+        T::from_scanner(self)
     }
 
     /// The text after the last piece taken.
@@ -436,6 +555,7 @@ fn raw_data(text: &str) -> Vec<(Range<usize>, DataKind)> {
             _ => {}
         }
     }
+    out.extend(digit_sequences(text).into_iter().map(|r| (r, DataKind::DigitSequence)));
     let mut at = 0;
     for word in text.split_inclusive(char::is_whitespace) {
         let start = at;
@@ -457,6 +577,41 @@ fn raw_data(text: &str) -> Vec<(Range<usize>, DataKind)> {
             continue;
         };
         out.push((range, kind));
+    }
+    out
+}
+
+/// Groups of digits with one space or dash between, seven digits or more:
+/// card numbers, phone numbers, account numbers.
+fn digit_sequences(text: &str) -> Vec<Range<usize>> {
+    let bytes = text.as_bytes();
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        let starts = bytes[i].is_ascii_digit() && (i == 0 || !bytes[i - 1].is_ascii_alphanumeric());
+        if !starts {
+            i += 1;
+            continue;
+        }
+        let (start, mut end, mut groups, mut digits) = (i, i, 0, 0);
+        let mut k = i;
+        loop {
+            let run = bytes[k..].iter().take_while(|b| b.is_ascii_digit()).count();
+            if run == 0 {
+                break;
+            }
+            (groups, digits, end, k) = (groups + 1, digits + run, k + run, k + run);
+            let separated = k + 1 < bytes.len() && matches!(bytes[k], b' ' | b'-') && bytes[k + 1].is_ascii_digit();
+            if !separated {
+                break;
+            }
+            k += 1;
+        }
+        let whole = end == bytes.len() || !bytes[end].is_ascii_alphanumeric() && bytes[end] != b'.';
+        if groups >= 2 && digits >= 7 && whole {
+            out.push(start..end);
+        }
+        i = end.max(i + 1);
     }
     out
 }

@@ -190,3 +190,31 @@ fn scanning_in_any_order() {
     assert_eq!(scanner.take(DataKind::Date).unwrap().text, "tomorrow");
     assert!(scanner.take(DataKind::Date).is_err());
 }
+
+#[test]
+fn digit_sequences_keywords_and_structure() {
+    assert_eq!(
+        found("card 4111 1111 1111 1111, call 555-123-4567 or 12 34", &[DataKind::DigitSequence]),
+        [
+            "DigitSequence 4111 1111 1111 1111 = Text(\"4111111111111111\")",
+            "DigitSequence 555-123-4567 = Text(\"5551234567\")",
+        ]
+    );
+    let calc = calc();
+    let mut scanner = calc.scanner("Flight QF1 leaves from gate 12 tomorrow");
+    assert_eq!(scanner.keyword(&["gate", "terminal"]).unwrap(), "gate");
+    assert_eq!(scanner.number().unwrap().to_string(), "12");
+    assert!(scanner.ensure(&["flight", "LEAVES"]).is_ok());
+    assert!(scanner.ensure(&["arrives"]).is_err());
+    assert!(scanner.keyword(&["terminal"]).is_err());
+
+    assert!(calc.same_structure("$5 on Monday", "$20 on Friday"));
+    assert!(!calc.same_structure("$5 on Monday", "Monday $5"));
+
+    let (n, day): (rechenkern::Number, rechenkern::Moment) = calc.read_as("We sold 130 copies yesterday").unwrap();
+    assert_eq!((n.to_string(), day.time.date().to_string()), ("130".into(), "2026-09-22".into()));
+
+    let doubled = |f: &rechenkern::Found| Some(format!("{}", f.number()? * rechenkern::Number::from_i64(2)));
+    assert_eq!(calc.replace_all("3 apples and 4 pears", &[DataKind::Number], doubled), "6 apples and 8 pears");
+    assert_eq!(calc.replace_first("3 apples and 4 pears", &[DataKind::Number], doubled), "6 apples and 4 pears");
+}

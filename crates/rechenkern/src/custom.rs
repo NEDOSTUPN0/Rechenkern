@@ -59,6 +59,18 @@ impl CustomPlace {
     }
 }
 
+/// Variables the host keeps up to date, as SoulverCore's `VariableProvider`: asked for names
+/// lines use that no line set (`stock price * 10`). Keep it quick: it is asked while parsing.
+pub trait VariableProvider: Send + Sync {
+    fn variable(&self, name: &str) -> Option<Value>;
+}
+
+/// Distances of the host's own between places, as SoulverCore's `distanceBetween`: by road,
+/// say. Kilometers, or `None` for the great-circle distance.
+pub trait DistanceProvider: Send + Sync {
+    fn distance(&self, from: &crate::zones::Location, to: &crate::zones::Location) -> Option<f64>;
+}
+
 /// Places a host finds by name, as SoulverCore's `PlaceDataProvider`: asked where a line
 /// expects a place the engine doesn't know (`time in Smallville`, `sunrise in Smallville`),
 /// once per name.

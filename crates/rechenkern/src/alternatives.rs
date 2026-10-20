@@ -33,6 +33,24 @@ pub enum AlternativeKind {
 }
 
 impl AlternativeKind {
+    /// A title for menus: "Hexadecimal", "ISO 8601".
+    pub fn title(self) -> &'static str {
+        match self {
+            AlternativeKind::Decimal => "Decimal",
+            AlternativeKind::Binary => "Binary",
+            AlternativeKind::Hexadecimal => "Hexadecimal",
+            AlternativeKind::Octal => "Octal",
+            AlternativeKind::Fraction => "Fraction",
+            AlternativeKind::Scientific => "Scientific Notation",
+            AlternativeKind::Timespan => "Timespan",
+            AlternativeKind::Laptime => "Laptime",
+            AlternativeKind::Date => "Date",
+            AlternativeKind::Iso8601 => "ISO 8601",
+            AlternativeKind::Timestamp => "Unix Timestamp",
+            AlternativeKind::Unit => "Unit Conversion",
+        }
+    }
+
     /// The name in snake case: "hexadecimal".
     pub fn name(self) -> &'static str {
         match self {

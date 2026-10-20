@@ -55,7 +55,9 @@ impl Parser<'_> {
             let (location, _) = self.location_at(from).expect("distance_at found a place");
             self.located(location, from, to)
         });
-        let km = zones::distance_km(&a?, &b?).round();
+        let (a, b) = (a?, b?);
+        let host = self.scope.distances.and_then(|d| d.distance(&a, &b));
+        let km = host.unwrap_or_else(|| zones::distance_km(&a, &b)).round();
         self.pos += n;
         Ok(Some(Expr::WithUnit(Expr::Number(Number::from_f64(km)).boxed(), registry().get("km"))))
     }

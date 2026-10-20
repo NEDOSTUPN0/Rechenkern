@@ -84,6 +84,11 @@ impl Clone for Sheet {
 }
 
 impl SheetLine {
+    /// The function line answers go through: `Sheet::set_transformer`.
+    pub fn transformer(&self) -> Option<&str> {
+        self.transformer.as_deref()
+    }
+
     /// What the line looks like.
     pub fn line_type(&self) -> LineType {
         if matches!(self.behaviour, Behaviour::Subtotal | Behaviour::GrandTotal) {
@@ -130,6 +135,25 @@ impl Sheet {
         }
         *self.calc.config_mut() = to;
         self.recalculate()
+    }
+
+    /// A copy without comments and tags, as SoulverCore's `LineCollectionTrimmer`.
+    pub fn trimmed(&self) -> Sheet {
+        let mut copy = self.clone();
+        for i in 0..copy.lines.len() {
+            if !self.lines[i].is_heading() {
+                copy.lines[i].text = self.expression(i, true, false, false, false);
+            }
+        }
+        copy.recalculate();
+        copy
+    }
+
+    /// Line `i`'s answer goes through a function before it is shown and read, as SoulverCore's
+    /// `setTransformer(reference:forLineAt:)`: `round`, `sqrt`, or one the lines defined.
+    pub fn set_transformer(&mut self, i: usize, function: Option<&str>) -> Vec<usize> {
+        self.lines[i].transformer = function.map(String::from);
+        self.update(i, &[i])
     }
 
     /// A copy to change without touching this one, as SoulverCore's `deepCopy`.
@@ -288,7 +312,7 @@ impl Sheet {
 
     /// Line `i` with `prev` and `line 2` written as the answers they stand for.
     pub fn expanded_text(&self, i: usize) -> String {
-        self.expression(i, false, true, false)
+        self.expression(i, false, true, false, false)
     }
 
     /// The variables line `i` sees, with `prev` and `line N` for the answers above it,

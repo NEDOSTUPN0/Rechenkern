@@ -35,6 +35,7 @@ pub mod online;
 mod parser;
 mod pi;
 mod rates;
+mod results;
 mod sheet;
 #[cfg(test)]
 mod tests;
@@ -51,10 +52,13 @@ pub use config::{
     Formatting, MisplacedSeparator, NamedDay, Notation, Phrase, ResultConversions, ScalarSystem, Scale, SymbolPosition,
     TimeZoneOptions, TimespanStyle, UnitSymbol, ZoneCodeCorrection,
 };
-pub use custom::{CustomFunction, CustomPlace, CustomType, CustomUnit, FunctionHandler, PlaceProvider, UnitSystem};
+pub use custom::{
+    CustomFunction, CustomPlace, CustomType, CustomUnit, DistanceProvider, FunctionHandler, PlaceProvider, UnitSystem,
+    VariableProvider,
+};
 pub use editor::{Beautify, Components, Token};
 pub use error::{Error, ErrorKind, Result};
-pub use find::{DataKind, Found, Scanner};
+pub use find::{DataKind, Found, FromScanner, Scanner};
 pub use inflation::InflationProvider;
 pub use number::Number;
 pub use parser::highlight::{Highlight, TokenKind};

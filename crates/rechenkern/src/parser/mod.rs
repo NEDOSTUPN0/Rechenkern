@@ -72,6 +72,10 @@ pub struct Scope<'a> {
     pub places: &'a dyn Fn(&str) -> Option<CustomPlace>,
     /// Weather phrases are read: off when looking for data in text.
     pub weather: bool,
+    /// The host's variables, for names no line set.
+    pub variables: Option<&'a dyn crate::custom::VariableProvider>,
+    /// The host's distances between places.
+    pub distances: Option<&'a dyn crate::custom::DistanceProvider>,
 }
 
 /// Parses one line; `None` means the line has nothing to calculate.
@@ -110,18 +114,32 @@ pub fn values_in(src: &str, scope: &Scope) -> Vec<(std::ops::Range<usize>, Expr)
             continue;
         }
         // A range of dates, "March 3 to March 10", or one value: "68.3 °F", "this sunday".
-        let mut range = start.clone();
-        let mut one = start.clone();
-        let parsed = match range.expr() {
-            Ok(expr @ (Expr::Range(..) | Expr::Period(..))) => Some((expr, range.pos)),
-            _ => one.unary().ok().map(|expr| (expr, one.pos)),
+        let parse_at = |at: &Parser| {
+            let (mut range, mut one) = (at.clone(), at.clone());
+            match range.expr() {
+                Ok(expr @ (Expr::Range(..) | Expr::Period(..))) => Some((expr, range.pos)),
+                _ => one.unary().ok().map(|expr| (expr, one.pos)),
+            }
         };
-        match parsed {
+        match parse_at(&start) {
             Some((expr, end)) if end > start.pos && unit_product(&expr).is_none() && !is_unit_rate(&expr) => {
+                // Words before the value that don't change it aren't part of it: "from gate 12".
+                let mut first = start.pos;
+                let shown = format!("{expr:?}");
+                while first + 1 < end {
+                    let mut later = p.clone();
+                    later.pos = first + 1;
+                    later.skip_noise();
+                    match parse_at(&later) {
+                        Some((other, e)) if e == end && later.pos < end && format!("{other:?}") == shown => {
+                            first = later.pos;
+                        }
+                        _ => break,
+                    }
+                }
                 // Comment words read past at the end aren't part of it: "130 copies", but "30k" is.
-                let last =
-                    (start.pos..end).rev().find(|&k| !p.comment_at(k) || !tokens[k].space_before).unwrap_or(start.pos);
-                found.push((tokens[start.pos].start..tokens[last].end, expr));
+                let last = (first..end).rev().find(|&k| !p.comment_at(k) || !tokens[k].space_before).unwrap_or(first);
+                found.push((tokens[first].start..tokens[last].end, expr));
                 i = end;
             }
             _ => i = start.pos + 1,
@@ -361,6 +379,8 @@ impl<'a> Parser<'a> {
             declared: outer.declared,
             places: outer.places,
             weather: outer.weather,
+            variables: outer.variables,
+            distances: outer.distances,
         };
         let body = Parser::new(self.src, &toks[close + 2..], &scope).value()?;
         Ok(Some(Stmt::Function { name, params, body }))

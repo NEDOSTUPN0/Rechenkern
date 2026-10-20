@@ -273,3 +273,34 @@ fn trips_statistics_and_pending() {
     assert_eq!(stat(Statistic::Total, all), "129");
     assert_eq!(s.result_as_value(Statistic::Total).and_then(|v| v.as_number()), Number::parse("126"));
 }
+
+#[test]
+fn exports_of_some_lines_trimming_and_transformers() {
+    use rechenkern::{HtmlColors, HtmlOptions, TextOptions};
+    let mut s = sheet("coffee $5 #food\nlunch $15 // with Sam\nline 1 + line 2");
+    let some = TextOptions { lines: Some(vec![0, 2]), statistic: Some(Statistic::Total), ..TextOptions::default() };
+    assert_eq!(s.to_text(&some), "coffee $5 #food = $5.00\nline 1 + line 2 = $20.00\nTotal: $20.00");
+    let links =
+        TextOptions { markdown_links: true, include_answers: false, lines: Some(vec![2]), ..TextOptions::default() };
+    assert_eq!(s.to_text(&links), "[line 1](#line-1) + [line 2](#line-2)");
+    let both = TextOptions { substitute_references: true, ..links };
+    assert_eq!(s.to_text(&both), "[$5.00](#line-1) + [$15.00](#line-2)");
+    let html = s.to_html(&HtmlOptions { lines: Some(vec![1]), ..HtmlOptions::default() }, &HtmlColors::light());
+    assert!(html.contains("lunch") && !html.contains("coffee"));
+
+    let trimmed = s.trimmed();
+    assert_eq!(trimmed.text(), "$5\n$15\nline 1 + line 2");
+    assert_eq!(answers(&trimmed), ["$5.00", "$15.00", "$20.00"]);
+
+    s.set_transformer(1, Some("round"));
+    s.set_line(1, "lunch $15.40");
+    assert_eq!(answers(&s), ["$5.00", "$15.00", "$20.00"]);
+    assert_eq!(s.lines()[1].transformer(), Some("round"));
+
+    let archive = s.archive();
+    let lazy = Sheet::unarchive_unevaluated(Calculator::new(), &archive).unwrap();
+    assert_eq!(lazy.text(), s.text());
+    assert!(matches!(lazy.lines()[0].answer(), Ok(None)));
+    let back = Sheet::unarchive(Calculator::new(), &archive).unwrap();
+    assert_eq!(back.lines()[1].answer().unwrap().unwrap().text(), "$15.00");
+}

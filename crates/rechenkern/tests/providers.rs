@@ -306,3 +306,70 @@ fn stateless_lines_and_threads() {
     });
     assert_eq!(handle.join().unwrap(), "3,000");
 }
+
+#[test]
+fn host_variables_distances_and_pair_rates() {
+    struct Stocks;
+    impl rechenkern::VariableProvider for Stocks {
+        fn variable(&self, name: &str) -> Option<rechenkern::Value> {
+            (name == "stock price").then(|| rechenkern::Value::number(Number::from_i64(42)))
+        }
+    }
+    struct Roads;
+    impl rechenkern::DistanceProvider for Roads {
+        fn distance(&self, _: &rechenkern::Location, _: &rechenkern::Location) -> Option<f64> {
+            Some(1234.4)
+        }
+    }
+    struct Pairs;
+    impl RateProvider for Pairs {
+        fn rates(&self) -> Result<RateTable, String> {
+            let mut table = RateTable::new();
+            table.insert("EUR", Number::from_i64(2));
+            Ok(table)
+        }
+        fn pair_rate(&self, from: &str, to: &str) -> Option<Number> {
+            (from == "USD" && to == "EUR").then(|| Number::from_i64(3))
+        }
+    }
+    let mut calc = Calculator::new();
+    calc.set_variable_provider(Stocks);
+    calc.set_distance_provider(Roads);
+    calc.set_rate_provider(Pairs);
+    let answer = |calc: &mut Calculator, line: &str| calc.calculate(line).unwrap().unwrap().to_string();
+    assert_eq!(answer(&mut calc, "stock price * 10"), "420");
+    assert_eq!(answer(&mut calc, "distance from Tokyo to London"), "1,234 km");
+    assert_eq!(answer(&mut calc, "$10 in EUR"), "€30.00");
+    assert_eq!(answer(&mut calc, "€10 in USD"), "$5.00");
+}
+
+#[test]
+fn weather_requests_say_what_they_ask() {
+    use std::sync::Mutex;
+    struct Asked(Mutex<Vec<rechenkern::WeatherQuery>>);
+    impl rechenkern::WeatherProvider for Asked {
+        fn weather(&self, request: &rechenkern::WeatherRequest) -> Result<rechenkern::Weather, String> {
+            self.0.lock().unwrap().push(request.query);
+            Ok(rechenkern::Weather { humidity: Some(50.0), ..Default::default() })
+        }
+    }
+    let mut calc = Calculator::new();
+    calc.set_weather_provider(Asked(Mutex::new(Vec::new())));
+    assert_eq!(calc.calculate("humidity in Tokyo").unwrap().unwrap().to_string(), "50%");
+}
+
+#[test]
+fn answers_outside_a_sheet() {
+    use rechenkern::{AlternativeKind, Statistic, Value};
+    let calc = Calculator::new();
+    let money = |n| Value::Quantity(rechenkern::Quantity::new(Number::from_i64(n), calc.unit("USD").unwrap()));
+    let values = [money(10), money(20), money(60)];
+    assert_eq!(calc.statistic(Statistic::Total, &values).unwrap().unwrap().text(), "$90.00");
+    assert_eq!(calc.statistic(Statistic::Average, &values).unwrap().unwrap().text(), "$30.00");
+    assert_eq!(calc.statistic(Statistic::Max, &values).unwrap().unwrap().text(), "$60.00");
+    assert!(calc.statistic(Statistic::Total, &[]).is_none());
+    assert_eq!(calc.combine(&values[0], '*', &Value::number(Number::from_i64(3))).unwrap().text(), "$30.00");
+    assert_eq!(calc.percentage_of(&values[0], &values[1]).unwrap().text(), "50%");
+    assert_eq!(calc.percent_change(&values[1], &values[2]).unwrap().text(), "200%");
+    assert_eq!(AlternativeKind::Iso8601.title(), "ISO 8601");
+}

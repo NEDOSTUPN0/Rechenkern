@@ -106,6 +106,8 @@ pub(crate) struct Env<'a> {
     pub rates_at_hand: Cell<bool>,
     pub inflation: Option<&'a dyn InflationProvider>,
     pub weather: Option<&'a dyn WeatherProvider>,
+    /// The host's variables, for names no line set.
+    pub variables: Option<&'a dyn crate::custom::VariableProvider>,
     /// What the line read, for sheets that recalculate only what changed.
     pub reads: std::cell::RefCell<crate::calculator::Reads>,
     /// The host phrase the line called last, with the values it got.
@@ -213,7 +215,12 @@ impl Env<'_> {
                 #[cfg(test)]
                 crate::tests::SHEET_READS.with(|reads| reads.set(reads.get() + 1));
                 self.reads.borrow_mut().names.push(name.clone());
-                self.vars.get(name).cloned().ok_or_else(|| Error::new(format!("unknown variable {name}")))?
+                let host = || self.variables.and_then(|v| v.variable(name));
+                self.vars
+                    .get(name)
+                    .cloned()
+                    .or_else(host)
+                    .ok_or_else(|| Error::new(format!("unknown variable {name}")))?
             }
             Expr::Line(line) => self.line(*line)?,
             Expr::Cadence { every, start, until } => self.cadence(every, start.as_deref(), until.as_deref())?,
@@ -397,6 +404,7 @@ impl Env<'_> {
             rates_at_hand: Cell::new(self.rates_at_hand.get()),
             inflation: self.inflation,
             weather: self.weather,
+            variables: self.variables,
             reads: Default::default(),
             custom_call: Default::default(),
         };
@@ -593,6 +601,16 @@ impl Env<'_> {
         {
             let kelvin = q.number * a.scale + a.offset;
             return Ok(Quantity::new((kelvin - b.offset) / b.scale, to.clone()));
+        }
+        // The host's rate for the pair: "100 USD in EUR".
+        if let (Some(from), Some(target)) = (q.unit.single(), to.single())
+            && let (Some(a), Some(b)) = (from.currency, target.currency)
+            && from.scale == Number::ONE
+            && target.scale == Number::ONE
+            && self.rate_date.get().is_none()
+            && let Some(rate) = self.rates.pair_rate(a.code, b.code)
+        {
+            return Ok(Quantity::new(q.number * rate, to.clone()));
         }
         let scale = |id| self.scale(id);
         let factor = q.unit.scale(&scale)? / to.scale(&scale)?;

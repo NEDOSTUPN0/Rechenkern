@@ -439,7 +439,8 @@ impl<'a> Parser<'a> {
         let (text, ends) = self.joined_words(i, 6, true);
         ends.iter().rev().find_map(|&(end, n)| {
             let name = &text[..end];
-            (self.scope.is_var)(name).then(|| (name.to_string(), n))
+            let host = || self.scope.variables.is_some_and(|v| v.variable(name).is_some());
+            ((self.scope.is_var)(name) || host()).then(|| (name.to_string(), n))
         })
     }
 

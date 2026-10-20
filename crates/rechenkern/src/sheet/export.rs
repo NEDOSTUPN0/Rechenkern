@@ -29,6 +29,11 @@ pub struct TextOptions {
     pub hide_comments: bool,
     /// Headings without their `#`.
     pub hide_heading_indicator: bool,
+    /// References as Markdown links to their lines: `[line 2](#line-2)`, or with
+    /// `substitute_references` `[$15.00](#line-2)`.
+    pub markdown_links: bool,
+    /// Only these lines; `None` for all.
+    pub lines: Option<Vec<usize>>,
 }
 
 impl Default for TextOptions {
@@ -43,6 +48,8 @@ impl Default for TextOptions {
             statistic: None,
             hide_comments: false,
             hide_heading_indicator: false,
+            markdown_links: false,
+            lines: None,
         }
     }
 }
@@ -80,6 +87,8 @@ pub struct HtmlOptions {
     pub answer_alignment: Alignment,
     /// Answers below the first number or above the second take the small and large number colors.
     pub number_thresholds: Option<(Number, Number)>,
+    /// Only these lines; `None` for all.
+    pub lines: Option<Vec<usize>>,
 }
 
 impl Default for HtmlOptions {
@@ -100,6 +109,7 @@ impl Default for HtmlOptions {
             dark: false,
             answer_alignment: Alignment::Left,
             number_thresholds: None,
+            lines: None,
         }
     }
 }
@@ -186,13 +196,16 @@ fn token_colors(dark: bool) -> Vec<(TokenKind, String)> {
 impl Sheet {
     /// The sheet as plain text, as SoulverCore's plain text export.
     pub fn to_text(&self, options: &TextOptions) -> String {
-        let rows: Vec<(String, Option<String>)> = (0..self.len())
-            .map(|i| {
+        let chosen = self.chosen(options.lines.as_deref());
+        let rows: Vec<(String, Option<String>)> = chosen
+            .iter()
+            .map(|&i| {
                 let expression = self.expression(
                     i,
                     options.hide_comments,
                     options.substitute_references,
                     options.hide_heading_indicator,
+                    options.markdown_links,
                 );
                 let answer = options.include_answers.then(|| self.answer_text(i, options.unformatted)).flatten();
                 let number = if options.line_numbers { format!("{}. ", i + 1) } else { String::new() };
@@ -212,7 +225,7 @@ impl Sheet {
             });
         }
         if let Some(statistic) = options.statistic
-            && let Some(Ok(answer)) = self.statistic(statistic, None)
+            && let Some(Ok(answer)) = self.statistic(statistic, options.lines.as_deref())
         {
             out.push(format!("{}: {answer}", statistic_name(statistic)));
         }
@@ -267,6 +280,7 @@ impl Sheet {
                     ("highlights".into(), Json::Array(highlights)),
                     ("alignment".into(), alignment_name(line.alignment).into()),
                     ("attribution".into(), line.attribution.clone().into()),
+                    ("transformer".into(), line.transformer().map(String::from).into()),
                 ])
             })
             .collect();
@@ -275,6 +289,14 @@ impl Sheet {
 
     /// A sheet from `archive`, worked out with this calculator.
     pub fn unarchive(calc: Calculator, archive: &str) -> crate::Result<Sheet> {
+        let mut sheet = Sheet::unarchive_unevaluated(calc, archive)?;
+        sheet.recalculate();
+        Ok(sheet)
+    }
+
+    /// A sheet from `archive` with no line worked out yet, for a quick look at the text:
+    /// `recalculate` works them out.
+    pub fn unarchive_unevaluated(calc: Calculator, archive: &str) -> crate::Result<Sheet> {
         let bad = || crate::Error::new("not a sheet archive");
         let json = Json::parse(archive).ok_or_else(bad)?;
         if json.get("version").and_then(Json::as_f64).is_none_or(|v| v > 1.0) {
@@ -291,6 +313,7 @@ impl Sheet {
             new.behaviour = name("behaviour").and_then(behaviour_named).unwrap_or_default();
             new.alignment = name("alignment").and_then(alignment_named).unwrap_or_default();
             new.attribution = name("attribution").map(String::from);
+            new.transformer = name("transformer").map(String::from);
             if let Some(highlights) = line.get("highlights").and_then(Json::as_array) {
                 for (slot, color) in new.highlights.iter_mut().zip(highlights) {
                     *slot = color.as_str().and_then(color_named);
@@ -298,17 +321,23 @@ impl Sheet {
             }
             sheet.lines.push(new);
         }
-        sheet.recalculate();
         Ok(sheet)
     }
 
     /// The text of line `i` for an export.
-    pub(super) fn expression(&self, i: usize, hide_comments: bool, substitute: bool, hide_heading: bool) -> String {
+    pub(super) fn expression(
+        &self,
+        i: usize,
+        hide_comments: bool,
+        substitute: bool,
+        hide_heading: bool,
+        links: bool,
+    ) -> String {
         let text = self.lines[i].text();
         if self.lines[i].is_heading() {
             return if hide_heading { text.trim_start_matches('#').trim_start().to_string() } else { text.to_string() };
         }
-        if !hide_comments && !substitute {
+        if !hide_comments && !substitute && !links {
             return text.to_string();
         }
         let mut out = String::new();
@@ -318,11 +347,15 @@ impl Sheet {
             out.push_str(&text[at..h.range.start]);
             at = h.range.end;
             match h.kind {
-                TokenKind::Comment | TokenKind::Tag if hide_comments => {}
-                TokenKind::Reference if substitute => match self.referenced(i, part) {
-                    Some(answer) => out.push_str(&answer),
-                    None => out.push_str(part),
-                },
+                TokenKind::Comment | TokenKind::Url | TokenKind::Tag | TokenKind::TagIndicator if hide_comments => {}
+                TokenKind::Reference if substitute || links => {
+                    let shown = if substitute { self.referenced(i, part) } else { None };
+                    let shown = shown.unwrap_or_else(|| part.to_string());
+                    match self.referenced_line(i, part).filter(|_| links) {
+                        Some(line) => out.push_str(&format!("[{shown}](#line-{})", line + 1)),
+                        None => out.push_str(&shown),
+                    }
+                }
                 _ => out.push_str(part),
             }
         }
@@ -332,6 +365,12 @@ impl Sheet {
 
     /// The answer a reference on line `i` stands for: "line 2" or "prev".
     fn referenced(&self, i: usize, reference: &str) -> Option<String> {
+        let line = self.referenced_line(i, reference)?;
+        Some(self.lines.get(line)?.answer().ok()??.text().to_string())
+    }
+
+    /// The line a reference on line `i` stands for: "line 2", "prev".
+    fn referenced_line(&self, i: usize, reference: &str) -> Option<usize> {
         let lower = reference.to_lowercase();
         let line = match lower.strip_prefix("line").map(str::trim) {
             Some(n) if !n.is_empty() => n.parse::<usize>().ok()?.checked_sub(1)?,
@@ -340,7 +379,15 @@ impl Sheet {
             }
             _ => return None,
         };
-        Some(self.lines.get(line)?.answer().ok()??.text().to_string())
+        (line < self.lines.len()).then_some(line)
+    }
+
+    /// The lines an export writes, in order.
+    fn chosen(&self, lines: Option<&[usize]>) -> Vec<usize> {
+        match lines {
+            Some(lines) => lines.iter().copied().filter(|&i| i < self.len()).collect(),
+            None => (0..self.len()).collect(),
+        }
     }
 
     /// The answer of line `i`, as shown or with every digit.
@@ -402,7 +449,7 @@ impl Sheet {
         }
         let table_style = if email { " style=\"border-collapse:collapse;width:100%\"" } else { "" };
         let _ = write!(out, "<table{table_style}>{nl}");
-        for i in 0..self.len() {
+        for i in self.chosen(options.lines.as_deref()) {
             let line = &self.lines[i];
             let heading = line.is_heading();
             let row_style = if email && heading { format!(" style=\"{heading_style}\"") } else { String::new() };
@@ -429,7 +476,7 @@ impl Sheet {
             let _ = write!(out, "<td{answer_attr}>{}</td></tr>{nl}", escape(answer.map_or("", |a| a.text())));
         }
         if let Some(label) = &options.total_label
-            && let Some(Ok(total)) = self.statistic(Statistic::Total, None)
+            && let Some(Ok(total)) = self.statistic(Statistic::Total, options.lines.as_deref())
         {
             let span = if options.line_numbers { " colspan=\"2\"" } else { "" };
             let style =
@@ -463,7 +510,7 @@ impl Sheet {
     fn html_expression(&self, i: usize, options: &HtmlOptions, colors: &HtmlColors, email: bool) -> String {
         let line = &self.lines[i];
         if line.is_heading() || !options.color_text {
-            return escape(&self.expression(i, options.hide_comments, false, options.hide_heading_indicator));
+            return escape(&self.expression(i, options.hide_comments, false, options.hide_heading_indicator, false));
         }
         let text = line.text();
         let mut out = String::new();
@@ -472,7 +519,9 @@ impl Sheet {
             out.push_str(&escape(&text[at..range.start]));
             at = range.end;
             let part = &text[range.clone()];
-            if options.hide_comments && matches!(kind, TokenKind::Comment | TokenKind::Tag) {
+            if options.hide_comments
+                && matches!(kind, TokenKind::Comment | TokenKind::Url | TokenKind::Tag | TokenKind::TagIndicator)
+            {
                 continue;
             }
             let tag_colors = colors

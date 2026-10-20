@@ -44,6 +44,8 @@ pub struct WeatherRequest {
     pub zone: TimeZone,
     /// A day, or `None` for now.
     pub date: Option<Date>,
+    /// What the line asks: the temperature, the humidity...
+    pub query: WeatherQuery,
 }
 
 /// The weather at a place, now or on a day; a provider leaves out what it doesn't know.

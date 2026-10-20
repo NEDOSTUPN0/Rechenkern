@@ -40,6 +40,7 @@ impl Env<'_> {
             longitude: place.longitude,
             zone: place.zone.clone(),
             date: (date != today).then_some(date),
+            query: what,
         };
         if provider.pending(&request) {
             return Err(Error::pending("the weather is on its way"));

@@ -8,7 +8,7 @@ use crate::alternatives::Alternative;
 use crate::answer::Answer;
 use crate::ast::{Expr, Func, LineRef, Stmt, UserFunction};
 use crate::config::{Config, ConversionRule, Now, ResultConversions};
-use crate::custom::{CustomPlace, CustomUnits, PlaceProvider};
+use crate::custom::{CustomPlace, CustomUnits, DistanceProvider, PlaceProvider, VariableProvider};
 use crate::error::{Error, Result};
 use crate::eval::{Display, Env, Line, LineKind};
 use crate::inflation::InflationProvider;
@@ -44,6 +44,8 @@ pub struct Calculator {
     inflation: Option<Arc<dyn InflationProvider>>,
     places: Option<Arc<dyn PlaceProvider>>,
     weather: Option<Arc<dyn WeatherProvider>>,
+    variables: Option<Arc<dyn VariableProvider>>,
+    distances: Option<Arc<dyn DistanceProvider>>,
     /// What the place provider said for each name asked.
     found_places: RefCell<HashMap<String, Option<CustomPlace>>>,
     /// The line asked the place provider about a place it is still looking up.
@@ -62,6 +64,8 @@ impl Clone for Calculator {
             inflation: self.inflation.clone(),
             places: self.places.clone(),
             weather: self.weather.clone(),
+            variables: self.variables.clone(),
+            distances: self.distances.clone(),
             found_places: self.found_places.clone(),
             pending_place: Cell::new(false),
         }
@@ -89,6 +93,8 @@ impl Calculator {
             inflation: None,
             places: None,
             weather: None,
+            variables: None,
+            distances: None,
             found_places: RefCell::default(),
             pending_place: Cell::new(false),
         }
@@ -134,6 +140,16 @@ impl Calculator {
     pub fn set_place_provider(&mut self, provider: impl PlaceProvider + 'static) {
         self.places = Some(Arc::new(provider));
         self.found_places.borrow_mut().clear();
+    }
+
+    /// Where variables no line set come from: `stock price * 10`.
+    pub fn set_variable_provider(&mut self, provider: impl VariableProvider + 'static) {
+        self.variables = Some(Arc::new(provider));
+    }
+
+    /// Where distances between places come from, instead of along the surface of the Earth.
+    pub fn set_distance_provider(&mut self, provider: impl DistanceProvider + 'static) {
+        self.distances = Some(Arc::new(provider));
     }
 
     /// A place from the provider, asked once per name.
@@ -309,6 +325,7 @@ impl Calculator {
             rates_at_hand: Default::default(),
             inflation: self.inflation.as_deref(),
             weather: self.weather.as_deref(),
+            variables: self.variables.as_deref(),
             reads: Default::default(),
             custom_call: Default::default(),
         }
@@ -597,6 +614,8 @@ impl Calculator {
             declared: &names.units,
             places,
             weather,
+            variables: self.variables.as_deref(),
+            distances: self.distances.as_deref(),
         }
     }
 }
