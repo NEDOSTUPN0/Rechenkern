@@ -3,13 +3,14 @@
 
 use jiff::tz::TimeZone;
 
-use crate::config::CurrencySymbol;
+use crate::config::{CurrencySymbol, UnitSymbol};
 use crate::currency::Currency;
 use crate::error::{Error, Result};
 use crate::hash::TableMap;
 use crate::number::Number;
 use crate::units::{self, Dim, Unit, UnitDef, registry};
 use crate::value::Value;
+use crate::zones::PlaceKind;
 
 /// A unit of the host's own, worth an amount of a known one: a smoot is 1.7018 m.
 #[derive(Clone, Debug, PartialEq)]
@@ -41,12 +42,33 @@ pub struct CustomPlace {
     pub zone: TimeZone,
     /// Latitude (north) and longitude (east) in degrees, for sunrise and distances.
     pub coordinates: Option<(f64, f64)>,
+    /// Other names lines may use: "HQ" for "Head Office".
+    pub aliases: Vec<String>,
+    /// What the place is, for highlighting and captions; a city unless the host says.
+    pub kind: PlaceKind,
 }
 
 impl CustomPlace {
     pub fn new(name: &str, zone: TimeZone) -> CustomPlace {
-        CustomPlace { name: name.into(), zone, coordinates: None }
+        CustomPlace { name: name.into(), zone, coordinates: None, aliases: Vec::new(), kind: PlaceKind::City }
     }
+
+    /// The place goes by this lowercase name or alias.
+    pub(crate) fn is_named(&self, lowercase: &str) -> bool {
+        self.name.to_lowercase() == lowercase || self.aliases.iter().any(|a| a.to_lowercase() == lowercase)
+    }
+}
+
+/// Variables the host keeps up to date, as SoulverCore's `VariableProvider`: asked for names
+/// lines use that no line set (`stock price * 10`). Keep it quick: it is asked while parsing.
+pub trait VariableProvider: Send + Sync {
+    fn variable(&self, name: &str) -> Option<Value>;
+}
+
+/// Distances of the host's own between places, as SoulverCore's `distanceBetween`: by road,
+/// say. Kilometers, or `None` for the great-circle distance.
+pub trait DistanceProvider: Send + Sync {
+    fn distance(&self, from: &crate::zones::Location, to: &crate::zones::Location) -> Option<f64>;
 }
 
 /// Places a host finds by name, as SoulverCore's `PlaceDataProvider`: asked where a line
@@ -55,6 +77,13 @@ impl CustomPlace {
 pub trait PlaceProvider: Send + Sync {
     /// The place `name` (as written in the line) stands for, if there is one.
     fn place(&self, name: &str) -> Option<CustomPlace>;
+
+    /// The place is being looked up in the background: the line answers `ErrorKind::Pending`
+    /// and is asked again later (`Sheet::recalculate_pending`).
+    fn pending(&self, name: &str) -> bool {
+        let _ = name;
+        false
+    }
 }
 
 /// What generic names like "gallon", "cup" and "ton" mean, as in SoulverCore.
@@ -106,13 +135,18 @@ pub(crate) struct CustomUnits {
 }
 
 impl CustomUnits {
-    pub fn build(units: &[CustomUnit], symbols: &[CurrencySymbol]) -> Result<CustomUnits> {
+    pub fn build(units: &[CustomUnit], symbols: &[CurrencySymbol], unit_symbols: &[UnitSymbol]) -> Result<CustomUnits> {
         let mut table = CustomUnits::default();
         // The host's currency symbols read as their currencies: "100 kr".
         for symbol in symbols {
             let unit = registry()
                 .currency(&symbol.code)
                 .ok_or_else(|| Error::new(format!("unknown currency {}", symbol.code)))?;
+            table.exact.insert(symbol.symbol.clone(), unit);
+        }
+        for symbol in unit_symbols {
+            let unit = parse_unit(&symbol.unit).ok_or_else(|| Error::new(format!("unknown unit {}", symbol.unit)))?;
+            table.max_words = table.max_words.max(symbol.symbol.split(' ').count());
             table.exact.insert(symbol.symbol.clone(), unit);
         }
         for custom in units {
@@ -207,6 +241,8 @@ pub struct CustomFunction {
     /// Other phrases for the same function.
     pub aliases: Vec<String>,
     pub handler: FunctionHandler,
+    /// The host's name for the function, given back in `Answer::custom_call`.
+    pub id: Option<String>,
 }
 
 impl CustomFunction {
@@ -214,7 +250,17 @@ impl CustomFunction {
         prototype: &str,
         handler: impl Fn(&[Value]) -> std::result::Result<Value, String> + Send + Sync + 'static,
     ) -> CustomFunction {
-        CustomFunction { prototype: prototype.into(), aliases: Vec::new(), handler: std::sync::Arc::new(handler) }
+        CustomFunction {
+            prototype: prototype.into(),
+            aliases: Vec::new(),
+            handler: std::sync::Arc::new(handler),
+            id: None,
+        }
+    }
+
+    /// The same function with the host's name for it.
+    pub fn with_id(self, id: &str) -> CustomFunction {
+        CustomFunction { id: Some(id.into()), ..self }
     }
 }
 
@@ -226,11 +272,23 @@ impl std::fmt::Debug for CustomFunction {
 
 /// Words a custom placeholder matches, as SoulverCore's `CustomType`: `__airline` for
 /// "QF", "BA" and "Qantas".
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Default)]
 pub struct CustomType {
     /// "__airline".
     pub placeholder: String,
     pub words: Vec<String>,
+    /// What each word stands for, by position, as SoulverCore's `associatedObject`; a word
+    /// without one is handed over as text.
+    pub values: Vec<Value>,
+}
+
+impl PartialEq for CustomType {
+    fn eq(&self, other: &CustomType) -> bool {
+        self.placeholder == other.placeholder
+            && self.words == other.words
+            && self.values.len() == other.values.len()
+            && self.values.iter().zip(&other.values).all(|(a, b)| a.same_as(b))
+    }
 }
 
 /// One part of a prototype phrase.

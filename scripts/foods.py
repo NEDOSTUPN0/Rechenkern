@@ -14,6 +14,7 @@ word of a phrase decides nothing, longer names simply win. A food can also be co
 """
 
 import csv
+import re
 import sys
 from decimal import Decimal
 
@@ -22,7 +23,11 @@ PER_CUP = {"cup": 1, "tbsp": 16, "tsp": 48, "fl oz": 8}
 PLAIN = ["cup", "cup (8 fl oz)", "cup 8 fl oz", "tbsp", "tsp", "fl oz"]
 
 # Foods with a weight that isn't measured: water is a gram per milliliter.
-FIXED = {"water, tap water": Decimal("236.5882365")}
+FIXED = {
+    "water, tap water": Decimal("236.5882365"),
+    # Ice at 0 °C, 0.9167 g/mL (it isn't in SR Legacy).
+    "ice, ice cubes, crushed ice": Decimal("0.9167") * Decimal("236.5882365"),
+}
 
 # names | SR Legacy description | measure | pieces: what one weighs, by its household measure
 # ("stick = stick"; "each" is a food counted by itself, "small"... its sizes)
@@ -90,7 +95,7 @@ whipped butter | Butter, whipped, with salt |
 ghee, clarified butter, butter oil | Butter oil, anhydrous |
 margarine | Margarine, regular, 80% fat, composite, stick, with salt |
 shortening, vegetable shortening | Shortening, vegetable, household, composite |
-lard | Lard |
+lard, animal fat | Lard |
 tallow, beef tallow, beef fat | Fat, beef tallow |
 chicken fat, schmaltz | Fat, chicken |
 goose fat | Fat, goose |
@@ -164,6 +169,8 @@ egg whites, egg white | Egg, white, raw, fresh | | each = large
 egg yolks, egg yolk | Egg, yolk, raw, fresh | | each = large
 egg powder, powdered egg, dried egg | Egg, whole, dried | cup, sifted
 egg white powder, dried egg white | Egg, white, dried, powder, stabilized, glucose reduced | cup, sifted
+cooked egg, cooked eggs, scrambled eggs, scrambled egg | Egg, whole, cooked, scrambled |
+chopped boiled eggs, chopped hard-boiled eggs | Egg, whole, cooked, hard-boiled | cup, chopped
 
 rice, white rice, long grain rice, long-grain rice, basmati rice, jasmine rice | Rice, white, long-grain, regular, raw, enriched |
 medium grain rice, medium-grain rice, arborio rice | Rice, white, medium-grain, raw, enriched |
@@ -287,14 +294,14 @@ dried cranberries, craisins | Cranberries, dried, sweetened (Includes foods for 
 dried blueberries | Blueberries, dried, sweetened | cup
 prunes, dried plums | Plums, dried (prunes), uncooked | cup, pitted
 dried apricots | Apricots, dried, sulfured, uncooked | cup, halves
-dried figs | Figs, dried, uncooked |
+dried figs, figs | Figs, dried, uncooked |
 dried apples | Apples, dried, sulfured, uncooked |
 dried peaches | Peaches, dried, sulfured, uncooked | cup, halves
 dehydrated apples | Apples, dehydrated (low moisture), sulfured, uncooked |
 dehydrated apricots | Apricots, dehydrated (low-moisture), sulfured, uncooked |
 dehydrated peaches | Peaches, dehydrated (low-moisture), sulfured, uncooked |
 dehydrated prunes | Prunes, dehydrated (low-moisture), uncooked |
-dehydrated carrots | Carrot, dehydrated |
+dehydrated carrots, dehydrated carrot, dried carrots | Carrot, dehydrated |
 sun-dried tomatoes, sun dried tomatoes | Tomatoes, sun-dried |
 banana powder | Bananas, dehydrated, or banana powder |
 
@@ -385,7 +392,10 @@ ginger, grated ginger | Ginger root, raw | tsp
 lemongrass, lemon grass | Lemon grass (citronella), raw |
 watercress | Watercress, raw | cup, chopped
 artichoke hearts | Artichokes, (globe or french), cooked, boiled, drained, without salt | cup hearts
-alfalfa sprouts | Alfalfa seeds, sprouted, raw |
+alfalfa sprouts, alfalfa seeds | Alfalfa seeds, sprouted, raw |
+artichokes | Artichokes, (globe or french), frozen, cooked, boiled, drained, without salt |
+soy meal | Soy meal, defatted, raw |
+nutella, hazelnut spread, chocolate hazelnut spread | Chocolate-flavored hazelnut spread | serving 2 TBSP
 purslane | Purslane, raw |
 grape leaves, vine leaves | Grape leaves, raw |
 pumpkin leaves | Pumpkin leaves, raw |
@@ -399,6 +409,7 @@ baking soda, bicarbonate of soda, sodium bicarbonate | Leavening agents, baking 
 cream of tartar | Leavening agents, cream of tartar |
 yeast, active dry yeast, dry yeast, instant yeast | Leavening agents, yeast, baker's, active dry |
 cocoa, cocoa powder, unsweetened cocoa | Cocoa, dry powder, unsweetened |
+chocolate powder, drinking chocolate | Beverages, chocolate powder, no sugar added | tbsp
 dutch-process cocoa, dutch process cocoa | Cocoa, dry powder, unsweetened, processed with alkali |
 chocolate chips, semisweet chocolate chips, chocolate morsels | Candies, semisweet chocolate | cup chips (6 oz package)
 mini chocolate chips | Candies, semisweet chocolate | cup mini chips
@@ -496,14 +507,20 @@ def measure_unit(modifier):
     return None
 
 
+def serving(modifier):
+    """A serving written in a measure, and how many: "serving 2 TBSP" is 2 tbsp."""
+    match = re.fullmatch(r"serving (\d+) (tbsp|tsp)", modifier.lower())
+    return (match[2], Decimal(match[1])) if match else (None, Decimal(1))
+
+
 def grams_per_cup(portions, measure):
     """Grams in a cup from the measure asked for, or from the plain cup, tablespoon..."""
     wanted = [measure] if measure else PLAIN
     for name in wanted:
         for amount, modifier, grams in portions:
-            unit = measure_unit(modifier)
+            unit, count = (measure_unit(modifier), Decimal(1)) if measure_unit(modifier) else serving(modifier)
             if modifier == name and unit and amount > 0:
-                return grams / amount * PER_CUP[unit]
+                return grams / (amount * count) * PER_CUP[unit]
     return None
 
 

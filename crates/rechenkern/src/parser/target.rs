@@ -13,13 +13,14 @@ impl Parser<'_> {
     /// One conversion step after `expr`, or `None` if there is none.
     pub(super) fn conversion(&mut self, expr: &Expr) -> Result<Option<Expr>> {
         let start = self.pos;
-        // "2 hours to 1.5x": played at that speed.
+        // "2 hours to 1.5x", "2 hours to 1.5x speed": played at that speed.
         if self.cur().is_some_and(|t| t.is_word("to"))
             && let Some(Tok::Num(speed)) = self.toks.get(self.pos + 1).map(|t| &t.tok)
             && self.toks.get(self.pos + 2).is_some_and(|t| t.word() == Some("x") && !t.space_before)
-            && self.toks.len() == self.pos + 3
+            && let speed_word = usize::from(self.toks.get(self.pos + 3).is_some_and(|t| t.is_word("speed")))
+            && self.toks.len() == self.pos + 3 + speed_word
         {
-            self.pos += 3;
+            self.pos += 3 + speed_word;
             return Ok(Some(Expr::binary(Op::At, expr.clone(), Expr::Number(*speed))));
         }
         if self.converter_allowed(Converter::Rounding) && self.eat_rounding_word() {
@@ -55,7 +56,8 @@ impl Parser<'_> {
             return Ok(Some(Expr::Range(expr.clone().boxed(), self.range_end(through)?.boxed())));
         }
         // "5 km cast to miles": the number kept, the unit changed.
-        if self.words_at(self.pos, &["cast"]) && ["to", "as", "into"].iter().any(|w| self.words_at(self.pos + 1, &[w]))
+        if self.words_at(self.pos, &["cast"])
+            && ["to", "as", "into", "in"].iter().any(|w| self.words_at(self.pos + 1, &[w]))
         {
             let mut p = self.clone();
             p.pos += 2;
@@ -74,6 +76,22 @@ impl Parser<'_> {
             return Ok(None);
         }
         self.pos += 1;
+        // "5:30/km in /mile": a pace in minutes per another length.
+        if self.cur().is_some_and(|t| t.is_sym("/"))
+            && expr.edge_unit(true).is_some_and(|u| u.dim() == Dim::TIME.div(Dim::LENGTH))
+            && let Some((length, n)) = self.unit_at(self.pos + 1, true).filter(|(u, _)| u.dim() == Dim::LENGTH)
+        {
+            self.pos += 1 + n;
+            let pace = registry().get("min").product(&length.pow(-1));
+            return Ok(Some(Expr::Convert(expr.clone().boxed(), Target::Unit(pace))));
+        }
+        // "3pm in 24 hour", "15:45 to 12-hour time": the clock it is shown on; "in 24 hours" moves it.
+        if is_moment(expr)
+            && let Some((h24, n)) = self.clock_style_at(self.pos)
+        {
+            self.pos += n;
+            return Ok(Some(Parser::formatted(expr.clone(), Format::Clock(h24))));
+        }
         // "today as yyyy-MM-dd", "now as HH:mm": the rest of the line is the template.
         if is_moment(expr)
             && let Some(first) = self.toks.get(self.pos)
@@ -91,7 +109,7 @@ impl Parser<'_> {
             && self.operand_follows(0)
         {
             // "square meters in sq ft": one of a unit, which may have a power.
-            let amount = match self.unit_phrase(true) {
+            let amount = match self.unit_expr(false) {
                 Some(of) => Expr::BareUnit(of),
                 None => self.bit_or()?,
             };
@@ -117,6 +135,13 @@ impl Parser<'_> {
         {
             return Ok(Some(shifted(expr, Op::Add, amount)));
         }
+        // "Q3 2027 in Tokyo": a period is the same days anywhere.
+        if matches!(expr, Expr::Period(..))
+            && let Some((_, n)) = self.zone_at(self.pos)
+        {
+            self.pos += n;
+            return Ok(Some(expr.clone()));
+        }
         // A date or time goes to a place, even one named like a unit: "time in Cordoba".
         let zone = match is_moment(expr) {
             true => self.zone_at(self.pos).filter(|&(_, n)| self.unit_at(self.pos, false).is_none_or(|(_, m)| m <= n)),
@@ -137,6 +162,28 @@ impl Parser<'_> {
             target => target,
         };
         if let Some(target) = target {
+            // "5 minutes 20 seconds as frames @ 24 fps": that many seconds of frames.
+            if let Target::Format(Format::Frames) = &target
+                && let Some(fps) = self.fps_after()
+            {
+                let seconds = Expr::Convert(expr.clone().boxed(), Target::Unit(registry().get("s")));
+                let frames = Expr::binary(Op::Mul, Parser::formatted(seconds, Format::Number), Expr::Number(fps));
+                let whole = Expr::Round(frames.boxed(), Rounding::Places(0, Direction::Nearest));
+                return Ok(Some(Parser::formatted(whole, Format::Frames)));
+            }
+            // "27 inch in px with 326 ppi": pixels at that density.
+            if let Target::Unit(unit) = &target
+                && unit.same_as(&registry().get("px"))
+                && let Some(density) = self.density_after()?
+            {
+                let inches = Expr::Convert(expr.clone().boxed(), Target::Unit(registry().get("in")));
+                let dots = Parser::formatted(
+                    Expr::Convert(density.boxed(), Target::Unit(registry().get("ppi"))),
+                    Format::Number,
+                );
+                let pixels = Expr::binary(Op::Mul, Parser::formatted(inches, Format::Number), dots);
+                return Ok(Some(Expr::WithUnit(pixels.boxed(), unit.clone())));
+            }
             // "9am in New York to Tokyo": the first zone says where the clock is.
             if let Target::Zone(zone) = &target
                 && matches!(expr, Expr::Time(TimeExpr::Clock { .. }))
@@ -619,11 +666,40 @@ impl Parser<'_> {
     }
 }
 
+/// The format a converter writes in, for `ConversionRule::Display`; `None` for converters that need a target.
+pub(crate) fn converter_format(converter: Converter) -> Option<Format> {
+    Some(match converter {
+        Converter::Hexadecimal => Format::Hex,
+        Converter::Binary => Format::Binary,
+        Converter::Octal => Format::Octal,
+        Converter::Decimal => Format::Decimal,
+        Converter::Scientific => Format::Scientific,
+        Converter::Fraction => Format::Fraction,
+        Converter::Number => Format::Number,
+        Converter::Percentage => Format::Percent,
+        Converter::Multiplier => Format::Multiplier,
+        Converter::Timespan => Format::Timespan,
+        Converter::Laptime => Format::Laptime,
+        Converter::Hms => Format::Hms,
+        Converter::Timestamp => Format::Timestamp,
+        Converter::Date => Format::Date,
+        Converter::Iso8601 => Format::Iso,
+        Converter::Relative => Format::Relative,
+        Converter::Pitch => Format::Pitch,
+        Converter::Midi => Format::Midi,
+        Converter::Dms => Format::Dms,
+        Converter::Frames => Format::Frames,
+        Converter::Megapixels => Format::Megapixels,
+        _ => return None,
+    })
+}
+
 /// The kind of conversion to a target, for `Features::disabled_converters`.
 fn converter(target: &Target) -> Converter {
     match target {
-        Target::Unit(_) | Target::Cast(_) => Converter::Unit,
-        Target::Pattern(_) => Converter::DatePart,
+        Target::Unit(_) => Converter::Unit,
+        Target::Cast(_) => Converter::Cast,
+        Target::Pattern(_) => Converter::Pattern,
         Target::Units(units) if units.iter().any(Unit::is_money) => Converter::Unit,
         Target::Units(_) => Converter::Parts,
         Target::Per(_) => Converter::Rate,
@@ -640,16 +716,21 @@ fn converter(target: &Target) -> Converter {
             Format::Percent => Converter::Percentage,
             Format::Multiplier => Converter::Multiplier,
             Format::Timespan => Converter::Timespan,
-            Format::Laptime | Format::Hms => Converter::Laptime,
+            Format::Laptime => Converter::Laptime,
+            Format::Hms => Converter::Hms,
             Format::Timestamp => Converter::Timestamp,
             Format::Date => Converter::Date,
             Format::Iso => Converter::Iso8601,
+            Format::Relative => Converter::Relative,
             Format::Weekday | Format::WeekNumber | Format::DayOfYear | Format::DayOfMonth | Format::WeekOfMonth => {
                 Converter::DatePart
             }
-            Format::Pitch | Format::Midi => Converter::Pitch,
+            Format::Pitch => Converter::Pitch,
+            Format::Midi => Converter::Midi,
             Format::Dms => Converter::Dms,
-            Format::Megapixels | Format::Frames => Converter::Number,
+            Format::Megapixels => Converter::Megapixels,
+            Format::Frames => Converter::Frames,
+            Format::Clock(_) => Converter::Clock,
         },
     }
 }
@@ -664,6 +745,60 @@ fn is_date_pattern(text: &str) -> bool {
     let separated = text.chars().any(|c| " -/:.,".contains(c));
     let repeated = text.chars().all(|c| text.starts_with(c));
     marked && text.chars().all(allowed) && (separated || repeated)
+}
+
+impl Parser<'_> {
+    /// "@ 24 fps", "at 30 fps" at the cursor, read past: the frame rate.
+    fn fps_after(&mut self) -> Option<Number> {
+        let at = self.cur().is_some_and(|t| t.is_sym("@") || t.is_word("at"));
+        let Some(Tok::Num(fps)) = self.toks.get(self.pos + 1).map(|t| &t.tok) else { return None };
+        let unit = self.toks.get(self.pos + 2).is_some_and(|t| t.is_word("fps"));
+        (at && unit).then(|| {
+            self.pos += 3;
+            *fps
+        })
+    }
+
+    /// "with 326 ppi", "at 300 dpi" at the cursor, read past: a pixel density.
+    fn density_after(&mut self) -> Result<Option<Expr>> {
+        if !self.cur().is_some_and(|t| t.is_word("with") || t.is_word("at")) {
+            return Ok(None);
+        }
+        let mut p = self.clone();
+        p.pos += 1;
+        let Ok(density) = p.unary() else { return Ok(None) };
+        let ppi = registry().get("ppi");
+        if !density.edge_unit(true).is_some_and(|u| u.dim() == ppi.dim()) {
+            return Ok(None);
+        }
+        *self = p;
+        Ok(Some(density))
+    }
+
+    /// "24 hour", "24-hour time", "12h clock", "military time" at token `i`: whether the clock
+    /// has 24 hours, and the length in tokens.
+    fn clock_style_at(&self, i: usize) -> Option<(bool, usize)> {
+        if self.words_at(i, &["military", "time"]) {
+            return Some((true, 2));
+        }
+        let Tok::Num(hours) = self.toks.get(i)?.tok else { return None };
+        let h24 = match hours.to_i64()? {
+            24 => true,
+            12 => false,
+            _ => return None,
+        };
+        let hyphen = usize::from(self.toks.get(i + 1).is_some_and(|t| t.is_sym("-")));
+        let word = self.lower(i + 1 + hyphen)?;
+        if !matches!(word.as_str(), "hour" | "h" | "hr") {
+            return None;
+        }
+        let mut n = 2 + hyphen;
+        if self.lower(i + n).is_some_and(|w| matches!(w.as_str(), "time" | "clock" | "format")) {
+            n += 1;
+        }
+        // Nothing else follows: "in 24 hour increments" is something else.
+        (i + n == self.toks.len()).then_some((h24, n))
+    }
 }
 
 fn is_moment(expr: &Expr) -> bool {

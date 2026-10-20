@@ -57,6 +57,20 @@ pub trait RateProvider: Send + Sync {
     fn cached_rates(&self) -> Option<RateTable> {
         None
     }
+
+    /// The rates are on their way (the host fetches them in the background): lines that need
+    /// them answer `ErrorKind::Pending` and nothing is kept, so they answer once asked again
+    /// (`Sheet::recalculate_pending`).
+    fn pending(&self) -> bool {
+        false
+    }
+
+    /// The rate from one currency to another the host knows better than by way of the dollar:
+    /// units of `to` for one `from`. `None` uses the table.
+    fn pair_rate(&self, from: &str, to: &str) -> Option<Number> {
+        let _ = (from, to);
+        None
+    }
 }
 
 /// Rates that come with the engine (`data/rates.txt`), for currencies a provider
@@ -79,7 +93,7 @@ pub fn bundled_rates() -> &'static RateTable {
 /// Rates loaded lazily from a provider.
 #[derive(Default)]
 pub(crate) struct Rates {
-    provider: Option<Box<dyn RateProvider>>,
+    provider: Option<Arc<dyn RateProvider>>,
     table: OnceLock<std::result::Result<RateTable, String>>,
     /// Rates of past days, as the provider gave them.
     dated: Mutex<HashMap<Date, std::result::Result<Arc<RateTable>, String>>>,
@@ -87,8 +101,20 @@ pub(crate) struct Rates {
     cached: OnceLock<Option<RateTable>>,
 }
 
+impl Clone for Rates {
+    fn clone(&self) -> Rates {
+        let dated = self.dated.lock().unwrap_or_else(PoisonError::into_inner).clone();
+        Rates {
+            provider: self.provider.clone(),
+            table: self.table.clone(),
+            dated: Mutex::new(dated),
+            cached: self.cached.clone(),
+        }
+    }
+}
+
 impl Rates {
-    pub fn with_provider(provider: Box<dyn RateProvider>) -> Rates {
+    pub fn with_provider(provider: Arc<dyn RateProvider>) -> Rates {
         Rates { provider: Some(provider), ..Rates::default() }
     }
 
@@ -97,11 +123,19 @@ impl Rates {
     }
 
     pub fn table(&self) -> Result<&RateTable> {
+        if self.table.get().is_none() && self.provider.as_ref().is_some_and(|p| p.pending()) {
+            return Err(Error::pending("exchange rates are on their way"));
+        }
         let loaded = self.table.get_or_init(|| match &self.provider {
             Some(p) => p.rates(),
             None => Err("no exchange rates available".into()),
         });
         loaded.as_ref().map_err(|e| Error::new(e.clone()))
+    }
+
+    /// The provider's own rate between two currencies.
+    pub fn pair_rate(&self, from: &str, to: &str) -> Option<Number> {
+        self.provider.as_ref()?.pair_rate(from, to)
     }
 
     /// Value of one unit of `code` in US dollars; with `fallback` the bundled rates
@@ -112,6 +146,8 @@ impl Rates {
         }
         let rate = match self.table() {
             Ok(table) => table.get(code).or_else(|| fallback.then(|| bundled_rates().get(code)).flatten()),
+            // Rates on their way are waited for, not stood in for.
+            Err(e) if e.is_pending() => return Err(e),
             Err(_) if fallback => bundled_rates().get(code),
             Err(e) => return Err(e),
         };
@@ -136,10 +172,17 @@ impl Rates {
         }
     }
 
+    fn dated_known(&self, date: Date) -> bool {
+        self.dated.lock().unwrap_or_else(PoisonError::into_inner).contains_key(&date)
+    }
+
     /// Value of one unit of `code` in US dollars on a past day.
     pub fn usd_value_on(&self, code: &str, date: Date) -> Result<Number> {
         if code == "USD" {
             return Ok(Number::ONE);
+        }
+        if self.provider.as_ref().is_some_and(|p| p.pending()) && !self.dated_known(date) {
+            return Err(Error::pending(format!("exchange rates for {date} are on their way")));
         }
         let table = {
             let mut dated = self.dated.lock().unwrap_or_else(PoisonError::into_inner);

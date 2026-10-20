@@ -167,6 +167,58 @@ impl Value {
         Value::Quantity(Quantity::plain(n))
     }
 
+    /// The number of a plain number, as SoulverCore's `decimalValue`.
+    pub fn as_number(&self) -> Option<Number> {
+        match self {
+            Value::Quantity(q) if q.unit.is_none() => Some(q.number),
+            _ => None,
+        }
+    }
+
+    /// An amount with or without a unit: `5 km`, `$20`, `7`.
+    pub fn as_quantity(&self) -> Option<&Quantity> {
+        match self {
+            Value::Quantity(q) => Some(q),
+            _ => None,
+        }
+    }
+
+    /// A percentage, as written: 20 for 20%.
+    pub fn as_percent(&self) -> Option<Number> {
+        match self {
+            Value::Percent(p) => Some(*p),
+            _ => None,
+        }
+    }
+
+    pub fn as_moment(&self) -> Option<&Moment> {
+        match self {
+            Value::Moment(m) => Some(m),
+            _ => None,
+        }
+    }
+
+    pub fn as_duration(&self) -> Option<&Duration> {
+        match self {
+            Value::Duration(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    pub fn as_bool(&self) -> Option<bool> {
+        match self {
+            Value::Bool(b) => Some(*b),
+            _ => None,
+        }
+    }
+
+    pub fn as_text(&self) -> Option<&str> {
+        match self {
+            Value::Text(t) => Some(t),
+            _ => None,
+        }
+    }
+
     /// The same value, written the same way: for sheets, to tell which answers changed.
     pub fn same_as(&self, other: &Value) -> bool {
         match (self, other) {

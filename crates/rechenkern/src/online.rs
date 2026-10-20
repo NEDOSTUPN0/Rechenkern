@@ -255,7 +255,7 @@ impl crate::PlaceProvider for OnlinePlaces {
         let zone = jiff::tz::TimeZone::get(found.get("timezone")?.as_str()?).ok()?;
         let coordinates = found.get("latitude")?.as_f64().zip(found.get("longitude")?.as_f64());
         let name = found.get("name")?.as_str()?.to_string();
-        Some(crate::CustomPlace { name, zone, coordinates })
+        Some(crate::CustomPlace { coordinates, ..crate::CustomPlace::new(&name, zone) })
     }
 }
 
@@ -273,7 +273,9 @@ impl Default for OnlineWeather {
 }
 
 /// What a day of Open-Meteo's daily weather holds.
-const DAILY: &str = "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max,wind_direction_10m_dominant,uv_index_max,precipitation_probability_max";
+const DAILY: &str = "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max,wind_direction_10m_dominant,apparent_temperature_max,apparent_temperature_min,precipitation_sum,rain_sum,snowfall_sum,uv_index_max,precipitation_probability_max";
+/// What the weather now holds.
+const CURRENT: &str = "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,uv_index,apparent_temperature,precipitation,rain,snowfall,cloud_cover,visibility,dew_point_2m,pressure_msl";
 
 impl crate::WeatherProvider for OnlineWeather {
     fn weather(&self, request: &crate::WeatherRequest) -> Result<crate::Weather, String> {
@@ -298,14 +300,13 @@ impl crate::WeatherProvider for OnlineWeather {
             if recent {
                 DAILY
             } else {
-                "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max,wind_direction_10m_dominant"
+                "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max,wind_direction_10m_dominant,apparent_temperature_max,apparent_temperature_min,precipitation_sum,rain_sum,snowfall_sum"
             },
         );
         if request.date.is_none() {
-            call = call.query(
-                "current",
-                "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,uv_index",
-            );
+            // The last three hours of pressure say where it is going.
+            call = call.query("current", CURRENT).query("hourly", "pressure_msl").query("past_hours", "3");
+            call = call.query("forecast_hours", "1");
         }
         let response = call.config().timeout_global(Some(self.timeout)).build().call();
         let text = response
@@ -317,6 +318,15 @@ impl crate::WeatherProvider for OnlineWeather {
         let (high, low) = (daily("temperature_2m_max"), daily("temperature_2m_min"));
         let middle = high.zip(low).map(|(h, l)| (h + l) / 2.0);
         let code = current("weather_code").or_else(|| daily("weather_code"));
+        let pressures: Vec<f64> = json
+            .get("hourly")
+            .and_then(|h| h.get("pressure_msl")?.as_array().cloned())
+            .unwrap_or_default()
+            .iter()
+            .filter_map(serde_json::Value::as_f64)
+            .collect();
+        let feels =
+            daily("apparent_temperature_max").zip(daily("apparent_temperature_min")).map(|(h, l)| (h + l) / 2.0);
         Ok(crate::Weather {
             temperature: current("temperature_2m").or(middle),
             high,
@@ -326,6 +336,15 @@ impl crate::WeatherProvider for OnlineWeather {
             wind_direction: current("wind_direction_10m").or_else(|| daily("wind_direction_10m_dominant")),
             uv_index: current("uv_index").or_else(|| daily("uv_index_max")),
             chance_of_rain: daily("precipitation_probability_max"),
+            feels_like: current("apparent_temperature").or(feels),
+            precipitation: current("precipitation").or_else(|| daily("precipitation_sum")),
+            rain: current("rain").or_else(|| daily("rain_sum")),
+            snowfall: current("snowfall").or_else(|| daily("snowfall_sum")),
+            cloud_cover: current("cloud_cover"),
+            visibility: current("visibility").map(|m| m / 1000.0),
+            dew_point: current("dew_point_2m"),
+            pressure: current("pressure_msl"),
+            pressure_change: (pressures.len() >= 2).then(|| pressures[pressures.len() - 1] - pressures[0]),
             condition: code.and_then(|c| crate::weather_condition(c as u32)).map(String::from),
         })
     }

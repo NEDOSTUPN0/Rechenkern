@@ -2,16 +2,18 @@
 //! and earlier answers carry down, an edit recalculates only the lines that depend on
 //! it, and a host can mark subtotals, keep undo states and ask for statistics.
 
+mod editing;
 mod export;
 
 use std::collections::{HashMap, HashSet};
 
+pub use editing::{Definitions, LineType, StatisticOptions};
 pub use export::{HtmlColors, HtmlOptions, TextOptions, TextStyle};
 
 use crate::answer::{Answer, Parts};
 use crate::ast::{Expr, Func, LineRef};
 use crate::calculator::{Assignment, Calculator, Effects, Names, Reads};
-use crate::config::Config;
+use crate::config::{Config, Formatting};
 use crate::error::{Error, Result};
 use crate::eval::{Display, Env, Line, LineKind};
 use crate::parser::highlight::Highlight;
@@ -33,6 +35,8 @@ pub enum Behaviour {
     RunningTotal,
     /// The line is a budget: the ones below show what is left of it.
     RunningBudget,
+    /// A stop of a trip (`Sheet::set_trip_planning`); it answers as an expression.
+    TripWaypoint,
 }
 
 /// Colors a host paints a part of a line with.
@@ -78,6 +82,8 @@ pub enum Statistic {
     Lcm,
     Gcd,
     StandardDeviation,
+    /// The first answer minus the others.
+    Reduction,
 }
 
 /// A line of a sheet: its text, how the host marked it, and its answer.
@@ -93,6 +99,10 @@ pub struct SheetLine {
     answer: Result<Option<Answer>>,
     /// A running total, or what is left of a budget.
     running: Option<Answer>,
+    /// The host's formatting for this line only.
+    formatting: Option<Formatting>,
+    /// A function the answer goes through.
+    transformer: Option<String>,
     effects: Effects,
 }
 
@@ -107,6 +117,8 @@ impl SheetLine {
             attribution: None,
             answer: Ok(None),
             running: None,
+            formatting: None,
+            transformer: None,
             effects: Effects {
                 line: Line { value: None, kind: LineKind::Blank, tags: Vec::new() },
                 assigned: None,
@@ -199,6 +211,9 @@ pub struct Sheet {
     next_id: u64,
     observers: Vec<(ObserverId, Observer)>,
     next_observer: u64,
+    /// Changes held back until `end_changes`.
+    batch: Option<editing::Batch>,
+    trip_planning: bool,
 }
 
 impl Default for Sheet {
@@ -210,7 +225,15 @@ impl Default for Sheet {
 impl Sheet {
     /// A sheet that calculates with this calculator's config and providers.
     pub fn new(calc: Calculator) -> Sheet {
-        Sheet { calc, lines: Vec::new(), next_id: 1, observers: Vec::new(), next_observer: 1 }
+        Sheet {
+            calc,
+            lines: Vec::new(),
+            next_id: 1,
+            observers: Vec::new(),
+            next_observer: 1,
+            batch: None,
+            trip_planning: false,
+        }
     }
 
     pub fn with_config(config: Config) -> Sheet {
@@ -266,8 +289,11 @@ impl Sheet {
     pub fn insert(&mut self, i: usize, text: &str) -> Vec<usize> {
         let id = self.new_id();
         let i = i.min(self.lines.len());
+        // "line 3" keeps pointing at the same line.
+        let renumbered = if i < self.lines.len() { self.renumber_references(i, 1) } else { Vec::new() };
         self.lines.insert(i, SheetLine::new(id, text));
-        self.update(i, &[])
+        let renumbered: Vec<usize> = renumbered.into_iter().map(|k| if k >= i { k + 1 } else { k }).collect();
+        self.update_renumbered(i, &renumbered)
     }
 
     pub fn push(&mut self, text: &str) -> Vec<usize> {
@@ -276,7 +302,8 @@ impl Sheet {
 
     pub fn remove(&mut self, i: usize) -> Vec<usize> {
         self.lines.remove(i);
-        self.update(i, &[])
+        let renumbered = self.renumber_references(i, -1);
+        self.update_renumbered(i, &renumbered)
     }
 
     /// Moves line `from` to index `to`.
@@ -284,7 +311,8 @@ impl Sheet {
         let line = self.lines.remove(from);
         let to = to.min(self.lines.len());
         self.lines.insert(to, line);
-        self.update(from.min(to), &[])
+        let renumbered = self.renumber_moved(from, to);
+        self.update_renumbered(from.min(to), &renumbered)
     }
 
     /// Marks how line `i` answers. Subtotals below may now take other lines, so every
@@ -387,34 +415,32 @@ impl Sheet {
     /// A statistic of the answers of some lines (all of them for `None`), leaving out lines
     /// that set a variable and lines other lines read, as SoulverCore's quick statistics do.
     pub fn statistic(&self, statistic: Statistic, lines: Option<&[usize]>) -> Option<Result<Answer>> {
+        self.statistic_of(statistic, lines, StatisticOptions::default())
+    }
+
+    fn statistic_of(
+        &self,
+        statistic: Statistic,
+        lines: Option<&[usize]>,
+        options: StatisticOptions,
+    ) -> Option<Result<Answer>> {
         let all: Vec<usize> = (0..self.lines.len()).collect();
         let lines = lines.unwrap_or(&all);
-        let referenced: HashSet<usize> =
-            self.lines.iter().flat_map(|l| l.effects.reads.lines.iter().copied()).collect();
+        let referenced: HashSet<usize> = match options.ignore_referenced {
+            true => self.lines.iter().flat_map(|l| l.effects.reads.lines.iter().copied()).collect(),
+            false => HashSet::new(),
+        };
         let values: Vec<Value> = lines
             .iter()
             .filter(|&&i| i < self.lines.len() && !referenced.contains(&i))
             .map(|&i| &self.lines[i])
-            .filter(|l| l.effects.assigned.is_none() && l.effects.line.kind == LineKind::Value)
+            .filter(|l| !(options.ignore_declarations && l.effects.assigned.is_some()))
+            .filter(|l| l.effects.line.kind == LineKind::Value)
             .filter_map(|l| l.effects.line.value.clone())
             .collect();
-        if values.is_empty() {
-            return None;
-        }
-        let func = match statistic {
-            Statistic::Total => Func::Sum,
-            Statistic::Average => Func::Average,
-            Statistic::Count => Func::Count,
-            Statistic::Median => Func::Median,
-            Statistic::Min => Func::Min,
-            Statistic::Max => Func::Max,
-            Statistic::Lcm => Func::Lcm,
-            Statistic::Gcd => Func::Gcd,
-            Statistic::StandardDeviation => Func::StdDev,
-        };
         let names = Names::default();
         let env = self.calc.env(&names, &[]);
-        Some(env.call(func, values).map(|value| answer_of(&env, value)))
+        crate::results::statistic_of(&env, statistic, values)
     }
 
     /// The line whose subtotal includes line `i`.
@@ -450,6 +476,9 @@ impl Sheet {
     fn update(&mut self, from: usize, dirty: &[usize]) -> Vec<usize> {
         // Without dirty lines, lines moved: every line below reads differently.
         let all_from = if dirty.is_empty() { from } else { self.lines.len() };
+        if self.held_back(from, dirty, all_from) {
+            return Vec::new();
+        }
         self.update_from(from, dirty, all_from)
     }
 
@@ -514,8 +543,34 @@ impl Sheet {
         let line = &self.lines[i];
         match line.behaviour {
             Behaviour::Subtotal | Behaviour::GrandTotal => self.subtotal(i, names, above),
-            _ => self.calc.run(&line.text, names, above, true),
+            _ => {
+                let (answer, effects) = self.calc.run(&line.text, names, above, true);
+                let (answer, effects) = match &line.transformer {
+                    Some(function) => self.transformed(function, answer, effects, names, above),
+                    None => (answer, effects),
+                };
+                (editing::formatted(answer, line.formatting.as_ref()), effects)
+            }
         }
+    }
+
+    /// An answer put through a function: what later lines read is the function's answer.
+    fn transformed(
+        &self,
+        function: &str,
+        answer: Result<Option<Answer>>,
+        mut effects: Effects,
+        names: &Names,
+        above: &[Line],
+    ) -> (Result<Option<Answer>>, Effects) {
+        let Ok(Some(answer)) = answer else { return (answer, effects) };
+        // Answers read back as the same value.
+        let line = format!("{function}({})", answer.unformatted_text());
+        let (transformed, _) = self.calc.run(&line, names, above, false);
+        if let Ok(Some(t)) = &transformed {
+            effects.line.value = Some(t.reference());
+        }
+        (transformed, effects)
     }
 
     /// A subtotal or grand total line: the sum of the lines it takes.

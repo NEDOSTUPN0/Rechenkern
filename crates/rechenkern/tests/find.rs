@@ -139,3 +139,82 @@ fn scanning_in_order() {
     assert!(scanner.number().is_err());
     assert_eq!(scanner.find(DataKind::Date).unwrap().text, "tomorrow");
 }
+
+#[test]
+fn more_kinds() {
+    use DataKind::*;
+    let kinds = [
+        HexNumber,
+        BinaryNumber,
+        Digits,
+        Timecode,
+        Resolution,
+        FuelEconomy,
+        TransferSpeed,
+        Frequency,
+        Power,
+        Pressure,
+        Angle,
+        Number,
+    ];
+    let text = "0xFF and 0b101, code 007, at 01:00:10:12 on 1920x1080, 30 mpg, 100 Mbps, 440 Hz, 5 kW, 2 bar, 90°, 3.5";
+    let kinds_found: Vec<String> =
+        calc().find(text, &kinds).iter().map(|f| format!("{:?} {}", f.kind, f.text)).collect();
+    assert_eq!(
+        kinds_found,
+        [
+            "HexNumber 0xFF",
+            "BinaryNumber 0b101",
+            "Digits 007",
+            "Timecode 01:00:10:12",
+            "Resolution 1920x1080",
+            "FuelEconomy 30 mpg",
+            "TransferSpeed 100 Mbps",
+            "Frequency 440 Hz",
+            "Power 5 kW",
+            "Pressure 2 bar",
+            "Angle 90°",
+            "Number 3.5",
+        ]
+    );
+    let words = calc().find("5 km in miles", &[Whitespace, Keyword]);
+    let words: Vec<String> = words.iter().map(|f| format!("{:?} {:?}", f.kind, f.text)).collect();
+    assert_eq!(words, ["Whitespace \" \"", "Whitespace \" \"", "Keyword \"in\"", "Whitespace \" \""]);
+}
+
+#[test]
+fn scanning_in_any_order() {
+    let calc = calc();
+    let mut scanner = calc.scanner("tomorrow QF 123");
+    assert_eq!(scanner.take(DataKind::Number).unwrap().text, "123");
+    assert_eq!(scanner.take(DataKind::Date).unwrap().text, "tomorrow");
+    assert!(scanner.take(DataKind::Date).is_err());
+}
+
+#[test]
+fn digit_sequences_keywords_and_structure() {
+    assert_eq!(
+        found("card 4111 1111 1111 1111, call 555-123-4567 or 12 34", &[DataKind::DigitSequence]),
+        [
+            "DigitSequence 4111 1111 1111 1111 = Text(\"4111111111111111\")",
+            "DigitSequence 555-123-4567 = Text(\"5551234567\")",
+        ]
+    );
+    let calc = calc();
+    let mut scanner = calc.scanner("Flight QF1 leaves from gate 12 tomorrow");
+    assert_eq!(scanner.keyword(&["gate", "terminal"]).unwrap(), "gate");
+    assert_eq!(scanner.number().unwrap().to_string(), "12");
+    assert!(scanner.ensure(&["flight", "LEAVES"]).is_ok());
+    assert!(scanner.ensure(&["arrives"]).is_err());
+    assert!(scanner.keyword(&["terminal"]).is_err());
+
+    assert!(calc.same_structure("$5 on Monday", "$20 on Friday"));
+    assert!(!calc.same_structure("$5 on Monday", "Monday $5"));
+
+    let (n, day): (rechenkern::Number, rechenkern::Moment) = calc.read_as("We sold 130 copies yesterday").unwrap();
+    assert_eq!((n.to_string(), day.time.date().to_string()), ("130".into(), "2026-09-22".into()));
+
+    let doubled = |f: &rechenkern::Found| Some(format!("{}", f.number()? * rechenkern::Number::from_i64(2)));
+    assert_eq!(calc.replace_all("3 apples and 4 pears", &[DataKind::Number], doubled), "6 apples and 8 pears");
+    assert_eq!(calc.replace_first("3 apples and 4 pears", &[DataKind::Number], doubled), "6 apples and 4 pears");
+}

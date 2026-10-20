@@ -110,6 +110,21 @@ impl Parser<'_> {
         if let Some(root) = self.root_of_degree(value)? {
             return Ok(root);
         }
+        // "1st", "21st": an ordinal, not stones.
+        if self.cur().is_some_and(|t| t.word() == Some("st") && !t.space_before)
+            && value.to_i64().is_some_and(|v| value.is_integer() && v % 10 == 1 && v % 100 != 11)
+        {
+            self.pos += 1;
+            return Ok(Expr::Number(value));
+        }
+        // "100 frames": a count of video frames, as in SoulverCore.
+        if value.is_integer()
+            && self.cur().is_some_and(|t| t.is_word("frames") || t.is_word("frame"))
+            && !self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("per") || t.is_sym("/"))
+        {
+            self.pos += 1;
+            return Ok(Self::formatted(Expr::Number(value), Format::Frames));
+        }
         // "1.5x" is a plain multiplier.
         if self.cur().is_some_and(|t| t.word() == Some("x") && !t.space_before) && !self.operand_follows(1) {
             self.pos += 1;
@@ -174,7 +189,7 @@ impl Parser<'_> {
     }
 
     /// Attaches a unit after a value, then further parts: `5 ft 3 in`.
-    fn quantity(&mut self, value: Expr) -> Result<Expr> {
+    pub(super) fn quantity(&mut self, value: Expr) -> Result<Expr> {
         let start = self.pos;
         let Some(unit) = self.number_unit() else { return Ok(value) };
         let mut last = unit.clone();
@@ -195,7 +210,13 @@ impl Parser<'_> {
         {
             self.pos += 1 + n;
         }
-        Ok(if parts.len() == 1 { parts.pop().unwrap() } else { Expr::Composite(parts) })
+        let amount = if parts.len() == 1 { parts.pop().unwrap() } else { Expr::Composite(parts) };
+        if last.dim() == Dim::ANGLE
+            && let Some(coordinates) = self.coordinates_literal(&amount)
+        {
+            return Ok(coordinates);
+        }
+        Ok(amount)
     }
 
     /// "at 30 fps" after a timecode: its frame rate.
@@ -228,6 +249,11 @@ impl Parser<'_> {
             // "5 um", "10 us in ms": micro typed with a "u", but not "5 us dollars".
             Tok::Word(w) if matches!(w.as_str(), "um" | "us") && self.micro_here() => {
                 Some(if w == "um" { "µm" } else { "µs" })
+            }
+            // "3 um3": cubic micrometers.
+            Tok::Word(w) if matches!(w.as_str(), "um2" | "um3") && self.micro_here() => {
+                self.pos += 1;
+                return Some(registry().get("µm").pow(if w == "um2" { 2 } else { 3 }));
             }
             Tok::Word(w) if w.eq_ignore_ascii_case("in") && self.inch_here() => Some("in"),
             _ => None,
@@ -296,9 +322,15 @@ impl Parser<'_> {
         if power > 1 {
             self.pos += 1;
         }
-        // "sq in" is square inches.
-        let inch = power > 1 && self.toks.get(self.pos).is_some_and(|t| t.is_word("in"));
-        let found = if inch { Some((registry().get("in"), 1)) } else { self.unit_at(self.pos, after_number) };
+        // "sq in" is square inches, "cu um" cubic micrometers.
+        let after_power = |w: &str| power > 1 && self.toks.get(self.pos).is_some_and(|t| t.is_word(w));
+        let found = if after_power("in") {
+            Some((registry().get("in"), 1))
+        } else if after_power("um") {
+            Some((registry().get("µm"), 1))
+        } else {
+            self.unit_at(self.pos, after_number)
+        };
         let Some((unit, n)) = found else {
             self.pos = start;
             return None;
@@ -315,8 +347,26 @@ impl Parser<'_> {
             Some(per) if power > 1 => base.pow(power).product(&per.pow(-1)),
             _ => unit.pow(power),
         };
-        let unit = self.per_unit_power(unit, per.as_ref());
+        let mut unit = self.per_unit_power(unit, per.as_ref());
+        // "m s^-2", "kg m^2": units side by side multiply when the next has a power.
+        while after_number && let Some(next) = self.powered_unit() {
+            unit = unit.product(&next);
+        }
         Some(self.per_amount(&unit).unwrap_or(unit))
+    }
+
+    /// A unit with a power written after it, at the cursor: the `s^-2` of `m s^-2`.
+    fn powered_unit(&mut self) -> Option<Unit> {
+        let (unit, n) = self.unit_at(self.pos, true)?;
+        let mut p = self.clone();
+        p.pos += n;
+        // "kg m s^-2": a unit without one counts before another that has one.
+        let unit = match p.cur().is_some_and(|t| t.is_sym("^")) {
+            true => unit.pow(p.signed_exponent()?),
+            false => unit.product(&p.powered_unit()?),
+        };
+        *self = p;
+        Some(unit)
     }
 
     /// A power after a unit; "meters per second squared" gives it to the second.
@@ -343,13 +393,27 @@ impl Parser<'_> {
         }
     }
 
-    /// A power at the cursor, read past: `²`, `^3`, `squared`.
+    /// A positive power at the cursor, read past: `²`, `^3`, `squared`. A negative one after
+    /// the number's own unit is the amount's: `3 s^-1` = 1/(3 s), as in SoulverCore.
     fn exponent(&mut self) -> Option<i8> {
+        let mut p = self.clone();
+        let e = p.signed_exponent().filter(|&e| e > 0)?;
+        *self = p;
+        Some(e)
+    }
+
+    /// A power at the cursor, read past, also a negative one: `^-2`.
+    fn signed_exponent(&mut self) -> Option<i8> {
         let exp = match self.cur().map(|t| &t.tok) {
             Some(Tok::Sym("²")) => Some((2, 1)),
             Some(Tok::Sym("³")) => Some((3, 1)),
             Some(Tok::Sym("^")) => match self.toks.get(self.pos + 1).map(|t| &t.tok) {
                 Some(Tok::Num(e)) => e.to_i64().filter(|e| (1..=9).contains(e)).map(|e| (e as i8, 2)),
+                // "s^-2"
+                Some(Tok::Sym("-" | "−")) => match self.toks.get(self.pos + 2).map(|t| &t.tok) {
+                    Some(Tok::Num(e)) => e.to_i64().filter(|e| (1..=9).contains(e)).map(|e| (-e as i8, 3)),
+                    _ => None,
+                },
                 _ => None,
             },
             Some(Tok::Word(w)) if w.eq_ignore_ascii_case("squared") => Some((2, 1)),
@@ -531,6 +595,11 @@ impl Parser<'_> {
             self.pos += 2;
             return Ok(Some(Expr::WithUnit(Expr::Number(*n).boxed(), registry().get("mach"))));
         }
+        if let Some((code, n)) = self.metal_price_at(i) {
+            self.pos += n;
+            let ounce = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().currency(code).expect("a metal"));
+            return Ok(Some(Expr::Convert(ounce.boxed(), Target::Unit(self.dollar()))));
+        }
         if let Some(expr) = self.weather()? {
             return Ok(Some(expr));
         }
@@ -660,6 +729,25 @@ impl Parser<'_> {
         Ok(None)
     }
 
+    /// "gold price", "price of silver", "gold spot price" at token `i`: a troy ounce of the
+    /// metal in money, its code and the phrase's length.
+    pub(super) fn metal_price_at(&self, i: usize) -> Option<(&'static str, usize)> {
+        let metal = |k: usize| match self.lower(k)?.as_str() {
+            "gold" => Some("XAU"),
+            "silver" => Some("XAG"),
+            "platinum" => Some("XPT"),
+            "palladium" => Some("XPD"),
+            _ => None,
+        };
+        let spot = usize::from(self.words_at(i, &["spot"]));
+        if self.words_at(i + spot, &["price", "of"]) {
+            return Some((metal(i + spot + 2)?, spot + 3));
+        }
+        let code = metal(i)?;
+        let spot = usize::from(self.words_at(i + 1, &["spot"]));
+        self.words_at(i + 1 + spot, &["price"]).then_some((code, 2 + spot))
+    }
+
     /// A musical note converted to a frequency at token `i`: "C#4 in Hz", "Bb3 to Hz".
     /// Its frequency in equal temperament from A4 = 440 Hz, and its length in tokens.
     pub(super) fn note_at(&self, i: usize) -> Option<(f64, usize)> {
@@ -713,16 +801,30 @@ impl Parser<'_> {
     /// `prev`, `line 3`, `sum`, `average`.
     fn line_ref(&mut self) -> Result<Option<Expr>> {
         let w = self.lower(self.pos).unwrap_or_default();
+        // "sum of above", "total of the above", "average above": the lines above, as "sum" alone.
+        if matches!(w.as_str(), "sum" | "total" | "subtotal" | "average" | "avg" | "mean") {
+            let mut at = self.pos + 1 + usize::from(self.words_at(self.pos + 1, &["of"]));
+            at += usize::from(self.words_at(at, &["the"]));
+            if self.words_at(at, &["above"]) && self.toks.get(at + 1).is_none_or(|t| !t.is_word("line")) {
+                self.pos = at + 1;
+                let average = matches!(w.as_str(), "average" | "avg" | "mean");
+                return Ok(Some(Expr::Line(if average { LineRef::Average } else { LineRef::Sum })));
+            }
+        }
+        // "average of #food" is the tagged lines (tags are no tokens): "of" with nothing after.
+        let ends_at =
+            |p: &Self, i: usize| p.toks.get(i).is_none_or(|t| ["in", "to", "as"].iter().any(|w| t.is_word(w)));
+        let tag_of = self.words_at(self.pos + 1, &["of"]) && ends_at(self, self.pos + 2);
         // "sum of 1, 2", "average(1, 2)", "average 36, 42", "average between 10 and 20" are functions.
-        let followed_by_args =
-            self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_word("between") || t.is_sym("("))
-                || self.amount_follows(1);
+        let followed_by_args = !tag_of
+            && (self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_word("between") || t.is_sym("("))
+                || self.amount_follows(1));
         // A statistic of the lines above, as the whole line: "median", "std dev in EUR".
         if self.pos == 0
             && !followed_by_args
             && let Some((func, n)) = self.line_statistic()
         {
-            self.pos += n;
+            self.pos += n + usize::from(self.words_at(self.pos + n, &["of"]));
             return Ok(Some(Expr::Line(LineRef::Stat(func))));
         }
         let line = match w.as_str() {
@@ -752,7 +854,7 @@ impl Parser<'_> {
                 _ => return Ok(None),
             },
         };
-        self.pos += 1;
+        self.pos += 1 + usize::from(tag_of);
         Ok(Some(Expr::Line(line)))
     }
 
@@ -765,6 +867,10 @@ impl Parser<'_> {
             ("min", Func::Min),
             ("minimum", Func::Min),
             ("count", Func::Count),
+            ("lcm", Func::Lcm),
+            ("gcd", Func::Gcd),
+            ("gcf", Func::Gcd),
+            ("hcf", Func::Gcd),
         ]
         .iter()
         .find(|(w, _)| self.words_at(self.pos, &[w]))
@@ -775,9 +881,11 @@ impl Parser<'_> {
                 .find(|ws| self.words_at(self.pos, ws))
                 .map(|ws| (Func::StdDev, ws.len()))
         })?;
+        let of_tag = self.words_at(self.pos + n, &["of"])
+            && self.toks.get(self.pos + n + 1).is_none_or(|t| ["in", "to", "as"].iter().any(|w| t.is_word(w)));
         let ends = match self.toks.get(self.pos + n) {
             None => true,
-            Some(t) => ["in", "to", "as"].iter().any(|w| t.is_word(w)) || t.is_sym("#"),
+            Some(t) => ["in", "to", "as"].iter().any(|w| t.is_word(w)) || t.is_sym("#") || of_tag,
         };
         ends.then_some((func, n))
     }
@@ -905,7 +1013,11 @@ impl Parser<'_> {
         if func == Func::Root && !self.at_sym("(") {
             // "root of 16" is the square root.
             if self.eat_word("of") {
-                return Ok(Some(Expr::Call(Func::Sqrt, vec![self.unary()?])));
+                let x = self.unary()?;
+                if self.at_sym(",") {
+                    bail!("root takes one value");
+                }
+                return Ok(Some(Expr::Call(Func::Sqrt, vec![x])));
             }
             let degree = self.unary()?;
             self.eat_word("of");
@@ -918,6 +1030,7 @@ impl Parser<'_> {
             self.eat_word("of");
             return Ok(Some(Expr::Call(func, vec![self.unary()?, base])));
         }
+        let called = self.at_sym("(");
         let mut args = if self.eat_sym("(") {
             let saved = std::mem::replace(&mut self.in_list, true);
             let mut args = Vec::new();
@@ -931,7 +1044,12 @@ impl Parser<'_> {
             self.eat_sym(")");
             args
         } else if self.eat_word("of") || self.eat_word("between") {
-            self.list()?
+            let list = self.list()?;
+            // "log of 2, 8 and 4" is no logarithm.
+            if func == Func::Log && list.len() > 1 {
+                bail!("log takes one value");
+            }
+            list
         } else if func.takes_list() && self.list_follows() {
             // "average 36, 42, 19, 81"
             self.list()?
@@ -947,7 +1065,20 @@ impl Parser<'_> {
         if func == Func::Log && self.eat_word("base") {
             args.push(self.unary()?);
         }
-        // "clamp 26 between 5 and 25", "clamp 4 from 5 to 25"
+        // "pow(2, 10)", "nthroot(27, 3)"
+        match (func, args.as_slice()) {
+            (Func::Pow, [base, exp]) => return Ok(Some(Expr::binary(Op::Pow, base.clone(), exp.clone()))),
+            // "root(27, 3)": the degree last, as in "nthroot"; "root 3 of 27" puts it first.
+            (Func::NthRoot, [x, degree]) => return Ok(Some(Expr::Call(Func::Root, vec![degree.clone(), x.clone()]))),
+            (Func::Root, [x, degree]) if called => {
+                return Ok(Some(Expr::Call(Func::Root, vec![degree.clone(), x.clone()])));
+            }
+            (Func::Pow | Func::NthRoot, _) => {
+                bail!("{} takes 2 arguments", if func == Func::Pow { "pow" } else { "nthroot" })
+            }
+            _ => {}
+        }
+        // "clamp 26 between 5 and 25", "clamp 4 from 5 to 25", "clamp 20 5 25"
         if func == Func::Clamp && args.len() == 1 {
             if self.eat_word("between") {
                 args.extend(self.list()?);
@@ -955,6 +1086,9 @@ impl Parser<'_> {
                 args.push(self.bit_or()?);
                 self.eat_word("to");
                 args.push(self.bit_or()?);
+            } else if self.operand_follows(0) {
+                args.push(self.unary()?);
+                args.push(self.unary()?);
             }
         }
         Ok(Some(Expr::Call(func, args)))

@@ -9,7 +9,7 @@ use crate::lexer::{Tok, Token};
 use crate::number::Number;
 use crate::units::foods::Food;
 use crate::units::{Dim, Unit, registry};
-use crate::zones::{self, Location, Place, PlaceKind};
+use crate::zones::{self, Location, Place};
 
 /// Words glued by a hyphen are somewhere in the tokens: "x-ray".
 pub(super) fn has_hyphenated_words(toks: &[Token]) -> bool {
@@ -180,24 +180,28 @@ impl<'a> Parser<'a> {
         let w = word.to_lowercase();
         let w = w.as_str();
         words::KEYWORDS.contains(&w)
-            || w == "x"
+            // "3 x^2" is no product: the x is a comment there.
+            || (w == "x" && !self.toks.get(i + 1).is_some_and(|t| t.is_sym("^")))
             || self.article_unit_at(i)
             // "for 2 hours" and "split 4 ways" only matter before an amount.
-            || (w == "for" && self.duration_at(i + 1))
+            || (w == "for" && (self.duration_at(i + 1) || self.pace_distance_at(i)))
             // "once a week", "thrice per day"
             || (matches!(w, "once" | "thrice") && (self.article_unit_at(i + 1) || self.per_unit_at(i + 1)))
             || (matches!(w, "every" | "each") && self.counted_unit_at(i + 1))
             // "daily", "monthly until June": a cadence, as a whole line.
             || (i == 0 && words::is_cadence_word(w) && self.config().features.cadence_parsing && self.var_at(0).is_none())
+            // "not true", "not (5 > 3)", "not 5 > 3": logic, not a comment.
+            || (w == "not" && self.not_operand_at(i + 1))
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
-            || (w == "cast" && ["to", "as", "into"].iter().any(|t| self.words_at(i + 1, &[t])))
+            || (w == "cast" && ["to", "as", "into", "in"].iter().any(|t| self.words_at(i + 1, &[t])))
             || (w == "diff" && (self.words_at(i + 1, &["between"]) || self.zone_at(i + 1).is_some()))
             // "zł10", "CHF10": a currency glued before its amount.
             // "zł10", "apr3": letters with digits glued after them.
             || (word.ends_with(|c: char| c.is_ascii_digit()) && (self.glued_money(i).is_some() || self.glued_date(i).is_some()))
             // "first monday of the month", "first day in March"
-            || (self.nth_at(i).is_some_and(|(_, n)| n == 1) && self.day_in_month_at(i + 1).is_some())
+            || (self.nth_at(i).is_some_and(|(_, n)| n == 1)
+                && (self.day_in_month_at(i + 1).is_some() || (w == "first" && self.weekday_ends_at(i + 1))))
             // "flour 1 cup": a food before its amount.
             || (matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_)))
                 && self.unit_at(i + 2, false).is_some_and(|(u, _)| matches!(u.dim(), Dim::MASS | Dim::VOLUME))
@@ -223,6 +227,7 @@ impl<'a> Parser<'a> {
             || (self.scope.is_function)(w)
             || self.phrase_at(i, &words::HOLIDAYS).is_some()
             || self.event_at(i).is_some()
+            || self.named_day_at(i).is_some()
             || self.phrase_at(i, &words::DATE_PARTS).is_some()
             || self.phrase_at(i, &words::PHYSICAL_CONSTANTS).is_some()
             || self.unit_at(i, false).is_some()
@@ -233,6 +238,8 @@ impl<'a> Parser<'a> {
             || self.weather_at(i).is_some()
             || self.distance_at(i).is_some()
             || self.coordinates_at(i).is_some()
+            || self.geo_of_number_at(i).is_some()
+            || self.metal_price_at(i).is_some()
             || self.note_at(i).is_some()
             || self.place_sky_at(i).is_some()
             || self.density_at(i).is_some()
@@ -260,6 +267,13 @@ impl<'a> Parser<'a> {
 
     /// A food named at token `i` and its length in tokens: "olive oil".
     pub(super) fn food_at(&self, i: usize) -> Option<(Food, usize)> {
+        // "half & half" is the cream, not a bitwise and.
+        if self.words_at(i, &["half"])
+            && self.toks.get(i + 1).is_some_and(|t| t.is_sym("&"))
+            && self.words_at(i + 2, &["half"])
+        {
+            return words::FOODS.starting_with("half").find(|(name, _)| *name == "half and half").map(|&(_, f)| (f, 3));
+        }
         self.phrase_at(i, &words::FOODS)
     }
 
@@ -318,8 +332,16 @@ impl<'a> Parser<'a> {
         // in a target: "there are 5", "PS: 5", but "$5/are", "kcal·PS".
         let word_unit = word.eq_ignore_ascii_case("are") || word.eq_ignore_ascii_case("ares") || word == "PS";
         let after_slash = i > 0 && (self.toks[i - 1].is_sym("/") || self.toks[i - 1].is_sym("*"));
-        if word.eq_ignore_ascii_case("in") || (!after_number && (article || (word_unit && !after_slash))) {
+        // "ares in km²": a unit alone starting a conversion.
+        let converted = i == 0 && ["in", "to"].iter().any(|w| self.words_at(1, &[w]));
+        if word.eq_ignore_ascii_case("in")
+            || (!after_number && (article || (word_unit && !after_slash && !(converted && word != "PS"))))
+        {
             return None;
+        }
+        // "3 weekdays" are workdays, but "today as weekday" is the day of the week.
+        if after_number && (word.eq_ignore_ascii_case("weekday") || word.eq_ignore_ascii_case("weekdays")) {
+            return Some((registry().get("workday"), 1));
         }
         // "5 H", "5 S", "5 T": hours, seconds and tonnes after a number, as in SoulverCore.
         if after_number && let Some(name) = [("H", "h"), ("S", "s"), ("T", "t")].iter().find(|(w, _)| *w == word) {
@@ -332,10 +354,39 @@ impl<'a> Parser<'a> {
             return None;
         }
         let (text, ends) = self.joined_words(i, registry().max_words().max(self.scope.units.max_words), false);
-        ends.iter()
+        let found = ends
+            .iter()
             .rev()
             .find_map(|&(end, n)| Some((self.lookup_unit(&text[..end])?, n)))
-            .or_else(|| self.time_power_at(i))
+            .or_else(|| self.time_power_at(i));
+        // "100 euros in pounds", "10 pounds + $5": pounds converted or added with money are sterling.
+        match found {
+            Some((unit, 1)) if is_pound_word(word) && self.pounds_are_money(i) => {
+                Some((registry().currency("GBP").unwrap_or(unit), 1))
+            }
+            found => found,
+        }
+    }
+
+    /// The pounds at token `i` are converted to or from money, or added to it.
+    fn pounds_are_money(&self, i: usize) -> bool {
+        let conversion = |t: Option<&Token>| t.is_some_and(|t| ["in", "to", "as", "into"].iter().any(|w| t.is_word(w)));
+        let sum = |t: Option<&Token>| {
+            t.is_some_and(|t| t.is_sym("+") || t.is_sym("-") || t.is_word("plus") || t.is_word("minus"))
+        };
+        let money_at = |k: usize| {
+            self.toks[k].word().is_none_or(|w| !is_pound_word(w))
+                && (self.unit_at(k, true).is_some_and(|(u, _)| u.is_money()) || self.glued_money(k).is_some())
+        };
+        let before = i.checked_sub(1).and_then(|k| self.toks.get(k));
+        let (next, after) = (self.toks.get(i + 1), self.toks.get(i + 2));
+        // "€100 in pounds"
+        (conversion(before) && (0..i).any(money_at))
+            // "10 pounds in euros"
+            || (conversion(next) && after.is_some() && money_at(i + 2))
+            // "10 pounds + $5", "$5 + 10 pounds"
+            || ((sum(next) || sum(i.checked_sub(2).and_then(|k| self.toks.get(k))))
+                && (0..self.toks.len()).any(|k| k != i && money_at(k)))
     }
 
     /// A time with a power after a slash: the "s2" of "m/s2".
@@ -388,7 +439,8 @@ impl<'a> Parser<'a> {
         let (text, ends) = self.joined_words(i, 6, true);
         ends.iter().rev().find_map(|&(end, n)| {
             let name = &text[..end];
-            (self.scope.is_var)(name).then(|| (name.to_string(), n))
+            let host = || self.scope.variables.is_some_and(|v| v.variable(name).is_some());
+            ((self.scope.is_var)(name) || host()).then(|| (name.to_string(), n))
         })
     }
 
@@ -420,6 +472,19 @@ impl<'a> Parser<'a> {
                 let zone = zones::corrected(&text, zone, options.code_correction);
                 return Some((text, zone, ends[n - 1] - i));
             }
+            // "Curaçao" as "Curacao", when only the plain spelling is listed.
+            if let Some(plain) = zones::without_diacritics(&text)
+                && let Some(zone) = zones::find(&plain)
+            {
+                return Some((plain, zone, ends[n - 1] - i));
+            }
+            // "WAW" is the airport, "Waw" the town.
+            if lowercase_code
+                && zones::capitals_only(&text)
+                && let Some(zone) = zones::find_city(&text)
+            {
+                return Some((text, zone, ends[n - 1] - i));
+            }
             text.truncate(text.len().saturating_sub(words[n - 1].len() + 1));
         }
         // "japanese time", "time in kazakh": a country by its adjective, only with "time".
@@ -438,6 +503,12 @@ impl<'a> Parser<'a> {
                 latitude,
                 longitude,
             }),
+            // "waw" is the town, "WAW" the airport.
+            None if self.toks[i].word().is_some_and(|w| w.chars().any(char::is_lowercase))
+                && zones::capitals_only(&name) =>
+            {
+                zones::locate_city(&name)
+            }
             None => zones::locate(&name),
         };
         Some((location, n))
@@ -445,7 +516,7 @@ impl<'a> Parser<'a> {
 
     /// The host's place of this name (lowercase).
     fn custom_place(&self, name: &str) -> Option<&CustomPlace> {
-        self.config().custom_places.iter().find(|p| p.name.to_lowercase() == name)
+        self.config().custom_places.iter().find(|p| p.is_named(name))
     }
 
     /// Up to `MAX_WORDS` lowercase words from token `i`, and the token index after each.
@@ -470,14 +541,18 @@ impl<'a> Parser<'a> {
         let (zone, n) = self.place_at(i)?;
         let written = &self.src[self.toks[i].start..self.toks[i + n - 1].end];
         if let Some(custom) = self.custom_place(&written.replace('-', " ").to_lowercase()) {
-            return Some((Place { name: custom.name.clone(), zone, kind: PlaceKind::City }, n));
+            return Some((Place { name: custom.name.clone(), zone, kind: custom.kind }, n));
         }
         Some((Place::written(written, zone), n))
     }
 
     /// "Tokyo time", "Tokyo local time" or "Paris date".
     pub(super) fn place_time_at(&self, i: usize) -> Option<(Place, usize, bool)> {
-        let (tz, mut n) = self.named_place_at(i)?;
+        // "GMT+3 time", "Hawaii time" (a place of its own name).
+        let (tz, mut n) = self.zone_at(i)?;
+        if self.toks[i + n - 1].is_word("time") {
+            return Some((tz, n, false));
+        }
         if self.words_at(i + n, &["local"]) {
             n += 1;
         }
@@ -561,6 +636,25 @@ impl<'a> Parser<'a> {
     }
 
     /// A time amount starts at token `i`: "2 hours", "a year".
+    /// A boolean follows "not" at `i`: `true`, `false`, parentheses or a comparison.
+    pub(super) fn not_operand_at(&self, i: usize) -> bool {
+        let Some(t) = self.toks.get(i) else { return false };
+        if t.is_word("true") || t.is_word("false") || t.is_sym("(") {
+            return true;
+        }
+        let mut p = self.clone();
+        p.pos = i;
+        p.additive().is_ok()
+            && p.cur().is_some_and(|t| matches!(t.tok, Tok::Sym("==" | "!=" | "<" | ">" | "<=" | ">=")))
+    }
+
+    /// "5:30 min/km for 10 km": a distance after a time per a length, at the "for" at `i`.
+    pub(super) fn pace_distance_at(&self, i: usize) -> bool {
+        let length = |k: usize| self.unit_at(k, true).is_some_and(|(u, _)| u.dim() == crate::units::Dim::LENGTH);
+        let per = i >= 2 && (self.toks[i - 2].is_sym("/") || self.toks[i - 2].is_word("per"));
+        per && length(i - 1) && self.toks.get(i + 1).is_some_and(|t| matches!(t.tok, Tok::Num(_))) && length(i + 2)
+    }
+
     pub(super) fn duration_at(&self, i: usize) -> bool {
         let amount = self
             .toks
@@ -574,7 +668,9 @@ impl<'a> Parser<'a> {
         let Some(next) = self.toks.get(self.pos + 1) else { return false };
         let sign = next.is_sym("+") || next.is_sym("-");
         let comment = next.word().is_some() && !self.significant(self.pos + 1);
-        next.space_before && !sign && !comment && self.operand_follows(1)
+        // "10% from 200", "5% of 20": a percentage before its operator.
+        let operator = ["from", "of", "on", "off", "after", "before"].iter().any(|w| next.is_word(w));
+        next.space_before && !sign && !comment && !operator && self.operand_follows(1)
     }
 
     /// Something that multiplies without an operator follows: "(", a function,
@@ -592,6 +688,8 @@ impl<'a> Parser<'a> {
         let Some(w) = self.lower(self.pos) else { return false };
         words::constant(&w).is_some()
             || self.var_at(self.pos).is_some()
+            // "3 gold price": three ounces.
+            || self.metal_price_at(self.pos).is_some()
             || (self.function_at(self.pos).is_some_and(|(f, _)| !matches!(f, Func::Sum | Func::Average | Func::Count))
                 && self.toks.get(self.pos + 1).is_some_and(|t| t.is_sym("(")))
     }
@@ -728,4 +826,9 @@ impl<'a> Parser<'a> {
         }
         self.toks.iter().zip(keep).filter(|(_, k)| *k).map(|(t, _)| t.clone()).collect()
     }
+}
+
+/// "pound" or "pounds", which are sterling next to money.
+fn is_pound_word(word: &str) -> bool {
+    word.eq_ignore_ascii_case("pound") || word.eq_ignore_ascii_case("pounds")
 }

@@ -61,9 +61,10 @@ fn inserting_and_removing_lines() {
     assert_eq!(answers(&s), ["$10.00", "$5.00", "$20.00", "$35.00", "$30.00"]);
     s.remove(0);
     assert_eq!(answers(&s), ["$5.00", "$20.00", "$25.00", "$15.00"]);
+    // "line 1" follows the line it names.
     s.move_line(0, 1);
-    assert_eq!(answers(&s), ["$20.00", "$5.00", "$25.00", "$60.00"]);
-    assert_eq!(s.text(), "$20\n$5\nsum\nline 1 * 3");
+    assert_eq!(answers(&s), ["$20.00", "$5.00", "$25.00", "$15.00"]);
+    assert_eq!(s.text(), "$20\n$5\nsum\nline 2 * 3");
 }
 
 #[test]
@@ -200,4 +201,106 @@ fn archives() {
     assert_eq!(back.lines()[2].behaviour(), Behaviour::Subtotal);
     assert_eq!(back.lines()[0].highlight(Portion::Tail), Some(Color::Orange));
     assert!(Sheet::unarchive(Calculator::new(), "{").is_err());
+}
+
+#[test]
+fn copies_batches_and_line_formatting() {
+    let mut s = sheet("rent = $1,500\nrent * 2\n1/3");
+    let copy = s.deep_copy();
+    s.set_line(0, "rent = $1,000");
+    assert_eq!(answers(&copy)[1], "$3,000.00");
+    assert_eq!(answers(&s)[1], "$2,000.00");
+
+    s.begin_changes();
+    assert!(s.set_line(0, "rent = $10").is_empty());
+    assert!(s.push("rent + 1").is_empty());
+    assert_eq!(s.end_changes(), [0, 1, 3]);
+    assert_eq!(answers(&s)[3], "$11.00");
+
+    let two_places = rechenkern::Formatting { decimal_places: Some(2), ..Default::default() };
+    s.set_line_formatting(2, Some(two_places));
+    assert_eq!(answers(&s)[2], "0.33");
+    assert_eq!(s.lines()[2].line_type(), rechenkern::LineType::Regular);
+    assert_eq!(s.lines()[0].line_type(), rechenkern::LineType::Declaration);
+
+    let mut other = sheet("5\n6");
+    other.append(&s);
+    assert_eq!(other.len(), 6);
+    assert_eq!(answers(&other)[4], "0.33");
+}
+
+#[test]
+fn renaming_and_references() {
+    let mut s = sheet("rent = $1,500\nfood = $400\nrent + food\nline 1 * 2");
+    s.rename_variable("rent", "housing");
+    assert_eq!(s.lines()[0].text(), "housing = $1,500");
+    assert_eq!(s.lines()[2].text(), "housing + food");
+    assert_eq!(answers(&s)[2], "$1,900.00");
+    assert_eq!(s.line_setting("food"), Some(1));
+    assert_eq!(s.references_to(2, "food"), vec![10..14]);
+    assert_eq!(s.lines_read_by(3), [0]);
+    assert_eq!(s.expanded_text(3), "$1,500.00 * 2");
+
+    // "line 1" follows its line when lines come and go above it.
+    s.insert(0, "# Budget");
+    assert_eq!(s.lines()[4].text(), "line 2 * 2");
+    assert_eq!(answers(&s)[4], "$3,000.00");
+    s.remove(0);
+    assert_eq!(s.lines()[3].text(), "line 1 * 2");
+    s.move_line(0, 2);
+    assert_eq!(s.lines()[3].text(), "line 3 * 2");
+
+    let defs = sheet("widgets = new unit\narea(w, h) = w * h\nx = 3\nx * 2").definitions();
+    assert_eq!(defs.units, ["widgets"]);
+    assert_eq!(defs.functions, ["area"]);
+    assert_eq!(defs.variables.len(), 1);
+    assert_eq!(defs.last_answer.and_then(|v| v.as_number()), Number::parse("6"));
+}
+
+#[test]
+fn trips_statistics_and_pending() {
+    let mut s = sheet("Paris\nHotel $200 per night\nRome");
+    s.set_behaviour(0, Behaviour::TripWaypoint);
+    s.set_behaviour(2, Behaviour::TripWaypoint);
+    assert!(s.lines()[0].is_waypoint() && !s.is_part_of_trip(0));
+    s.set_trip_planning(true);
+    assert!(s.is_part_of_trip(0) && !s.is_part_of_trip(1));
+
+    let s = sheet("100\n20\n5\nx = 3\n1");
+    let stat = |st, options| s.statistic_with(st, None, options).unwrap().unwrap().text().to_string();
+    assert_eq!(stat(Statistic::Reduction, rechenkern::StatisticOptions::default()), "74");
+    let all = rechenkern::StatisticOptions { ignore_declarations: false, ignore_referenced: false };
+    assert_eq!(stat(Statistic::Total, all), "129");
+    assert_eq!(s.result_as_value(Statistic::Total).and_then(|v| v.as_number()), Number::parse("126"));
+}
+
+#[test]
+fn exports_of_some_lines_trimming_and_transformers() {
+    use rechenkern::{HtmlColors, HtmlOptions, TextOptions};
+    let mut s = sheet("coffee $5 #food\nlunch $15 // with Sam\nline 1 + line 2");
+    let some = TextOptions { lines: Some(vec![0, 2]), statistic: Some(Statistic::Total), ..TextOptions::default() };
+    assert_eq!(s.to_text(&some), "coffee $5 #food = $5.00\nline 1 + line 2 = $20.00\nTotal: $20.00");
+    let links =
+        TextOptions { markdown_links: true, include_answers: false, lines: Some(vec![2]), ..TextOptions::default() };
+    assert_eq!(s.to_text(&links), "[line 1](#line-1) + [line 2](#line-2)");
+    let both = TextOptions { substitute_references: true, ..links };
+    assert_eq!(s.to_text(&both), "[$5.00](#line-1) + [$15.00](#line-2)");
+    let html = s.to_html(&HtmlOptions { lines: Some(vec![1]), ..HtmlOptions::default() }, &HtmlColors::light());
+    assert!(html.contains("lunch") && !html.contains("coffee"));
+
+    let trimmed = s.trimmed();
+    assert_eq!(trimmed.text(), "$5\n$15\nline 1 + line 2");
+    assert_eq!(answers(&trimmed), ["$5.00", "$15.00", "$20.00"]);
+
+    s.set_transformer(1, Some("round"));
+    s.set_line(1, "lunch $15.40");
+    assert_eq!(answers(&s), ["$5.00", "$15.00", "$20.00"]);
+    assert_eq!(s.lines()[1].transformer(), Some("round"));
+
+    let archive = s.archive();
+    let lazy = Sheet::unarchive_unevaluated(Calculator::new(), &archive).unwrap();
+    assert_eq!(lazy.text(), s.text());
+    assert!(matches!(lazy.lines()[0].answer(), Ok(None)));
+    let back = Sheet::unarchive(Calculator::new(), &archive).unwrap();
+    assert_eq!(back.lines()[1].answer().unwrap().unwrap().text(), "$15.00");
 }

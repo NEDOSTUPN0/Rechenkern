@@ -2,7 +2,7 @@
 
 use std::fmt;
 
-const BASES: usize = 10 + DECLARED;
+const BASES: usize = 11 + DECLARED;
 /// Slots for units declared in lines: `widgets = new unit`. Each is a quantity of its own.
 pub const DECLARED: usize = 4;
 const NAMES: [&str; BASES] = [
@@ -16,6 +16,7 @@ const NAMES: [&str; BASES] = [
     "data",
     "money",
     "workdays",
+    "luminous flux",
     "declared unit",
     "declared unit",
     "declared unit",
@@ -40,6 +41,9 @@ impl Dim {
     /// Workdays are counted on a calendar, so they don't convert to days; hours
     /// of work convert at `Config::hours_per_workday`.
     pub const WORKDAY: Dim = Dim::base(9);
+    /// Light: lumens (a candela's steradian is no quantity, so candelas aren't one).
+    pub const LUMINOUS_FLUX: Dim = Dim::base(10);
+    pub const ILLUMINANCE: Dim = Dim::LUMINOUS_FLUX.div(Dim::AREA);
 
     pub const AREA: Dim = Dim::LENGTH.pow(2);
     pub const VOLUME: Dim = Dim::LENGTH.pow(3);
@@ -63,7 +67,7 @@ impl Dim {
 
     /// The quantity of the `slot`th declared unit.
     pub const fn declared(slot: usize) -> Dim {
-        Dim::base(10 + slot)
+        Dim::base(11 + slot)
     }
 
     const fn base(i: usize) -> Dim {

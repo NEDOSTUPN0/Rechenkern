@@ -216,7 +216,10 @@ impl Env<'_> {
             TimeExpr::InMonth(pick, month) => {
                 let pick_in = |d: Date| -> Result<Date> {
                     Ok(match *pick {
-                        MonthDay::Nth(n, weekday) => d.first_of_month().nth_weekday_of_month(n, weekday)?,
+                        MonthDay::Nth(n, weekday) => d
+                            .first_of_month()
+                            .nth_weekday_of_month(n, weekday)
+                            .map_err(|_| Error::new(format!("{} has no {n}th {weekday:?}", d.strftime("%B %Y"))))?,
                         MonthDay::Day(-1) => d.last_of_month(),
                         MonthDay::Day(day) => Date::new(d.year(), d.month(), day)
                             .map_err(|_| Error::new(format!("that month has no day {day}")))?,
@@ -257,6 +260,10 @@ impl Env<'_> {
                 let (date, zone) = match on {
                     Some(on) => match self.eval(on)? {
                         Value::Moment(m) => (m.time.date(), m.time.time_zone().clone()),
+                        // "Q3 2027 at 3pm": its first day.
+                        Value::Duration(d) if d.start().is_some() => {
+                            (d.start().unwrap_or_default().date(), self.local_zone())
+                        }
                         v => bail!("expected a date, not {}", v.kind()),
                     },
                     None => (today, self.local_zone()),
@@ -325,6 +332,14 @@ impl Env<'_> {
     /// The two ends of a range. A date without a year is read next to the other end:
     /// "Dec 1 to Jan 31" ends next year, "days since Dec 25" starts last year.
     pub(crate) fn range_ends(&self, a: &Expr, b: &Expr) -> Result<(Value, Value)> {
+        // "monday to friday", "friday to friday": the end is the next such day after the start.
+        if let Expr::Time(TimeExpr::Weekday(weekday, None)) = b {
+            let start = self.endpoint(a)?;
+            if let Value::Moment(m) = &start {
+                let end = m.time.date().nth_weekday(1, *weekday)?;
+                return Ok((start, Value::Moment(self.date_moment(end)?)));
+            }
+        }
         if yearless(b) {
             let start = self.endpoint(a)?;
             let end = match &start {
@@ -381,6 +396,30 @@ impl Env<'_> {
         self.range(first, end)
     }
 
+    /// A range, negative when its end is behind its start: `days until March 5, 2025`.
+    pub(crate) fn signed_range(&self, a: Value, b: Value) -> Result<Value> {
+        // Clock times alone wrap past midnight instead.
+        let clocks = |a: &Moment, b: &Moment| a.kind == MomentKind::Clock && b.kind == MomentKind::Clock;
+        let behind = matches!((&a, &b), (Value::Moment(a), Value::Moment(b)) if b.time < a.time && !clocks(a, b));
+        Ok(match self.range(a, b)? {
+            // Counted back from the later end.
+            Value::Duration(d) if behind => {
+                let Some(start) = d.anchor else {
+                    return Ok(Value::Duration(Duration { span: d.span.negate(), ..d }));
+                };
+                let end = start.checked_add(d.span)?;
+                let days = [Cal::Year, Cal::Month, Cal::Week, Cal::Day].iter().any(|&c| get(&d.span, c) != 0);
+                let mut span = end.until((if days { Cal::Year } else { Cal::Hour }, start))?;
+                if d.span.get_weeks() != 0 {
+                    let n = span.get_days() as i64;
+                    span = span.try_days(n % 7)?.try_weeks(n / 7)?;
+                }
+                Value::Duration(Duration { span, anchor: Some(end), ..d })
+            }
+            v => v,
+        })
+    }
+
     pub(crate) fn range(&self, a: Value, b: Value) -> Result<Value> {
         match (a, b) {
             (Value::Moment(a), Value::Moment(b)) => Ok(Value::Duration(self.between(&a, &b, true)?)),
@@ -388,6 +427,9 @@ impl Env<'_> {
             (a @ Value::Duration(_), b @ Value::Duration(_)) => self.sub(b, a),
             (Value::Timecode(a), Value::Timecode(b)) if a.fps == b.fps => {
                 Ok(Value::Timecode(crate::value::Timecode { frames: b.frames - a.frames, fps: a.fps }))
+            }
+            (Value::Quantity(a), Value::Quantity(b)) if a.unit.is_none() && b.unit.is_none() => {
+                self.sub(Value::Quantity(b), Value::Quantity(a))
             }
             (a, b) => bail!("can't make a range from {} to {}", a.kind(), b.kind()),
         }
@@ -517,7 +559,10 @@ impl Env<'_> {
             let hours = self.seconds(&Value::Duration(d.clone()))?.abs() / Number::from_i64(3600);
             return Ok(hours / self.config.hours_per_workday);
         }
-        let start = d.anchor.unwrap_or_else(|| self.today().to_datetime(jiff::civil::Time::midnight()));
+        let anchor = d.anchor.unwrap_or_else(|| self.today().to_datetime(jiff::civil::Time::midnight()));
+        // A span counted back ("workdays until" a day behind) ends at its anchor and counts negative.
+        let back = d.span.is_negative();
+        let start = if back { anchor.checked_add(d.span)? } else { anchor };
         let (start, end) = (start.date(), start.checked_add(span)?.date());
         let days = start.until((Cal::Day, end))?.get_days() as i64;
         let mut count = days / 7 * 5;
@@ -529,7 +574,8 @@ impl Env<'_> {
             day = day.tomorrow()?;
         }
         let holidays = self.config.holidays.iter().filter(|&&h| start <= h && h < end && !is_weekend(h));
-        Ok(Number::from_i64(count - holidays.count() as i64))
+        let count = count - holidays.count() as i64;
+        Ok(Number::from_i64(if back { -count } else { count }))
     }
 
     /// The unit with its workdays written as hours of work, and the factor for
@@ -564,6 +610,37 @@ impl Env<'_> {
         let nanos = nanos.to_i128().ok_or_else(|| Error::new("timestamp is out of range"))?;
         let time = Timestamp::from_nanosecond(nanos)?.to_zoned(self.local_zone());
         Ok(Moment { time, kind: MomentKind::DateTime, zoned: false, seconds: true })
+    }
+}
+
+impl Env<'_> {
+    /// How far a moment is from now, as people say it: "tomorrow", "in 3 days", "2 hours ago".
+    pub(super) fn relative(&self, m: &Moment) -> Result<String> {
+        let now = self.now.get().with_time_zone(m.time.time_zone().clone());
+        let plural = |n: i64, unit: &str| format!("{n} {unit}{}", if n == 1 { "" } else { "s" });
+        let say = |n: i64, unit: &str| match n {
+            0 => "now".to_string(),
+            n if n > 0 => format!("in {}", plural(n, unit)),
+            n => format!("{} ago", plural(-n, unit)),
+        };
+        let days = i64::from(m.time.date().since(now.date())?.get_days());
+        let seconds = m.time.timestamp().as_second() - now.timestamp().as_second();
+        Ok(match (m.kind, days) {
+            (MomentKind::Date, 0) => "today".to_string(),
+            (_, 1) if m.kind == MomentKind::Date || seconds.abs() >= 86_400 => "tomorrow".to_string(),
+            (_, -1) if m.kind == MomentKind::Date || seconds.abs() >= 86_400 => "yesterday".to_string(),
+            _ if days.abs() >= 2 => match days.abs() {
+                d if d < 14 => say(days, "day"),
+                d if d < 60 => say((days as f64 / 7.0).round() as i64, "week"),
+                d if d < 730 => say((days as f64 / 30.436875).round() as i64, "month"),
+                _ => say((days as f64 / 365.2425).round() as i64, "year"),
+            },
+            _ => match seconds.abs() {
+                s if s < 60 => "now".to_string(),
+                s if s < 3_600 => say(seconds / 60, "minute"),
+                _ => say((seconds as f64 / 3_600.0).round() as i64, "hour"),
+            },
+        })
     }
 }
 

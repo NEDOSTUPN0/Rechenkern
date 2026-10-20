@@ -14,7 +14,7 @@ use crate::zones::{self, Location};
 
 impl Env<'_> {
     pub(super) fn sky(&self, what: Sky, place: Option<&Location>, on: Option<&Expr>) -> Result<Value> {
-        if !what.is_sun() {
+        if !what.is_local() {
             let moon = astro::moon(self.sky_moment(on)?);
             return Ok(match what {
                 Sky::MoonPhase => Value::Text(moon.phase.name().into()),
@@ -28,6 +28,17 @@ impl Env<'_> {
                 .ok_or_else(|| Error::new("don't know where you are: name a city, as in sunrise in Paris"))?,
         };
         let date = self.sky_date(on, &place)?;
+        let kind = if on.is_some() { MomentKind::DateTime } else { MomentKind::Clock };
+        let moment = |time: Zoned| Value::Moment(Moment { time, kind, zoned, seconds: false });
+        if matches!(what, Sky::Moonrise | Sky::Moonset) {
+            let midnight = date.to_zoned(place.zone.clone())?;
+            let next = midnight.tomorrow()?.start_of_day()?;
+            let (rise, set) =
+                astro::moon_rise_set(midnight.timestamp(), next.timestamp(), place.latitude, place.longitude);
+            let (time, verb) = if what == Sky::Moonrise { (rise, "rise") } else { (set, "set") };
+            let Some(time) = time else { bail!("the moon doesn't {verb} there on {}", date.strftime("%a, %-d %b %Y")) };
+            return Ok(moment(to_minute(time, &place)?));
+        }
         let noon = date.to_datetime(Time::constant(12, 0, 0, 0)).to_zoned(place.zone.clone())?.timestamp();
         let day =
             astro::sun_day(noon, place.latitude, place.longitude).ok_or_else(|| Error::new("date out of range"))?;
@@ -41,8 +52,6 @@ impl Env<'_> {
             }
         };
         // Minutes, as the sun's times are shown: daylight is sunset minus sunrise.
-        let kind = if on.is_some() { MomentKind::DateTime } else { MomentKind::Clock };
-        let moment = |time: Zoned| Value::Moment(Moment { time, kind, zoned, seconds: false });
         Ok(match what {
             Sky::Sunrise => moment(rise),
             Sky::Sunset => moment(set),

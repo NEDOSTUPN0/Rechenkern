@@ -80,43 +80,43 @@ days in dec                                  → 31 days
 monday                                       → Mon, 28 Sep 2026
 next monday                                  → Mon, 28 Sep 2026
 last monday at 3pm                           → Mon, 21 Sep 2026 15:00
-mon                                          → <error: expected a value at the end>
+mon                                          → Mon, 28 Sep 2026
 next mon                                     → Mon, 28 Sep 2026
 last mon at 3pm                              → Mon, 21 Sep 2026 15:00
 tuesday                                      → Tue, 29 Sep 2026
 next tuesday                                 → Tue, 29 Sep 2026
 last tuesday at 3pm                          → Tue, 22 Sep 2026 15:00
-tue                                          → <error: expected a value at the end>
+tue                                          → Tue, 29 Sep 2026
 next tue                                     → Tue, 29 Sep 2026
 last tue at 3pm                              → Tue, 22 Sep 2026 15:00
 wednesday                                    → Wed, 23 Sep 2026
 next wednesday                               → Wed, 30 Sep 2026
 last wednesday at 3pm                        → Wed, 16 Sep 2026 15:00
-wed                                          → <error: expected a value at the end>
+wed                                          → Wed, 23 Sep 2026
 next wed                                     → Wed, 30 Sep 2026
 last wed at 3pm                              → Wed, 16 Sep 2026 15:00
 thursday                                     → Thu, 24 Sep 2026
 next thursday                                → Thu, 24 Sep 2026
 last thursday at 3pm                         → Thu, 17 Sep 2026 15:00
-thu                                          → <error: expected a value at the end>
+thu                                          → Thu, 24 Sep 2026
 next thu                                     → Thu, 24 Sep 2026
 last thu at 3pm                              → Thu, 17 Sep 2026 15:00
 friday                                       → Fri, 25 Sep 2026
 next friday                                  → Fri, 25 Sep 2026
 last friday at 3pm                           → Fri, 18 Sep 2026 15:00
-fri                                          → <error: expected a value at the end>
+fri                                          → Fri, 25 Sep 2026
 next fri                                     → Fri, 25 Sep 2026
 last fri at 3pm                              → Fri, 18 Sep 2026 15:00
 saturday                                     → Sat, 26 Sep 2026
 next saturday                                → Sat, 26 Sep 2026
 last saturday at 3pm                         → Sat, 19 Sep 2026 15:00
-sat                                          → <error: expected a value at the end>
+sat                                          → Sat, 26 Sep 2026
 next sat                                     → Sat, 26 Sep 2026
 last sat at 3pm                              → Sat, 19 Sep 2026 15:00
 sunday                                       → Sun, 27 Sep 2026
 next sunday                                  → Sun, 27 Sep 2026
 last sunday at 3pm                           → Sun, 20 Sep 2026 15:00
-sun                                          → <error: expected a value at the end>
+sun                                          → Sun, 27 Sep 2026
 next sun                                     → Sun, 27 Sep 2026
 last sun at 3pm                              → Sun, 20 Sep 2026 15:00
 
@@ -202,6 +202,24 @@ orthodox good friday 2030                    → Fri, 26 Apr 2030
 greek good friday                            → Fri, 30 Apr 2027
 days until greek good friday                 → 219 days
 greek good friday 2030                       → Fri, 26 Apr 2030
+russian good friday                          → Fri, 30 Apr 2027
+days until russian good friday               → 219 days
+russian good friday 2030                     → Fri, 26 Apr 2030
+orthodox holy friday                         → Fri, 30 Apr 2027
+days until orthodox holy friday              → 219 days
+orthodox holy friday 2030                    → Fri, 26 Apr 2030
+greek orthodox easter                        → Sun, 2 May 2027
+days until greek orthodox easter             → 221 days
+greek orthodox easter 2030                   → Sun, 28 Apr 2030
+russian orthodox easter                      → Sun, 2 May 2027
+days until russian orthodox easter           → 221 days
+russian orthodox easter 2030                 → Sun, 28 Apr 2030
+russian orthodox christmas                   → Thu, 7 Jan 2027
+days until russian orthodox christmas        → 106 days
+russian orthodox christmas 2030              → Mon, 7 Jan 2030
+greek christmas                              → Fri, 25 Dec 2026
+days until greek christmas                   → 93 days
+greek christmas 2030                         → Wed, 25 Dec 2030
 halloween                                    → Sat, 31 Oct 2026
 days until halloween                         → 38 days
 halloween 2030                               → Thu, 31 Oct 2030
@@ -379,20 +397,32 @@ daylight                                     → <none>
 daylight in Tokyo                            → 12 hours 6 minutes
 daylight on March 21, 2027                   → 12 hours 11 minutes
 moon phase                                   → Waxing Gibbous
-moon phase in Tokyo                          → <error: only a date or a time can be in a time zone, not text>
+moon phase in Tokyo                          → Waxing Gibbous
 moon phase on March 21, 2027                 → Full Moon
 moonphase                                    → Waxing Gibbous
-moonphase in Tokyo                           → <error: only a date or a time can be in a time zone, not text>
+moonphase in Tokyo                           → Waxing Gibbous
 moonphase on March 21, 2027                  → Full Moon
 phase of the moon                            → Waxing Gibbous
-phase of the moon in Tokyo                   → <error: only a date or a time can be in a time zone, not text>
+phase of the moon in Tokyo                   → Waxing Gibbous
 phase of the moon on March 21, 2027          → Full Moon
 lunar phase                                  → Waxing Gibbous
-lunar phase in Tokyo                         → <error: only a date or a time can be in a time zone, not text>
+lunar phase in Tokyo                         → Waxing Gibbous
 lunar phase on March 21, 2027                → Full Moon
 lunar day                                    → 13
-lunar day in Tokyo                           → <error: only a date or a time can be in a time zone, not a number>
+lunar day in Tokyo                           → 13
 lunar day on March 21, 2027                  → 14
 moon day                                     → 13
-moon day in Tokyo                            → <error: only a date or a time can be in a time zone, not a number>
+moon day in Tokyo                            → 13
 moon day on March 21, 2027                   → 14
+moonrise                                     → 17:27
+moonrise in Tokyo                            → Thu, 24 Sep 2026 16:16 JST
+moonrise on March 21, 2027                   → Sun, 21 Mar 2027 18:37
+moon rise                                    → 17:27
+moon rise in Tokyo                           → Thu, 24 Sep 2026 16:16 JST
+moon rise on March 21, 2027                  → Sun, 21 Mar 2027 18:37
+moonset                                      → 03:19
+moonset in Tokyo                             → Thu, 24 Sep 2026 02:39 JST
+moonset on March 21, 2027                    → Sun, 21 Mar 2027 06:19
+moon set                                     → 03:19
+moon set in Tokyo                            → Thu, 24 Sep 2026 02:39 JST
+moon set on March 21, 2027                   → Sun, 21 Mar 2027 06:19

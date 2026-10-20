@@ -5,7 +5,7 @@ use jiff::tz::TimeZone;
 use super::{Parser, words};
 use crate::ast::{Expr, Format, Func, MonthDay, Op, Target, TimeExpr, Which};
 use crate::config::DateOrder;
-use crate::error::{Result, bail};
+use crate::error::{Error, Result, bail};
 use crate::lexer::Tok;
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
@@ -30,6 +30,16 @@ pub(super) fn maybe_duration(expr: &Expr) -> bool {
         Expr::Number(_) | Expr::Percent(_) | Expr::Bool(_) => false,
         Expr::WithUnit(_, u) | Expr::BareUnit(u) => u.dim() == Dim::TIME || u.dim() == Dim::WORKDAY,
         _ => true,
+    }
+}
+
+/// Whether `expr` names a day or a moment, which "at 3pm" can give a time to.
+pub(super) fn is_dateish(expr: &Expr) -> bool {
+    match expr {
+        Expr::Time(TimeExpr::Clock { on: None, .. }) => false,
+        Expr::Time(_) | Expr::Period(..) => true,
+        Expr::Binary(Op::Add | Op::Sub, a, b) => is_dateish(a) || is_dateish(b),
+        _ => false,
     }
 }
 
@@ -92,6 +102,18 @@ impl Parser<'_> {
                 (h, m) => Expr::binary(Op::Add, part(h, "h"), part(m, "min")),
             });
         }
+        // "5:30/km": minutes and seconds a kilometer, a pace.
+        if m < 60
+            && self.toks.get(self.pos).is_some_and(|t| t.is_sym("/"))
+            && self.unit_at(self.pos + 1, true).is_some_and(|(u, _)| u.dim() == Dim::LENGTH)
+        {
+            let minutes = Expr::binary(
+                Op::Add,
+                Expr::Number(Number::from_i64(h.into())),
+                Expr::Number(Number::ratio(m.into(), 60)),
+            );
+            return Some(Expr::WithUnit(minutes.boxed(), reg.get("min")));
+        }
         let time_unit = |i: usize| self.unit_at(i, true).filter(|(u, _)| u.dim() == Dim::TIME);
         let converted = ["in", "to", "as", "into"].iter().any(|w| self.words_at(self.pos, &[w]));
         let (unit, len) = match converted {
@@ -144,6 +166,20 @@ impl Parser<'_> {
             }
             None => expr,
         })
+    }
+
+    /// "at" and a clock time follow: "at 3pm", "at 15:00", "at noon".
+    pub(super) fn at_clock_follows(&mut self) -> bool {
+        if !self.peek().is_some_and(|t| t.is_word("at")) {
+            return false;
+        }
+        let (i, next) = (self.pos + 1, self.lower(self.pos + 2).unwrap_or_default());
+        match self.toks.get(i).map(|t| &t.tok) {
+            Some(Tok::Clock { .. }) => true,
+            Some(Tok::Num(_)) => matches!(next.as_str(), "am" | "pm"),
+            Some(Tok::Word(w)) => matches!(w.to_lowercase().as_str(), "noon" | "midday" | "midnight"),
+            _ => false,
+        }
     }
 
     /// A clock time after a date: `tomorrow at 3pm`, `March 12 9:30`.
@@ -217,14 +253,39 @@ impl Parser<'_> {
     /// "last day of February", "first day of next month", "the first of next month".
     pub(super) fn day_in_month(&mut self) -> Result<Option<Expr>> {
         let Some((nth, n)) = self.nth_at(self.pos) else { return Ok(None) };
-        let Some(len) = self.day_in_month_at(self.pos + n) else { return Ok(None) };
+        let Some(len) = self.day_in_month_at(self.pos + n) else { return self.nth_weekday(nth, n) };
         let pick = match self.lower(self.pos + n).and_then(|w| words::weekday(&w)) {
             Some((weekday, _)) => MonthDay::Nth(nth, weekday),
             None => MonthDay::Day(nth),
         };
         self.pos += n + len;
-        let month = self.month_of()?;
+        // "third friday of xyz" is no date, rather than the Friday alone.
+        let month = self.month_of().map_err(|e| match pick {
+            MonthDay::Nth(..) if e.is_unclear() => Error::new("expected a month after the weekday"),
+            _ => e,
+        })?;
         Ok(Some(Expr::Time(TimeExpr::InMonth(pick, month))))
+    }
+
+    /// "second tuesday" alone: that one of this month, or of the next once it has passed.
+    fn nth_weekday(&mut self, nth: i8, n: usize) -> Result<Option<Expr>> {
+        // "last friday" is the one before today.
+        if nth < 1 || !self.weekday_ends_at(self.pos + n) {
+            return Ok(None);
+        }
+        let Some((weekday, _)) = self.lower(self.pos + n).and_then(|w| words::weekday(&w)) else { return Ok(None) };
+        self.pos += n + 1;
+        Ok(Some(Expr::Time(TimeExpr::InMonth(MonthDay::Nth(nth, weekday), None))))
+    }
+
+    /// A weekday at token `i` that ends the value.
+    pub(super) fn weekday_ends_at(&self, i: usize) -> bool {
+        if self.lower(i).and_then(|w| words::weekday(&w)).is_none() {
+            return false;
+        }
+        let mut p = self.clone();
+        p.pos = i + 1;
+        p.value_ends()
     }
 
     /// After an ordinal at token `i`: a weekday or "day" (or nothing), then "of" or "in"
@@ -252,16 +313,15 @@ impl Parser<'_> {
                 .get(i + 1)
                 .is_some_and(|t| !t.space_before && ["st", "nd", "rd", "th"].iter().any(|s| t.is_word(s)))
         {
-            return n.to_i64().filter(|n| (1..=5).contains(n)).map(|n| (n as i8, 2));
+            return n.to_i64().filter(|n| (1..=31).contains(n)).map(|n| (n as i8, 2));
         }
-        let n = match self.lower(i)?.as_str() {
-            "first" => 1,
-            "second" => 2,
-            "third" => 3,
-            "fourth" => 4,
-            "fifth" => 5,
-            "last" => -1,
-            _ => return None,
+        // "tenth friday of May" is no day at all, not a tenth.
+        let words = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
+        let w = self.lower(i)?;
+        let n = match words.iter().position(|o| *o == w) {
+            Some(k) => k as i8 + 1,
+            None if w == "last" => -1,
+            None => return None,
         };
         Some((n, 1))
     }
@@ -483,7 +543,9 @@ impl Parser<'_> {
                 let which = words::which(&w).unwrap_or(Which::This);
                 if let Some((weekday, _)) = words::weekday(&next) {
                     self.pos += 2;
-                    return Ok(Some(Expr::Time(TimeExpr::Weekday(weekday, Some(which)))));
+                    // "this sunday" is the one ahead, as the weekday alone.
+                    let which = Some(which).filter(|&w| w != Which::This);
+                    return Ok(Some(Expr::Time(TimeExpr::Weekday(weekday, which))));
                 }
                 let period = match next.as_str() {
                     "week" => jiff::Unit::Week,
@@ -499,7 +561,9 @@ impl Parser<'_> {
         if let Some((weekday, short)) = words::weekday(&w) {
             let clock_follows =
                 matches!(self.toks.get(self.pos + 1).map(|t| &t.tok), Some(Tok::Num(_) | Tok::Clock { .. }));
-            if !short || clock_follows {
+            // "mon" alone is a day too.
+            let alone = self.toks.len() == 1;
+            if !short || clock_follows || alone {
                 self.pos += 1;
                 // "friday in 3 weeks": that day of the week 3 weeks from now.
                 if let Some(weeks) = self.in_weeks() {
@@ -523,6 +587,11 @@ impl Parser<'_> {
             self.pos += n;
             let year = self.year().map(|y| y as i16);
             return Ok(Some(self.in_year(TimeExpr::Holiday { holiday, year })));
+        }
+        if let Some((date, n)) = self.named_day_at(self.pos) {
+            self.pos += n;
+            let (year, month, day) = (date.year(), date.month(), date.day());
+            return Ok(Some(Expr::Time(TimeExpr::Date { year: Some(year), month, day })));
         }
         if let Some((event, n)) = self.event_at(self.pos) {
             self.pos += n;
@@ -556,24 +625,25 @@ impl Parser<'_> {
 
     /// An event name at token `i`, such as `GTA 6`.
     pub(super) fn event_at(&self, i: usize) -> Option<(&'static words::Event, usize)> {
-        // Names are lowercase; numbers in them are whole.
+        words::EVENTS.iter().find_map(|event| event.names.iter().find_map(|name| Some((event, self.name_at(i, name)?))))
+    }
+
+    /// A day the host named, from token `i`: "Company Day".
+    pub(super) fn named_day_at(&self, i: usize) -> Option<(jiff::civil::Date, usize)> {
+        let days = &self.config().named_days;
+        days.iter().find_map(|day| Some((day.date, self.name_at(i, &day.name.to_lowercase())?)))
+    }
+
+    /// The tokens from `i` spell a lowercase name; how many they are.
+    fn name_at(&self, i: usize, name: &str) -> Option<usize> {
+        // Numbers in names are whole.
         let spells = |k: usize, part: &str| match self.toks.get(k).map(|t| &t.tok) {
             Some(Tok::Word(w)) => w.chars().flat_map(char::to_lowercase).eq(part.chars()),
             Some(Tok::Num(n)) => n.is_integer() && n.to_string() == part,
             _ => false,
         };
-        words::EVENTS.iter().find_map(|event| {
-            event.names.iter().find_map(|name| {
-                let mut n = 0;
-                for part in name.split(' ') {
-                    if !spells(i + n, part) {
-                        return None;
-                    }
-                    n += 1;
-                }
-                Some((event, n))
-            })
-        })
+        let parts = name.split(' ').collect::<Vec<_>>();
+        parts.iter().enumerate().all(|(n, part)| spells(i + n, part)).then_some(parts.len())
     }
 
     /// "time" after an unknown word is not now, as in SoulverCore: "Qwertyville time",
@@ -610,11 +680,11 @@ impl Parser<'_> {
         if w == "time" {
             if self.eat_word("until") || self.eat_word("till") {
                 let end = self.additive()?;
-                return Ok(Some(timespan(Expr::Range(now().boxed(), end.boxed()))));
+                return Ok(Some(timespan(Expr::SignedRange(now().boxed(), end.boxed()))));
             }
             if self.eat_word("since") {
                 let start = self.additive()?;
-                return Ok(Some(timespan(Expr::Range(start.boxed(), now().boxed()))));
+                return Ok(Some(timespan(Expr::SignedRange(start.boxed(), now().boxed()))));
             }
             if self.eat_word("between") {
                 let [a, b] = self.pair()?;
@@ -737,14 +807,19 @@ impl Parser<'_> {
     pub(super) fn time_unit_phrase(&mut self, unit: &Unit) -> Result<Option<Expr>> {
         let start = || now_for(&Expr::BareUnit(unit.clone()));
         let w = self.lower(self.pos).unwrap_or_default();
+        // "days before March 5" counts the days, as "days until"; "day before" is a date.
+        let plural = self.lower(self.pos.wrapping_sub(1)).is_some_and(|w| w.ends_with('s'));
         let range = match w.as_str() {
-            "until" | "till" | "to" if w != "to" || self.date_starts(self.pos + 1) => {
+            "until" | "till" | "to" | "before" if (w != "to" && w != "before") || self.date_starts(self.pos + 1) => {
+                if w == "before" && !plural {
+                    return Ok(None);
+                }
                 self.pos += 1;
-                Expr::Range(start().boxed(), self.date_or_period(true)?.boxed())
+                Expr::SignedRange(start().boxed(), self.date_or_period(true)?.boxed())
             }
             "since" => {
                 self.pos += 1;
-                Expr::Range(self.date_or_period(false)?.boxed(), start().boxed())
+                Expr::SignedRange(self.date_or_period(false)?.boxed(), start().boxed())
             }
             // "days in March 3 to May 30" is the days between them.
             "in" if self.range_follows(self.pos + 1) => {
@@ -755,13 +830,22 @@ impl Parser<'_> {
             "between" => {
                 self.pos += 1;
                 let [a, b] = self.pair()?;
-                Expr::Range(a.boxed(), b.boxed())
+                Expr::SignedRange(a.boxed(), b.boxed())
             }
-            "from" if self.date_starts(self.pos + 1) => {
+            // "days from 2020 to 2025": years count from their first day.
+            "from" if self.date_starts(self.pos + 1) || self.year_range_at(self.pos + 1) => {
                 self.pos += 1;
+                if self.year_range_at(self.pos) {
+                    let a = self.date_or_period(false)?;
+                    self.range_word(&["to", "until", "till"]);
+                    return Ok(Some(Expr::Convert(
+                        Expr::SignedRange(a.boxed(), self.date_or_period(true)?.boxed()).boxed(),
+                        Target::Unit(unit.clone()),
+                    )));
+                }
                 let a = self.additive()?;
                 match self.range_word(&["to", "until", "till"]) {
-                    Some(through) => Expr::Range(a.boxed(), self.range_end(through)?.boxed()),
+                    Some(through) => Expr::SignedRange(a.boxed(), self.range_end(through)?.boxed()),
                     // "days from Jan 1" counts to now, as "since" does.
                     None => Expr::Range(a.boxed(), start().boxed()),
                 }
@@ -774,13 +858,33 @@ impl Parser<'_> {
                 // what is left is always of this one: "days left in month".
                 let the = usize::from(self.words_at(at, &["the"]));
                 let named = the == 1 || left || self.lower(at).is_some_and(|w| words::which(&w).is_some());
-                let period = if named { self.named_period_at(at + the) } else { self.period_at(at) };
-                let Some((first, span, n)) = period.filter(|_| !left || self.words_at(at - 1, &["in"])) else {
+                let mut period = if named { self.named_period_at(at + the) } else { self.period_at(at) };
+                // "days in March 5, 2025": a day, not its month.
+                if let Some((_, _, n)) = &period
+                    && self.date_starts(at + the)
+                {
+                    let mut p = self.clone();
+                    p.pos = at + the + n;
+                    if !p.value_ends() {
+                        p.pos = at + the;
+                        let day = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("d"));
+                        period = p.additive().ok().map(|date| (date, day, p.pos - at - the));
+                    }
+                }
+                let Some((mut first, span, n)) = period.filter(|_| !left || self.words_at(at - 1, &["in"])) else {
                     return Ok(None);
                 };
                 let n = n + the;
                 self.pos = at + n;
-                let end = Expr::binary(Op::Add, first.clone(), span);
+                let mut end = Expr::binary(Op::Add, first.clone(), span.clone());
+                // "days left in Q3" after Q3: what is left of the next one, as "days until Q3" counts to it.
+                if left && matches!(first, Expr::Time(TimeExpr::Date { year: None, .. })) {
+                    let year = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("yr"));
+                    let over = Expr::binary(Op::Le, end.clone(), start()).boxed();
+                    let next = Expr::binary(Op::Add, first.clone(), year);
+                    first = Expr::If { cond: over, then: Some(next.boxed()), otherwise: Some(first.boxed()) };
+                    end = Expr::binary(Op::Add, first.clone(), span);
+                }
                 if left {
                     // What is left starts now, or when the period does; a past period has none.
                     let from = Expr::Call(Func::Max, vec![start(), first]);
@@ -814,6 +918,13 @@ impl Parser<'_> {
             }
         }
         self.additive()
+    }
+
+    /// Two years at token `i`: "2020 to 2025".
+    fn year_range_at(&self, i: usize) -> bool {
+        let year = |k: usize| matches!(self.toks.get(k).map(|t| &t.tok), Some(Tok::Num(n)) if n.is_integer() && (1000..3000).contains(&n.to_i64().unwrap_or(0)));
+        let to = ["to", "until", "till"].iter().any(|w| self.words_at(i + 1, &[w]));
+        year(i) && to && year(i + 2) && i + 3 == self.toks.len()
     }
 
     /// A date, then a word that ends a range, from token `i`: "March 3 to May 30".
@@ -906,7 +1017,10 @@ impl Parser<'_> {
     /// `next quarter`, `summer 2020`.
     fn quarter_at(&self, i: usize, w: &str) -> Option<(Expr, Expr, usize)> {
         let (first, n) = match (words::which(w), words::three_months(w)) {
-            (Some(which), _) if self.words_at(i + 1, &["quarter"]) => (TimeExpr::Quarter(which), 2),
+            // "this quarters" too, as SoulverCore reads it.
+            (Some(which), _) if self.words_at(i + 1, &["quarter"]) || self.words_at(i + 1, &["quarters"]) => {
+                (TimeExpr::Quarter(which), 2)
+            }
             // "spring festival" is a holiday.
             (_, Some(month)) if self.phrase_at(i, &words::HOLIDAYS).is_none() => {
                 let mut p = self.clone();

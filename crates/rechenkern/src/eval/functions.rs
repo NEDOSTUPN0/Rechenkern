@@ -10,10 +10,11 @@ use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
 use crate::value::{MomentKind, Quantity, Value};
 
-/// A plain number from a value; percentages count as fractions.
+/// A plain number from a value; percentages count as fractions. An amount gives its number,
+/// as in SoulverCore: `log10($9)` is the log of 9.
 fn plain(v: &Value, what: &str) -> Result<Number> {
     match v {
-        Value::Quantity(q) if q.unit.is_none() => Ok(q.number),
+        Value::Quantity(q) => Ok(q.number),
         Value::Percent(p) => Ok(*p / Number::from_i64(100)),
         v => bail!("{what} needs a plain number, not {}", v.kind()),
     }
@@ -125,6 +126,8 @@ impl Env<'_> {
         }
         match func {
             Log | Clamp | Root | Midpoint | Perm | Comb => {}
+            // "round(3.456, 2)": to decimal places.
+            Round if args.len() == 2 => {}
             _ => arity(1)?,
         }
         let Some(x) = args.first() else { bail!("missing a value") };
@@ -137,9 +140,16 @@ impl Env<'_> {
                 self.root(&args[1], n)
             }
             Abs | Round | Ceil | Floor | Trunc | Int => {
+                let places = match args.get(1) {
+                    Some(places) => u32::try_from(integer(places, "round")?)
+                        .ok()
+                        .filter(|p| *p <= 28)
+                        .ok_or_else(|| Error::new("round takes 0 to 28 decimal places"))?,
+                    None => 0,
+                };
                 let f = |n: Number| match func {
                     Abs => n.abs(),
-                    Round => n.round_dp(0),
+                    Round => n.round_dp(places),
                     Ceil => n.ceil(),
                     Floor => n.floor(),
                     _ => n.trunc(),
@@ -168,6 +178,11 @@ impl Env<'_> {
                 )
             }
             Fact => factorial(x.clone()),
+            Reach => match x {
+                Value::Quantity(q) if q.number.is_negative() => bail!("it never gets there at that rate"),
+                Value::Duration(d) if d.span.is_negative() => bail!("it never gets there at that rate"),
+                v => Ok(v.clone()),
+            },
             Sin | Cos | Tan | SinD | CosD | TanD | Cot | Csc | CotD | CscD => {
                 let degrees = matches!(func, SinD | CosD | TanD | CotD | CscD);
                 let rad = self.radians(x, degrees)?;
@@ -190,8 +205,9 @@ impl Env<'_> {
                     Asin | AsinD => n.asin(),
                     Acos | AcosD => n.acos(),
                     Atan | AtanD => n.atan(),
-                    // acot(0) is a right angle.
-                    Acot | AcotD => std::f64::consts::FRAC_PI_2 - n.atan(),
+                    // atan(1/x), from -90° to 90° as in SoulverCore; acot(0) is a right angle.
+                    Acot | AcotD if n == 0.0 => std::f64::consts::FRAC_PI_2,
+                    Acot | AcotD => (1.0 / n).atan(),
                     _ => (1.0 / n).asin(),
                 };
                 if !r.is_finite() {
@@ -262,7 +278,11 @@ impl Env<'_> {
                     Bin => 2,
                     _ => 8,
                 };
-                Ok(Value::Text(crate::format::radix(n, radix)?))
+                // A number shown in that base (`Scope::radix`), as in SoulverCore: "hex(9) + 1" = 0xA.
+                match n.is_negative() {
+                    true => Ok(Value::Text(crate::format::radix(n.round_dp(0), radix)?)),
+                    false => Ok(Value::number(n.round_dp(0))),
+                }
             }
             _ => unreachable!("handled above"),
         }
@@ -304,7 +324,8 @@ impl Env<'_> {
             Value::Quantity(q) if q.unit.dim() == Dim::ANGLE => {
                 Ok(self.convert_quantity(q, &registry().get("rad"))?.number.to_f64())
             }
-            Value::Quantity(q) if q.unit.is_none() => {
+            // "sin(9 km)": the number, as in SoulverCore.
+            Value::Quantity(q) => {
                 let n = q.number.to_f64();
                 Ok(if degrees || self.config.angle_unit == AngleUnit::Degrees { n.to_radians() } else { n })
             }

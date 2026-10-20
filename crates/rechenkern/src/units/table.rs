@@ -3,7 +3,7 @@
 use jiff::Unit as Cal;
 
 use super::{Dim, Registry, Unit, UnitDef, UnitId};
-use crate::currency::{AMBIGUOUS_CODES, CURRENCIES, MINOR_UNITS, find};
+use crate::currency::{AMBIGUOUS_CODES, CURRENCIES, MINOR_UNITS, REPLACED_CURRENCIES, find};
 use crate::hash::TableMap;
 use crate::number::Number;
 
@@ -40,7 +40,7 @@ const NANO: Prefix = si("n", "nano", -9);
 const PICO: Prefix = si("p", "pico", -12);
 
 const SMALL: &[Prefix] = &[MILLI, MICRO, MICRO_GREEK, NANO, PICO];
-const LENGTH: &[Prefix] = &[KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO, PICO];
+const LENGTH: &[Prefix] = &[GIGA, MEGA, KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO, PICO];
 const MASS: &[Prefix] = &[KILO, CENTI, MILLI, MICRO, MICRO_GREEK, NANO];
 const VOLUME: &[Prefix] = &[MEGA, KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO];
 const DATA: &[Prefix] = &[
@@ -58,6 +58,8 @@ const DATA: &[Prefix] = &[
     bin("Ti", "tebi", 40),
     bin("Pi", "pebi", 50),
     bin("Ei", "exbi", 60),
+    bin("Zi", "zebi", 70),
+    bin("Yi", "yobi", 80),
 ];
 
 /// A unit definition before it gets an id.
@@ -405,12 +407,22 @@ fn definitions() -> Vec<Def> {
             .scale(Number::ratio(5, 9))
             .aliases(&["rankine"]),
         // Frequency
-        unit("Hz", "hertz", Dim::FREQUENCY, "1")
-            .plural("hertz")
-            .prefixes(&[KILO, MEGA, GIGA, TERA, MILLI, MICRO, NANO]),
+        unit("Hz", "hertz", Dim::FREQUENCY, "1").plural("hertz").prefixes(&[
+            KILO,
+            MEGA,
+            GIGA,
+            TERA,
+            MILLI,
+            MICRO,
+            MICRO_GREEK,
+            NANO,
+        ]),
         unit("fps", "frame per second", Dim::FREQUENCY, "1").plural("frames per second"),
+        unit("bpm", "beat per minute", Dim::FREQUENCY, "1")
+            .scale(Number::ONE / Number::from_i64(60))
+            .plural("beats per minute"),
         // Mechanics
-        unit("N", "newton", Dim::FORCE, "1").prefixes(&[KILO, MEGA, GIGA, MILLI, MICRO, NANO]),
+        unit("N", "newton", Dim::FORCE, "1").prefixes(&[KILO, MEGA, GIGA, MILLI, MICRO, MICRO_GREEK, NANO]),
         unit("dyn", "dyne", Dim::FORCE, "0.00001"),
         // The speed of sound at sea level (ISA, 15 °C).
         unit("mach", "mach", Dim::SPEED, "340.294").plural("mach").aliases(&["Mach"]).spelled(),
@@ -426,6 +438,19 @@ fn definitions() -> Vec<Def> {
             "ounces force",
             "ounce of force",
             "ounces of force",
+        ]),
+        // "kip" alone is the Lao currency.
+        unit("klbf", "kilopound-force", Dim::FORCE, "4448.2216152605").plural("kilopounds-force").aliases(&[
+            "kilopound-force",
+            "kilopounds-force",
+            "kilopound force",
+            "kilopound of force",
+            "kilopounds of force",
+        ]),
+        unit("Mlbf", "megapound-force", Dim::FORCE, "4448221.6152605").plural("megapounds-force").aliases(&[
+            "megapound force",
+            "megapound of force",
+            "megapounds of force",
         ]),
         unit("pdl", "poundal", Dim::FORCE, "0.138254954376"),
         unit("kgf", "kilogram-force", Dim::FORCE, "9.80665").plural("kilograms-force").aliases(&["kilogram force"]),
@@ -453,7 +478,15 @@ fn definitions() -> Vec<Def> {
                 "pounds of force per square inch",
             ]),
         unit("ksi", "kilopound per square inch", Dim::PRESSURE, "6894757.293168361")
-            .plural("kilopounds per square inch"),
+            .plural("kilopounds per square inch")
+            .aliases(&[
+                "kilopound of force per square inch",
+                "kilopounds of force per square inch",
+                "kilopound-force per square inch",
+                "kilopounds-force per square inch",
+                "kip per square inch",
+                "kips per square inch",
+            ]),
         unit("Mpsi", "megapound per square inch", Dim::PRESSURE, "6894757293.168361")
             .plural("megapounds per square inch"),
         unit("mmHg", "millimeter of mercury", Dim::PRESSURE, "133.322387415").plural("millimeters of mercury"),
@@ -472,24 +505,51 @@ fn definitions() -> Vec<Def> {
         // "C", "F", "H", "S" and "T" alone are Celsius, Fahrenheit, hours, seconds and tonnes, as in
         // SoulverCore (`Parser::unit_at` reads the last three, after a number only).
         unit("C", "coulomb", Dim::CHARGE, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO, PICO]).prefixed_only(),
-        unit("F", "farad", Dim::CAPACITANCE, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO, PICO]).prefixed_only(),
+        unit("F", "farad", Dim::CAPACITANCE, "1")
+            .prefixes(&[KILO, MEGA, MILLI, MICRO, MICRO_GREEK, NANO, PICO])
+            .prefixed_only(),
         unit("H", "henry", Dim::INDUCTANCE, "1")
             .plural("henries")
             .aliases(&["henrys"])
-            .prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO])
+            .prefixes(&[KILO, MEGA, MILLI, MICRO, MICRO_GREEK, NANO])
             .prefixed_only(),
         unit("S", "siemens", Dim::CONDUCTANCE, "1")
             .plural("siemens")
-            .aliases(&["mho", "mhos"])
+            .aliases(&["mho", "mhos", "siemen", "℧"])
             .prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK])
             .prefixed_only(),
-        unit("Wb", "weber", Dim::MAGNETIC_FLUX, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO]),
+        // "MS" stays milliseconds, as in SoulverCore: megasiemens are written out.
+        unit("MS", "megasiemens", Dim::CONDUCTANCE, "1000000")
+            .plural("megasiemens")
+            .aliases(&["megasiemen"])
+            .spelled()
+            .prefixed_only(),
+        unit("Wb", "weber", Dim::MAGNETIC_FLUX, "1").aliases(&["WB"]).prefixes(&[
+            KILO,
+            MEGA,
+            MILLI,
+            MICRO,
+            MICRO_GREEK,
+            NANO,
+        ]),
         unit("Mx", "maxwell", Dim::MAGNETIC_FLUX, "0.00000001"),
+        unit("lm", "lumen", Dim::LUMINOUS_FLUX, "1").prefixes(&[KILO, MILLI]),
+        unit("lx", "lux", Dim::ILLUMINANCE, "1").plural("lux").aliases(&["luxes"]).prefixes(&[KILO, MILLI]),
+        unit("fc", "foot-candle", Dim::ILLUMINANCE, "10.763910416709722").plural("foot-candles").aliases(&[
+            "footcandle",
+            "footcandles",
+            "foot candle",
+            "foot candles",
+        ]),
+        unit("ph", "phot", Dim::ILLUMINANCE, "10000"),
         unit("T", "tesla", Dim::FLUX_DENSITY, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO]).prefixed_only(),
+        // "kT" is knots and "MT" tonnes, as in SoulverCore: kiloteslas and megateslas are written out.
+        unit("kT", "kilotesla", Dim::FLUX_DENSITY, "1000").spelled().prefixed_only(),
+        unit("MT", "megatesla", Dim::FLUX_DENSITY, "1000000").spelled().prefixed_only(),
         unit("gauss", "gauss", Dim::FLUX_DENSITY, "0.0001").plural("gauss").spelled(),
-        unit("mol", "mole", Dim::AMOUNT, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO]),
+        unit("mol", "mole", Dim::AMOUNT, "1").aliases(&["mols"]).prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO]),
         // Molar concentration, a mole per liter; glued to a number "M" is a million ("5M").
-        unit("M", "molar", Dim::AMOUNT.div(Dim::VOLUME), "1000").plural("molar").prefixes(&[
+        unit("M", "molar", Dim::AMOUNT.div(Dim::VOLUME), "1000").plural("molar").aliases(&["molars", "ᴍ"]).prefixes(&[
             MILLI,
             MICRO,
             MICRO_GREEK,
@@ -531,7 +591,7 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("N·m", &["Nm", "N·m", "N⋅m", "N m", "newton meter", "newton meters", "newton metre", "newton metres"], "N*m"),
     ("", &["Ws", "W s", "watt second", "watt seconds"], "W*s"),
     // "W m" is a watt minute, as in SoulverCore.
-    ("", &["W m", "watt minute", "watt minutes"], "W*min"),
+    ("W·min", &["W m", "watt minute", "watt minutes"], "W*min"),
     (
         "",
         &[
@@ -540,35 +600,85 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
             "ft-lb",
             "ft-lbs",
             "ft-lbf",
+            "ft lb",
+            "ft lbs",
+            "ft lbf",
             "lb-ft",
+            "lb ft",
             "foot-pound",
             "foot-pounds",
             "foot pound",
             "foot pounds",
             "pound-foot",
             "pound-feet",
+            "pound foot",
+            "pound feet",
         ],
         "lbf*ft",
     ),
-    ("", &["lbf-in", "in-lb", "in-lbs", "in-lbf", "lb-in", "inch-pound", "inch-pounds"], "lbf*in"),
+    (
+        "",
+        &["lbf-in", "in-lb", "in-lbs", "in-lbf", "lb-in", "inch-pound", "inch-pounds", "inch pound", "inch pounds"],
+        "lbf*in",
+    ),
     ("", &["ozf-in", "oz-in", "in-oz", "inch-ounce", "inch-ounces"], "ozf*in"),
     ("rpm", &["rpm", "revolution per minute", "revolutions per minute"], "rev/min"),
     ("rps", &["rps", "revolution per second", "revolutions per second"], "rev/s"),
     ("Ah", &["Ah", "amp hour", "amp hours", "ampere hour", "ampere hours"], "A*h"),
     ("kAh", &["kAh", "kiloamp hour", "kiloamp hours", "kiloampere hour", "kiloampere hours"], "kA*h"),
     ("mAh", &["mAh", "mah", "milliamp hour", "milliamp hours", "milliampere hour", "milliampere hours"], "mA*h"),
-    ("µAh", &["µAh", "uAh", "microamp hour", "microamp hours", "microampere hour", "microampere hours"], "µA*h"),
+    ("MAh", &["MAh", "megaamp hour", "megaamp hours", "megaampere hour", "megaampere hours"], "MA*h"),
+    (
+        "µAh",
+        &[
+            "µAh",
+            "uAh",
+            "microamp hour",
+            "microamp hours",
+            "microampere hour",
+            "microampere hours",
+            "uamp hour",
+            "uamp hours",
+        ],
+        "µA*h",
+    ),
     ("bps", &["bps", "bits per second"], "bit/s"),
     ("kbps", &["kbps", "Kbps"], "kbit/s"),
     ("Mbps", &["Mbps", "mbps"], "Mbit/s"),
     ("Gbps", &["Gbps", "gbps"], "Gbit/s"),
     ("Tbps", &["Tbps", "tbps"], "Tbit/s"),
+    ("Pbps", &["Pbps", "pbps"], "Pbit/s"),
+    ("Ebps", &["Ebps", "ebps"], "Ebit/s"),
+    ("Zbps", &["Zbps", "zbps"], "Zbit/s"),
+    ("Ybps", &["Ybps", "ybps"], "Ybit/s"),
     // A capital B is bytes.
     ("", &["Bps", "bytes per second"], "B/s"),
     ("", &["kBps", "KBps"], "kB/s"),
     ("", &["MBps", "mBps"], "MB/s"),
     ("", &["GBps", "gBps"], "GB/s"),
     ("", &["TBps", "tBps"], "TB/s"),
+    ("", &["PBps", "pBps"], "PB/s"),
+    ("", &["EBps", "eBps"], "EB/s"),
+    ("", &["ZBps", "zBps"], "ZB/s"),
+    ("", &["YBps", "yBps"], "YB/s"),
+    ("", &["KiBps"], "KiB/s"),
+    ("", &["MiBps"], "MiB/s"),
+    ("", &["GiBps"], "GiB/s"),
+    ("", &["TiBps"], "TiB/s"),
+    ("", &["PiBps"], "PiB/s"),
+    ("", &["EiBps"], "EiB/s"),
+    ("", &["ZiBps"], "ZiB/s"),
+    ("", &["YiBps"], "YiB/s"),
+    ("", &["Kibps"], "Kibit/s"),
+    ("", &["Mibps"], "Mibit/s"),
+    ("", &["Gibps"], "Gibit/s"),
+    ("", &["Tibps"], "Tibit/s"),
+    ("", &["Pibps"], "Pibit/s"),
+    ("", &["Eibps"], "Eibit/s"),
+    ("", &["Zibps"], "Zibit/s"),
+    ("", &["Yibps"], "Yibit/s"),
+    ("", &["sqnm"], "nm^2"),
+    ("", &["squm", "sqµm"], "µm^2"),
     ("", &["kilo", "kilos"], "kg"),
     ("", &["sqm"], "m^2"),
     ("", &["sqkm"], "km^2"),
@@ -607,6 +717,8 @@ const EXTRA: &[(&str, &str)] = &[
     ("Tib", "Tibit"),
     ("Pib", "Pibit"),
     ("Eib", "Eibit"),
+    ("Zib", "Zibit"),
+    ("Yib", "Yibit"),
     ("mb", "MB"),
     ("gb", "GB"),
     ("tb", "TB"),
@@ -617,6 +729,8 @@ const EXTRA: &[(&str, &str)] = &[
     ("tib", "TiB"),
     ("pib", "PiB"),
     ("eib", "EiB"),
+    ("zib", "ZiB"),
+    ("yib", "YiB"),
     ("mcg", "µg"),
     // Lowercase "mj" is megajoules, as in SoulverCore.
     ("kj", "kJ"),
@@ -625,6 +739,22 @@ const EXTRA: &[(&str, &str)] = &[
     ("KV", "kV"),
     ("kCal", "kcal"),
     ("millimol", "mmol"),
+    ("millimols", "mmol"),
+    ("micromols", "µmol"),
+    ("kilomols", "kmol"),
+    ("bsh", "bu"),
+    ("af", "acre-foot"),
+    ("pts", "pt"),
+    ("PostScript point", "pt"),
+    ("PostScript points", "pt"),
+    ("postscript point", "pt"),
+    ("postscript points", "pt"),
+    ("force pound", "lbf"),
+    ("force pounds", "lbf"),
+    ("forcepound", "lbf"),
+    ("forcepounds", "lbf"),
+    ("force-pound", "lbf"),
+    ("force-pounds", "lbf"),
     ("micromol", "µmol"),
     ("nanomol", "nmol"),
     ("micron", "µm"),
@@ -698,6 +828,20 @@ pub(super) fn build() -> Registry {
         b.register(id, d.aliases.iter().map(|a| a.to_string()), !d.prefixed_only);
         ids.push(id);
     }
+    // A percentage per something: "5%/year". Never read as a word: "in percent" is a format.
+    let percent = b.push(UnitDef {
+        symbol: "%".into(),
+        name: "percent".into(),
+        plural: "percent".into(),
+        dim: Dim::NONE,
+        scale: Number::parse("0.01").expect("valid unit scale"),
+        offset: Number::ZERO,
+        spelled: false,
+        tight: true,
+        calendar: None,
+        currency: None,
+    });
+    b.exact.insert("%".into(), Unit::of(percent));
 
     for c in CURRENCIES {
         let id = b.push(UnitDef {
@@ -739,6 +883,22 @@ pub(super) fn build() -> Registry {
             scale: Number::pow10(-places),
             offset: Number::ZERO,
             spelled: true,
+            tight: false,
+            calendar: None,
+            currency: Some(currency),
+        });
+        b.register(id, aliases.iter().map(|a| a.to_string()), true);
+    }
+    for &(code, name, plural, aliases, per_new) in REPLACED_CURRENCIES {
+        let currency = find(code).expect("a replaced currency's successor is known");
+        let id = b.push(UnitDef {
+            symbol: aliases[0].into(),
+            name: name.into(),
+            plural: plural.into(),
+            dim: Dim::MONEY,
+            scale: Number::ONE / Number::parse(per_new).expect("a fixed rate"),
+            offset: Number::ZERO,
+            spelled: false,
             tight: false,
             calendar: None,
             currency: Some(currency),
@@ -792,7 +952,8 @@ pub(super) fn build() -> Registry {
 
     for &(text, target) in EXTRA {
         let unit = b.exact[target].clone();
-        b.exact.entry(text.into()).or_insert(unit);
+        // Lowercase spellings match in any case: "FORCEPOUND".
+        b.spelling(text, &unit);
     }
 
     let mut compound_symbols = Vec::new();

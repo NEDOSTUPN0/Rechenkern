@@ -203,6 +203,7 @@ const DERIVED: &[(Dim, &str)] = &[
     (Dim::MAGNETIC_FLUX, "Wb"),
     (Dim::FLUX_DENSITY, "tesla"),
     (Dim::INDUCTANCE, "henry"),
+    (Dim::ILLUMINANCE, "lx"),
 ];
 
 /// All known units and their spellings.
@@ -312,6 +313,11 @@ impl Registry {
     pub fn currency(&self, code: &str) -> Option<Unit> {
         let code = code.to_uppercase();
         self.exact.get(&code).filter(|u| u.is_money()).cloned()
+    }
+
+    /// Every built-in unit with its id, in the order of the table.
+    pub fn units(&self) -> impl Iterator<Item = (UnitId, &UnitDef)> {
+        self.defs.iter().enumerate().filter_map(|(i, def)| Some((UnitId::try_from(i).ok()?, def)))
     }
 
     /// Every spelling of every unit, sorted.

@@ -128,7 +128,8 @@ fn weeks_and_locales() {
     // Wednesday 23 September 2026.
     answers(config(), &[("start of week", "Mon, 21 Sep 2026"), ("this sunday", "Sun, 27 Sep 2026")]);
     let sunday = Config { week_start: jiff::civil::Weekday::Sunday, ..config() };
-    answers(sunday, &[("start of week", "Sun, 20 Sep 2026"), ("this sunday", "Sun, 20 Sep 2026")]);
+    // "this sunday" is the one ahead whatever the week's start, as in SoulverCore.
+    answers(sunday, &[("start of week", "Sun, 20 Sep 2026"), ("this sunday", "Sun, 27 Sep 2026")]);
 
     let german = Config::for_locale("de_DE.UTF-8");
     assert!(german.decimal_comma && german.clock_24h);

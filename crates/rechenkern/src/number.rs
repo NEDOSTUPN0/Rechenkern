@@ -50,7 +50,8 @@ impl Number {
             if s.contains(['e', 'E']) { Decimal::from_scientific(s).ok() } else { Decimal::from_str_exact(s).ok() };
         match exact {
             Some(d) => Some(Exact(d)),
-            None => s.parse::<f64>().ok().filter(|f| f.is_finite()).map(Float),
+            // "1e400" stays infinite, so the answer says it is too large.
+            None => s.parse::<f64>().ok().map(Float),
         }
     }
 

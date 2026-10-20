@@ -92,6 +92,8 @@ pub enum Expr {
     InZone(Box<Expr>, Place),
     /// Time between two moments: `9am to 5pm`.
     Range(Box<Expr>, Box<Expr>),
+    /// A range counted from its first end, negative when the second is behind it: `days until March 5, 2025`.
+    SignedRange(Box<Expr>, Box<Expr>),
     /// A calendar period, its first day and length: `Q3 2026`.
     Period(Box<Expr>, Box<Expr>),
     /// Difference between the UTC offsets of two zones.
@@ -206,6 +208,8 @@ pub enum CustomArg {
     Expr(Expr, crate::custom::SlotKind),
     Unit(Unit),
     Text(String),
+    /// What the host gave a word of a custom type.
+    Value(crate::value::Value),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -237,7 +241,9 @@ impl Expr {
     pub fn contains(&self, f: &impl Fn(&Expr) -> bool) -> bool {
         f(self)
             || match self {
-                Expr::Binary(_, a, b) | Expr::Range(a, b) | Expr::Period(a, b) => a.contains(f) || b.contains(f),
+                Expr::Binary(_, a, b) | Expr::Range(a, b) | Expr::SignedRange(a, b) | Expr::Period(a, b) => {
+                    a.contains(f) || b.contains(f)
+                }
                 Expr::Composite(parts) => parts.iter().any(|p| p.contains(f)),
                 Expr::WithUnit(e, _)
                 | Expr::Percent(e)
@@ -312,6 +318,10 @@ pub enum Func {
     Sqrt,
     Cbrt,
     Root,
+    /// `nthroot(27, 3)`: a root with its degree last; parsed as `Root`.
+    NthRoot,
+    /// `pow(2, 10)`: parsed as a power.
+    Pow,
     Exp,
     Ln,
     Log,
@@ -373,6 +383,8 @@ pub enum Func {
     Int,
     /// `is 17 prime`: true or false.
     IsPrime,
+    /// The time a value takes to reach another, an error when it never does (no name).
+    Reach,
 }
 
 impl Func {
@@ -471,11 +483,14 @@ pub enum Sky {
     MoonPhase,
     /// Day of the lunar month, 1 on the day of the new moon.
     LunarDay,
+    Moonrise,
+    Moonset,
 }
 
 impl Sky {
-    pub fn is_sun(self) -> bool {
-        matches!(self, Sky::Sunrise | Sky::Sunset | Sky::Daylight)
+    /// Seen from a place: the sun's times and the moon's rising and setting, not its phase.
+    pub fn is_local(self) -> bool {
+        !matches!(self, Sky::MoonPhase | Sky::LunarDay)
     }
 }
 
@@ -548,6 +563,8 @@ pub enum Format {
     Timestamp,
     Date,
     Iso,
+    /// From now: "in 3 days", "2 hours ago".
+    Relative,
     Weekday,
     WeekNumber,
     DayOfYear,
@@ -562,6 +579,8 @@ pub enum Format {
     Megapixels,
     /// Frames of a timecode.
     Frames,
+    /// A time of day on a 24-hour (true) or 12-hour clock: `3pm in 24 hour`.
+    Clock(bool),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

@@ -49,6 +49,9 @@ pub struct Formatting {
     pub currency_trailing_zeros: bool,
     /// The host's symbols for currencies, and where they go: `100 kr`, `100 €`.
     pub symbols: Vec<CurrencySymbol>,
+    /// The host's symbols for other units, as SoulverCore's `customSymbols`: `{ unit: "kWh", symbol: "kW·h" }`.
+    /// Answers write them and lines read them.
+    pub unit_symbols: Vec<UnitSymbol>,
     /// Earlier lines and variables give the value as shown, rounded.
     pub references_take_formatted_value: bool,
     pub timespans: TimespanStyle,
@@ -56,6 +59,9 @@ pub struct Formatting {
     pub compound_imperial_units: bool,
     /// Answers converted without asking for it.
     pub conversions: ResultConversions,
+    /// Answers that are simple fractions are written as them, as SoulverCore's
+    /// `fractionizeWherePossible`: `3/8` is ⅜, `10/4 cups` is 2 ½ cups.
+    pub fractions: bool,
 }
 
 impl Formatting {
@@ -78,10 +84,12 @@ impl Default for Formatting {
             round_currency: true,
             currency_trailing_zeros: true,
             symbols: Vec::new(),
+            unit_symbols: Vec::new(),
             references_take_formatted_value: false,
             timespans: TimespanStyle::Automatic,
             compound_imperial_units: false,
             conversions: ResultConversions::None,
+            fractions: false,
         }
     }
 }
@@ -101,14 +109,24 @@ pub enum Notation {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Scale {
     Thousand,
+    /// A lakh.
+    HundredThousand,
     Million,
     Billion,
     Trillion,
+    Quadrillion,
 }
 
 impl Scale {
     pub fn value(self) -> Number {
-        Number::pow10(3 * (self as i32 + 1))
+        Number::pow10(match self {
+            Scale::Thousand => 3,
+            Scale::HundredThousand => 5,
+            Scale::Million => 6,
+            Scale::Billion => 9,
+            Scale::Trillion => 12,
+            Scale::Quadrillion => 15,
+        })
     }
 }
 
@@ -125,6 +143,8 @@ pub enum ScalarSystem {
     Russian,
     /// `¥5万`, `¥5亿`.
     Chinese,
+    /// `₹5K`, `₹5 lakh`, `₹5 crore`.
+    Indian,
 }
 
 /// A currency symbol of the host's own and where it goes.
@@ -135,6 +155,21 @@ pub struct CurrencySymbol {
     /// "kr"; lines may use it too.
     pub symbol: String,
     pub position: SymbolPosition,
+}
+
+/// A day with a name of the host's: a company holiday, a launch.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct NamedDay {
+    pub name: String,
+    pub date: civil::Date,
+}
+
+/// A symbol of the host's own for a unit.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct UnitSymbol {
+    /// The unit as lines write it: "kWh", "miles".
+    pub unit: String,
+    pub symbol: String,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -187,6 +222,15 @@ pub enum ConversionRule {
     Kind { like: String, to: String },
     /// Times are shown in this zone.
     TimeZone(TimeZone),
+    /// Lengths of time go to this unit: `{ to: "hours" }` writes `2 days 3 hours` as 51 hours.
+    Durations { to: String },
+    /// Answers of the kind of `like` are split over these units: `ft` and `in` for every length.
+    Parts { like: String, units: Vec<String> },
+    /// Dates and times are written from now: "in 3 days".
+    RelativeDates,
+    /// Answers shown this way are converted: every hex answer to decimal (`Converter::Decimal`),
+    /// every timestamp to a date (`Converter::Date`).
+    Display { from: crate::answer::DisplayKind, to: Converter },
 }
 
 /// Parts of the language to turn off or read another way, as SoulverCore's
@@ -203,18 +247,25 @@ pub struct Features {
     pub converters: bool,
     /// `name = value` lines.
     pub variable_declarations: bool,
+    /// `widgets = new unit` lines, as SoulverCore's `unitDeclarations`.
+    pub unit_declarations: bool,
     /// A `---` line forgets the variables above it.
     pub dividers_reset_variable_scope: bool,
     /// Functions need parentheses: `sqrt(16)`, not `sqrt 16`.
     pub functions_require_parentheses: bool,
     /// Functions to leave out, by any of their names: `"average"` also leaves out `avg`.
     pub disabled_functions: Vec<String>,
+    /// Whole-line phrases to leave unread, as SoulverCore's `FunctionIdentifier`s that aren't calls.
+    pub disabled_phrases: Vec<Phrase>,
     /// Conversions to leave out.
     pub disabled_converters: Vec<Converter>,
     /// A line whose words make no calculation answers with a value in it: `iPhone 16 Pro $999`.
     pub in_ambiguity_prefer_something_to_nothing: bool,
     /// What a thousands separator before more than three digits means: `1,0000`.
     pub misplaced_thousands_separator: MisplacedSeparator,
+    /// With a decimal comma, a comma before three digits still groups thousands: `1,000` is a
+    /// thousand, as SoulverCore's `cosmeticallyLenientDecimalCommaAsThousandsSeparatorForEuropeans`.
+    pub lenient_comma_thousands: bool,
     /// Links and email addresses are comments: `https://example.com`, `me@example.com`.
     pub url_detection: bool,
     /// The rates that come with the engine stand in for currencies the rate provider
@@ -244,6 +295,16 @@ pub struct Features {
     pub comments: CommentOptions,
 }
 
+impl Features {
+    /// Turns every query that may go online on or off at once: past exchange rates, places
+    /// the engine doesn't know and past weather.
+    pub fn set_remote_queries(&mut self, on: bool) {
+        self.historical_currency_queries = on;
+        self.dynamic_place_queries = on;
+        self.historical_weather_queries = on;
+    }
+}
+
 impl Default for Features {
     fn default() -> Features {
         Features {
@@ -252,12 +313,15 @@ impl Default for Features {
             word_functions: true,
             converters: true,
             variable_declarations: true,
+            unit_declarations: true,
             dividers_reset_variable_scope: true,
             functions_require_parentheses: false,
             disabled_functions: Vec::new(),
+            disabled_phrases: Vec::new(),
             disabled_converters: Vec::new(),
             in_ambiguity_prefer_something_to_nothing: true,
             misplaced_thousands_separator: MisplacedSeparator::DecimalPoint,
+            lenient_comma_thousands: false,
             url_detection: true,
             use_default_rates_for_unhandled_currencies: true,
             historical_currency_queries: true,
@@ -274,6 +338,58 @@ impl Default for Features {
             comments: CommentOptions::default(),
         }
     }
+}
+
+/// Whole-line phrases, for `Features::disabled_phrases`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum Phrase {
+    /// `every 2 weeks until Dec 31`.
+    Cadence,
+    /// `8% vat in $108`, `$108 before 8% tax`.
+    SalesTax,
+    /// `purchasing power of $500 in 2030 assuming 3% inflation`.
+    Inflation,
+    /// `investment required for $1,000/month at 5%`.
+    InvestmentRequired,
+    /// `time saved for 1 hour 30 minutes at 1.5x`.
+    TimeSaved,
+    /// `$80 after 15% discount`.
+    Discount,
+    /// `frames between 00:00:10:00 and 00:00:20:00`.
+    Frames,
+    /// `income tax on $100,000 in US`.
+    IncomeTax,
+    /// `$1,000 after 3 years at 7%`, `monthly repayment on`, `compound interest on`.
+    Growth,
+    /// `ppi of 5.5 inch at 1920x1080`.
+    ScreenDensity,
+    /// `speed of 26 inch tire at 200 rpm`.
+    WheelSpeed,
+    /// `annual return on $500 that grew to $1,000 over 5 years`.
+    AnnualReturn,
+    /// `year %`, `day percentage`: how much of the period has gone by.
+    Progress,
+    /// `exchange rate from 100 USD to 150 AUD`.
+    ExchangeRate,
+    /// `cast 5 km to miles`.
+    Cast,
+    /// `time from 20 to 30 at 10% every year`.
+    TimeToReach,
+    /// `growth every year from 100 to 200 over 5 years`.
+    GrowthRate,
+    /// `$500 invested $1,000 returned`.
+    InvestmentReturn,
+    /// `time in Tokyo when it is 9am in London`.
+    WhenItIs,
+    /// `from 30 to 10 is what % change`.
+    PercentChange,
+    /// `is 17 prime`.
+    PrimeCheck,
+    /// `100 digits of pi`.
+    DigitsOfPi,
+    /// `20 is what % of 200`, `6 is to 60 as 8 is to what`, `81 is 9 to what power`.
+    Percentages,
 }
 
 /// Kinds of conversion, for `Features::disabled_converters`.
@@ -306,12 +422,28 @@ pub enum Converter {
     Timestamp,
     Date,
     Iso8601,
+    /// `as relative`: "in 3 days".
+    Relative,
     /// `as weekday`, `as week number`, `as day of year`.
     DatePart,
-    /// `as pitch`, `as midi`.
+    /// `as pitch`.
     Pitch,
+    /// `as midi`.
+    Midi,
     /// `as dms`.
     Dms,
+    /// `cast to miles`: the number kept, the unit changed.
+    Cast,
+    /// `as yyyy-MM-dd`.
+    Pattern,
+    /// `in hms`.
+    Hms,
+    /// `in 24 hour`, `to 12-hour time`.
+    Clock,
+    /// `in frames`.
+    Frames,
+    /// `in megapixels`.
+    Megapixels,
 }
 
 /// What a thousands separator before more than three digits means, as in `1,0000`.
@@ -354,6 +486,9 @@ pub struct DateOptions {
     pub prefer_future_for_ambiguous_dates: bool,
     /// A year may start a date: `2026 March 5`.
     pub leading_year_parsing: bool,
+    /// The time of day the dates of an interval found in text take, as SoulverCore's
+    /// `defaultTimeForDateRange`; `None` keeps midnight.
+    pub range_time: Option<civil::Time>,
 }
 
 /// Which kinds of comment the parser skips, as SoulverCore's `CommentingOptions`.
@@ -405,6 +540,8 @@ pub struct Config {
     pub week_start: civil::Weekday,
     /// Days off besides weekends, skipped when counting workdays.
     pub holidays: Vec<civil::Date>,
+    /// Days the host names, read as dates: `days until Company Day`.
+    pub named_days: Vec<NamedDay>,
     /// What "gallon", "cup" and "ton" mean.
     pub unit_system: UnitSystem,
     /// Pixels in an `em` or `rem`.
@@ -421,6 +558,8 @@ pub struct Config {
     pub formatting: Formatting,
     /// Local time zone; `None` uses the system zone.
     pub time_zone: Option<TimeZone>,
+    /// The locale `for_locale` was given: "de_DE".
+    pub locale: Option<String>,
     /// Fixed current time, mostly for tests; `None` uses the clock.
     pub now: Option<Zoned>,
 }
@@ -440,6 +579,7 @@ impl Default for Config {
             hours_per_workday: Number::from_i64(8),
             week_start: civil::Weekday::Monday,
             holidays: Vec::new(),
+            named_days: Vec::new(),
             unit_system: UnitSystem::CustomaryUs,
             base_font_size: Number::from_i64(16),
             custom_units: Vec::new(),
@@ -450,6 +590,7 @@ impl Default for Config {
             formatting: Formatting::default(),
             time_zone: None,
             now: None,
+            locale: None,
         }
     }
 }
@@ -462,7 +603,7 @@ impl Config {
         let locale = locale.split(['.', '@']).next().unwrap_or_default().replace('-', "_");
         let (lang, region) = locale.split_once('_').unwrap_or((&locale, ""));
         let (lang, region) = (lang.to_lowercase(), region.to_uppercase());
-        let mut config = Config::default();
+        let mut config = Config { locale: Some(locale.clone()), ..Config::default() };
         const COMMA: &[&str] = &[
             "az", "be", "bg", "bs", "ca", "cs", "da", "de", "el", "es", "et", "eu", "fi", "fr", "gl", "hr", "hu", "hy",
             "id", "is", "it", "ka", "kk", "ky", "lt", "lv", "mk", "nb", "nl", "nn", "no", "pl", "pt", "ro", "ru", "sk",
@@ -520,6 +661,29 @@ impl Config {
             config.formatting.symbols.push(symbol);
         }
         config
+    }
+
+    /// These settings for another locale, as SoulverCore's `convertTo(locale:)`: what the locale
+    /// decides changes (decimal comma, clock, date order, units, week start, currency), the host's
+    /// own units, places, functions, features and formatting stay.
+    pub fn with_locale(&self, locale: &str) -> Config {
+        let local = Config::for_locale(locale);
+        // The old locale's currency symbol goes, the host's other symbols stay.
+        let mut symbols: Vec<CurrencySymbol> =
+            self.formatting.symbols.iter().filter(|s| Some(&s.code) != self.currency.as_ref()).cloned().collect();
+        symbols.extend(local.formatting.symbols);
+        Config {
+            decimal_comma: local.decimal_comma,
+            clock_24h: local.clock_24h,
+            date_order: local.date_order,
+            unit_system: local.unit_system,
+            week_start: local.week_start,
+            currency: local.currency,
+            dollar: local.dollar,
+            locale: local.locale,
+            formatting: Formatting { symbols, ..self.formatting.clone() },
+            ..self.clone()
+        }
     }
 
     /// As SoulverCore's `unformatted` preferences: every digit, no separators, currency codes.

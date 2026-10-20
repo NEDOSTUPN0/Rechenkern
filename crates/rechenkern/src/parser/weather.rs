@@ -14,7 +14,9 @@ impl Parser<'_> {
         }
         if let Some((what, n)) = self.phrase_at(i, &words::WEATHER) {
             let place_follows = ["in", "at", "for"].iter().any(|w| self.words_at(i + n, &[w]));
-            return (what == WeatherQuery::Summary || place_follows).then_some((what, n));
+            // "rain in Tokyo", but "pressure in psi" and "visibility in km" are not the weather.
+            let known_place = || !common_word(what) || self.place_at(i + n + 1).is_some();
+            return (what == WeatherQuery::Summary || (place_follows && known_place())).then_some((what, n));
         }
         // "Tokyo temperature": first see if a weather word follows at all, as places are slow.
         if !(i + 1..=i + crate::zones::MAX_WORDS).any(|k| self.phrase_at(k, &words::WEATHER).is_some()) {
@@ -66,4 +68,18 @@ impl Parser<'_> {
         }
         Ok(Some(Expr::Weather { what, place, on }))
     }
+}
+
+/// Weather words that are common words too: the weather only before a known place.
+fn common_word(what: WeatherQuery) -> bool {
+    matches!(
+        what,
+        WeatherQuery::Precipitation
+            | WeatherQuery::Rain
+            | WeatherQuery::Snowfall
+            | WeatherQuery::CloudCover
+            | WeatherQuery::Visibility
+            | WeatherQuery::Pressure
+            | WeatherQuery::Conditions
+    )
 }

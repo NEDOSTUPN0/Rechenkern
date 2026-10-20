@@ -80,6 +80,17 @@ struct Args {
     /// Download fresh exchange rates and exit.
     #[arg(long)]
     update_rates: bool,
+    /// Print what the engine knows as JSON and exit: units, currencies, countries or airports.
+    #[arg(long, value_enum)]
+    list: Option<Catalogue>,
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum Catalogue {
+    Units,
+    Currencies,
+    Countries,
+    Airports,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -111,6 +122,10 @@ enum Order {
 
 fn main() -> ExitCode {
     let args = Args::parse();
+    if let Some(catalogue) = args.list {
+        println!("{}", catalogue_json(catalogue));
+        return ExitCode::SUCCESS;
+    }
     let rates = OnlineRates {
         offline: args.offline,
         ..OnlineRates::new(dirs::cache_dir().map(|d| d.join("rechenkern/rates.json")))
@@ -184,6 +199,30 @@ fn main() -> ExitCode {
 
 /// `{"input": ..., "answer": ..., "error": ...}` for scripts and launchers, with the
 /// form of the line, its two sides and the text to copy when there is an answer.
+/// Units, currencies, countries or airports as a JSON array.
+fn catalogue_json(catalogue: Catalogue) -> serde_json::Value {
+    use serde_json::json;
+    let items: Vec<serde_json::Value> = match catalogue {
+        Catalogue::Units => rechenkern::units::registry()
+            .units()
+            .filter(|(_, d)| d.currency.is_none())
+            .map(|(_, d)| json!({ "symbol": d.symbol, "name": d.name, "plural": d.plural, "kind": d.dim.name() }))
+            .collect(),
+        Catalogue::Currencies => rechenkern::currency::CURRENCIES
+            .iter()
+            .map(|c| json!({ "code": c.code, "name": c.name, "symbol": c.symbol, "crypto": c.crypto }))
+            .collect(),
+        Catalogue::Countries => rechenkern::countries()
+            .iter()
+            .map(|c| json!({ "code": c.code, "name": c.name, "currency": c.currency, "zones": c.zones }))
+            .collect(),
+        Catalogue::Airports => rechenkern::airports()
+            .map(|a| json!({ "code": a.code, "zone": a.zone, "latitude": a.latitude, "longitude": a.longitude }))
+            .collect(),
+    };
+    serde_json::Value::Array(items)
+}
+
 fn json_line(
     calc: &Calculator,
     input: &str,

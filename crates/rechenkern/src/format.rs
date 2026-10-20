@@ -4,6 +4,7 @@ use jiff::Zoned;
 
 use crate::config::{Config, Formatting, Notation, Now, ScalarSystem, SymbolPosition, TimespanStyle};
 use crate::currency::Currency;
+use crate::custom;
 use crate::error::{Result, bail};
 use crate::eval::Display;
 use crate::number::Number;
@@ -35,7 +36,10 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
     match value {
         Value::Quantity(q) => quantity(q, display, config),
         Value::Percent(p) => format!("{}%", number(*p, config)),
-        Value::Moment(m) => moment(m, config, now.get()),
+        Value::Moment(m) => match display {
+            Display::Clock(h24) => moment(m, &Config { clock_24h: *h24, ..config.clone() }, now.get()),
+            _ => moment(m, config, now.get()),
+        },
         Value::Duration(d) if matches!(display, Display::Hms) => hms(d),
         Value::Duration(d) => duration(d, config),
         Value::Bool(b) => b.to_string(),
@@ -203,12 +207,13 @@ const SCALES_BEFORE_CODES: &[(i32, &str)] = &[(12, "tn"), (9, "bn"), (6, "M"), (
 /// Scales in their systems, biggest first: plain numbers take SI letters, money its own.
 fn scales(system: Option<ScalarSystem>) -> &'static [(i32, &'static str)] {
     match system {
-        None => &[(12, "T"), (9, "G"), (6, "M"), (3, "k")],
-        Some(ScalarSystem::Standard) => &[(12, "T"), (9, "B"), (6, "M"), (3, "K")],
+        None => &[(15, "P"), (12, "T"), (9, "G"), (6, "M"), (3, "k")],
+        Some(ScalarSystem::Standard) => &[(15, "P"), (12, "T"), (9, "B"), (6, "M"), (3, "K")],
         Some(ScalarSystem::Lowercase) => &[(12, "t"), (9, "b"), (6, "m"), (3, "k")],
-        Some(ScalarSystem::British) => &[(12, "tn"), (9, "bn"), (6, "m"), (3, "k")],
+        Some(ScalarSystem::British) => &[(15, " quadrillion"), (12, "tn"), (9, "bn"), (6, "m"), (3, "k")],
         Some(ScalarSystem::Russian) => &[(12, " трлн"), (9, " млрд"), (6, " млн"), (3, " тыс.")],
         Some(ScalarSystem::Chinese) => &[(8, "亿"), (4, "万")],
+        Some(ScalarSystem::Indian) => &[(7, " crore"), (5, " lakh"), (3, "K")],
     }
 }
 
@@ -364,10 +369,21 @@ fn fraction(n: Number, config: &Config) -> String {
     ratio(n.is_negative(), h1.unsigned_abs() as u128, k1.unsigned_abs() as u128)
 }
 
+/// The number is a fraction with a small denominator, near enough: 0.375 is 3/8, 1/3 is 1/3.
+pub(crate) fn is_simple_fraction(n: Number) -> bool {
+    if n.is_integer() {
+        return false;
+    }
+    (2..=64).any(|den| (n * Number::from_i64(den)).round_dp(18).is_integer())
+}
+
 /// A fraction as SoulverCore writes it: "⅜", "1 ¼", "3 1/7", "7/13".
 fn ratio(negative: bool, num: u128, den: u128) -> String {
     let sign = if negative { "-" } else { "" };
     let (whole, rest) = (num / den, num % den);
+    if rest == 0 {
+        return format!("{sign}{whole}");
+    }
     let part = match crate::lexer::vulgar_char(rest, den) {
         Some(c) => c.to_string(),
         None => format!("{rest}/{den}"),
@@ -399,11 +415,14 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         }
         Display::Auto
         | Display::Hms
+        | Display::Clock(_)
         | Display::Note(_)
         | Display::Period
         | Display::Dms
         | Display::Places(_)
         | Display::Significant(_)
+        | Display::Iso
+        | Display::Relative
         | Display::Digits(_) => {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config, false);
@@ -417,6 +436,12 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
             number(q.number, config)
         }
     };
+    // The host's own symbol: "5 kW·h".
+    let custom =
+        config.formatting.unit_symbols.iter().find(|s| custom::parse_unit(&s.unit).is_some_and(|u| u.same_as(&q.unit)));
+    if let Some(symbol) = custom {
+        return format!("{digits} {}", symbol.symbol);
+    }
     with_unit(&digits, q.number, &q.unit)
 }
 

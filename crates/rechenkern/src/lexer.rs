@@ -69,6 +69,9 @@ const MULTI_SYMBOLS: &[(&str, &str)] = &[
     ("/=", "/="),
     ("&&", "&&"),
     ("||", "||"),
+    ("≠", "!="),
+    ("≤", "<="),
+    ("≥", ">="),
 ];
 
 /// "h30m" after "1": the length of the leading time unit ("h") when the word is time
@@ -194,6 +197,7 @@ pub struct Options {
     pub trailing: bool,
     pub hashtags: bool,
     pub misplaced: MisplacedSeparator,
+    pub lenient_comma: bool,
 }
 
 impl Options {
@@ -205,6 +209,7 @@ impl Options {
             trailing: f.comments.trailing,
             hashtags: f.comments.hashtags,
             misplaced: f.misplaced_thousands_separator,
+            lenient_comma: f.lenient_comma_thousands,
         }
     }
 }
@@ -282,6 +287,11 @@ impl Lexer<'_> {
         !self.space && matches!(self.tokens.last(), Some(Token { tok: Tok::Num(_), .. }))
     }
 
+    /// A number came last, maybe with a space between: "3 ′" is still minutes of arc.
+    fn after_number_spaced(&self) -> bool {
+        matches!(self.tokens.last(), Some(Token { tok: Tok::Num(_), .. }))
+    }
+
     fn run(&mut self) {
         while let Some(c) = self.peek(0) {
             let start = self.i;
@@ -322,7 +332,7 @@ impl Lexer<'_> {
             } else if (c.is_alphabetic() && !matches!(c, 'º' | 'ˆ')) || c == '_' {
                 let tok = self.word();
                 self.push(tok, start);
-            } else if CURRENCY_SIGNS.contains(c) || matches!(c, '℃' | '℉') {
+            } else if CURRENCY_SIGNS.contains(c) || matches!(c, '℃' | '℉' | '℧') {
                 // Signs that stand for a word: "$", "℃".
                 self.i += 1;
                 self.push(Tok::Word(c.to_string()), start);
@@ -330,7 +340,7 @@ impl Lexer<'_> {
                 self.i += 1;
                 if !self.options.quotes {
                     self.space = true;
-                } else if self.after_number() {
+                } else if self.after_number() || (c == '″' && self.after_number_spaced()) {
                     // "30″" is arcseconds, as in SoulverCore; "5'10\"" feet and inches.
                     self.push(Tok::Sym(if c == '″' { "″" } else { "\"" }), start);
                 } else {
@@ -343,8 +353,17 @@ impl Lexer<'_> {
                 }
             } else if matches!(c, '\'' | '′' | '’') {
                 self.i += 1;
-                if self.after_number() {
+                // "3 '" is feet too, when no word is glued after it.
+                let alone = c == '\'' && self.peek(0).is_none_or(char::is_whitespace);
+                let converts = || {
+                    let rest = self.src[self.offset(self.i)..].trim_start();
+                    ["in ", "to "].iter().any(|w| rest.get(..3).is_some_and(|r| r.eq_ignore_ascii_case(w)))
+                };
+                if self.after_number() || ((c == '′' || alone) && self.after_number_spaced()) {
                     self.push(Tok::Sym(if c == '′' { "′" } else { "'" }), start);
+                } else if alone && self.tokens.is_empty() && converts() {
+                    // "' in km": the foot sign alone before a conversion is the foot.
+                    self.push(Tok::Word("ft".to_string()), start);
                 }
             } else if let Some(&(text, sym)) =
                 MULTI_SYMBOLS.iter().find(|(t, _)| self.src[self.offset(self.i)..].starts_with(t))
@@ -416,6 +435,21 @@ impl Lexer<'_> {
                 self.i += 1;
             }
             word = format!("{}m", word.to_lowercase());
+        }
+        // "S/.3", "S/ 3": the Peruvian sol, but not "m/S".
+        let before = start.checked_sub(1).and_then(|k| self.chars.get(k)).map(|&(_, c)| c);
+        if word == "S"
+            && self.peek(0) == Some('/')
+            && before != Some('/')
+            && (self.peek(1) == Some('.') || self.peek(1).is_some_and(|c| c.is_ascii_digit() || c == ' '))
+            && (self.peek(1) != Some(' ') || self.peek(2).is_some_and(|c| c.is_ascii_digit()))
+        {
+            self.i += 1;
+            word.push('/');
+            if self.peek(0) == Some('.') {
+                self.i += 1;
+                word.push('.');
+            }
         }
         // "US$", "C$", "R$", "CN¥"
         if let Some(sign @ ('$' | '¥')) = self.peek(0)
@@ -514,6 +548,11 @@ impl Lexer<'_> {
         {
             let decimals = groups.get(pairs + 1).is_some_and(|(sep, _, _)| *sep == '.');
             return if decimals { (pairs + 2, Some(pairs + 1)) } else { (pairs + 1, None) };
+        }
+        // "1,000" with a decimal comma: a thousand, if the config is lenient.
+        let lenient = self.decimal_comma && self.options.lenient_comma && !in_list && whole;
+        if lenient && groups.len() == 1 && first == ',' && groups[0].1.len() == 3 {
+            return (1, None);
         }
         let run = groups.iter().take_while(|(sep, digits, _)| *sep == first && digits.len() == 3).count();
         let decimal_after = groups.get(run).is_some_and(|(sep, _, _)| *sep != first);

@@ -62,6 +62,63 @@ impl Form {
     }
 }
 
+/// The host phrase a line called, as SoulverCore's `TokenListForm.customFunction`.
+#[derive(Clone, Debug)]
+pub struct CustomCall {
+    /// `CustomFunction::id`.
+    pub id: Option<String>,
+    pub prototype: String,
+    /// The values the placeholders got.
+    pub values: Vec<Value>,
+}
+
+/// How an answer is written beyond its value, as SoulverCore's result kinds tell it: a host
+/// can tell `0xFF` from 255 without reading the text.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum DisplayKind {
+    /// As the value is: "255", "5 km", "Tue, 20 Oct 2026".
+    Plain,
+    /// In base 2, 8 or 16: "0xFF".
+    Base(u32),
+    /// "1.5e9"
+    Scientific,
+    /// "⅜", "1 ¼"
+    Fraction,
+    /// "1.5x"
+    Multiplier,
+    /// Over several units: "5 ft 6 in".
+    Compound,
+    /// A Unix timestamp, without separators.
+    Timestamp,
+    /// With a remark: "Thu, 19 Nov 2026 (probably)".
+    Noted,
+    /// A span as its first and last day: "1 Jul – 30 Sep 2026".
+    Period,
+    /// Rounded to these decimal places, all shown.
+    DecimalPlaces(u32),
+    /// Rounded to these significant digits, all shown.
+    SignificantDigits(u32),
+    /// More digits than a number holds: pi to 1000 places.
+    Digits,
+    /// Degrees, minutes and seconds.
+    Dms,
+    /// With the scale the line wrote: "$2.5M".
+    Scaled,
+    /// In cents, pence or satoshis: "1,000 cents".
+    MinorUnits,
+    /// Hours, minutes and seconds: "3h 30m 0s".
+    Hms,
+    /// Video frames: "240 frames".
+    Frames,
+    /// A time of day on a 24-hour or a 12-hour clock.
+    Clock { h24: bool },
+    /// ISO 8601: "2026-12-25".
+    Iso8601,
+    /// From now: "in 3 days".
+    Relative,
+}
+
 /// One side of a line with two: what is converted, or what it becomes.
 #[derive(Clone, Debug)]
 pub struct Side {
@@ -97,6 +154,7 @@ pub struct Answer {
     config: Arc<Config>,
     now: Option<Zoned>,
     sides: OnceCell<Option<(Side, Side, Option<String>)>>,
+    custom: Option<Box<CustomCall>>,
 }
 
 impl Answer {
@@ -111,6 +169,35 @@ impl Answer {
 
     pub fn form(&self) -> Form {
         self.form
+    }
+
+    /// The host phrase the line called, with its values (`Form::CustomFunction`).
+    pub fn custom_call(&self) -> Option<&CustomCall> {
+        self.custom.as_deref()
+    }
+
+    pub(crate) fn set_custom_call(&mut self, call: CustomCall) {
+        self.custom = Some(Box::new(call));
+    }
+
+    /// The same answer written with other formatting.
+    pub fn reformatted(&self, formatting: &crate::config::Formatting) -> Answer {
+        let config = Arc::new(Config { formatting: formatting.clone(), ..(*self.config).clone() });
+        let now = match &self.now {
+            Some(time) => Now::at(&config, time.clone()),
+            None => Now::new(&config),
+        };
+        Answer {
+            text: format::render(&self.value, &self.display, &config, &now),
+            config,
+            sides: OnceCell::new(),
+            ..self.clone()
+        }
+    }
+
+    /// How the answer is written beyond its value.
+    pub fn display_kind(&self) -> DisplayKind {
+        kind_of(&self.display)
     }
 
     /// What later lines get for this answer: the value, or the value as shown if the
@@ -366,6 +453,16 @@ impl Env<'_> {
                 (ConversionRule::TimeZone(zone), Value::Moment(m)) if m.kind != MomentKind::Date => {
                     Some(Target::Zone(Place::of_zone(zone)))
                 }
+                (ConversionRule::Durations { to }, Value::Duration(_)) => Some(Target::Unit(custom::parse_unit(to)?)),
+                (ConversionRule::Durations { to }, Value::Quantity(q)) if q.unit.dim() == Dim::TIME => {
+                    Some(Target::Unit(custom::parse_unit(to)?))
+                }
+                (ConversionRule::Parts { like, units }, Value::Quantity(q)) => {
+                    let like = custom::parse_unit(like)?;
+                    let units = units.iter().map(|u| custom::parse_unit(u)).collect::<Option<Vec<_>>>()?;
+                    (!q.unit.is_none() && q.unit.dim() == like.dim()).then_some(Target::Units(units))
+                }
+                (ConversionRule::RelativeDates, Value::Moment(_)) => Some(Target::Format(Format::Relative)),
                 _ => None,
             }),
         };
@@ -425,7 +522,7 @@ impl Env<'_> {
         }
         let mut parts = Parts::default();
         let (value, display) = match expr {
-            Expr::Convert(inner, target) if !matches!(**inner, Expr::Range(..)) => {
+            Expr::Convert(inner, target) if !matches!(**inner, Expr::Range(..) | Expr::SignedRange(..)) => {
                 let saved = self.food_as.replace(weight_or_volume(target));
                 let source = self.answer(inner);
                 self.food_as.set(saved);
@@ -437,11 +534,11 @@ impl Env<'_> {
                 }
                 self.convert(from, target, display)?
             }
-            _ if let Some((a, b)) = interval(expr) => {
+            _ if let Some((a, b, signed)) = interval(expr) => {
                 let (a, b) = self.range_ends(a, b)?;
                 parts.source = Some((a.clone(), Display::Auto));
                 parts.end = Some(b.clone());
-                let span = self.range(a, b)?;
+                let span = if signed { self.signed_range(a, b)? } else { self.range(a, b)? };
                 match expr {
                     Expr::Convert(_, target) => self.convert(span, target, Display::Auto)?,
                     _ => (span, Display::Auto),
@@ -483,6 +580,7 @@ impl Env<'_> {
             config: config.clone(),
             now: self.now.peek().cloned(),
             sides: OnceCell::new(),
+            custom: None,
         }
     }
 }
@@ -507,11 +605,12 @@ fn form(expr: &Expr, value: &Value) -> Form {
 
 /// The ends of a range of dates or times, also inside a conversion: `days until christmas`,
 /// `Jan 1 - Mar 1`.
-fn interval(expr: &Expr) -> Option<(&Expr, &Expr)> {
+fn interval(expr: &Expr) -> Option<(&Expr, &Expr, bool)> {
     match expr {
         Expr::Convert(inner, _) => interval(inner),
-        Expr::Range(a, b) if is_moment(a) && is_moment(b) => Some((a, b)),
-        Expr::Binary(Op::Sub, a, b) if time::yearless(a) && time::yearless(b) => Some((a, b)),
+        Expr::Range(a, b) if is_moment(a) && is_moment(b) => Some((a, b, false)),
+        Expr::SignedRange(a, b) if is_moment(a) && is_moment(b) => Some((a, b, true)),
+        Expr::Binary(Op::Sub, a, b) if time::yearless(a) && time::yearless(b) => Some((a, b, false)),
         _ => None,
     }
 }
@@ -632,6 +731,8 @@ fn format_caption(format: Format) -> Option<String> {
         Format::Timespan => "Timespan",
         Format::Laptime => "Laptime",
         Format::Hms => "Hours, Minutes and Seconds",
+        Format::Clock(true) => "24-Hour Clock",
+        Format::Clock(false) => "12-Hour Clock",
         Format::WeekOfMonth => "Week of Month",
         Format::Timestamp => "Unix Timestamp",
         Format::Date => "Date",
@@ -645,6 +746,33 @@ fn format_caption(format: Format) -> Option<String> {
         Format::Dms => "Degrees, Minutes and Seconds",
         Format::Megapixels => "Megapixels",
         Format::Frames => "Frames",
+        Format::Relative => "Relative Date",
     };
     Some(name.to_string())
+}
+
+/// What kind of display a line's answer has.
+pub(crate) fn kind_of(display: &Display) -> DisplayKind {
+    match display {
+        Display::Auto => DisplayKind::Plain,
+        Display::Radix(r) => DisplayKind::Base(*r),
+        Display::Scientific => DisplayKind::Scientific,
+        Display::Fraction => DisplayKind::Fraction,
+        Display::Multiplier => DisplayKind::Multiplier,
+        Display::Parts(_) => DisplayKind::Compound,
+        Display::Plain => DisplayKind::Timestamp,
+        Display::Note(_) => DisplayKind::Noted,
+        Display::Period => DisplayKind::Period,
+        Display::Places(dp) => DisplayKind::DecimalPlaces(*dp),
+        Display::Significant(n) => DisplayKind::SignificantDigits(*n),
+        Display::Digits(_) => DisplayKind::Digits,
+        Display::Dms => DisplayKind::Dms,
+        Display::Scaled => DisplayKind::Scaled,
+        Display::Minor => DisplayKind::MinorUnits,
+        Display::Hms => DisplayKind::Hms,
+        Display::Frames => DisplayKind::Frames,
+        Display::Clock(h24) => DisplayKind::Clock { h24: *h24 },
+        Display::Iso => DisplayKind::Iso8601,
+        Display::Relative => DisplayKind::Relative,
+    }
 }

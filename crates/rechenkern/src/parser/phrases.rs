@@ -4,6 +4,7 @@ use super::Parser;
 use crate::ast::{
     Direction, Expr, Format, Func, GrowthResult, IncomeTaxPart, MonthDay, Op, Target, TaxPart, TimeExpr, Which,
 };
+use crate::config::Phrase;
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -12,72 +13,122 @@ use crate::units::{Dim, Unit, registry};
 impl Parser<'_> {
     /// Tries phrases such as "20 is what % of 200" on the whole line.
     pub(super) fn phrase(&mut self) -> Result<Option<Expr>> {
-        if let Some(expr) = self.cadence()? {
+        let disabled = &self.config().features.disabled_phrases;
+        let on = |phrase: Phrase| disabled.is_empty() || !disabled.contains(&phrase);
+        if on(Phrase::Cadence)
+            && let Some(expr) = self.cadence()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.sales_tax()? {
+        if on(Phrase::SalesTax)
+            && let Some(expr) = self.sales_tax()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.inflation()? {
+        if on(Phrase::Inflation)
+            && let Some(expr) = self.inflation()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.investment_required()? {
+        if on(Phrase::InvestmentRequired)
+            && let Some(expr) = self.investment_required()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.time_saved()? {
+        if on(Phrase::TimeSaved)
+            && let Some(expr) = self.time_saved()?
+        {
             return Ok(Some(expr));
         }
-        // "frames between 00:00:10:00 and 00:00:20:00"
-        if self.matches_at(0, &["frames", "between"]) {
+        if on(Phrase::Discount)
+            && let Some(expr) = self.discount()?
+        {
+            return Ok(Some(expr));
+        }
+        // "frames between 00:00:10:00 and 00:00:20:00", "frames in 00:01:00:00 to 00:02:00:00"
+        if on(Phrase::Frames) && ["between", "in", "from"].iter().any(|w| self.matches_at(0, &["frames", w])) {
             let mut p = self.sub(2, self.toks.len());
             let [a, b] = p.pair()?;
             return Ok(Some(Self::formatted(Expr::Range(a.boxed(), b.boxed()), Format::Frames)));
         }
-        if let Some(expr) = self.income_tax()? {
+        if on(Phrase::IncomeTax)
+            && let Some(expr) = self.income_tax()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.growth()? {
+        if on(Phrase::Growth)
+            && let Some(expr) = self.growth()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.screen_density()? {
+        if on(Phrase::ScreenDensity)
+            && let Some(expr) = self.screen_density()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.wheel_speed()? {
+        if on(Phrase::WheelSpeed)
+            && let Some(expr) = self.wheel_speed()?
+        {
             return Ok(Some(expr));
         }
 
-        if let Some(expr) = self.annual_return()? {
+        if on(Phrase::AnnualReturn)
+            && let Some(expr) = self.annual_return()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.progress() {
+        if on(Phrase::Progress)
+            && let Some(expr) = self.progress()
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.exchange_rate()? {
+        if on(Phrase::ExchangeRate)
+            && let Some(expr) = self.exchange_rate()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.time_to_reach()? {
+        if on(Phrase::Cast)
+            && let Some(expr) = self.leading_cast()
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.growth_rate()? {
+        if on(Phrase::TimeToReach)
+            && let Some(expr) = self.time_to_reach()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.investment_return()? {
+        if on(Phrase::GrowthRate)
+            && let Some(expr) = self.growth_rate()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.when_it_is()? {
+        if on(Phrase::InvestmentReturn)
+            && let Some(expr) = self.investment_return()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.percent_change()? {
+        if on(Phrase::WhenItIs)
+            && let Some(expr) = self.when_it_is()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.prime_check() {
+        if on(Phrase::PercentChange)
+            && let Some(expr) = self.percent_change()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.digits_of_pi() {
+        if on(Phrase::PrimeCheck)
+            && let Some(expr) = self.prime_check()
+        {
+            return Ok(Some(expr));
+        }
+        if on(Phrase::DigitsOfPi)
+            && let Some(expr) = self.digits_of_pi()
+        {
             return Ok(Some(expr));
         }
         // Every phrase below has one of these words.
-        if !self.toks.iter().any(|t| ["is", "as", "what"].iter().any(|w| t.is_word(w))) {
+        if !on(Phrase::Percentages) || !self.toks.iter().any(|t| ["is", "as", "what"].iter().any(|w| t.is_word(w))) {
             return Ok(None);
         }
         let end = self.toks.len();
@@ -124,7 +175,7 @@ impl Parser<'_> {
         {
             let whole = self.part(3, is)?;
             let part = self.part(is + 1, end)?;
-            return Ok(Some(pct(Expr::binary(Op::Div, part, whole))));
+            return Ok(Some(Expr::binary(Op::OutOf, part, whole)));
         }
         // "what % is 25 with 100"
         if self.matches_at(0, &["what", "%", "is"])
@@ -161,6 +212,10 @@ impl Parser<'_> {
             let kind = kind.unwrap_or("of");
             let a = self.part(0, at)?;
             let b = self.share_part(kind, from, end)?;
+            // "12.5 is what % of $40": a plain number counts in the other's unit.
+            if kind == "of" && format == Format::Percent {
+                return Ok(Some(Expr::binary(Op::OutOf, a, b)));
+            }
             return Ok(Some(Self::formatted(share(kind, a, b), format)));
         }
 
@@ -210,7 +265,8 @@ impl Parser<'_> {
             return Ok(Some(Expr::binary(Op::Div, a, divisor)));
         }
 
-        // "50 to 75 is what %", "40 to 90 as %", "50 to 75 is what x"
+        // "50 to 75 is what %", "40 to 90 as %", "50 to 75 is what x", "from 30 to 10 is what % change"
+        let start = usize::from(self.matches_at(0, &["from"]));
         for (seq, skip) in [(&["is", "what"][..], 2), (&["as", "a"][..], 2), (&["as"][..], 1)] {
             let Some(at) = self.find(0, seq) else { continue };
             let Some(to) = self.find(0, &["to"]).filter(|&t| t < at) else { continue };
@@ -222,10 +278,12 @@ impl Parser<'_> {
             } else {
                 continue;
             };
-            if tail + 1 != end {
+            let changed =
+                self.lower(tail + 1).is_some_and(|w| matches!(w.as_str(), "change" | "increase" | "decrease"));
+            if tail + 1 + usize::from(changed) != end {
                 continue;
             }
-            let a = self.part(0, to)?;
+            let a = self.part(start, to)?;
             let b = self.part(to + 1, at)?;
             let change = match format {
                 Format::Percent => change(a, b),
@@ -314,10 +372,12 @@ impl Parser<'_> {
             compounds,
             result,
         };
-        // "monthly repayment": the whole loan spread over its time.
+        // "monthly repayment": the whole loan spread over its time, all of it in a loan shorter
+        // than a month.
         Ok(Some(match every {
             Some((n, unit)) => {
                 let every = Expr::WithUnit(Expr::Number(Number::from_i64(n)).boxed(), registry().get(unit));
+                let time = Expr::Call(Func::Max, vec![time, every.clone()]);
                 Expr::binary(Op::Mul, Expr::binary(Op::Div, growth, time), every)
             }
             None => growth,
@@ -381,6 +441,7 @@ impl Parser<'_> {
             let every = period(rate.period.unwrap_or((Number::ONE, registry().get("yr"))));
             let factor = Expr::binary(Op::Add, Expr::Number(Number::ONE), rate.rate);
             let steps = Expr::Call(Func::Log, vec![Expr::binary(Op::Div, b, a), factor]);
+            let steps = Expr::Call(Func::Reach, vec![steps]);
             let time = Expr::binary(Op::Mul, steps, every);
             return Ok(Some(match unit {
                 Some(unit) => Expr::Convert(time.boxed(), Target::Unit(unit)),
@@ -402,11 +463,13 @@ impl Parser<'_> {
             (None, Some((_, unit))) => Some(Target::Units(parts(unit))),
             (None, None) => None,
         };
+        // Plain numbers are money at a money rate: "time from 20 to 30 at $50/hour".
+        let op = if rate.rate.edge_unit(true).is_some_and(Unit::is_money) { Op::At } else { Op::Div };
         let rate = match rate.period {
             Some(p) => Expr::binary(Op::Per, rate.rate, period(p)),
             None => rate.rate,
         };
-        let time = Expr::binary(Op::Div, Expr::binary(Op::Sub, b, a), rate);
+        let time = Expr::Call(Func::Reach, vec![Expr::binary(op, Expr::binary(Op::Sub, b, a), rate)]);
         Ok(Some(match target {
             Some(target) => Expr::Convert(time.boxed(), target),
             None => time,
@@ -498,15 +561,17 @@ impl Parser<'_> {
         }))
     }
 
-    /// "year %", "day percentage": how much of this period has gone by.
+    /// "year %", "day percentage", "days %": how much of this period has gone by.
     fn progress(&self) -> Option<Expr> {
         if self.toks.len() != 2 || !self.matches_at(1, &["%"]) {
             return None;
         }
-        let (start, next) = match self.lower(0)?.as_str() {
+        let word = self.lower(0)?;
+        let word = word.strip_suffix('s').unwrap_or(&word);
+        let (start, next) = match word {
             "day" => (TimeExpr::Today(0), TimeExpr::Today(1)),
             "week" | "month" | "year" => {
-                let unit = match self.lower(0)?.as_str() {
+                let unit = match word {
                     "week" => jiff::Unit::Week,
                     "month" => jiff::Unit::Month,
                     _ => jiff::Unit::Year,
@@ -521,22 +586,32 @@ impl Parser<'_> {
         Some(Self::formatted(part, Format::Percent))
     }
 
-    /// "ppi of 5.5 inch at 1920x1080": the pixels per inch of a screen.
+    /// "ppi of 5.5 inch at 1920x1080", "density of 27 inch at 2560x1440": the pixels per inch of a screen.
     fn screen_density(&self) -> Result<Option<Expr>> {
-        if !(self.matches_at(0, &["ppi"]) || self.matches_at(0, &["dpi"])) {
-            return Ok(None);
-        }
-        let start = 1 + usize::from(self.matches_at(1, &["of"]));
+        let words = [&["ppi"][..], &["dpi"], &["density"], &["pixel", "density"], &["pixels", "per", "inch"]];
+        // "5.5 inch screen at 1920x1080 ppi": the word may come last.
+        let last = usize::from(self.ends_with(&["ppi"]) || self.ends_with(&["dpi"]));
+        let lead = match words.iter().find(|w| self.matches_at(0, w)) {
+            Some(w) => w.len(),
+            None if last == 1 => 0,
+            None => return Ok(None),
+        };
+        let start = lead + usize::from(self.matches_at(lead, &["of"]));
         let resolution = (start + 1..self.toks.len()).find_map(|i| Some((i, self.resolution_at(i)?)));
         let Some((at, (width, height, n))) = resolution else {
             return Ok(None);
         };
-        if at + n != self.toks.len() {
+        if at + n + last != self.toks.len() {
             return Ok(None);
         }
         let end = at - usize::from(self.matches_at(at - 1, &["at"]));
         let reg = registry();
-        let inches = Expr::Convert(self.part(start, end)?.boxed(), Target::Unit(reg.get("in")));
+        let screen = match self.part(start, end) {
+            Ok(screen) => screen,
+            Err(_) if lead == 0 => return Ok(None),
+            Err(e) => return Err(e),
+        };
+        let inches = Expr::Convert(screen.boxed(), Target::Unit(reg.get("in")));
         let pixels = Expr::Call(Func::Sqrt, vec![Expr::Number(width * width + height * height)]);
         let density = Expr::binary(Op::Div, pixels, Self::formatted(inches, Format::Number));
         Ok(Some(Expr::WithUnit(density.boxed(), reg.get("ppi"))))
@@ -546,7 +621,8 @@ impl Parser<'_> {
     /// £50,000 in UK", "effective tax rate for €80,000 in Germany".
     fn income_tax(&self) -> Result<Option<Expr>> {
         let len = self.toks.len();
-        let tax = self.toks.iter().any(|t| t.is_word("tax")) || (0..len).any(|i| self.matches_at(i, &["take", "home"]));
+        let tax = self.toks.iter().any(|t| t.is_word("tax"))
+            || (0..len).any(|i| self.matches_at(i, &["take", "home"]) || self.matches_at(i, &["net", "income"]));
         if !tax {
             return Ok(None);
         }
@@ -598,17 +674,35 @@ impl Parser<'_> {
         Ok(Some(Expr::IncomeTax { income: income.boxed(), country, part }))
     }
 
-    /// "time saved for 1 hour 30 minutes at 1.5x": the time minus the time at that speed.
+    /// "time saved for 1 hour 30 minutes at 1.5x" (or "to 1.5x"): the time minus the time at that speed.
     fn time_saved(&self) -> Result<Option<Expr>> {
         if !self.matches_at(0, &["time", "saved"]) {
             return Ok(None);
         }
-        let start = 2 + usize::from(self.matches_at(2, &["for"]) || self.matches_at(2, &["on"]));
-        let Some(at) = self.find(start + 1, &["at"]) else { return Ok(None) };
+        let start = 2 + usize::from(["for", "on", "at"].iter().any(|w| self.matches_at(2, &[w])));
+        // "time saved 3 weeks to 1.5x" plays it at that speed too.
+        let Some(at) = self.find(start + 1, &["at"]).or_else(|| self.find(start + 1, &["to"])) else { return Ok(None) };
         let time = self.part(start, at)?;
         let speed = self.part(at + 1, self.toks.len())?;
         let faster = Expr::binary(Op::At, time.clone(), speed);
         Ok(Some(Expr::binary(Op::Sub, time, faster)))
+    }
+
+    /// "$80 after 15% discount", "$80 with a 15% discount": the price with that much off.
+    fn discount(&self) -> Result<Option<Expr>> {
+        let len = self.toks.len();
+        if len < 4 || !["discount", "off", "rebate", "markdown"].iter().any(|w| self.matches_at(len - 1, &[w])) {
+            return Ok(None);
+        }
+        let Some(at) = (1..len - 2).find(|&i| self.matches_at(i, &["after"]) || self.matches_at(i, &["with"])) else {
+            return Ok(None);
+        };
+        let start = at + 1 + usize::from(self.matches_at(at + 1, &["a"]));
+        let Ok(share) = self.part(start, len - 1) else { return Ok(None) };
+        if !matches!(share, Expr::Percent(_)) {
+            return Ok(None);
+        }
+        Ok(Some(Expr::binary(Op::Off, share, self.part(0, at)?)))
     }
 
     /// "investment required for $1,000/month at 5%": what pays that much a year at the
@@ -728,6 +822,22 @@ impl Parser<'_> {
             true => Expr::binary(Op::Of, asked, whole),
             false => Self::formatted(Expr::binary(Op::Div, asked, whole), Format::Percent),
         }))
+    }
+
+    /// "cast 5 km miles", "cast 5 km to miles": converts, as SoulverCore does with "cast" first
+    /// (only "5 km cast to miles" keeps the number).
+    fn leading_cast(&self) -> Option<Expr> {
+        let end = self.toks.len();
+        if !self.matches_at(0, &["cast"]) || end < 3 {
+            return None;
+        }
+        (2..end).rev().find_map(|k| {
+            let from = k - usize::from(["to", "as", "into", "in"].iter().any(|w| self.matches_at(k - 1, &[w])));
+            let mut unit = self.sub(k, end);
+            let Some(Target::Unit(unit)) = unit.target().filter(|_| unit.pos == end - k) else { return None };
+            let amount = self.part(1, from).ok()?;
+            Some(Expr::Convert(amount.boxed(), Target::Unit(unit)))
+        })
     }
 
     /// "% change from 10 to 20", "percent increase from 10 to 20", "what % change is 10 to 20".

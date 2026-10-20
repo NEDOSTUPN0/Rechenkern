@@ -57,6 +57,12 @@ pub enum Display {
     Hms,
     /// A count of video frames: "240 frames".
     Frames,
+    /// A time of day on a 24-hour (true) or 12-hour clock.
+    Clock(bool),
+    /// Written as ISO 8601: "2026-12-25".
+    Iso,
+    /// From now: "in 3 days".
+    Relative,
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -100,8 +106,12 @@ pub(crate) struct Env<'a> {
     pub rates_at_hand: Cell<bool>,
     pub inflation: Option<&'a dyn InflationProvider>,
     pub weather: Option<&'a dyn WeatherProvider>,
+    /// The host's variables, for names no line set.
+    pub variables: Option<&'a dyn crate::custom::VariableProvider>,
     /// What the line read, for sheets that recalculate only what changed.
     pub reads: std::cell::RefCell<crate::calculator::Reads>,
+    /// The host phrase the line called last, with the values it got.
+    pub custom_call: std::cell::RefCell<Option<(usize, Vec<Value>)>>,
 }
 
 impl Env<'_> {
@@ -205,7 +215,12 @@ impl Env<'_> {
                 #[cfg(test)]
                 crate::tests::SHEET_READS.with(|reads| reads.set(reads.get() + 1));
                 self.reads.borrow_mut().names.push(name.clone());
-                self.vars.get(name).cloned().ok_or_else(|| Error::new(format!("unknown variable {name}")))?
+                let host = || self.variables.and_then(|v| v.variable(name));
+                self.vars
+                    .get(name)
+                    .cloned()
+                    .or_else(host)
+                    .ok_or_else(|| Error::new(format!("unknown variable {name}")))?
             }
             Expr::Line(line) => self.line(*line)?,
             Expr::Cadence { every, start, until } => self.cadence(every, start.as_deref(), until.as_deref())?,
@@ -239,6 +254,10 @@ impl Env<'_> {
             Expr::Range(a, b) => {
                 let (a, b) = self.range_ends(a, b)?;
                 self.range(a, b)?
+            }
+            Expr::SignedRange(a, b) => {
+                let (a, b) = self.range_ends(a, b)?;
+                self.signed_range(a, b)?
             }
             Expr::Period(first, length) => self.period(first, length)?,
             Expr::ZoneDiff(a, b) => self.zone_difference(&a.zone, &b.zone)?,
@@ -329,6 +348,10 @@ impl Env<'_> {
     fn amount_range(&self, a: &Expr, b: &Expr) -> Result<Option<[Quantity; 2]>> {
         let Value::Quantity(mut a) = self.eval(a)? else { return Ok(None) };
         let Value::Quantity(mut b) = self.eval(b)? else { return Ok(None) };
+        // "from 30 to 10" is the difference, as in SoulverCore.
+        if a.unit.is_none() && b.unit.is_none() {
+            return Ok(None);
+        }
         if a.unit.is_none() {
             a.unit = b.unit.clone();
         } else if b.unit.is_none() {
@@ -360,7 +383,7 @@ impl Env<'_> {
         if args.len() != function.params.len() {
             bail!("{name} takes {} values, not {}", function.params.len(), args.len());
         }
-        if self.depth.get() >= 64 {
+        if self.depth.get() >= 32 {
             bail!("{name} calls itself too deep");
         }
         let mut vars = self.vars.clone();
@@ -381,7 +404,9 @@ impl Env<'_> {
             rates_at_hand: Cell::new(self.rates_at_hand.get()),
             inflation: self.inflation,
             weather: self.weather,
+            variables: self.variables,
             reads: Default::default(),
+            custom_call: Default::default(),
         };
         let result = inner.eval(&function.body);
         self.reads.borrow_mut().merge(inner.reads.take());
@@ -398,6 +423,7 @@ impl Env<'_> {
             .map(|arg| match arg {
                 CustomArg::Unit(unit) => Ok(Value::Quantity(Quantity::new(Number::ONE, unit.clone()))),
                 CustomArg::Text(text) => Ok(Value::Text(text.clone())),
+                CustomArg::Value(value) => Ok(value.clone()),
                 CustomArg::Expr(expr, kind) => {
                     let value = self.eval(expr)?;
                     let fits = match (kind, &value) {
@@ -418,6 +444,7 @@ impl Env<'_> {
                 }
             })
             .collect::<Result<Vec<_>>>()?;
+        self.custom_call.replace(Some((function, values.clone())));
         (custom.handler)(&values).map_err(Error::new)
     }
 
@@ -575,6 +602,16 @@ impl Env<'_> {
             let kelvin = q.number * a.scale + a.offset;
             return Ok(Quantity::new((kelvin - b.offset) / b.scale, to.clone()));
         }
+        // The host's rate for the pair: "100 USD in EUR".
+        if let (Some(from), Some(target)) = (q.unit.single(), to.single())
+            && let (Some(a), Some(b)) = (from.currency, target.currency)
+            && from.scale == Number::ONE
+            && target.scale == Number::ONE
+            && self.rate_date.get().is_none()
+            && let Some(rate) = self.rates.pair_rate(a.code, b.code)
+        {
+            return Ok(Quantity::new(q.number * rate, to.clone()));
+        }
         let scale = |id| self.scale(id);
         let factor = q.unit.scale(&scale)? / to.scale(&scale)?;
         Ok(Quantity::new(q.number * factor, to.clone()))
@@ -627,15 +664,22 @@ impl Env<'_> {
                         .take_while(|l| l.kind == LineKind::Value)
                         .count()
                     - self.lines.iter().rev().take_while(|l| l.kind == LineKind::Total).count();
+                // A tag takes its lines from the whole sheet above, as in SoulverCore: "sum #food".
+                let whole = !self.tags.is_empty();
                 // The line that ends the block counts too: it may stop being a heading.
-                self.reads.borrow_mut().lines.extend(first.saturating_sub(1)..self.lines.len());
+                let first = if whole { 0 } else { first.saturating_sub(1) };
+                self.reads.borrow_mut().lines.extend(first..self.lines.len());
                 let tagged = |l: &&Line| self.tags.is_empty() || l.tags.iter().any(|t| self.tags.contains(t));
+                let in_block = std::cell::Cell::new(true);
                 let mut block: Vec<Value> = self
                     .lines
                     .iter()
                     .rev()
                     .skip_while(|l| l.kind == LineKind::Total)
-                    .take_while(|l| l.kind == LineKind::Value)
+                    .filter(|l| {
+                        in_block.set(in_block.get() && l.kind == LineKind::Value);
+                        (whole || in_block.get()) && l.kind == LineKind::Value
+                    })
                     .filter(tagged)
                     .filter_map(|l| l.value.clone())
                     .filter(|v| matches!(v, Value::Quantity(_) | Value::Percent(_) | Value::Duration(_)))
@@ -669,6 +713,14 @@ impl Env<'_> {
             }
             Target::Units(units) => self.to_parts(value, units)?,
             Target::Per(period) => {
+                // "salary $120k in monthly": an amount of money alone is a year's.
+                let value = match value {
+                    Value::Quantity(q) if q.unit.dim() == Dim::MONEY => {
+                        let year = Value::Quantity(Quantity::new(Number::ONE, registry().get("yr")));
+                        self.binary(Op::Per, Value::Quantity(q), year)?
+                    }
+                    v => v,
+                };
                 let unit = match &value {
                     Value::Quantity(q) => q.unit.numerator().product(&period.pow(-1)),
                     v => bail!("{} is not a rate", v.kind()),
@@ -768,6 +820,14 @@ impl Env<'_> {
                 Ok(Value::Quantity(self.convert_quantity(&hz, unit)?))
             }
             Value::Percent(p) if unit.is_none() => Ok(Value::number(p / Number::from_i64(100))),
+            // "hours in today": the length of that day where it is (23 or 25 hours when the clocks change).
+            Value::Moment(m) if m.kind == MomentKind::Date && unit.dim() == Dim::TIME => {
+                let zone = if m.zoned { m.time.time_zone().clone() } else { self.local_zone() };
+                let start = m.time.date().to_zoned(zone.clone())?;
+                let end = m.time.date().tomorrow()?.to_zoned(zone)?;
+                let seconds = Number::from_i64(end.timestamp().as_second() - start.timestamp().as_second());
+                Ok(Value::Quantity(self.convert_quantity(&Quantity::new(seconds, registry().get("s")), unit)?))
+            }
             v => bail!("can't convert {} to {}", v.kind(), unit_text(unit, true)),
         }
     }
@@ -847,6 +907,9 @@ impl Env<'_> {
             },
             Format::Frames => match value {
                 Value::Timecode(t) => (Value::number(Number::from_i64(t.frames)), Display::Frames),
+                Value::Quantity(q) if q.unit.is_none() && q.number.is_integer() => {
+                    (Value::Quantity(q), Display::Frames)
+                }
                 v => bail!("only a timecode has frames, not {}", v.kind()),
             },
             Format::Pitch => match &value {
@@ -890,6 +953,10 @@ impl Env<'_> {
                     (Value::Percent(q.number * Number::from_i64(100)), Display::Auto)
                 }
                 v => bail!("can't show {} as a percentage", v.kind()),
+            },
+            Format::Clock(h24) => match value {
+                Value::Moment(_) => (value, Display::Clock(h24)),
+                v => bail!("{} is not a time of day", v.kind()),
             },
             Format::Hms => {
                 let seconds = match &value {
@@ -935,6 +1002,8 @@ impl Env<'_> {
                 v => bail!("can't make a timestamp from {}", v.kind()),
             },
             Format::Date => match value {
+                // A date stays one; a clock time shows its date too.
+                Value::Moment(m) if m.kind == MomentKind::Date => (Value::Moment(m), Display::Auto),
                 Value::Moment(m) => (Value::Moment(Moment { kind: MomentKind::DateTime, ..m }), Display::Auto),
                 Value::Quantity(q) if q.unit.is_none() => {
                     (Value::Moment(self.timestamp_moment(q.number)?), Display::Auto)
@@ -942,8 +1011,16 @@ impl Env<'_> {
                 v => bail!("can't make a date from {}", v.kind()),
             },
             Format::Iso => match value {
-                Value::Moment(m) => (Value::Text(m.time.strftime("%Y-%m-%dT%H:%M:%S%:z").to_string()), Display::Auto),
+                // A date alone has no time of day: "christmas in iso" = 2026-12-25.
+                Value::Moment(m) if m.kind == MomentKind::Date => {
+                    (Value::Text(m.time.strftime("%Y-%m-%d").to_string()), Display::Iso)
+                }
+                Value::Moment(m) => (Value::Text(m.time.strftime("%Y-%m-%dT%H:%M:%S%:z").to_string()), Display::Iso),
                 v => bail!("can't write {} as ISO 8601", v.kind()),
+            },
+            Format::Relative => match value {
+                Value::Moment(m) => (Value::Text(self.relative(&m)?), Display::Relative),
+                v => bail!("can't write {} from now", v.kind()),
             },
             Format::Weekday => match value {
                 Value::Moment(m) => (Value::Text(m.time.strftime("%A").to_string()), Display::Auto),

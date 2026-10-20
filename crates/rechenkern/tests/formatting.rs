@@ -68,7 +68,7 @@ fn scales() {
     );
     answers(
         Formatting { notation_threshold: Some(Scale::Trillion), ..standard() },
-        &[("2^50", "1,125.899907T"), ("2^30", "1,073,741,824")],
+        &[("2^50", "1.125899907P"), ("2^30", "1,073,741,824")],
     );
     answers(Formatting { scalars: ScalarSystem::British, ..standard() }, &[("$2bn", "$2bn"), ("$5M", "$5m")]);
     answers(Formatting { scalars: ScalarSystem::Russian, ..standard() }, &[("5 млн RUB", "₽5 млн")]);

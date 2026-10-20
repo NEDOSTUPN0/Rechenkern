@@ -6,9 +6,9 @@ use std::sync::Arc;
 
 use crate::alternatives::Alternative;
 use crate::answer::Answer;
-use crate::ast::{Expr, LineRef, Stmt, UserFunction};
-use crate::config::{Config, Now};
-use crate::custom::{CustomPlace, CustomUnits, PlaceProvider};
+use crate::ast::{Expr, Func, LineRef, Stmt, UserFunction};
+use crate::config::{Config, ConversionRule, Now, ResultConversions};
+use crate::custom::{CustomPlace, CustomUnits, DistanceProvider, PlaceProvider, VariableProvider};
 use crate::error::{Error, Result};
 use crate::eval::{Display, Env, Line, LineKind};
 use crate::inflation::InflationProvider;
@@ -16,14 +16,19 @@ use crate::parser::Kept;
 use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::{self, Scope};
 use crate::rates::{RateProvider, RateTable, Rates};
-use crate::units::Unit;
+use crate::units::{Unit, registry};
+use crate::value::Quantity;
 use crate::value::Value;
 use crate::weather::WeatherProvider;
+use crate::zones::{self, Location, PlaceInfo};
 
 /// Evaluates natural language math.
 ///
 /// Lines are remembered, so later lines can use variables (`rent = $1500`),
 /// earlier answers (`prev`, `line 2`) and totals (`sum`).
+///
+/// A calculator is `Send` but not `Sync`: for several threads, give each a clone. Clones
+/// share the providers and what they fetched (rates, places), and nothing else.
 ///
 /// ```
 /// let mut calc = rechenkern::Calculator::new();
@@ -36,11 +41,35 @@ pub struct Calculator {
     pub(crate) names: Names,
     pub(crate) lines: Vec<Line>,
     rates: Rates,
-    inflation: Option<Box<dyn InflationProvider>>,
-    places: Option<Box<dyn PlaceProvider>>,
-    weather: Option<Box<dyn WeatherProvider>>,
+    inflation: Option<Arc<dyn InflationProvider>>,
+    places: Option<Arc<dyn PlaceProvider>>,
+    weather: Option<Arc<dyn WeatherProvider>>,
+    variables: Option<Arc<dyn VariableProvider>>,
+    distances: Option<Arc<dyn DistanceProvider>>,
     /// What the place provider said for each name asked.
     found_places: RefCell<HashMap<String, Option<CustomPlace>>>,
+    /// The line asked the place provider about a place it is still looking up.
+    pending_place: Cell<bool>,
+}
+
+/// A copy shares the providers and what they gave; variables and lines are its own.
+impl Clone for Calculator {
+    fn clone(&self) -> Calculator {
+        Calculator {
+            config: self.config.clone(),
+            units: OnceCell::new(),
+            names: self.names.clone(),
+            lines: self.lines.clone(),
+            rates: self.rates.clone(),
+            inflation: self.inflation.clone(),
+            places: self.places.clone(),
+            weather: self.weather.clone(),
+            variables: self.variables.clone(),
+            distances: self.distances.clone(),
+            found_places: self.found_places.clone(),
+            pending_place: Cell::new(false),
+        }
+    }
 }
 
 impl Default for Calculator {
@@ -64,7 +93,10 @@ impl Calculator {
             inflation: None,
             places: None,
             weather: None,
+            variables: None,
+            distances: None,
             found_places: RefCell::default(),
+            pending_place: Cell::new(false),
         }
     }
 
@@ -80,31 +112,44 @@ impl Calculator {
     /// The custom units of the config.
     fn units(&self) -> Result<&CustomUnits> {
         self.units
-            .get_or_init(|| CustomUnits::build(&self.config.custom_units, &self.config.formatting.symbols))
+            .get_or_init(|| {
+                let f = &self.config.formatting;
+                CustomUnits::build(&self.config.custom_units, &f.symbols, &f.unit_symbols)
+            })
             .as_ref()
             .map_err(Clone::clone)
     }
 
     /// Where exchange rates come from; asked once, on the first conversion.
     pub fn set_rate_provider(&mut self, provider: impl RateProvider + 'static) {
-        self.rates = Rates::with_provider(Box::new(provider));
+        self.rates = Rates::with_provider(Arc::new(provider));
     }
 
     /// Where consumer price indexes come from, for currencies besides the US dollar or
     /// newer ones; the bundled US index is used otherwise.
     pub fn set_inflation_provider(&mut self, provider: impl InflationProvider + 'static) {
-        self.inflation = Some(Box::new(provider));
+        self.inflation = Some(Arc::new(provider));
     }
 
     /// Where the weather comes from: `weather in Tokyo`.
     pub fn set_weather_provider(&mut self, provider: impl WeatherProvider + 'static) {
-        self.weather = Some(Box::new(provider));
+        self.weather = Some(Arc::new(provider));
     }
 
     /// Where places the engine doesn't know are looked up: `time in Smallville`.
     pub fn set_place_provider(&mut self, provider: impl PlaceProvider + 'static) {
-        self.places = Some(Box::new(provider));
+        self.places = Some(Arc::new(provider));
         self.found_places.borrow_mut().clear();
+    }
+
+    /// Where variables no line set come from: `stock price * 10`.
+    pub fn set_variable_provider(&mut self, provider: impl VariableProvider + 'static) {
+        self.variables = Some(Arc::new(provider));
+    }
+
+    /// Where distances between places come from, instead of along the surface of the Earth.
+    pub fn set_distance_provider(&mut self, provider: impl DistanceProvider + 'static) {
+        self.distances = Some(Arc::new(provider));
     }
 
     /// A place from the provider, asked once per name.
@@ -114,9 +159,40 @@ impl Calculator {
         if let Some(found) = self.found_places.borrow().get(&key) {
             return found.clone();
         }
+        if provider.pending(name) {
+            self.pending_place.set(true);
+            return None;
+        }
         let found = provider.place(name);
         self.found_places.borrow_mut().insert(key, found.clone());
         found
+    }
+
+    /// What a place name is: the config's places first, then the built-in ones, then the provider's.
+    pub fn place(&self, name: &str) -> Option<PlaceInfo> {
+        let custom = |p: &CustomPlace| {
+            let location =
+                p.coordinates.map(|(latitude, longitude)| Location { zone: p.zone.clone(), latitude, longitude });
+            let country = p.zone.iana_name().and_then(zones::country_of_zone);
+            PlaceInfo { name: p.name.clone(), kind: p.kind, zone: p.zone.clone(), location, country }
+        };
+        let key = name.trim().to_lowercase();
+        if let Some(p) = self.config.custom_places.iter().find(|p| p.is_named(&key)) {
+            return Some(custom(p));
+        }
+        zones::place(name).or_else(|| self.find_place(name.trim()).as_ref().map(custom))
+    }
+
+    /// A unit by any of its spellings, custom units of the config first: "km", "miles per hour".
+    pub fn unit(&self, name: &str) -> Option<Unit> {
+        let custom = self.units().ok().and_then(|units| units.lookup(name));
+        custom.or_else(|| registry().lookup(name))
+    }
+
+    /// An amount in another unit of the same kind, at the calculator's rates: `5 km` in miles.
+    pub fn convert(&self, quantity: &Quantity, to: &Unit) -> Result<Quantity> {
+        let (names, lines) = (Names::default(), Vec::new());
+        self.env(&names, &lines).convert_quantity(quantity, to)
     }
 
     pub fn set_rates(&mut self, table: RateTable) {
@@ -126,6 +202,11 @@ impl Calculator {
     /// Exchange rates, loading them if needed.
     pub fn rates(&self) -> Result<&RateTable> {
         self.rates.table()
+    }
+
+    /// A function the lines defined: `area(w, h) = w * h`.
+    pub(crate) fn function_defined(&self, name: &str) -> bool {
+        self.names.functions.contains_key(name)
     }
 
     pub fn variable(&self, name: &str) -> Option<&Value> {
@@ -140,6 +221,14 @@ impl Calculator {
     pub fn clear(&mut self) {
         self.names = Names::default();
         self.lines.clear();
+    }
+
+    /// Works out one line with these variables over the ones set already, remembering
+    /// nothing, as SoulverCore's `calculate(_:with:)`.
+    pub fn calculate_with(&self, line: &str, variables: &HashMap<String, Value>) -> Result<Option<Answer>> {
+        let mut names = self.names.clone();
+        names.vars.extend(variables.iter().map(|(name, value)| (name.to_lowercase(), value.clone())));
+        self.run(line, &names, &self.lines, false).0
     }
 
     /// Calculates one line. `Ok(None)` means there is nothing to calculate,
@@ -183,7 +272,15 @@ impl Calculator {
         let asked = track.then_some(&asked);
         let body = &trimmed[self.label_end(trimmed, names, asked)..];
         let label = &trimmed[..trimmed.len() - body.len()];
+        self.pending_place.set(false);
         let result = self.evaluate(body, label, names, lines, asked, &mut effects);
+        // "time in Smallville" while the provider looks it up: not unknown, only not yet known.
+        let result = match result {
+            Err(e) if self.pending_place.get() && e.kind() == crate::error::ErrorKind::Unknown => {
+                Err(Error::pending("the place is being looked up"))
+            }
+            result => result,
+        };
         if self.config.features.labels_as_variables
             && effects.assigned.is_none()
             && let Ok(Some((answer, false))) = &result
@@ -228,7 +325,9 @@ impl Calculator {
             rates_at_hand: Default::default(),
             inflation: self.inflation.as_deref(),
             weather: self.weather.as_deref(),
+            variables: self.variables.as_deref(),
             reads: Default::default(),
+            custom_call: Default::default(),
         }
     }
 
@@ -243,7 +342,11 @@ impl Calculator {
         let start = line.len() - line.trim_start().len();
         let trimmed = line.trim();
         if line_kind(trimmed) == LineKind::Heading {
-            return vec![Highlight { range: start..start + trimmed.len(), kind: TokenKind::Heading }];
+            let marks = trimmed.len() - trimmed.trim_start_matches('#').len();
+            let text = start + trimmed.len() - trimmed[marks..].trim_start().len();
+            let indicator = Highlight { range: start..start + marks, kind: TokenKind::HeadingIndicator };
+            let heading = Highlight { range: text..start + trimmed.len(), kind: TokenKind::Heading };
+            return [indicator, heading].into_iter().filter(|h| !h.range.is_empty()).collect();
         }
         if line_kind(trimmed) != LineKind::Value {
             return Vec::new();
@@ -252,7 +355,13 @@ impl Calculator {
         let mut out = Vec::new();
         let label = trimmed[..trimmed.len() - body.len()].trim_end();
         if !label.is_empty() {
-            out.push(Highlight { range: start..start + label.len(), kind: TokenKind::Label });
+            // "1. Rent:": the list marker before the label is its own.
+            let marker = list_marker_len(label);
+            if marker > 0 {
+                out.push(Highlight { range: start..start + marker, kind: TokenKind::ListMarker });
+            }
+            let label_start = start + marker + label[marker..].len() - label[marker..].trim_start().len();
+            out.push(Highlight { range: label_start..start + label.len(), kind: TokenKind::Label });
         }
         let is_var = |name: &str| names.vars.contains_key(name);
         let is_function = |name: &str| names.functions.contains_key(name);
@@ -287,6 +396,7 @@ impl Calculator {
                     Some(Value::Quantity(crate::value::Quantity::new(crate::Number::ONE, unit.clone())))
                 }
                 crate::ast::CustomArg::Text(text) => Some(Value::Text(text.clone())),
+                crate::ast::CustomArg::Value(value) => Some(value.clone()),
             })
             .collect()
     }
@@ -420,7 +530,7 @@ impl Calculator {
         let mut parts = parts;
         let (value, mut display) = env.convert_result(expr, value, display, &mut parts)?;
         // "0xff + 1" = 0x100, but "0xff in decimal" = 255.
-        if let Some(radix) = scope.radix.get()
+        if let Some(radix) = scope.radix.get().or_else(|| base_call(expr))
             && matches!(display, Display::Auto)
             && !matches!(expr, Expr::Convert(..))
             && let Value::Quantity(q) = &value
@@ -434,6 +544,15 @@ impl Calculator {
         if scope.scaled.get() && matches!(display, Display::Auto) {
             display = Display::Scaled;
         }
+        let (value, mut display) = self.convert_display(env, expr, value, display)?;
+        if self.config.formatting.fractions
+            && matches!(display, Display::Auto)
+            && let Value::Quantity(q) = &value
+            && !q.unit.is_money()
+            && crate::format::is_simple_fraction(q.number)
+        {
+            display = Display::Fraction;
+        }
         let kept = Kept {
             radix: match display {
                 Display::Radix(radix) => Some(radix),
@@ -441,9 +560,36 @@ impl Calculator {
             },
             food: food_of(expr),
         };
-        let answer = env.describe(expr, value, display, parts, &self.config);
+        let mut answer = env.describe(expr, value, display, parts, &self.config);
+        if matches!(expr, Expr::Custom { .. })
+            && let Some((function, values)) = env.custom_call.take()
+        {
+            let custom = &self.config.custom_functions[function];
+            answer.set_custom_call(crate::answer::CustomCall {
+                id: custom.id.clone(),
+                prototype: custom.prototype.clone(),
+                values,
+            });
+        }
         let assigned = name.map(|name| (name, answer.reference(), kept));
         Ok(Some((answer, is_total, assigned)))
+    }
+
+    /// The answer converted by the config's rules for how it is shown: hex answers in decimal.
+    fn convert_display(&self, env: &Env, expr: &Expr, value: Value, display: Display) -> Result<(Value, Display)> {
+        let ResultConversions::Rules(rules) = &self.config.formatting.conversions else { return Ok((value, display)) };
+        if matches!(expr, Expr::Convert(..)) {
+            return Ok((value, display));
+        }
+        let kind = crate::answer::kind_of(&display);
+        let format = rules.iter().find_map(|rule| match rule {
+            ConversionRule::Display { from, to } if *from == kind => parser::target::converter_format(*to),
+            _ => None,
+        });
+        match format {
+            Some(format) => env.convert(value, &crate::ast::Target::Format(format), Display::Auto),
+            None => Ok((value, display)),
+        }
     }
 
     /// The parser's view of the calculator, with closures that answer its questions.
@@ -468,6 +614,8 @@ impl Calculator {
             declared: &names.units,
             places,
             weather,
+            variables: self.variables.as_deref(),
+            distances: self.distances.as_deref(),
         }
     }
 }
@@ -555,13 +703,34 @@ impl Reads {
 pub(crate) fn line_kind(trimmed: &str) -> LineKind {
     if trimmed.is_empty() {
         LineKind::Blank
-    } else if trimmed.starts_with('#') {
+    } else if trimmed.starts_with('#') && !tag_statistic(trimmed) {
         LineKind::Heading
     } else if trimmed.len() >= 3 && trimmed.chars().all(|c| c == '-') {
         LineKind::Divider
     } else {
         LineKind::Value
     }
+}
+
+/// The length of a list marker starting a text and the space after it: "1." in "1. Rent:", "a)".
+fn list_marker_len(text: &str) -> usize {
+    let digits = text.len() - text.trim_start_matches(|c: char| c.is_ascii_digit()).len();
+    let lead = match digits {
+        0 if text.chars().next().is_some_and(|c| c.is_ascii_alphabetic()) && text[1..].starts_with(')') => 1,
+        0 => return 0,
+        n => n,
+    };
+    let rest = &text[lead..];
+    let ends = (rest.starts_with(')') || (rest.starts_with('.') && digits > 0)) && rest[1..].starts_with(' ');
+    if ends { lead + 1 } else { 0 }
+}
+
+/// "#food total", "#food average in EUR": a statistic of tagged lines, not a heading.
+fn tag_statistic(trimmed: &str) -> bool {
+    const WORDS: &[&str] = &["total", "subtotal", "sum", "average", "avg", "mean", "median", "max", "min", "count"];
+    let mut words = trimmed.split_whitespace();
+    let tag = words.next().unwrap_or_default();
+    tag.len() > 1 && words.next().is_some_and(|w| WORDS.contains(&w.to_lowercase().as_str()))
 }
 
 /// The hashtags in a line, lowercase: "food" in "Coffee $5 #food".
@@ -628,4 +797,12 @@ fn strip_label(line: &str) -> &str {
         }
     }
     line
+}
+
+/// The base of a call that writes a number in one: `hex(9) + 1` is in base 16.
+fn base_call(expr: &Expr) -> Option<u32> {
+    [(Func::Hex, 16), (Func::Bin, 2), (Func::Oct, 8)]
+        .into_iter()
+        .find(|&(func, _)| expr.contains(&|e| matches!(e, Expr::Call(f, _) if *f == func)))
+        .map(|(_, radix)| radix)
 }

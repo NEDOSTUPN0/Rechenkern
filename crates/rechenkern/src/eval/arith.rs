@@ -166,7 +166,7 @@ impl Env<'_> {
         Ok(match (a, b) {
             (Value::Quantity(x), Value::Quantity(y)) => {
                 let units = (x.unit.clone(), y.unit.clone());
-                self.tidy_time(self.mul_quantities(x, y, false)?, units)?
+                percent_left(self.tidy_time(self.mul_quantities(x, y, false)?, units)?)
             }
             (Value::Quantity(q), Value::Percent(p)) | (Value::Percent(p), Value::Quantity(q)) => {
                 Value::Quantity(Quantity::new(q.number * p / hundred(), q.unit))
@@ -200,6 +200,12 @@ impl Env<'_> {
             (Value::Percent(p), Value::Quantity(y)) if y.unit.is_none() => {
                 zero(y.number)?;
                 Value::Percent(p / y.number)
+            }
+            // "5%/year": a percentage rate, as in SoulverCore.
+            (Value::Percent(p), Value::Quantity(y)) if !y.unit.is_money() => {
+                zero(y.number)?;
+                let percent = registry().get("%");
+                Value::Quantity(Quantity::new(p / y.number, percent.product(&y.unit.pow(-1))))
             }
             (Value::Percent(p), Value::Percent(q)) => {
                 zero(q)?;
@@ -281,6 +287,19 @@ impl Env<'_> {
         }
         let (unit, factor) = x.unit.mul(&y_unit, &|id| self.scale(id))?;
         let q = Quantity::new(number * factor, unit);
+        // "$15/hour × 40 hours/week" is $600/week: a time per a time moves a rate to its period.
+        if !divide {
+            let rate_by_share = |rate: &Unit, share: &Unit| {
+                let period = time_per_time(share)?;
+                let per_time = rate.factors().iter().any(|&(id, e)| e < 0 && Unit::of(id).dim() == Dim::TIME);
+                per_time.then(|| rate.numerator().product(&period.pow(-1)))
+            };
+            if let Some(target) = rate_by_share(&x.unit, &y.unit).or_else(|| rate_by_share(&y.unit, &x.unit))
+                && let Ok(converted) = self.convert_quantity(&q, &target)
+            {
+                return Ok(converted);
+            }
+        }
         // Most products have no unit of their own; only those that may are worked out again.
         match registry().may_be_named(&q.unit) {
             true => self.named_product(q, &x.unit.product(&y_unit)),
@@ -407,6 +426,29 @@ impl Env<'_> {
                 false => self.div(a, b),
             };
         }
+        let reg = registry();
+        if let (Value::Quantity(x), Value::Quantity(rate)) = (&a, &b) {
+            // "300 px at 326 ppi": that many pixels are inches long.
+            if x.unit.same_as(&reg.get("px")) && rate.unit.same_as(&reg.get("ppi")) && !rate.number.is_zero() {
+                return Ok(Value::Quantity(Quantity::new(x.number / rate.number, reg.get("in"))));
+            }
+            // "20 at $50/hour": a plain number is money at a money rate, as in SoulverCore (24 minutes).
+            if x.unit.is_none() && is_money_per_time(&rate.unit) {
+                let money = Value::Quantity(Quantity::new(x.number, money_of(&rate.unit)));
+                return self.div(money, b);
+            }
+        }
+        // "01:30:00 at $50/hour", "00:01:00:12 at $50/hour": the time at the rate.
+        if matches!(&a, Value::Duration(_) | Value::Timecode(_))
+            && matches!(&b, Value::Quantity(q) if is_money_per_time(&q.unit))
+        {
+            let seconds = match &a {
+                Value::Timecode(t) => Number::from_i64(t.frames) / t.fps,
+                a => self.seconds(a)?,
+            };
+            let seconds = Value::Quantity(Quantity::new(seconds, reg.get("s")));
+            return self.at(seconds, b);
+        }
         let product = self.mul(a.clone(), b.clone());
         let quotient = self.div(a, b);
         let factors = |v: &Result<Value>| match v {
@@ -493,4 +535,34 @@ fn bitwise(op: Op, a: Value, b: Value) -> Result<Value> {
 fn plain_rates(q: Quantity) -> Quantity {
     let (unit, multiplier) = q.unit.plain_rates();
     Quantity::new(q.number * multiplier, unit)
+}
+
+/// The period of a time per a time, as "week" in "hours/week".
+fn time_per_time(unit: &Unit) -> Option<Unit> {
+    let &[(a, ea), (b, eb)] = unit.factors() else { return None };
+    let time = |id| Unit::of(id).dim() == Dim::TIME;
+    match (ea, eb) {
+        (1, -1) if time(a) && time(b) => Some(Unit::of(b)),
+        (-1, 1) if time(a) && time(b) => Some(Unit::of(a)),
+        _ => None,
+    }
+}
+
+/// Money per a time: `$50/hour`.
+fn is_money_per_time(unit: &Unit) -> bool {
+    unit.dim() == Dim::MONEY.div(Dim::TIME) && unit.factors().len() == 2
+}
+
+/// The currency of a money rate.
+fn money_of(unit: &Unit) -> Unit {
+    let &(id, _) = unit.factors().iter().find(|&&(id, e)| e > 0 && Unit::of(id).is_money()).expect("a money rate");
+    Unit::of(id)
+}
+
+/// "5%/year × 3 years" is a percentage again.
+fn percent_left(value: Value) -> Value {
+    match value {
+        Value::Quantity(q) if q.unit == registry().get("%") => Value::Percent(q.number),
+        v => v,
+    }
 }

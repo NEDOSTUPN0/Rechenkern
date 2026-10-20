@@ -10,7 +10,7 @@ mod inflation;
 mod phrases;
 mod primary;
 mod sky;
-mod target;
+pub(crate) mod target;
 mod time;
 mod tokens;
 mod weather;
@@ -72,6 +72,10 @@ pub struct Scope<'a> {
     pub places: &'a dyn Fn(&str) -> Option<CustomPlace>,
     /// Weather phrases are read: off when looking for data in text.
     pub weather: bool,
+    /// The host's variables, for names no line set.
+    pub variables: Option<&'a dyn crate::custom::VariableProvider>,
+    /// The host's distances between places.
+    pub distances: Option<&'a dyn crate::custom::DistanceProvider>,
 }
 
 /// Parses one line; `None` means the line has nothing to calculate.
@@ -110,18 +114,32 @@ pub fn values_in(src: &str, scope: &Scope) -> Vec<(std::ops::Range<usize>, Expr)
             continue;
         }
         // A range of dates, "March 3 to March 10", or one value: "68.3 °F", "this sunday".
-        let mut range = start.clone();
-        let mut one = start.clone();
-        let parsed = match range.expr() {
-            Ok(expr @ (Expr::Range(..) | Expr::Period(..))) => Some((expr, range.pos)),
-            _ => one.unary().ok().map(|expr| (expr, one.pos)),
+        let parse_at = |at: &Parser| {
+            let (mut range, mut one) = (at.clone(), at.clone());
+            match range.expr() {
+                Ok(expr @ (Expr::Range(..) | Expr::Period(..))) => Some((expr, range.pos)),
+                _ => one.unary().ok().map(|expr| (expr, one.pos)),
+            }
         };
-        match parsed {
+        match parse_at(&start) {
             Some((expr, end)) if end > start.pos && unit_product(&expr).is_none() && !is_unit_rate(&expr) => {
+                // Words before the value that don't change it aren't part of it: "from gate 12".
+                let mut first = start.pos;
+                let shown = format!("{expr:?}");
+                while first + 1 < end {
+                    let mut later = p.clone();
+                    later.pos = first + 1;
+                    later.skip_noise();
+                    match parse_at(&later) {
+                        Some((other, e)) if e == end && later.pos < end && format!("{other:?}") == shown => {
+                            first = later.pos;
+                        }
+                        _ => break,
+                    }
+                }
                 // Comment words read past at the end aren't part of it: "130 copies", but "30k" is.
-                let last =
-                    (start.pos..end).rev().find(|&k| !p.comment_at(k) || !tokens[k].space_before).unwrap_or(start.pos);
-                found.push((tokens[start.pos].start..tokens[last].end, expr));
+                let last = (first..end).rev().find(|&k| !p.comment_at(k) || !tokens[k].space_before).unwrap_or(first);
+                found.push((tokens[first].start..tokens[last].end, expr));
                 i = end;
             }
             _ => i = start.pos + 1,
@@ -162,7 +180,7 @@ impl<'a> Parser<'a> {
         Parser::new(self.src, &self.toks[from..to], self.scope)
     }
 
-    fn config(&self) -> &Config {
+    fn config(&self) -> &'a Config {
         self.scope.config
     }
 
@@ -196,6 +214,9 @@ impl<'a> Parser<'a> {
     /// "true if income > expenses", "false unless expenses > income".
     fn value(&mut self) -> Result<Expr> {
         let end = self.toks.len();
+        if let Some(ternary) = self.ternary()? {
+            return Ok(ternary);
+        }
         for (word, negate) in [("if", false), ("unless", true)] {
             let Some(at) = self.find(1, &[word]) else { continue };
             let otherwise = self.find(at + 1, &["else"]);
@@ -223,6 +244,21 @@ impl<'a> Parser<'a> {
                 false => Err(e),
             }),
         }
+    }
+
+    /// "5 > 3 ? 1 : 0": a condition, then the value if it holds and the one if it doesn't.
+    fn ternary(&self) -> Result<Option<Expr>> {
+        let gap_has = |k: usize, c: char| k > 0 && self.src[self.toks[k - 1].end..self.toks[k].start].contains(c);
+        let end = self.toks.len();
+        let Some(question) = (1..end).find(|&k| gap_has(k, '?')) else { return Ok(None) };
+        let Some(colon) = (question + 1..end).find(|&k| gap_has(k, ':')) else { return Ok(None) };
+        let Ok(cond) = self.part(0, question) else { return Ok(None) };
+        if !is_boolean(&cond) {
+            return Ok(None);
+        }
+        let then = Some(self.part(question, colon)?.boxed());
+        let otherwise = Some(self.part(colon, end)?.boxed());
+        Ok(Some(Expr::If { cond: cond.boxed(), then, otherwise }))
     }
 
     /// Numbers in text: the last of the values that matter most, as in
@@ -280,9 +316,14 @@ impl<'a> Parser<'a> {
             return Ok(None);
         }
         let name = name_toks.iter().filter_map(Token::word).collect::<Vec<_>>().join(" ").to_lowercase();
-        // "widgets = new unit"
+        // "widgets = new unit", "widgets = new unit type"
         let rest = &self.toks[eq + 1..];
-        if name_toks.len() == 1 && rest.len() == 2 && rest[0].is_word("new") && rest[1].is_word("unit") {
+        let new_unit = rest.len() >= 2 && rest[0].is_word("new") && rest[1].is_word("unit");
+        if name_toks.len() == 1
+            && new_unit
+            && self.config().features.unit_declarations
+            && (rest.len() == 2 || (rest.len() == 3 && rest[2].is_word("type")))
+        {
             return Ok(Some(Stmt::Unit(name)));
         }
         let op = match self.toks[eq].tok {
@@ -338,6 +379,8 @@ impl<'a> Parser<'a> {
             declared: outer.declared,
             places: outer.places,
             weather: outer.weather,
+            variables: outer.variables,
+            distances: outer.distances,
         };
         let body = Parser::new(self.src, &toks[close + 2..], &scope).value()?;
         Ok(Some(Stmt::Function { name, params, body }))
@@ -448,6 +491,11 @@ impl<'a> Parser<'a> {
     fn additive(&mut self) -> Result<Expr> {
         let mut lhs = self.multiplicative()?;
         loop {
+            // "today + 1 week at 3pm", "the 15th of next month at 3pm": that day at that time.
+            if time::is_dateish(&lhs) && self.at_clock_follows() {
+                lhs = self.date_tail(lhs)?;
+                continue;
+            }
             if let Some(rhs) = self.same_kind_follows(&lhs) {
                 lhs = Expr::binary(Op::Add, lhs, rhs);
                 continue;
@@ -476,6 +524,12 @@ impl<'a> Parser<'a> {
             };
             if !self.operand_follows(len) {
                 return Ok(lhs);
+            }
+            // "10% from 200" is a share of it, as in SoulverCore.
+            if swap && matches!(lhs, Expr::Percent(_)) && tok.is_word("from") {
+                self.pos += len;
+                lhs = Expr::binary(Op::Of, lhs, self.multiplicative()?);
+                continue;
             }
             // "$100 from 1990" is not date arithmetic.
             if swap && !time::maybe_duration(&lhs) {
@@ -545,6 +599,10 @@ impl<'a> Parser<'a> {
     fn multiplicative(&mut self) -> Result<Expr> {
         let mut lhs = self.unary()?;
         loop {
+            // "1 week at 3pm" leaves the time to the date it moves.
+            if (time::is_dateish(&lhs) || time::maybe_duration(&lhs)) && self.at_clock_follows() {
+                return Ok(lhs);
+            }
             let Some((op, len)) = self.mul_operator() else {
                 // Implicit multiplication: "2(3 + 4)", "2 pi", "3 sqrt 4".
                 if self.implicit_mul_follows() {
@@ -602,11 +660,6 @@ impl<'a> Parser<'a> {
                 Some(unit) if op == Op::Div => (Op::Per, Expr::BareUnit(unit)),
                 _ => (op, rhs),
             };
-            // "4 out of 10" as a fraction, if the config asks for one.
-            if op == Op::OutOf && !share && self.config().features.proper_fraction_parsing {
-                lhs = Self::formatted(Expr::binary(Op::Div, lhs, rhs), crate::ast::Format::Fraction);
-                continue;
-            }
             // "4 out of 10" as a fraction, if the config asks for one.
             if op == Op::OutOf && !share && self.config().features.proper_fraction_parsing {
                 lhs = Self::formatted(Expr::binary(Op::Div, lhs, rhs), crate::ast::Format::Fraction);
@@ -678,7 +731,7 @@ impl<'a> Parser<'a> {
                 "every" | "each" if self.counted_unit_at(self.pos + 1) => (Op::Div, 1),
                 "split" => (Op::Div, 1),
                 // "$24 a day for a year": a rate over a time span.
-                "for" if self.duration_at(self.pos + 1) => (Op::Mul, 1),
+                "for" if self.duration_at(self.pos + 1) || self.pace_distance_at(self.pos) => (Op::Mul, 1),
                 "mod" | "modulo" => (Op::Mod, 1),
                 "of" => (Op::Of, 1),
                 "out" if next_is(self, "of") => (Op::OutOf, 2),
@@ -712,6 +765,13 @@ impl<'a> Parser<'a> {
             Tok::Sym("!") => {
                 self.pos += 1;
                 Ok(Expr::Not(self.unary()?.boxed()))
+            }
+            // "not true"; "not 5 > 3" negates the whole comparison.
+            Tok::Word(w) if w.eq_ignore_ascii_case("not") && self.not_operand_at(self.pos + 1) => {
+                self.pos += 1;
+                let simple = self.cur().is_some_and(|t| t.is_word("true") || t.is_word("false") || t.is_sym("("));
+                let operand = if simple { self.unary()? } else { self.comparison()? };
+                Ok(Expr::Not(operand.boxed()))
             }
             // "~0xFF" is a bitwise not; "~5" stays "about 5", as in SoulverCore.
             Tok::Sym("~")
@@ -769,8 +829,18 @@ impl<'a> Parser<'a> {
         {
             return Ok(Expr::binary(Op::Pow, base, exp));
         }
+        let start = self.pos;
         if self.at_sym("^") {
+            // "3 pi r^2", "5 apples ^ 2": the power of a comment word is part of it, as in SoulverCore.
+            let glued = self.pos > start && self.toks[self.pos - 1].word().is_some();
             self.pos += 1;
+            if glued {
+                self.eat_sym("-");
+                if matches!(self.cur().map(|t| &t.tok), Some(Tok::Num(_))) {
+                    self.pos += 1;
+                }
+                return Ok(base);
+            }
             return Ok(Expr::binary(Op::Pow, base, self.unary()?));
         }
         Ok(base)

@@ -383,7 +383,9 @@ fn convert(q: &Quantity, to: &Unit) -> crate::Result<Quantity> {
         rates_at_hand: Cell::default(),
         inflation: None,
         weather: None,
+        variables: None,
         reads: Default::default(),
+        custom_call: Default::default(),
     };
     env.convert_quantity(q, to)
 }
