@@ -432,11 +432,15 @@ impl Env<'_> {
                 return self.div(money, b);
             }
         }
-        // "01:30:00 at $50/hour": the duration's hours at the rate.
-        if let Value::Duration(_) = &a
+        // "01:30:00 at $50/hour", "00:01:00:12 at $50/hour": the time at the rate.
+        if matches!(&a, Value::Duration(_) | Value::Timecode(_))
             && matches!(&b, Value::Quantity(q) if is_money_per_time(&q.unit))
         {
-            let seconds = Value::Quantity(Quantity::new(self.seconds(&a)?, reg.get("s")));
+            let seconds = match &a {
+                Value::Timecode(t) => Number::from_i64(t.frames) / t.fps,
+                a => self.seconds(a)?,
+            };
+            let seconds = Value::Quantity(Quantity::new(seconds, reg.get("s")));
             return self.at(seconds, b);
         }
         let product = self.mul(a.clone(), b.clone());

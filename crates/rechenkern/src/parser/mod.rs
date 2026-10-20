@@ -791,9 +791,8 @@ impl<'a> Parser<'a> {
         }
         let start = self.pos;
         if self.at_sym("^") {
-            // "3 pi r^2": the power of a comment word is part of the comment, as in SoulverCore.
-            let glued =
-                self.pos > start && !self.toks[self.pos].space_before && self.toks[self.pos - 1].word().is_some();
+            // "3 pi r^2", "5 apples ^ 2": the power of a comment word is part of it, as in SoulverCore.
+            let glued = self.pos > start && self.toks[self.pos - 1].word().is_some();
             self.pos += 1;
             if glued {
                 self.eat_sym("-");

@@ -1842,6 +1842,8 @@ fn third_sweep() {
         ("days from March 5, 2025 to March 5, 2025", "0 days"),
         ("days from 2020 to 2025", "1,827 days"),
         ("3 FORCEPOUND IN N", "13.34466485 N"),
+        ("3 pi r ^ 2", "9.424777961"),
+        ("00:01:00:12 at $50/hour", "$0.84"),
     ]);
     // A tag takes the tagged lines of the whole sheet, across blocks and other totals.
     let blocks = "lunch $10 #food\ntaxi $5 #travel\nsum\n\ndinner $20 #food\n---\nsnack $3 #food\n";

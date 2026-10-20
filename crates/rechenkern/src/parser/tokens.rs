@@ -181,7 +181,7 @@ impl<'a> Parser<'a> {
         let w = w.as_str();
         words::KEYWORDS.contains(&w)
             // "3 x^2" is no product: the x is a comment there.
-            || (w == "x" && !self.toks.get(i + 1).is_some_and(|t| t.is_sym("^") && !t.space_before))
+            || (w == "x" && !self.toks.get(i + 1).is_some_and(|t| t.is_sym("^")))
             || self.article_unit_at(i)
             // "for 2 hours" and "split 4 ways" only matter before an amount.
             || (w == "for" && self.duration_at(i + 1))
