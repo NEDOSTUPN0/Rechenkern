@@ -19,6 +19,19 @@ pub enum WeatherQuery {
     WindDirection,
     UvIndex,
     ChanceOfRain,
+    /// What feels like the temperature, with wind and humidity.
+    FeelsLike,
+    /// Rain, showers and snow as water.
+    Precipitation,
+    Rain,
+    Snowfall,
+    CloudCover,
+    Visibility,
+    DewPoint,
+    /// Air pressure at sea level, and whether it is rising or falling.
+    Pressure,
+    /// The sky in words: "partly cloudy".
+    Conditions,
 }
 
 /// Where and when the weather is asked for.
@@ -50,6 +63,23 @@ pub struct Weather {
     pub uv_index: Option<f64>,
     /// Percent.
     pub chance_of_rain: Option<f64>,
+    /// Degrees Celsius.
+    pub feels_like: Option<f64>,
+    /// Millimeters, in the last hour now or over the day; snow as water.
+    pub precipitation: Option<f64>,
+    pub rain: Option<f64>,
+    /// Centimeters.
+    pub snowfall: Option<f64>,
+    /// Percent of the sky.
+    pub cloud_cover: Option<f64>,
+    /// Kilometers.
+    pub visibility: Option<f64>,
+    /// Degrees Celsius.
+    pub dew_point: Option<f64>,
+    /// Hectopascals at sea level.
+    pub pressure: Option<f64>,
+    /// How much the pressure changed over the last three hours, in hectopascals.
+    pub pressure_change: Option<f64>,
     /// The sky in a few words: "partly cloudy".
     pub condition: Option<String>,
 }

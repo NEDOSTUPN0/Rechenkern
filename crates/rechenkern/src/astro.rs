@@ -1,8 +1,9 @@
-//! The sun and the moon: sunrise, sunset and the phases of the moon.
+//! The sun and the moon: sunrise, sunset, the phases of the moon, moonrise and moonset.
 //!
 //! The sun follows NOAA's solar calculator, the moon's phases chapter 49 of
 //! Meeus' "Astronomical Algorithms". Both are good to about a minute, away
-//! from the poles for the sun.
+//! from the poles for the sun. Moonrise and moonset take the moon from
+//! the largest terms of Meeus' chapter 47, good to a couple of minutes.
 
 use jiff::Timestamp;
 
@@ -143,6 +144,102 @@ pub struct Moon {
     pub phase: Phase,
     /// Days since the last new moon.
     pub age: f64,
+}
+
+/// When the moon rises and sets between two moments at a place, in degrees north and east;
+/// `None` where it doesn't. Its upper edge meets the horizon, with refraction and parallax.
+pub fn moon_rise_set(
+    from: Timestamp,
+    to: Timestamp,
+    latitude: f64,
+    longitude: f64,
+) -> (Option<Timestamp>, Option<Timestamp>) {
+    let (start, end) = (julian_day(from), julian_day(to));
+    let above = |jd: f64| moon_altitude(jd, latitude, longitude);
+    let (mut rise, mut set) = (None, None);
+    // Ten minutes at a time, then halving the step where the moon crosses the horizon.
+    const STEP: f64 = 10.0 / 1440.0;
+    let mut a = start;
+    let mut alt_a = above(a);
+    while a < end {
+        let b = (a + STEP).min(end);
+        let alt_b = above(b);
+        if (alt_a < 0.0) != (alt_b < 0.0) {
+            let (mut lo, mut hi) = (a, b);
+            for _ in 0..20 {
+                let mid = (lo + hi) / 2.0;
+                if (above(mid) < 0.0) == (alt_a < 0.0) { lo = mid } else { hi = mid }
+            }
+            let slot = if alt_a < 0.0 { &mut rise } else { &mut set };
+            if slot.is_none() {
+                *slot = timestamp((lo + hi) / 2.0);
+            }
+        }
+        (a, alt_a) = (b, alt_b);
+    }
+    (rise, set)
+}
+
+/// The moon's altitude above the height where its upper edge touches the horizon, in degrees.
+fn moon_altitude(jd: f64, latitude: f64, longitude: f64) -> f64 {
+    let (lambda, beta, distance) = moon_position(jd + DELTA_T / 86_400.0);
+    let parallax = (6378.14 / distance).asin().to_degrees();
+    let t = (jd - J2000) / 36525.0;
+    let obliquity = 23.439 - 0.013 * t;
+    let ra = (sin(lambda) * cos(obliquity) - beta.to_radians().tan() * sin(obliquity)).atan2(cos(lambda)).to_degrees();
+    let dec = (sin(beta) * cos(obliquity) + cos(beta) * sin(obliquity) * sin(lambda)).asin().to_degrees();
+    let sidereal = 280.46061837 + 360.98564736629 * (jd - J2000);
+    let hour_angle = sidereal + longitude - ra;
+    let altitude = (sin(latitude) * sin(dec) + cos(latitude) * cos(dec) * cos(hour_angle)).asin().to_degrees();
+    altitude - (0.7275 * parallax - 0.5667)
+}
+
+/// The moon's ecliptic longitude and latitude in degrees and its distance in km at `jde`, from
+/// the largest terms of Meeus' chapter 47: good to about a hundredth of a degree.
+fn moon_position(jde: f64) -> (f64, f64, f64) {
+    // Multiples of D, M, M', F, then the terms of longitude (1e-6 °) and distance (m).
+    #[rustfmt::skip]
+    const LR: [(f64, f64, f64, f64, f64, f64); 25] = [
+        (0.0, 0.0, 1.0, 0.0, 6288774.0, -20905355.0), (2.0, 0.0, -1.0, 0.0, 1274027.0, -3699111.0),
+        (2.0, 0.0, 0.0, 0.0, 658314.0, -2955968.0), (0.0, 0.0, 2.0, 0.0, 213618.0, -569925.0),
+        (0.0, 1.0, 0.0, 0.0, -185116.0, 48888.0), (0.0, 0.0, 0.0, 2.0, -114332.0, -3149.0),
+        (2.0, 0.0, -2.0, 0.0, 58793.0, 246158.0), (2.0, -1.0, -1.0, 0.0, 57066.0, -152138.0),
+        (2.0, 0.0, 1.0, 0.0, 53322.0, -170733.0), (2.0, -1.0, 0.0, 0.0, 45758.0, -204586.0),
+        (0.0, 1.0, -1.0, 0.0, -40923.0, -129620.0), (1.0, 0.0, 0.0, 0.0, -34720.0, 108743.0),
+        (0.0, 1.0, 1.0, 0.0, -30383.0, 104755.0), (2.0, 0.0, 0.0, -2.0, 15327.0, 10321.0),
+        (0.0, 0.0, 1.0, 2.0, -12528.0, 0.0), (0.0, 0.0, 1.0, -2.0, 10980.0, 79661.0),
+        (4.0, 0.0, -1.0, 0.0, 10675.0, -34782.0), (0.0, 0.0, 3.0, 0.0, 10034.0, -23210.0),
+        (4.0, 0.0, -2.0, 0.0, 8548.0, -21636.0), (2.0, 1.0, -1.0, 0.0, -7888.0, 24208.0),
+        (2.0, 1.0, 0.0, 0.0, -6766.0, 30824.0), (1.0, 0.0, -1.0, 0.0, -5163.0, -8379.0),
+        (1.0, 1.0, 0.0, 0.0, 4987.0, -16675.0), (2.0, -1.0, 1.0, 0.0, 4036.0, -12831.0),
+        (2.0, 0.0, 2.0, 0.0, 3994.0, -10445.0),
+    ];
+    #[rustfmt::skip]
+    const B: [(f64, f64, f64, f64, f64); 13] = [
+        (0.0, 0.0, 0.0, 1.0, 5128122.0), (0.0, 0.0, 1.0, 1.0, 280602.0), (0.0, 0.0, 1.0, -1.0, 277693.0),
+        (2.0, 0.0, 0.0, -1.0, 173237.0), (2.0, 0.0, -1.0, 1.0, 55413.0), (2.0, 0.0, -1.0, -1.0, 46271.0),
+        (2.0, 0.0, 0.0, 1.0, 32573.0), (0.0, 0.0, 2.0, 1.0, 17198.0), (2.0, 0.0, 1.0, -1.0, 9266.0),
+        (0.0, 0.0, 2.0, -1.0, 8822.0), (2.0, -1.0, 0.0, -1.0, 8216.0), (2.0, 0.0, -2.0, -1.0, 4324.0),
+        (2.0, 0.0, 1.0, 1.0, 4200.0),
+    ];
+    let t = (jde - J2000) / 36525.0;
+    let l = 218.3164477 + 481267.88123421 * t;
+    let d = 297.8501921 + 445267.1114034 * t;
+    let m = 357.5291092 + 35999.0502909 * t;
+    let mp = 134.9633964 + 477198.8675055 * t;
+    let f = 93.2720950 + 483202.0175233 * t;
+    let e = 1.0 - 0.002516 * t;
+    let eccentricity = |k: f64| e.powi(k.abs() as i32);
+    let (mut sl, mut sr, mut sb) = (0.0, 0.0, 0.0);
+    for (kd, km, kmp, kf, cl, cr) in LR {
+        let arg = kd * d + km * m + kmp * mp + kf * f;
+        sl += cl * eccentricity(km) * sin(arg);
+        sr += cr * eccentricity(km) * cos(arg);
+    }
+    for (kd, km, kmp, kf, cb) in B {
+        sb += cb * eccentricity(km) * sin(kd * d + km * m + kmp * mp + kf * f);
+    }
+    (l + sl / 1e6, sb / 1e6, 385000.56 + sr / 1000.0)
 }
 
 pub fn moon(t: Timestamp) -> Moon {

@@ -29,7 +29,7 @@ impl Parser<'_> {
         let (_, n) = self.place_at(i)?;
         let (what, m) = self.phrase_at(i + n, &words::SKY)?;
         let bare_daylight = m == 1 && what == Sky::Daylight;
-        (what.is_sun() && !bare_daylight).then_some((what, n + m))
+        (what.is_local() && !bare_daylight).then_some((what, n + m))
     }
 
     /// A place after the sun: "in Tokyo", "at JFK", "for London" or just "Tokyo".
@@ -57,12 +57,14 @@ impl Parser<'_> {
             }
         };
         // "sunrise time in Tokyo"
-        if matches!(what, Sky::Sunrise | Sky::Sunset) && self.words_at(self.pos, &["time"]) {
+        if matches!(what, Sky::Sunrise | Sky::Sunset | Sky::Moonrise | Sky::Moonset)
+            && self.words_at(self.pos, &["time"])
+        {
             self.pos += 1;
         }
         let mut on = None;
         loop {
-            if what.is_sun()
+            if what.is_local()
                 && place.is_none()
                 && let Some((location, name, n)) = self.sky_place_at(self.pos)
             {
@@ -87,7 +89,7 @@ impl Parser<'_> {
             break;
         }
         // "hours of daylight in Narnia" must not quietly mean here.
-        if what.is_sun() && place.is_none() && ["in", "at"].iter().any(|w| self.words_at(self.pos, &[w])) {
+        if what.is_local() && place.is_none() && ["in", "at"].iter().any(|w| self.words_at(self.pos, &[w])) {
             let mut p = self.clone();
             p.pos += 1;
             if let Some((_, location, n)) = p.found_place(p.pos) {

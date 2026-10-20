@@ -181,6 +181,13 @@ impl rechenkern::WeatherProvider for Mild {
             uv_index: Some(3.0),
             chance_of_rain: None,
             condition: Some("partly cloudy".into()),
+            feels_like: Some(17.0),
+            rain: Some(0.4),
+            snowfall: Some(0.0),
+            pressure: Some(1013.2),
+            pressure_change: Some(-1.5),
+            visibility: Some(24.0),
+            ..Default::default()
         })
     }
 }
@@ -215,6 +222,14 @@ fn weather() {
             ("weather in Tokyo tomorrow", "10 °C (partly cloudy)"),
             ("weather", "18.5 °C (partly cloudy)"),
             ("high five", "5"),
+            ("feels like in Tokyo", "17 °C"),
+            ("rain in London", "0.4 mm"),
+            ("snowfall in Oslo", "0 cm"),
+            ("pressure in Paris", "1,013 hPa (falling)"),
+            ("visibility in Tokyo in miles", "14.91290861 mi"),
+            ("weather conditions in Tokyo", "partly cloudy"),
+            ("cloud cover in Tokyo", "<error: the weather provider doesn't know that>"),
+            ("pressure in psi", "<error: can't add pressure to a date>"),
             ("weather in Gotham", "<error: unknown place \"Gotham\", did you mean \"Gotha\"?>"),
         ],
     );

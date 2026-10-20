@@ -333,10 +333,39 @@ impl<'a> Parser<'a> {
             return None;
         }
         let (text, ends) = self.joined_words(i, registry().max_words().max(self.scope.units.max_words), false);
-        ends.iter()
+        let found = ends
+            .iter()
             .rev()
             .find_map(|&(end, n)| Some((self.lookup_unit(&text[..end])?, n)))
-            .or_else(|| self.time_power_at(i))
+            .or_else(|| self.time_power_at(i));
+        // "100 euros in pounds", "10 pounds + $5": pounds converted or added with money are sterling.
+        match found {
+            Some((unit, 1)) if is_pound_word(word) && self.pounds_are_money(i) => {
+                Some((registry().currency("GBP").unwrap_or(unit), 1))
+            }
+            found => found,
+        }
+    }
+
+    /// The pounds at token `i` are converted to or from money, or added to it.
+    fn pounds_are_money(&self, i: usize) -> bool {
+        let conversion = |t: Option<&Token>| t.is_some_and(|t| ["in", "to", "as", "into"].iter().any(|w| t.is_word(w)));
+        let sum = |t: Option<&Token>| {
+            t.is_some_and(|t| t.is_sym("+") || t.is_sym("-") || t.is_word("plus") || t.is_word("minus"))
+        };
+        let money_at = |k: usize| {
+            self.toks[k].word().is_none_or(|w| !is_pound_word(w))
+                && (self.unit_at(k, true).is_some_and(|(u, _)| u.is_money()) || self.glued_money(k).is_some())
+        };
+        let before = i.checked_sub(1).and_then(|k| self.toks.get(k));
+        let (next, after) = (self.toks.get(i + 1), self.toks.get(i + 2));
+        // "€100 in pounds"
+        (conversion(before) && (0..i).any(money_at))
+            // "10 pounds in euros"
+            || (conversion(next) && after.is_some() && money_at(i + 2))
+            // "10 pounds + $5", "$5 + 10 pounds"
+            || ((sum(next) || sum(i.checked_sub(2).and_then(|k| self.toks.get(k))))
+                && (0..self.toks.len()).any(|k| k != i && money_at(k)))
     }
 
     /// A time with a power after a slash: the "s2" of "m/s2".
@@ -748,4 +777,9 @@ impl<'a> Parser<'a> {
         }
         self.toks.iter().zip(keep).filter(|(_, k)| *k).map(|(t, _)| t.clone()).collect()
     }
+}
+
+/// "pound" or "pounds", which are sterling next to money.
+fn is_pound_word(word: &str) -> bool {
+    word.eq_ignore_ascii_case("pound") || word.eq_ignore_ascii_case("pounds")
 }

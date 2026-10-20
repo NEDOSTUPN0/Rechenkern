@@ -471,11 +471,14 @@ pub enum Sky {
     MoonPhase,
     /// Day of the lunar month, 1 on the day of the new moon.
     LunarDay,
+    Moonrise,
+    Moonset,
 }
 
 impl Sky {
-    pub fn is_sun(self) -> bool {
-        matches!(self, Sky::Sunrise | Sky::Sunset | Sky::Daylight)
+    /// Seen from a place: the sun's times and the moon's rising and setting, not its phase.
+    pub fn is_local(self) -> bool {
+        !matches!(self, Sky::MoonPhase | Sky::LunarDay)
     }
 }
 

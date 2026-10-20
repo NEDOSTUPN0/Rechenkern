@@ -414,3 +414,15 @@ lunar day on March 21, 2027                  → 14
 moon day                                     → 13
 moon day in Tokyo                            → <error: only a date or a time can be in a time zone, not a number>
 moon day on March 21, 2027                   → 14
+moonrise                                     → 17:27
+moonrise in Tokyo                            → Thu, 24 Sep 2026 16:16 JST
+moonrise on March 21, 2027                   → Sun, 21 Mar 2027 18:37
+moon rise                                    → 17:27
+moon rise in Tokyo                           → Thu, 24 Sep 2026 16:16 JST
+moon rise on March 21, 2027                  → Sun, 21 Mar 2027 18:37
+moonset                                      → 03:19
+moonset in Tokyo                             → Thu, 24 Sep 2026 02:39 JST
+moonset on March 21, 2027                    → Sun, 21 Mar 2027 06:19
+moon set                                     → 03:19
+moon set in Tokyo                            → Thu, 24 Sep 2026 02:39 JST
+moon set on March 21, 2027                   → Sun, 21 Mar 2027 06:19

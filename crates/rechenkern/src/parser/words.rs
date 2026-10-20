@@ -433,6 +433,28 @@ pub static WEATHER: Phrases<WeatherQuery> = Phrases::new(&[
     ("chance of rain", WeatherQuery::ChanceOfRain),
     ("rain chance", WeatherQuery::ChanceOfRain),
     ("chance of precipitation", WeatherQuery::ChanceOfRain),
+    ("feels like", WeatherQuery::FeelsLike),
+    ("feels like temperature", WeatherQuery::FeelsLike),
+    ("apparent temperature", WeatherQuery::FeelsLike),
+    ("real feel", WeatherQuery::FeelsLike),
+    ("precipitation", WeatherQuery::Precipitation),
+    ("rain", WeatherQuery::Rain),
+    ("rainfall", WeatherQuery::Rain),
+    ("snow", WeatherQuery::Snowfall),
+    ("snowfall", WeatherQuery::Snowfall),
+    ("cloud cover", WeatherQuery::CloudCover),
+    ("cloudiness", WeatherQuery::CloudCover),
+    ("clouds", WeatherQuery::CloudCover),
+    ("visibility", WeatherQuery::Visibility),
+    ("dew point", WeatherQuery::DewPoint),
+    ("dewpoint", WeatherQuery::DewPoint),
+    ("pressure", WeatherQuery::Pressure),
+    ("air pressure", WeatherQuery::Pressure),
+    ("barometric pressure", WeatherQuery::Pressure),
+    ("atmospheric pressure", WeatherQuery::Pressure),
+    ("weather conditions", WeatherQuery::Conditions),
+    ("conditions", WeatherQuery::Conditions),
+    ("sky", WeatherQuery::Conditions),
 ]);
 
 /// The sun and the moon. "sunlight" and "daylight" alone need a place after them.
@@ -451,6 +473,10 @@ pub static SKY: Phrases<Sky> = Phrases::new(&[
     ("lunar phase", Sky::MoonPhase),
     ("lunar day", Sky::LunarDay),
     ("moon day", Sky::LunarDay),
+    ("moonrise", Sky::Moonrise),
+    ("moon rise", Sky::Moonrise),
+    ("moonset", Sky::Moonset),
+    ("moon set", Sky::Moonset),
 ]);
 
 /// Foods by name: "1 cup of flour", "density of butter".

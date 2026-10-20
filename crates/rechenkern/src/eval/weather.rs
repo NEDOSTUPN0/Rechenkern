@@ -49,8 +49,20 @@ impl Env<'_> {
         };
         let percent =
             |p: Option<f64>| -> Result<Value> { Ok(Value::Percent(Number::from_f64(p.ok_or_else(missing)?))) };
+        let amount = |v: Option<f64>, unit: &str| -> Result<Value> {
+            Ok(Value::Quantity(Quantity::new(Number::from_f64(v.ok_or_else(missing)?), registry().get(unit))))
+        };
         let value = match what {
             WeatherQuery::Summary | WeatherQuery::Temperature => celsius(weather.temperature)?,
+            WeatherQuery::FeelsLike => celsius(weather.feels_like)?,
+            WeatherQuery::DewPoint => celsius(weather.dew_point)?,
+            WeatherQuery::Precipitation => amount(weather.precipitation, "mm")?,
+            WeatherQuery::Rain => amount(weather.rain, "mm")?,
+            WeatherQuery::Snowfall => amount(weather.snowfall, "cm")?,
+            WeatherQuery::CloudCover => percent(weather.cloud_cover)?,
+            WeatherQuery::Visibility => amount(weather.visibility, "km")?,
+            WeatherQuery::Pressure => amount(weather.pressure.map(f64::round), "hPa")?,
+            WeatherQuery::Conditions => Value::Text(weather.condition.clone().ok_or_else(missing)?),
             WeatherQuery::High => celsius(weather.high)?,
             WeatherQuery::Low => celsius(weather.low)?,
             WeatherQuery::Humidity => percent(weather.humidity)?,
@@ -67,6 +79,12 @@ impl Env<'_> {
         };
         let display = match (what, weather.condition) {
             (WeatherQuery::Summary, Some(sky)) => Display::Note(Cow::Owned(sky)),
+            (WeatherQuery::Pressure, _) => match weather.pressure_change {
+                Some(change) if change >= 1.0 => Display::Note(Cow::Borrowed("rising")),
+                Some(change) if change <= -1.0 => Display::Note(Cow::Borrowed("falling")),
+                Some(_) => Display::Note(Cow::Borrowed("steady")),
+                None => Display::Auto,
+            },
             (WeatherQuery::WindDirection, _) => {
                 Display::Note(Cow::Borrowed(compass_point(weather.wind_direction.unwrap_or_default())))
             }

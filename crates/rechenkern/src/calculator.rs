@@ -555,13 +555,21 @@ impl Reads {
 pub(crate) fn line_kind(trimmed: &str) -> LineKind {
     if trimmed.is_empty() {
         LineKind::Blank
-    } else if trimmed.starts_with('#') {
+    } else if trimmed.starts_with('#') && !tag_statistic(trimmed) {
         LineKind::Heading
     } else if trimmed.len() >= 3 && trimmed.chars().all(|c| c == '-') {
         LineKind::Divider
     } else {
         LineKind::Value
     }
+}
+
+/// "#food total", "#food average in EUR": a statistic of tagged lines, not a heading.
+fn tag_statistic(trimmed: &str) -> bool {
+    const WORDS: &[&str] = &["total", "subtotal", "sum", "average", "avg", "mean", "median", "max", "min", "count"];
+    let mut words = trimmed.split_whitespace();
+    let tag = words.next().unwrap_or_default();
+    tag.len() > 1 && words.next().is_some_and(|w| WORDS.contains(&w.to_lowercase().as_str()))
 }
 
 /// The hashtags in a line, lowercase: "food" in "Coffee $5 #food".

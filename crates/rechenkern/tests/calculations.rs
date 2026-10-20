@@ -1669,5 +1669,27 @@ fn second_sweep_places() {
         ("time in New Caledonia", "Thu, 24 Sep 2026 05:30 UTC+11"),
         ("time in nir", "19:30 BST"),
         ("sunrise in Curaçao", "06:25 UTC-4"),
+        ("moonrise in Tokyo", "Thu, 24 Sep 2026 16:16 JST"),
+        ("moonset in London on Oct 25, 2026", "Sun, 25 Oct 2026 05:49 GMT"),
+        ("moonrise in New York on Jan 3, 2027", "Sun, 3 Jan 2027 03:55 EST"),
     ]);
+}
+
+#[test]
+fn second_sweep_words() {
+    check(&[
+        ("100 euros in pounds", "£88.89"),
+        ("10 pounds in euros", "€11.25"),
+        ("$5 + 10 pounds", "£14.00"),
+        ("10 pounds in kg", "4.5359237 kg"),
+        ("5 pounds of flour for $3", "$3.00"),
+        ("2 pounds - 1 pound", "1 lb"),
+    ]);
+    let tags = "lunch $10 #food\ntaxi $15 #travel\ndinner $30 #food\n";
+    assert_eq!(sheet(&format!("{tags}#food total")), "$40.00");
+    assert_eq!(sheet(&format!("{tags}#food average")), "$20.00");
+    assert_eq!(sheet(&format!("{tags}sum #food\nmax #food")), "$30.00");
+    assert_eq!(sheet(&format!("{tags}#food total\ncount #food")), "2");
+    assert_eq!(sheet(&format!("{tags}#food total\nsum")), "$55.00");
+    assert_eq!(sheet("# Food\n10\n20\nsum"), "30");
 }
