@@ -1527,7 +1527,7 @@ fn typed_results() {
         ("every 2 weeks", "every 2 weeks"),
         ("daily", "every day"),
         ("every other day until Sep 30", "every 2 days, 4 times until Wed, 30 Sep 2026"),
-        ("every 2 weeks from Oct 1 until Dec 31", "every 2 weeks, 7 times until Thu, 31 Dec 2026"),
+        ("every 2 weeks from Oct 1 until Dec 31", "every 2 weeks from Thu, 1 Oct 2026, 7 times until Thu, 31 Dec 2026"),
         ("$50 every 2 weeks", "$25.00/week"),
     ]);
 }

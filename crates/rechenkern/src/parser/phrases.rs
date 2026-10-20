@@ -1,7 +1,9 @@
 //! Whole-line phrases: percentage questions and proportions.
 
 use super::Parser;
-use crate::ast::{Direction, Expr, Format, Func, GrowthResult, IncomeTaxPart, Op, Target, TaxPart, TimeExpr, Which};
+use crate::ast::{
+    Direction, Expr, Format, Func, GrowthResult, IncomeTaxPart, MonthDay, Op, Target, TaxPart, TimeExpr, Which,
+};
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -775,8 +777,19 @@ impl Parser<'_> {
         }
         let amount = |n: i64, unit: crate::units::Unit| Expr::WithUnit(Expr::Number(Number::from_i64(n)).boxed(), unit);
         let first = self.lower(0).unwrap_or_default();
+        let mut first_day = None;
         let (every, mut at) = if let Some(&(_, unit, n)) = EVERY.iter().find(|(w, _, _)| *w == first) {
             (amount(n, registry().lookup(unit).expect("a unit of time")), 1)
+        } else if first == "every"
+            && let Some((every, len)) = self.every_weekday()?
+        {
+            match every {
+                Ok((weeks, day)) => {
+                    first_day = Some(day.boxed());
+                    (weeks, len)
+                }
+                Err(day) => return Ok(Some(day)),
+            }
         } else if first == "every" {
             // "every other day", "every 2 weeks", "every week"
             let (n, at) = match &self.toks.get(1).map(|t| &t.tok) {
@@ -809,7 +822,41 @@ impl Parser<'_> {
             *slot = Some(self.part(at + 1, stop)?.boxed());
             at = stop;
         }
-        Ok(Some(Expr::Cadence { every: every.boxed(), start, until }))
+        Ok(Some(Expr::Cadence { every: every.boxed(), start: start.or(first_day), until }))
+    }
+
+    /// "every monday", "every other friday", "every 2nd tuesday": weeks between the
+    /// days, the first day, and the length of the words. "every third monday" is a day in
+    /// each month: the next one (`Err`), as SoulverCore reads it.
+    #[allow(clippy::type_complexity)]
+    fn every_weekday(&self) -> Result<Option<(std::result::Result<(Expr, Expr), Expr>, usize)>> {
+        let weekday_at = |i: usize| self.lower(i).and_then(|w| super::words::weekday(&w)).map(|(d, _)| d);
+        let weeks = |n: i64| {
+            let unit = registry().lookup("week").expect("a unit of time");
+            Expr::WithUnit(Expr::Number(Number::from_i64(n)).boxed(), unit)
+        };
+        let next = |weekday| Expr::Time(TimeExpr::Weekday(weekday, None));
+        if let Some(weekday) = weekday_at(1) {
+            return Ok(Some((Ok((weeks(1), next(weekday))), 2)));
+        }
+        if self.words_at(1, &["other"])
+            && let Some(weekday) = weekday_at(2)
+        {
+            return Ok(Some((Ok((weeks(2), next(weekday))), 3)));
+        }
+        let Some((nth, n)) = self.nth_at(1) else { return Ok(None) };
+        let Some(weekday) = weekday_at(1 + n) else { return Ok(None) };
+        if nth == 2 {
+            return Ok(Some((Ok((weeks(2), next(weekday))), 2 + n)));
+        }
+        let mut p = self.clone();
+        p.pos = 2 + n;
+        let month = if p.eat_word("of") { p.month_of()? } else { None };
+        if p.pos != self.toks.len() {
+            return Ok(None);
+        }
+        let day = Expr::Time(TimeExpr::InMonth(MonthDay::Nth(nth, weekday), month));
+        Ok(Some((Err(day), p.pos)))
     }
 
     /// "8% vat in $108" (the tax in a price), "$108 before 8% tax" (the price without it),

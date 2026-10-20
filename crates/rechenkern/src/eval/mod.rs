@@ -208,19 +208,7 @@ impl Env<'_> {
                 self.vars.get(name).cloned().ok_or_else(|| Error::new(format!("unknown variable {name}")))?
             }
             Expr::Line(line) => self.line(*line)?,
-            Expr::Cadence { every, start, until } => {
-                let every = self.span_of(&self.eval(every)?)?;
-                let day = |e: &Expr| match self.eval(e)? {
-                    Value::Moment(m) => Ok(m.time.date()),
-                    v => bail!("expected a date, not {}", v.kind()),
-                };
-                let start = match start {
-                    Some(e) => day(e)?,
-                    None => self.today(),
-                };
-                let until = until.as_deref().map(day).transpose()?;
-                Value::Cadence(crate::value::Cadence { every, start, until })
-            }
+            Expr::Cadence { every, start, until } => self.cadence(every, start.as_deref(), until.as_deref())?,
             Expr::SalesTax { amount, rate, part } => {
                 let rate = match self.eval(rate)? {
                     Value::Percent(p) => p / Number::from_i64(100),
@@ -312,6 +300,28 @@ impl Env<'_> {
         let result = f();
         self.rate_date.set(saved);
         result
+    }
+
+    /// "every 2 weeks from May 1 until June 1".
+    fn cadence(&self, every: &Expr, start: Option<&Expr>, until: Option<&Expr>) -> Result<Value> {
+        let every = self.span_of(&self.eval(every)?)?;
+        let date = |v: Value| match v {
+            Value::Moment(m) => Ok(m.time.date()),
+            v => bail!("expected a date, not {}", v.kind()),
+        };
+        let day = |e: &Expr| date(self.eval(e)?);
+        let named_start = start.is_some();
+        let (start_day, until) = match (start, until) {
+            // "from Jan 1 until March 1": dates without a year are read as a range.
+            (Some(a), Some(b)) => {
+                let (a, b) = self.range_ends(a, b)?;
+                (date(a)?, Some(date(b)?))
+            }
+            (start, until) => {
+                (start.map(day).transpose()?.unwrap_or_else(|| self.today()), until.map(day).transpose()?)
+            }
+        };
+        Ok(Value::Cadence(crate::value::Cadence { every, start: start_day, until, named_start }))
     }
 
     /// The ends of a range of amounts in one unit, as in "5-10 kg": a plain number

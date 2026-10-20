@@ -121,6 +121,8 @@ pub struct Cadence {
     /// The first time, and the days it happens on up to `until`.
     pub start: civil::Date,
     pub until: Option<civil::Date>,
+    /// The first time was named (`from May 1`, `every monday`), so the answer shows it.
+    pub named_start: bool,
 }
 
 impl Cadence {

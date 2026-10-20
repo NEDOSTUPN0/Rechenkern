@@ -98,13 +98,17 @@ fn timecode(t: &Timecode) -> String {
     format!("{sign}{:02}:{:02}:{:02}:{:02}", s / 3600, s / 60 % 60, s % 60, frames.abs().min(per_second - 1))
 }
 
-/// "every 2 weeks", "every day", "every 2 weeks, 7 times until Thu, 31 Dec 2026".
+/// "every 2 weeks", "every day", "every week from Mon, 5 Oct 2026",
+/// "every 2 weeks, 7 times until Thu, 31 Dec 2026".
 fn cadence(c: &Cadence, config: &Config) -> String {
     let span = duration(&Duration::new(c.every), config);
-    let every = match span.strip_prefix("1 ") {
+    let mut every = match span.strip_prefix("1 ") {
         Some(unit) => format!("every {unit}"),
         None => format!("every {span}"),
     };
+    if c.named_start {
+        every = format!("{every} from {}", c.start.strftime("%a, %-d %b %Y"));
+    }
     match c.until {
         Some(until) => {
             let count = c.dates().len();
