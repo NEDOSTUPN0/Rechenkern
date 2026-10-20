@@ -610,6 +610,23 @@ impl Parser<'_> {
         }
         if let Some(n) = words::scale_word(self.toks[i].word().unwrap_or(w)).or_else(|| self.fraction_at(i)) {
             self.pos += 1;
+            // "half a dozen", "half a million", "half an hour"
+            let article = usize::from(matches!(self.lower(self.pos).as_deref(), Some("a" | "an")));
+            if self.fraction_at(i).is_some() {
+                if self
+                    .toks
+                    .get(self.pos + article)
+                    .and_then(|t| t.word())
+                    .is_some_and(|w| words::scale_word(w).is_some())
+                {
+                    self.pos += article;
+                    return Ok(Some(Expr::Number(self.multipliers(n, false))));
+                }
+                if article == 1 && self.unit_at(self.pos + 1, true).is_some() {
+                    self.pos += 1;
+                    return self.quantity(Expr::Number(n)).map(Some);
+                }
+            }
             return Ok(Some(Expr::Number(n)));
         }
         // "square meter in sq ft"
