@@ -62,6 +62,10 @@ fn turned_off() {
     answers(Features { word_functions: false, ..off() }, &[("20 is what % of 200", "200")]);
     answers(Features { converters: false, ..off() }, &[("5 km in m", "5 km")]);
     answers(Features { variable_declarations: false, ..off() }, &[("rent = 5", "5"), ("rent", "<none>")]);
+    answers(
+        Features { unit_declarations: false, ..off() },
+        &[("widgets = new unit", "<error: expected a value at the end>")],
+    );
     answers(Features { functions_require_parentheses: true, ..off() }, &[("sqrt 16", "16"), ("sqrt(16)", "4")]);
     answers(
         Features { disabled_functions: vec!["average".into()], ..off() },
@@ -69,7 +73,7 @@ fn turned_off() {
     );
     answers(
         Features { disabled_converters: vec![Converter::Hexadecimal, Converter::Rounding], ..off() },
-        &[("255 in hex", "255"), ("255 in binary", "0b11111111"), ("1/3 to 2 dp", "0.3333333333 – 2")],
+        &[("255 in hex", "255"), ("255 in binary", "0b11111111"), ("1/3 to 2 dp", "1.666666667")],
     );
     answers(
         Features { in_ambiguity_prefer_something_to_nothing: false, ..off() },

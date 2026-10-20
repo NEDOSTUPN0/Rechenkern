@@ -811,16 +811,20 @@ impl Parser<'_> {
                 return Ok(Some(Expr::Line(if average { LineRef::Average } else { LineRef::Sum })));
             }
         }
+        // "average of #food" is the tagged lines (tags are no tokens): "of" with nothing after.
+        let ends_at =
+            |p: &Self, i: usize| p.toks.get(i).is_none_or(|t| ["in", "to", "as"].iter().any(|w| t.is_word(w)));
+        let tag_of = self.words_at(self.pos + 1, &["of"]) && ends_at(self, self.pos + 2);
         // "sum of 1, 2", "average(1, 2)", "average 36, 42", "average between 10 and 20" are functions.
-        let followed_by_args =
-            self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_word("between") || t.is_sym("("))
-                || self.amount_follows(1);
+        let followed_by_args = !tag_of
+            && (self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_word("between") || t.is_sym("("))
+                || self.amount_follows(1));
         // A statistic of the lines above, as the whole line: "median", "std dev in EUR".
         if self.pos == 0
             && !followed_by_args
             && let Some((func, n)) = self.line_statistic()
         {
-            self.pos += n;
+            self.pos += n + usize::from(self.words_at(self.pos + n, &["of"]));
             return Ok(Some(Expr::Line(LineRef::Stat(func))));
         }
         let line = match w.as_str() {
@@ -850,7 +854,7 @@ impl Parser<'_> {
                 _ => return Ok(None),
             },
         };
-        self.pos += 1;
+        self.pos += 1 + usize::from(tag_of);
         Ok(Some(Expr::Line(line)))
     }
 
@@ -863,6 +867,10 @@ impl Parser<'_> {
             ("min", Func::Min),
             ("minimum", Func::Min),
             ("count", Func::Count),
+            ("lcm", Func::Lcm),
+            ("gcd", Func::Gcd),
+            ("gcf", Func::Gcd),
+            ("hcf", Func::Gcd),
         ]
         .iter()
         .find(|(w, _)| self.words_at(self.pos, &[w]))
@@ -873,9 +881,11 @@ impl Parser<'_> {
                 .find(|ws| self.words_at(self.pos, ws))
                 .map(|ws| (Func::StdDev, ws.len()))
         })?;
+        let of_tag = self.words_at(self.pos + n, &["of"])
+            && self.toks.get(self.pos + n + 1).is_none_or(|t| ["in", "to", "as"].iter().any(|w| t.is_word(w)));
         let ends = match self.toks.get(self.pos + n) {
             None => true,
-            Some(t) => ["in", "to", "as"].iter().any(|w| t.is_word(w)) || t.is_sym("#"),
+            Some(t) => ["in", "to", "as"].iter().any(|w| t.is_word(w)) || t.is_sym("#") || of_tag,
         };
         ends.then_some((func, n))
     }

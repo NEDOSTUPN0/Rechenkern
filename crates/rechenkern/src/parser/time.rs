@@ -5,7 +5,7 @@ use jiff::tz::TimeZone;
 use super::{Parser, words};
 use crate::ast::{Expr, Format, Func, MonthDay, Op, Target, TimeExpr, Which};
 use crate::config::DateOrder;
-use crate::error::{Result, bail};
+use crate::error::{Error, Result, bail};
 use crate::lexer::Tok;
 use crate::number::Number;
 use crate::units::{Dim, Unit, registry};
@@ -30,6 +30,16 @@ pub(super) fn maybe_duration(expr: &Expr) -> bool {
         Expr::Number(_) | Expr::Percent(_) | Expr::Bool(_) => false,
         Expr::WithUnit(_, u) | Expr::BareUnit(u) => u.dim() == Dim::TIME || u.dim() == Dim::WORKDAY,
         _ => true,
+    }
+}
+
+/// Whether `expr` names a day or a moment, which "at 3pm" can give a time to.
+pub(super) fn is_dateish(expr: &Expr) -> bool {
+    match expr {
+        Expr::Time(TimeExpr::Clock { on: None, .. }) => false,
+        Expr::Time(_) | Expr::Period(..) => true,
+        Expr::Binary(Op::Add | Op::Sub, a, b) => is_dateish(a) || is_dateish(b),
+        _ => false,
     }
 }
 
@@ -158,6 +168,20 @@ impl Parser<'_> {
         })
     }
 
+    /// "at" and a clock time follow: "at 3pm", "at 15:00", "at noon".
+    pub(super) fn at_clock_follows(&mut self) -> bool {
+        if !self.peek().is_some_and(|t| t.is_word("at")) {
+            return false;
+        }
+        let (i, next) = (self.pos + 1, self.lower(self.pos + 2).unwrap_or_default());
+        match self.toks.get(i).map(|t| &t.tok) {
+            Some(Tok::Clock { .. }) => true,
+            Some(Tok::Num(_)) => matches!(next.as_str(), "am" | "pm"),
+            Some(Tok::Word(w)) => matches!(w.to_lowercase().as_str(), "noon" | "midday" | "midnight"),
+            _ => false,
+        }
+    }
+
     /// A clock time after a date: `tomorrow at 3pm`, `March 12 9:30`.
     pub(super) fn date_tail(&mut self, date: Expr) -> Result<Expr> {
         let mut p = self.clone();
@@ -235,7 +259,11 @@ impl Parser<'_> {
             None => MonthDay::Day(nth),
         };
         self.pos += n + len;
-        let month = self.month_of()?;
+        // "third friday of xyz" is no date, rather than the Friday alone.
+        let month = self.month_of().map_err(|e| match pick {
+            MonthDay::Nth(..) if e.is_unclear() => Error::new("expected a month after the weekday"),
+            _ => e,
+        })?;
         Ok(Some(Expr::Time(TimeExpr::InMonth(pick, month))))
     }
 

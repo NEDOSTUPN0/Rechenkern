@@ -3,6 +3,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 ---
 2.5 "                                        → 2.5
 2.5 " in m                                   → 2.5
+2.5 %                                        → 2.5%
 2.5 '                                        → 2.5 ft
 2.5 ' in m                                   → 0.762 m
 2.5 A                                        → 2.5 A
@@ -104,6 +105,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 CDF in EUR                               → €1.13
 2.5 CHF                                      → 2.50 CHF
 2.5 CHF in EUR                               → €1.13
+2.5 CLF                                      → 2.5000 CLF
+2.5 CLF in EUR                               → €1.13
 2.5 CLP                                      → 3 CLP
 2.5 CLP in EUR                               → €1.13
 2.5 CNY                                      → CN¥2.50
@@ -114,6 +117,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 COP in EUR                               → €1.13
 2.5 CRC                                      → 2.50 CRC
 2.5 CRC in EUR                               → €1.13
+2.5 CUC                                      → 2.50 CUC
+2.5 CUC in EUR                               → €1.13
 2.5 CUP                                      → 2.50 CUP
 2.5 CUP in EUR                               → €1.13
 2.5 CVE                                      → 2.50 CVE
@@ -197,6 +202,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 GBps in bps                              → 20,000,000,000 bps
 2.5 GEL                                      → 2.50 GEL
 2.5 GEL in EUR                               → €1.13
+2.5 GGP                                      → 2.50 GGP
+2.5 GGP in EUR                               → €1.13
 2.5 GHS                                      → 2.50 GHS
 2.5 GHS in EUR                               → €1.13
 2.5 GHz                                      → 2.5 GHz
@@ -284,6 +291,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 IDR in EUR                               → €1.13
 2.5 ILS                                      → ₪2.50
 2.5 ILS in EUR                               → €1.13
+2.5 IMP                                      → 2.50 IMP
+2.5 IMP in EUR                               → €1.13
 2.5 INR                                      → ₹2.50
 2.5 INR in EUR                               → €1.13
 2.5 IQD                                      → 2.500 IQD
@@ -293,6 +302,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 ISK                                      → 3 ISK
 2.5 ISK in EUR                               → €1.13
 2.5 J                                        → 2.5 J
+2.5 JEP                                      → 2.50 JEP
+2.5 JEP in EUR                               → €1.13
 2.5 JMD                                      → 2.50 JMD
 2.5 JMD in EUR                               → €1.13
 2.5 JOD                                      → 2.500 JOD
@@ -743,6 +754,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 XBT in EUR                               → €225,000.00
 2.5 XCD                                      → 2.50 XCD
 2.5 XCD in EUR                               → €1.13
+2.5 XDR                                      → 2.5000 XDR
+2.5 XDR in EUR                               → €1.13
 2.5 XLM                                      → 2.5 XLM
 2.5 XLM in EUR                               → €1.13
 2.5 XMR                                      → 2.5 XMR
@@ -1029,6 +1042,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 bch in EUR                               → €1.13
 2.5 bdt                                      → 2.50 BDT
 2.5 bdt in EUR                               → €1.13
+2.5 beat per minute                          → 2.5 bpm
+2.5 beat per minute in Hz                    → 0.04166666667 Hz
+2.5 beats per minute                         → 2.5 bpm
+2.5 beats per minute in Hz                   → 0.04166666667 Hz
 2.5 belarusian rouble                        → 2.50 BYN
 2.5 belarusian rouble in EUR                 → €1.13
 2.5 belarusian roubles                       → 2.50 BYN
@@ -1116,6 +1133,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 botswana pula in EUR                     → €1.13
 2.5 botswana pulas                           → 2.50 BWP
 2.5 botswana pulas in EUR                    → €1.13
+2.5 bpm                                      → 2.5 bpm
+2.5 bpm in Hz                                → 0.04166666667 Hz
 2.5 bps                                      → 2.5 bps
 2.5 brazilian reais                          → R$2.50
 2.5 brazilian reais in EUR                   → €1.13
@@ -1317,12 +1336,18 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 chilean peso in EUR                      → €1.13
 2.5 chilean pesos                            → 3 CLP
 2.5 chilean pesos in EUR                     → €1.13
+2.5 chilean unidad de fomento                → 2.5000 CLF
+2.5 chilean unidad de fomento in EUR         → €1.13
+2.5 chilean unidad de fomentos               → 2.5000 CLF
+2.5 chilean unidad de fomentos in EUR        → €1.13
 2.5 chinese yuan                             → CN¥2.50
 2.5 chinese yuan in EUR                      → €1.13
 2.5 chinese yuans                            → CN¥2.50
 2.5 chinese yuans in EUR                     → €1.13
 2.5 cl                                       → 2.5 cL
 2.5 cl in L                                  → 0.025 L
+2.5 clf                                      → 2.5000 CLF
+2.5 clf in EUR                               → €1.13
 2.5 clp                                      → 3 CLP
 2.5 clp in EUR                               → €1.13
 2.5 cm                                       → 2.5 cm
@@ -1373,10 +1398,16 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 croatian kuna in EUR                     → €0.33
 2.5 ct                                       → 2.5 ct
 2.5 ct in kg                                 → 0.0005 kg
+2.5 cuban convertible peso                   → 2.50 CUC
+2.5 cuban convertible peso in EUR            → €1.13
+2.5 cuban convertible pesos                  → 2.50 CUC
+2.5 cuban convertible pesos in EUR           → €1.13
 2.5 cuban peso                               → 2.50 CUP
 2.5 cuban peso in EUR                        → €1.13
 2.5 cuban pesos                              → 2.50 CUP
 2.5 cuban pesos in EUR                       → €1.13
+2.5 cuc                                      → 2.50 CUC
+2.5 cuc in EUR                               → €1.13
 2.5 cuft                                     → 2.5 ft³
 2.5 cuft in L                                → 70.79211648 L
 2.5 cuin                                     → 2.5 in³
@@ -1825,6 +1856,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 georgian lari in EUR                     → €1.13
 2.5 georgian laris                           → 2.50 GEL
 2.5 georgian laris in EUR                    → €1.13
+2.5 ggp                                      → 2.50 GGP
+2.5 ggp in EUR                               → €1.13
 2.5 ghana cedi                               → 2.50 GHS
 2.5 ghana cedi in EUR                        → €1.13
 2.5 ghana cedis                              → 2.50 GHS
@@ -1969,6 +2002,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 guatemalan quetzales in EUR              → €1.13
 2.5 guatemalan quetzals                      → 2.50 GTQ
 2.5 guatemalan quetzals in EUR               → €1.13
+2.5 guernsey pound                           → 2.50 GGP
+2.5 guernsey pound in EUR                    → €1.13
+2.5 guernsey pounds                          → 2.50 GGP
+2.5 guernsey pounds in EUR                   → €1.13
 2.5 guinea franc                             → 3 GNF
 2.5 guinea franc in EUR                      → €1.13
 2.5 guinea francs                            → 3 GNF
@@ -2238,6 +2275,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 irr in EUR                               → €1.13
 2.5 isk                                      → 3 ISK
 2.5 isk in EUR                               → €1.13
+2.5 isle of man pound                        → 2.50 IMP
+2.5 isle of man pound in EUR                 → €1.13
+2.5 isle of man pounds                       → 2.50 IMP
+2.5 isle of man pounds in EUR                → €1.13
 2.5 israeli shekel                           → ₪2.50
 2.5 israeli shekel in EUR                    → €1.13
 2.5 israeli shekels                          → ₪2.50
@@ -2250,6 +2291,12 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 japanese yen in EUR                      → €0.02
 2.5 japanese yens                            → ¥3
 2.5 japanese yens in EUR                     → €0.02
+2.5 jep                                      → 2.50 JEP
+2.5 jep in EUR                               → €1.13
+2.5 jersey pound                             → 2.50 JEP
+2.5 jersey pound in EUR                      → €1.13
+2.5 jersey pounds                            → 2.50 JEP
+2.5 jersey pounds in EUR                     → €1.13
 2.5 jmd                                      → 2.50 JMD
 2.5 jmd in EUR                               → €1.13
 2.5 jod                                      → 2.500 JOD
@@ -2864,6 +2911,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 manat in EUR                             → €1.13
 2.5 manats                                   → 2.50 AZN
 2.5 manats in EUR                            → €1.13
+2.5 manx pound                               → 2.50 IMP
+2.5 manx pound in EUR                        → €1.13
+2.5 manx pounds                              → 2.50 IMP
+2.5 manx pounds in EUR                       → €1.13
 2.5 mauritanian ouguiya                      → 2.50 MRU
 2.5 mauritanian ouguiya in EUR               → €1.13
 2.5 mauritanian ouguiyas                     → 2.50 MRU
@@ -4061,6 +4112,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 scr in EUR                               → €1.13
 2.5 sdg                                      → 2.50 SDG
 2.5 sdg in EUR                               → €1.13
+2.5 sdr                                      → 2.5000 XDR
+2.5 sdr in EUR                               → €1.13
+2.5 sdrs                                     → 2.5000 XDR
+2.5 sdrs in EUR                              → €1.13
 2.5 sec                                      → 2.5 seconds
 2.5 second                                   → 2.5 seconds
 2.5 seconds                                  → 2.5 seconds
@@ -4159,6 +4214,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 south sudanese pound in EUR              → €1.13
 2.5 south sudanese pounds                    → 2.50 SSP
 2.5 south sudanese pounds in EUR             → €1.13
+2.5 special drawing right                    → 2.5000 XDR
+2.5 special drawing right in EUR             → €1.13
+2.5 special drawing rights                   → 2.5000 XDR
+2.5 special drawing rights in EUR            → €1.13
 2.5 sqcm                                     → 2.5 cm²
 2.5 sqcm in m2                               → 0.00025 m²
 2.5 sqdm                                     → 2.5 dm²
@@ -4544,6 +4603,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 ul in L                                  → 0.0000025 L
 2.5 umol                                     → 2.5 µmol
 2.5 umol in mol                              → 0.0000025 mol
+2.5 unidad de fomento                        → 2.5000 CLF
+2.5 unidad de fomento in EUR                 → €1.13
+2.5 unidad de fomentos                       → 2.5000 CLF
+2.5 unidad de fomentos in EUR                → €1.13
 2.5 uniswap                                  → 2.5 UNI
 2.5 uniswap in EUR                           → €1.13
 2.5 uniswaps                                 → 2.5 UNI
@@ -4713,6 +4776,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 xau in EUR                               → €1.13
 2.5 xcd                                      → 2.50 XCD
 2.5 xcd in EUR                               → €1.13
+2.5 xdr                                      → 2.5000 XDR
+2.5 xdr in EUR                               → €1.13
 2.5 xlm                                      → 2.5 XLM
 2.5 xlm in EUR                               → €1.13
 2.5 xmr                                      → 2.5 XMR

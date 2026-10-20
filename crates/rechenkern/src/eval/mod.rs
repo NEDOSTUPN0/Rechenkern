@@ -335,6 +335,10 @@ impl Env<'_> {
     fn amount_range(&self, a: &Expr, b: &Expr) -> Result<Option<[Quantity; 2]>> {
         let Value::Quantity(mut a) = self.eval(a)? else { return Ok(None) };
         let Value::Quantity(mut b) = self.eval(b)? else { return Ok(None) };
+        // "from 30 to 10" is the difference, as in SoulverCore.
+        if a.unit.is_none() && b.unit.is_none() {
+            return Ok(None);
+        }
         if a.unit.is_none() {
             a.unit = b.unit.clone();
         } else if b.unit.is_none() {
@@ -789,6 +793,14 @@ impl Env<'_> {
                 Ok(Value::Quantity(self.convert_quantity(&hz, unit)?))
             }
             Value::Percent(p) if unit.is_none() => Ok(Value::number(p / Number::from_i64(100))),
+            // "hours in today": the length of that day where it is (23 or 25 hours when the clocks change).
+            Value::Moment(m) if m.kind == MomentKind::Date && unit.dim() == Dim::TIME => {
+                let zone = if m.zoned { m.time.time_zone().clone() } else { self.local_zone() };
+                let start = m.time.date().to_zoned(zone.clone())?;
+                let end = m.time.date().tomorrow()?.to_zoned(zone)?;
+                let seconds = Number::from_i64(end.timestamp().as_second() - start.timestamp().as_second());
+                Ok(Value::Quantity(self.convert_quantity(&Quantity::new(seconds, registry().get("s")), unit)?))
+            }
             v => bail!("can't convert {} to {}", v.kind(), unit_text(unit, true)),
         }
     }
@@ -972,6 +984,10 @@ impl Env<'_> {
                 v => bail!("can't make a date from {}", v.kind()),
             },
             Format::Iso => match value {
+                // A date alone has no time of day: "christmas in iso" = 2026-12-25.
+                Value::Moment(m) if m.kind == MomentKind::Date => {
+                    (Value::Text(m.time.strftime("%Y-%m-%d").to_string()), Display::Auto)
+                }
                 Value::Moment(m) => (Value::Text(m.time.strftime("%Y-%m-%dT%H:%M:%S%:z").to_string()), Display::Auto),
                 v => bail!("can't write {} as ISO 8601", v.kind()),
             },

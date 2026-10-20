@@ -469,13 +469,13 @@ today as epoch                               → 1790136000
 today as date                                → Wed, 23 Sep 2026
 255 in iso 8601                              → <error: can't write a number as ISO 8601>
 0.75 as iso 8601                             → <error: can't write a number as ISO 8601>
-today as iso 8601                            → 2026-09-23T00:00:00-04:00
+today as iso 8601                            → 2026-09-23
 255 in iso8601                               → <error: can't write a number as ISO 8601>
 0.75 as iso8601                              → <error: can't write a number as ISO 8601>
-today as iso8601                             → 2026-09-23T00:00:00-04:00
+today as iso8601                             → 2026-09-23
 255 in iso                                   → <error: can't write a number as ISO 8601>
 0.75 as iso                                  → <error: can't write a number as ISO 8601>
-today as iso                                 → 2026-09-23T00:00:00-04:00
+today as iso                                 → 2026-09-23
 255 in day of the week                       → <error: a number has no weekday>
 0.75 as day of the week                      → <error: a number has no weekday>
 today as day of the week                     → Wednesday

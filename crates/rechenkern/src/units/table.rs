@@ -418,6 +418,9 @@ fn definitions() -> Vec<Def> {
             NANO,
         ]),
         unit("fps", "frame per second", Dim::FREQUENCY, "1").plural("frames per second"),
+        unit("bpm", "beat per minute", Dim::FREQUENCY, "1")
+            .scale(Number::ONE / Number::from_i64(60))
+            .plural("beats per minute"),
         // Mechanics
         unit("N", "newton", Dim::FORCE, "1").prefixes(&[KILO, MEGA, GIGA, MILLI, MICRO, MICRO_GREEK, NANO]),
         unit("dyn", "dyne", Dim::FORCE, "0.00001"),
@@ -588,7 +591,7 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("N·m", &["Nm", "N·m", "N⋅m", "N m", "newton meter", "newton meters", "newton metre", "newton metres"], "N*m"),
     ("", &["Ws", "W s", "watt second", "watt seconds"], "W*s"),
     // "W m" is a watt minute, as in SoulverCore.
-    ("", &["W m", "watt minute", "watt minutes"], "W*min"),
+    ("W·min", &["W m", "watt minute", "watt minutes"], "W*min"),
     (
         "",
         &[
@@ -825,6 +828,20 @@ pub(super) fn build() -> Registry {
         b.register(id, d.aliases.iter().map(|a| a.to_string()), !d.prefixed_only);
         ids.push(id);
     }
+    // A percentage per something: "5%/year". Never read as a word: "in percent" is a format.
+    let percent = b.push(UnitDef {
+        symbol: "%".into(),
+        name: "percent".into(),
+        plural: "percent".into(),
+        dim: Dim::NONE,
+        scale: Number::parse("0.01").expect("valid unit scale"),
+        offset: Number::ZERO,
+        spelled: false,
+        tight: true,
+        calendar: None,
+        currency: None,
+    });
+    b.exact.insert("%".into(), Unit::of(percent));
 
     for c in CURRENCIES {
         let id = b.push(UnitDef {

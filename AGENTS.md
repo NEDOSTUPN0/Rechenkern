@@ -119,7 +119,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - A unit per an amount (`L/100km`) is a unit of its own, found by its symbol:
   `liters per 100 km` builds "L/100km". Against another unit it works as the
   plain rate (`8 L/100km * 500 km` = 40 L).
-- `BareUnit in X` is reversed: `seconds in a day` = 1 day in seconds.
+- `BareUnit in X` is reversed: `seconds in a day` = 1 day in seconds; the target may be compound
+  (`kn in km/h`). `are`, `ares` and a lone `'` start one too (`ares in km²`, `' in km`).
 - A clock time followed by a zone is read in that zone (`3pm Tokyo`);
   `3pm in Tokyo` converts local 3pm; `9am in New York to Tokyo` places, then converts.
 - A place right before `in`/`to` + another zone means "now there": `PST to EST`.
@@ -267,6 +268,7 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   range (`5-10 kg`, `5 to 10 kg`, `between 5 and 10 kg` = "5 – 10 kg"); a
   conversion converts both ends. In a calculation it subtracts (`5-10 kg * 2`
   = -15 kg), and so does money (`$10-20`), as in SoulverCore. The answer is text.
+  Plain numbers subtract too: `from 30 to 10` = -20.
 - Period adjectives after an amount make a rate and convert as targets (`$100 daily` =
   $100/day, `$50,000 a year in monthly`); count words too (`$10 twice a week` = $20/week,
   `3 times per day`). A variable of the same name wins over a cadence word (`monthly`).
@@ -307,7 +309,10 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   timecode at 24 fps unless `at 30 fps` follows. A time at a speed (`2 hours at 1.5x`) is a
   duration; `time saved` is the difference. `in hms` writes `3h 30m 0s`; hours and
   degrees convert as hour angles (15° an hour).
-- `today as yyyy-MM-dd`, `now as HH:mm`: Unicode date patterns (`Target::Pattern`).
+- `today as yyyy-MM-dd`, `now as HH:mm`: Unicode date patterns (`Target::Pattern`). `in iso` writes
+  a date alone as `2026-12-25`, a time with its offset.
+- `at` and a clock time after any day sets the time (`time::is_dateish`): `the 15th of next month
+  at 3pm`, `today + 1 week at 3pm`, `Q3 2027 at 3pm` (its first day).
   `3pm in 24 hour`, `15:45 to 12-hour time` change the clock (`Format::Clock`); `in 24 hours` moves it.
 - `start of`/`end of` a period is its first or last day (`end of Q3`, `start of
   next month`). Weeks start on Monday: `friday in 3 weeks` is the Friday of the
@@ -333,6 +338,9 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - `mod` and `%` take the sign of the divisor, as in SoulverCore: `-10 mod 3` = 2. Before
   `from`, `of`, `on`, `off` a `%` is a percentage: `10% from 200` = 20, as in SoulverCore.
 - `root(27, 3)` takes the degree last, as `nthroot`; `root 3 of 27` puts it first.
+- Functions of an amount take its number, as in SoulverCore (`log10($9)`, `sin(9 km)`); an
+  angle stays an angle. `hex(9)`, `bin`, `oct` give a number shown in that base (`hex(9) + 1` =
+  0xA, `calculator::base_call`). `acot` is `atan(1/x)`, from -90° to 90°.
 - A power glued to a comment word is part of it, as in SoulverCore: `3 pi r^2` = 3π, `3 x^2` = 3.
   Units side by side multiply when the next has a power (`3 m s^-2`, `kg m^2`).
 - Fractions answer as SoulverCore writes them: `0.375 as fraction` = ⅜, `1.25 as frac` =
@@ -341,7 +349,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
   (`~0xFF` = -256); `~5` is "about 5", as in SoulverCore.
 - `K` glued to a number is a thousand, as in SoulverCore (`3K` = 3,000); kelvins take a
   space (`3 K`).
-- Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`.
+- Percentages are `Value::Percent(p)`: `X + p%`, `p% of X`, `p% on/off X`. A percentage per a
+  unit is a quantity in the `%` unit (never read as a word): `5%/year`, `5%/year * 3 years` = 15%.
   A written amount of/on/off another is its share, as in SoulverCore (`10 of 20`
   = 50%, `$5 off $20` = 25%; `half of 10` = 5); words around the operator or a
   date after it make it text (`$500 for team of 5` = $500).
@@ -366,6 +375,8 @@ label strip -> `lexer` -> `parser` -> `ast::Stmt` -> `eval::Env` -> `format`.
 - Events with a fixed date (`GTA 6 release date`) live in `words::EVENTS`;
   their note (`(probably)`) is display only (`Expr::Noted`), never part of a
   calculation. Update or drop entries when the date changes or passes.
+- Zone city names that are holidays (`Christmas`, `Easter`) are left out; the islands go by their
+  full names, so `today to christmas` is a span.
 - Daylight abbreviations (`EDT`, `AEDT`, `BST`) are fixed offsets; standard
   ones (`EST`, `AEST`) follow the region all year, as people use them. Those that
   are words (`CAT`, `EAT`, `WET`) are written in capitals in `places.txt` and count

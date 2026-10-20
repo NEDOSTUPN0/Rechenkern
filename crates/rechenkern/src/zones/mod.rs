@@ -17,6 +17,8 @@ const CITIES: &str = include_str!("cities.txt");
 const ZONE_COORDINATES: &str = include_str!("zone_coordinates.txt");
 
 /// Zone ids whose last segment is not a useful place name.
+const HOLIDAY_ZONE_CITIES: &[&str] = &["christmas", "easter"];
+
 const SKIPPED_PREFIXES: &[&str] = &[
     "Etc/",
     "US/",
@@ -109,6 +111,10 @@ static INDEX: LazyLock<TableMap<String, Listed>> = LazyLock::new(|| {
             continue;
         }
         let city = zone_city_name(id);
+        // "Christmas" and "Easter" are holidays; the islands are listed by their full names.
+        if HOLIDAY_ZONE_CITIES.contains(&city.as_str()) {
+            continue;
+        }
         index.entry(city).or_insert_with(|| Listed::new(id.to_string(), None));
     }
     // Airports last: places and zone cities win ("IST" is India's time, "Yap" an island).

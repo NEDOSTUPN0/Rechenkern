@@ -260,6 +260,10 @@ impl Env<'_> {
                 let (date, zone) = match on {
                     Some(on) => match self.eval(on)? {
                         Value::Moment(m) => (m.time.date(), m.time.time_zone().clone()),
+                        // "Q3 2027 at 3pm": its first day.
+                        Value::Duration(d) if d.start().is_some() => {
+                            (d.start().unwrap_or_default().date(), self.local_zone())
+                        }
                         v => bail!("expected a date, not {}", v.kind()),
                     },
                     None => (today, self.local_zone()),
@@ -424,6 +428,9 @@ impl Env<'_> {
             (Value::Timecode(a), Value::Timecode(b)) if a.fps == b.fps => {
                 Ok(Value::Timecode(crate::value::Timecode { frames: b.frames - a.frames, fps: a.fps }))
             }
+            (Value::Quantity(a), Value::Quantity(b)) if a.unit.is_none() && b.unit.is_none() => {
+                self.sub(Value::Quantity(b), Value::Quantity(a))
+            }
             (a, b) => bail!("can't make a range from {} to {}", a.kind(), b.kind()),
         }
     }
@@ -552,7 +559,10 @@ impl Env<'_> {
             let hours = self.seconds(&Value::Duration(d.clone()))?.abs() / Number::from_i64(3600);
             return Ok(hours / self.config.hours_per_workday);
         }
-        let start = d.anchor.unwrap_or_else(|| self.today().to_datetime(jiff::civil::Time::midnight()));
+        let anchor = d.anchor.unwrap_or_else(|| self.today().to_datetime(jiff::civil::Time::midnight()));
+        // A span counted back ("workdays until" a day behind) ends at its anchor and counts negative.
+        let back = d.span.is_negative();
+        let start = if back { anchor.checked_add(d.span)? } else { anchor };
         let (start, end) = (start.date(), start.checked_add(span)?.date());
         let days = start.until((Cal::Day, end))?.get_days() as i64;
         let mut count = days / 7 * 5;
@@ -564,7 +574,8 @@ impl Env<'_> {
             day = day.tomorrow()?;
         }
         let holidays = self.config.holidays.iter().filter(|&&h| start <= h && h < end && !is_weekend(h));
-        Ok(Number::from_i64(count - holidays.count() as i64))
+        let count = count - holidays.count() as i64;
+        Ok(Number::from_i64(if back { -count } else { count }))
     }
 
     /// The unit with its workdays written as hours of work, and the factor for

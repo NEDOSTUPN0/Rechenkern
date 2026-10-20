@@ -166,7 +166,7 @@ impl Env<'_> {
         Ok(match (a, b) {
             (Value::Quantity(x), Value::Quantity(y)) => {
                 let units = (x.unit.clone(), y.unit.clone());
-                self.tidy_time(self.mul_quantities(x, y, false)?, units)?
+                percent_left(self.tidy_time(self.mul_quantities(x, y, false)?, units)?)
             }
             (Value::Quantity(q), Value::Percent(p)) | (Value::Percent(p), Value::Quantity(q)) => {
                 Value::Quantity(Quantity::new(q.number * p / hundred(), q.unit))
@@ -200,6 +200,12 @@ impl Env<'_> {
             (Value::Percent(p), Value::Quantity(y)) if y.unit.is_none() => {
                 zero(y.number)?;
                 Value::Percent(p / y.number)
+            }
+            // "5%/year": a percentage rate, as in SoulverCore.
+            (Value::Percent(p), Value::Quantity(y)) if !y.unit.is_money() => {
+                zero(y.number)?;
+                let percent = registry().get("%");
+                Value::Quantity(Quantity::new(p / y.number, percent.product(&y.unit.pow(-1))))
             }
             (Value::Percent(p), Value::Percent(q)) => {
                 zero(q)?;
@@ -551,4 +557,12 @@ fn is_money_per_time(unit: &Unit) -> bool {
 fn money_of(unit: &Unit) -> Unit {
     let &(id, _) = unit.factors().iter().find(|&&(id, e)| e > 0 && Unit::of(id).is_money()).expect("a money rate");
     Unit::of(id)
+}
+
+/// "5%/year × 3 years" is a percentage again.
+fn percent_left(value: Value) -> Value {
+    match value {
+        Value::Quantity(q) if q.unit == registry().get("%") => Value::Percent(q.number),
+        v => v,
+    }
 }

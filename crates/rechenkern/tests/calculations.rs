@@ -1220,7 +1220,7 @@ fn time_zones() {
         // Abbreviations only where they read back: Belize's "CST" would be Chicago's.
         ("3pm Belize", "15:00 UTC-6"),
         ("3pm Kampala", "15:00 EAT"),
-        ("today as iso 8601", "2026-09-23T00:00:00-04:00"),
+        ("today as iso 8601", "2026-09-23"),
         ("3pm WEST in UTC", "14:00 UTC"),
         ("Jan 10 3pm EDT in UTC", "Sat, 10 Jan 2026 19:00 UTC"),
         ("Jan 10 3pm EST in UTC", "Sat, 10 Jan 2026 20:00 UTC"),
@@ -1855,4 +1855,69 @@ fn third_sweep() {
     assert_eq!(sheet(&format!("{blocks}#food total")), "$33.00");
     assert_eq!(sheet(&format!("{blocks}#food total\n#food average")), "$11.00");
     assert_eq!(sheet(&format!("{blocks}sum")), "$3.00");
+}
+
+#[test]
+fn fourth_sweep() {
+    check(&[
+        ("today to christmas", "3 months 2 days"),
+        ("christmas to easter", "3 months 3 days"),
+        ("today to easter 2027", "6 months 5 days"),
+        ("christmas in Tokyo", "Fri, 25 Dec 2026"),
+        ("time in christmas island", "Thu, 24 Sep 2026 01:30 UTC+7"),
+        ("third friday of xyz", "<error: expected a month after the weekday>"),
+        ("third friday of next month", "Fri, 16 Oct 2026"),
+        ("12.5 is what % of $40", "31.25%"),
+        ("5 as % of 200 km", "2.5%"),
+        ("what % of $40 is 12.5", "31.25%"),
+        ("30 to 10 is what % change", "-66.66666667%"),
+        ("from 30 to 10 is what % change", "-66.66666667%"),
+        ("the 15th of next month at 3pm", "Thu, 15 Oct 2026 15:00"),
+        ("yesterday 5pm at 3pm", "Tue, 22 Sep 2026 15:00"),
+        ("Q3 2027 at 3pm", "Thu, 1 Jul 2027 15:00"),
+        ("today + 1 week at 3pm", "Wed, 30 Sep 2026 15:00"),
+        ("kn in km/h", "0.5399568035 kn"),
+        ("mph in m/s", "2.236936292 mph"),
+        ("' in km", "3,280.839895 ft"),
+        ("ares in km²", "10,000 ares"),
+        ("Q3 2027 in Tokyo", "1 Jul – 30 Sep 2027"),
+        ("Hawaii time", "08:30 HST"),
+        ("GMT+3 time", "21:30 UTC+3"),
+        ("2.5 W m * 4", "10 W·min"),
+        ("workdays until Jan 1, 2025", "-450 workdays"),
+        ("sin(9 km)", "0.4121184852"),
+        ("log10($9)", "0.9542425094"),
+        ("fact($9)", "362,880"),
+        ("hex(9) + 1", "0xA"),
+        ("hex(16)^2", "0x100"),
+        ("hex(0.5)", "0x1"),
+        ("bin(9) + 1", "0b1010"),
+        ("acot(-3)", "-0.3217505544 rad"),
+        ("christmas in iso", "2026-12-25"),
+        ("10 GGP in USD", "$13.33"),
+        ("10 CUC in USD", "$10.00"),
+        ("5:30 min/km for 10 km", "55 minutes"),
+        ("1e400", "<error: result is too large>"),
+        ("from 1559740303 to 1559750303", "10,000"),
+        ("5%/year", "5%/year"),
+        ("5%/year * 3 years", "15%"),
+        ("5%/year in per month", "0.4166666667%/month"),
+        ("cast 5 km miles", "3.106855961 mi"),
+        ("5 km cast to miles", "5 mi"),
+        ("hours in today", "24 hours"),
+        ("not true", "false"),
+        ("not 5 > 3", "false"),
+        ("5 ≠ 3", "true"),
+        ("60 bpm in Hz", "1 Hz"),
+        ("1 kHz in bpm", "60,000 bpm"),
+    ]);
+}
+
+#[test]
+fn fourth_sweep_sheets() {
+    let tagged = "Coffee $5 #food\nBus $3 #transport\nLunch $12 #food\n";
+    assert_eq!(sheet(&format!("{tagged}average of #food")), "$8.50");
+    assert_eq!(sheet(&format!("{tagged}total of #food")), "$17.00");
+    assert_eq!(sheet("12\n18\n24\nlcm"), "72");
+    assert_eq!(sheet("12\n18\n24\ngcd"), "6");
 }

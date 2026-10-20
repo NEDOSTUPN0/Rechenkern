@@ -58,6 +58,9 @@ impl Parser<'_> {
         if let Some(expr) = self.exchange_rate()? {
             return Ok(Some(expr));
         }
+        if let Some(expr) = self.leading_cast() {
+            return Ok(Some(expr));
+        }
         if let Some(expr) = self.time_to_reach()? {
             return Ok(Some(expr));
         }
@@ -127,7 +130,7 @@ impl Parser<'_> {
         {
             let whole = self.part(3, is)?;
             let part = self.part(is + 1, end)?;
-            return Ok(Some(pct(Expr::binary(Op::Div, part, whole))));
+            return Ok(Some(Expr::binary(Op::OutOf, part, whole)));
         }
         // "what % is 25 with 100"
         if self.matches_at(0, &["what", "%", "is"])
@@ -164,6 +167,10 @@ impl Parser<'_> {
             let kind = kind.unwrap_or("of");
             let a = self.part(0, at)?;
             let b = self.share_part(kind, from, end)?;
+            // "12.5 is what % of $40": a plain number counts in the other's unit.
+            if kind == "of" && format == Format::Percent {
+                return Ok(Some(Expr::binary(Op::OutOf, a, b)));
+            }
             return Ok(Some(Self::formatted(share(kind, a, b), format)));
         }
 
@@ -213,7 +220,8 @@ impl Parser<'_> {
             return Ok(Some(Expr::binary(Op::Div, a, divisor)));
         }
 
-        // "50 to 75 is what %", "40 to 90 as %", "50 to 75 is what x"
+        // "50 to 75 is what %", "40 to 90 as %", "50 to 75 is what x", "from 30 to 10 is what % change"
+        let start = usize::from(self.matches_at(0, &["from"]));
         for (seq, skip) in [(&["is", "what"][..], 2), (&["as", "a"][..], 2), (&["as"][..], 1)] {
             let Some(at) = self.find(0, seq) else { continue };
             let Some(to) = self.find(0, &["to"]).filter(|&t| t < at) else { continue };
@@ -225,10 +233,12 @@ impl Parser<'_> {
             } else {
                 continue;
             };
-            if tail + 1 != end {
+            let changed =
+                self.lower(tail + 1).is_some_and(|w| matches!(w.as_str(), "change" | "increase" | "decrease"));
+            if tail + 1 + usize::from(changed) != end {
                 continue;
             }
-            let a = self.part(0, to)?;
+            let a = self.part(start, to)?;
             let b = self.part(to + 1, at)?;
             let change = match format {
                 Format::Percent => change(a, b),
@@ -767,6 +777,22 @@ impl Parser<'_> {
             true => Expr::binary(Op::Of, asked, whole),
             false => Self::formatted(Expr::binary(Op::Div, asked, whole), Format::Percent),
         }))
+    }
+
+    /// "cast 5 km miles", "cast 5 km to miles": converts, as SoulverCore does with "cast" first
+    /// (only "5 km cast to miles" keeps the number).
+    fn leading_cast(&self) -> Option<Expr> {
+        let end = self.toks.len();
+        if !self.matches_at(0, &["cast"]) || end < 3 {
+            return None;
+        }
+        (2..end).rev().find_map(|k| {
+            let from = k - usize::from(["to", "as", "into", "in"].iter().any(|w| self.matches_at(k - 1, &[w])));
+            let mut unit = self.sub(k, end);
+            let Some(Target::Unit(unit)) = unit.target().filter(|_| unit.pos == end - k) else { return None };
+            let amount = self.part(1, from).ok()?;
+            Some(Expr::Convert(amount.boxed(), Target::Unit(unit)))
+        })
     }
 
     /// "% change from 10 to 20", "percent increase from 10 to 20", "what % change is 10 to 20".

@@ -184,12 +184,14 @@ impl<'a> Parser<'a> {
             || (w == "x" && !self.toks.get(i + 1).is_some_and(|t| t.is_sym("^")))
             || self.article_unit_at(i)
             // "for 2 hours" and "split 4 ways" only matter before an amount.
-            || (w == "for" && self.duration_at(i + 1))
+            || (w == "for" && (self.duration_at(i + 1) || self.pace_distance_at(i)))
             // "once a week", "thrice per day"
             || (matches!(w, "once" | "thrice") && (self.article_unit_at(i + 1) || self.per_unit_at(i + 1)))
             || (matches!(w, "every" | "each") && self.counted_unit_at(i + 1))
             // "daily", "monthly until June": a cadence, as a whole line.
             || (i == 0 && words::is_cadence_word(w) && self.config().features.cadence_parsing && self.var_at(0).is_none())
+            // "not true", "not (5 > 3)", "not 5 > 3": logic, not a comment.
+            || (w == "not" && self.not_operand_at(i + 1))
             || (w == "split" && matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_))))
             || (w == "out" && self.words_at(i + 1, &["of"]))
             || (w == "cast" && ["to", "as", "into", "in"].iter().any(|t| self.words_at(i + 1, &[t])))
@@ -329,7 +331,11 @@ impl<'a> Parser<'a> {
         // in a target: "there are 5", "PS: 5", but "$5/are", "kcal·PS".
         let word_unit = word.eq_ignore_ascii_case("are") || word.eq_ignore_ascii_case("ares") || word == "PS";
         let after_slash = i > 0 && (self.toks[i - 1].is_sym("/") || self.toks[i - 1].is_sym("*"));
-        if word.eq_ignore_ascii_case("in") || (!after_number && (article || (word_unit && !after_slash))) {
+        // "ares in km²": a unit alone starting a conversion.
+        let converted = i == 0 && ["in", "to"].iter().any(|w| self.words_at(1, &[w]));
+        if word.eq_ignore_ascii_case("in")
+            || (!after_number && (article || (word_unit && !after_slash && !(converted && word != "PS"))))
+        {
             return None;
         }
         // "3 weekdays" are workdays, but "today as weekday" is the day of the week.
@@ -540,7 +546,11 @@ impl<'a> Parser<'a> {
 
     /// "Tokyo time", "Tokyo local time" or "Paris date".
     pub(super) fn place_time_at(&self, i: usize) -> Option<(Place, usize, bool)> {
-        let (tz, mut n) = self.named_place_at(i)?;
+        // "GMT+3 time", "Hawaii time" (a place of its own name).
+        let (tz, mut n) = self.zone_at(i)?;
+        if self.toks[i + n - 1].is_word("time") {
+            return Some((tz, n, false));
+        }
         if self.words_at(i + n, &["local"]) {
             n += 1;
         }
@@ -624,6 +634,25 @@ impl<'a> Parser<'a> {
     }
 
     /// A time amount starts at token `i`: "2 hours", "a year".
+    /// A boolean follows "not" at `i`: `true`, `false`, parentheses or a comparison.
+    pub(super) fn not_operand_at(&self, i: usize) -> bool {
+        let Some(t) = self.toks.get(i) else { return false };
+        if t.is_word("true") || t.is_word("false") || t.is_sym("(") {
+            return true;
+        }
+        let mut p = self.clone();
+        p.pos = i;
+        p.additive().is_ok()
+            && p.cur().is_some_and(|t| matches!(t.tok, Tok::Sym("==" | "!=" | "<" | ">" | "<=" | ">=")))
+    }
+
+    /// "5:30 min/km for 10 km": a distance after a time per a length, at the "for" at `i`.
+    pub(super) fn pace_distance_at(&self, i: usize) -> bool {
+        let length = |k: usize| self.unit_at(k, true).is_some_and(|(u, _)| u.dim() == crate::units::Dim::LENGTH);
+        let per = i >= 2 && (self.toks[i - 2].is_sym("/") || self.toks[i - 2].is_word("per"));
+        per && length(i - 1) && self.toks.get(i + 1).is_some_and(|t| matches!(t.tok, Tok::Num(_))) && length(i + 2)
+    }
+
     pub(super) fn duration_at(&self, i: usize) -> bool {
         let amount = self
             .toks

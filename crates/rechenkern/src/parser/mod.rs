@@ -301,7 +301,11 @@ impl<'a> Parser<'a> {
         // "widgets = new unit", "widgets = new unit type"
         let rest = &self.toks[eq + 1..];
         let new_unit = rest.len() >= 2 && rest[0].is_word("new") && rest[1].is_word("unit");
-        if name_toks.len() == 1 && new_unit && (rest.len() == 2 || (rest.len() == 3 && rest[2].is_word("type"))) {
+        if name_toks.len() == 1
+            && new_unit
+            && self.config().features.unit_declarations
+            && (rest.len() == 2 || (rest.len() == 3 && rest[2].is_word("type")))
+        {
             return Ok(Some(Stmt::Unit(name)));
         }
         let op = match self.toks[eq].tok {
@@ -467,6 +471,11 @@ impl<'a> Parser<'a> {
     fn additive(&mut self) -> Result<Expr> {
         let mut lhs = self.multiplicative()?;
         loop {
+            // "today + 1 week at 3pm", "the 15th of next month at 3pm": that day at that time.
+            if time::is_dateish(&lhs) && self.at_clock_follows() {
+                lhs = self.date_tail(lhs)?;
+                continue;
+            }
             if let Some(rhs) = self.same_kind_follows(&lhs) {
                 lhs = Expr::binary(Op::Add, lhs, rhs);
                 continue;
@@ -570,6 +579,10 @@ impl<'a> Parser<'a> {
     fn multiplicative(&mut self) -> Result<Expr> {
         let mut lhs = self.unary()?;
         loop {
+            // "1 week at 3pm" leaves the time to the date it moves.
+            if (time::is_dateish(&lhs) || time::maybe_duration(&lhs)) && self.at_clock_follows() {
+                return Ok(lhs);
+            }
             let Some((op, len)) = self.mul_operator() else {
                 // Implicit multiplication: "2(3 + 4)", "2 pi", "3 sqrt 4".
                 if self.implicit_mul_follows() {
@@ -698,7 +711,7 @@ impl<'a> Parser<'a> {
                 "every" | "each" if self.counted_unit_at(self.pos + 1) => (Op::Div, 1),
                 "split" => (Op::Div, 1),
                 // "$24 a day for a year": a rate over a time span.
-                "for" if self.duration_at(self.pos + 1) => (Op::Mul, 1),
+                "for" if self.duration_at(self.pos + 1) || self.pace_distance_at(self.pos) => (Op::Mul, 1),
                 "mod" | "modulo" => (Op::Mod, 1),
                 "of" => (Op::Of, 1),
                 "out" if next_is(self, "of") => (Op::OutOf, 2),
@@ -732,6 +745,13 @@ impl<'a> Parser<'a> {
             Tok::Sym("!") => {
                 self.pos += 1;
                 Ok(Expr::Not(self.unary()?.boxed()))
+            }
+            // "not true"; "not 5 > 3" negates the whole comparison.
+            Tok::Word(w) if w.eq_ignore_ascii_case("not") && self.not_operand_at(self.pos + 1) => {
+                self.pos += 1;
+                let simple = self.cur().is_some_and(|t| t.is_word("true") || t.is_word("false") || t.is_sym("("));
+                let operand = if simple { self.unary()? } else { self.comparison()? };
+                Ok(Expr::Not(operand.boxed()))
             }
             // "~0xFF" is a bitwise not; "~5" stays "about 5", as in SoulverCore.
             Tok::Sym("~")

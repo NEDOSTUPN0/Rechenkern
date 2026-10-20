@@ -109,7 +109,7 @@ impl Parser<'_> {
             && self.operand_follows(0)
         {
             // "square meters in sq ft": one of a unit, which may have a power.
-            let amount = match self.unit_phrase(true) {
+            let amount = match self.unit_expr(false) {
                 Some(of) => Expr::BareUnit(of),
                 None => self.bit_or()?,
             };
@@ -134,6 +134,13 @@ impl Parser<'_> {
             && let Some(amount) = self.time_amount()
         {
             return Ok(Some(shifted(expr, Op::Add, amount)));
+        }
+        // "Q3 2027 in Tokyo": a period is the same days anywhere.
+        if matches!(expr, Expr::Period(..))
+            && let Some((_, n)) = self.zone_at(self.pos)
+        {
+            self.pos += n;
+            return Ok(Some(expr.clone()));
         }
         // A date or time goes to a place, even one named like a unit: "time in Cordoba".
         let zone = match is_moment(expr) {

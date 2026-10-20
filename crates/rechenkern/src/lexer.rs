@@ -69,6 +69,9 @@ const MULTI_SYMBOLS: &[(&str, &str)] = &[
     ("/=", "/="),
     ("&&", "&&"),
     ("||", "||"),
+    ("≠", "!="),
+    ("≤", "<="),
+    ("≥", ">="),
 ];
 
 /// "h30m" after "1": the length of the leading time unit ("h") when the word is time
@@ -350,8 +353,15 @@ impl Lexer<'_> {
                 self.i += 1;
                 // "3 '" is feet too, when no word is glued after it.
                 let alone = c == '\'' && self.peek(0).is_none_or(char::is_whitespace);
+                let converts = || {
+                    let rest = self.src[self.offset(self.i)..].trim_start();
+                    ["in ", "to "].iter().any(|w| rest.get(..3).is_some_and(|r| r.eq_ignore_ascii_case(w)))
+                };
                 if self.after_number() || ((c == '′' || alone) && self.after_number_spaced()) {
                     self.push(Tok::Sym(if c == '′' { "′" } else { "'" }), start);
+                } else if alone && self.tokens.is_empty() && converts() {
+                    // "' in km": the foot sign alone before a conversion is the foot.
+                    self.push(Tok::Word("ft".to_string()), start);
                 }
             } else if let Some(&(text, sym)) =
                 MULTI_SYMBOLS.iter().find(|(t, _)| self.src[self.offset(self.i)..].starts_with(t))

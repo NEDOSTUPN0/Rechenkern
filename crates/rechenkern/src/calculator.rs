@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use crate::alternatives::Alternative;
 use crate::answer::Answer;
-use crate::ast::{Expr, LineRef, Stmt, UserFunction};
+use crate::ast::{Expr, Func, LineRef, Stmt, UserFunction};
 use crate::config::{Config, Now};
 use crate::custom::{CustomPlace, CustomUnits, PlaceProvider};
 use crate::error::{Error, Result};
@@ -420,7 +420,7 @@ impl Calculator {
         let mut parts = parts;
         let (value, mut display) = env.convert_result(expr, value, display, &mut parts)?;
         // "0xff + 1" = 0x100, but "0xff in decimal" = 255.
-        if let Some(radix) = scope.radix.get()
+        if let Some(radix) = scope.radix.get().or_else(|| base_call(expr))
             && matches!(display, Display::Auto)
             && !matches!(expr, Expr::Convert(..))
             && let Value::Quantity(q) = &value
@@ -636,4 +636,12 @@ fn strip_label(line: &str) -> &str {
         }
     }
     line
+}
+
+/// The base of a call that writes a number in one: `hex(9) + 1` is in base 16.
+fn base_call(expr: &Expr) -> Option<u32> {
+    [(Func::Hex, 16), (Func::Bin, 2), (Func::Oct, 8)]
+        .into_iter()
+        .find(|&(func, _)| expr.contains(&|e| matches!(e, Expr::Call(f, _) if *f == func)))
+        .map(|(_, radix)| radix)
 }

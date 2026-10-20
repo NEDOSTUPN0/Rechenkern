@@ -203,6 +203,8 @@ pub struct Features {
     pub converters: bool,
     /// `name = value` lines.
     pub variable_declarations: bool,
+    /// `widgets = new unit` lines, as SoulverCore's `unitDeclarations`.
+    pub unit_declarations: bool,
     /// A `---` line forgets the variables above it.
     pub dividers_reset_variable_scope: bool,
     /// Functions need parentheses: `sqrt(16)`, not `sqrt 16`.
@@ -252,6 +254,7 @@ impl Default for Features {
             word_functions: true,
             converters: true,
             variable_declarations: true,
+            unit_declarations: true,
             dividers_reset_variable_scope: true,
             functions_require_parentheses: false,
             disabled_functions: Vec::new(),
