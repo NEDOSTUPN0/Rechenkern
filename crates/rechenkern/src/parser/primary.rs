@@ -175,12 +175,25 @@ impl Parser<'_> {
 
     /// Attaches a unit after a value, then further parts: `5 ft 3 in`.
     fn quantity(&mut self, value: Expr) -> Result<Expr> {
+        let start = self.pos;
         let Some(unit) = self.number_unit() else { return Ok(value) };
         let mut last = unit.clone();
         let mut parts = vec![Expr::WithUnit(value.boxed(), unit)];
         while let Some((part, unit)) = self.composite_part(&last) {
             parts.push(part);
             last = unit;
+        }
+        // "3 nights in Paris": where the time is spent only describes it; but "time in
+        // 3 hours in Tokyo" is the time there.
+        let before = self.toks[..start].iter().rev().find(|t| !matches!(t.tok, Tok::Num(_)));
+        if last.dim() == Dim::TIME
+            && !before.is_some_and(|t| t.is_word("in") || t.is_word("after"))
+            && self.words_at(self.pos, &["in"])
+            && let Some((_, n)) = self.zone_at(self.pos + 1)
+            && self.unit_at(self.pos + 1, false).is_none()
+            && self.phrase_at(self.pos + 1, &words::FORMATS).is_none()
+        {
+            self.pos += 1 + n;
         }
         Ok(if parts.len() == 1 { parts.pop().unwrap() } else { Expr::Composite(parts) })
     }

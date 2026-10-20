@@ -176,7 +176,7 @@ fn plain_text_and_json() {
 #[test]
 fn html() {
     use rechenkern::{HtmlColors, HtmlOptions};
-    let s = sheet("# Trip\nflights = $1,240\nhotel $870 \"<b>\"\n3 nights in Paris");
+    let s = sheet("# Trip\nflights = $1,240\nhotel $870 \"<b>\"\nnotes on Paris");
     let options = HtmlOptions { total_label: Some("Total".into()), line_numbers: true, ..HtmlOptions::default() };
     let html = s.to_html(&options, &HtmlColors::light());
     assert!(html.starts_with("<!doctype html>\n<html><head><meta charset=\"utf-8\"><title>Trip</title>"), "{html}");

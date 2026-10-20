@@ -456,7 +456,7 @@ fn units() {
         ("3.5 hours as hms", "3h 30m 0s"),
         ("1,500hour 1ns", "1,500 hours 0.000000001 seconds"),
         ("1500 hours 0.000000001 seconds", "1,500 hours 0.000000001 seconds"),
-        ("3 nights in Paris", "<error: only a date or a time can be in a time zone, not time>"),
+        ("3 nights in Paris", "3 nights"),
         ("5:30 min/km in min/mile", "8:51 min/mi"),
         ("5:30 in minutes", "330 minutes"),
         ("1:30 hours in minutes", "90 minutes"),
