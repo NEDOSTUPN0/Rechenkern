@@ -18,10 +18,16 @@ impl Parser<'_> {
         let inflation = |amount, from, to, rate| Ok(Some(Expr::Inflation { amount, from, to, rate }));
 
         // "value of $100 in 1990", "what was $100 worth in 1990", "... in 2035 with 3% inflation"
-        let lead = [&["value", "of"][..], &["what", "was"], &["what", "will"]]
-            .into_iter()
-            .find(|lead| self.matches_at(0, lead))
-            .map_or(0, <[&str]>::len);
+        let lead = [
+            &["value", "of"][..],
+            &["purchasing", "power", "of"],
+            &["what", "was"],
+            &["what", "is"],
+            &["what", "will"],
+        ]
+        .into_iter()
+        .find(|lead| self.matches_at(0, lead))
+        .map_or(0, <[&str]>::len);
         if lead > 0 && self.matches_at(at - 1, &["in"]) {
             let mut amount_end = at - 1;
             for tail in [&["be", "worth"][..], &["worth"]] {
@@ -52,17 +58,22 @@ impl Parser<'_> {
         if self.matches_at(at + 1, &["is", "worth", "what", "today"]) && at + 5 == end {
             return inflation(self.part(0, from)?.boxed(), year, None, None);
         }
-        // "$100 from 1990 in 2000", "$100 from 1990 to today"
+        // "$100 from 1990 in 2000", "$100 from 1990 to today", "$100 from 2000 worth what in
+        // 2010", "what is $100 from 2000 worth in 2010"
         if self.matches_at(from, &["from"]) {
-            let to = match () {
-                _ if self.matches_at(at + 1, &["in"]) || self.matches_at(at + 1, &["to"]) => at + 2,
-                _ => return Ok(None),
-            };
-            if self.matches_at(to, &["today"]) && to + 1 == end {
-                return inflation(self.part(0, from)?.boxed(), year, None, None);
+            let mut to = at + 1;
+            while ["is", "was", "worth", "what"].iter().any(|w| self.matches_at(to, &[w])) {
+                to += 1;
             }
-            if let Some(later) = self.year_at(to).filter(|_| to + 1 == end) {
-                return inflation(self.part(0, from)?.boxed(), year, Some(later), None);
+            if self.matches_at(to, &["in"]) || self.matches_at(to, &["to"]) {
+                to += 1;
+            }
+            let amount = || self.part(lead, from).map(Box::new);
+            if self.matches_at(to, &["today"]) && to + 1 == end {
+                return inflation(amount()?, year, None, None);
+            }
+            if let Some(later) = self.year_at(to).filter(|_| to + 1 == end && to > at + 1) {
+                return inflation(amount()?, year, Some(later), None);
             }
         }
         Ok(None)
@@ -81,10 +92,11 @@ impl Parser<'_> {
         self.matches_at(i - 1, &["in"]) || self.matches_at(i - 1, &["from"])
     }
 
-    /// "with 3% inflation" from token `i` to the end.
+    /// "with 3% inflation" (or "given", "assuming", "at") from token `i` to the end.
     fn inflation_rate(&self, i: usize) -> Result<Option<Box<Expr>>> {
         let end = self.toks.len();
-        if !self.matches_at(i, &["with"]) || !self.ends_with(&["inflation"]) || i + 2 >= end {
+        let with = ["with", "given", "assuming", "at"].iter().any(|w| self.matches_at(i, &[w]));
+        if !with || !self.ends_with(&["inflation"]) || i + 2 >= end {
             return Ok(None);
         }
         Ok(Some(self.part(i + 1, end - 1)?.boxed()))
