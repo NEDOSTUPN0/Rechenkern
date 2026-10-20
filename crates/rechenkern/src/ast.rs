@@ -563,6 +563,8 @@ pub enum Format {
     Timestamp,
     Date,
     Iso,
+    /// From now: "in 3 days", "2 hours ago".
+    Relative,
     Weekday,
     WeekNumber,
     DayOfYear,

@@ -197,6 +197,7 @@ pub struct Options {
     pub trailing: bool,
     pub hashtags: bool,
     pub misplaced: MisplacedSeparator,
+    pub lenient_comma: bool,
 }
 
 impl Options {
@@ -208,6 +209,7 @@ impl Options {
             trailing: f.comments.trailing,
             hashtags: f.comments.hashtags,
             misplaced: f.misplaced_thousands_separator,
+            lenient_comma: f.lenient_comma_thousands,
         }
     }
 }
@@ -546,6 +548,11 @@ impl Lexer<'_> {
         {
             let decimals = groups.get(pairs + 1).is_some_and(|(sep, _, _)| *sep == '.');
             return if decimals { (pairs + 2, Some(pairs + 1)) } else { (pairs + 1, None) };
+        }
+        // "1,000" with a decimal comma: a thousand, if the config is lenient.
+        let lenient = self.decimal_comma && self.options.lenient_comma && !in_list && whole;
+        if lenient && groups.len() == 1 && first == ',' && groups[0].1.len() == 3 {
+            return (1, None);
         }
         let run = groups.iter().take_while(|(sep, digits, _)| *sep == first && digits.len() == 3).count();
         let decimal_after = groups.get(run).is_some_and(|(sep, _, _)| *sep != first);

@@ -48,8 +48,8 @@ pub use answer::{Answer, CustomCall, DisplayKind, Form, Side};
 pub use calculator::Calculator;
 pub use config::{
     AngleUnit, CommentOptions, Config, ConversionRule, Converter, CurrencySymbol, DateOptions, DateOrder, Features,
-    Formatting, MisplacedSeparator, Notation, ResultConversions, ScalarSystem, Scale, SymbolPosition, TimeZoneOptions,
-    TimespanStyle, ZoneCodeCorrection,
+    Formatting, MisplacedSeparator, NamedDay, Notation, Phrase, ResultConversions, ScalarSystem, Scale, SymbolPosition,
+    TimeZoneOptions, TimespanStyle, UnitSymbol, ZoneCodeCorrection,
 };
 pub use custom::{CustomFunction, CustomPlace, CustomType, CustomUnit, FunctionHandler, PlaceProvider, UnitSystem};
 pub use editor::{Beautify, Components, Token};

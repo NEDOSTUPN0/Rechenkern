@@ -7,7 +7,7 @@ use std::sync::Arc;
 use crate::alternatives::Alternative;
 use crate::answer::Answer;
 use crate::ast::{Expr, Func, LineRef, Stmt, UserFunction};
-use crate::config::{Config, Now};
+use crate::config::{Config, ConversionRule, Now, ResultConversions};
 use crate::custom::{CustomPlace, CustomUnits, PlaceProvider};
 use crate::error::{Error, Result};
 use crate::eval::{Display, Env, Line, LineKind};
@@ -20,7 +20,7 @@ use crate::units::{Unit, registry};
 use crate::value::Quantity;
 use crate::value::Value;
 use crate::weather::WeatherProvider;
-use crate::zones::{self, Location, PlaceInfo, PlaceKind};
+use crate::zones::{self, Location, PlaceInfo};
 
 /// Evaluates natural language math.
 ///
@@ -106,7 +106,10 @@ impl Calculator {
     /// The custom units of the config.
     fn units(&self) -> Result<&CustomUnits> {
         self.units
-            .get_or_init(|| CustomUnits::build(&self.config.custom_units, &self.config.formatting.symbols))
+            .get_or_init(|| {
+                let f = &self.config.formatting;
+                CustomUnits::build(&self.config.custom_units, &f.symbols, &f.unit_symbols)
+            })
             .as_ref()
             .map_err(Clone::clone)
     }
@@ -155,10 +158,10 @@ impl Calculator {
             let location =
                 p.coordinates.map(|(latitude, longitude)| Location { zone: p.zone.clone(), latitude, longitude });
             let country = p.zone.iana_name().and_then(zones::country_of_zone);
-            PlaceInfo { name: p.name.clone(), kind: PlaceKind::City, zone: p.zone.clone(), location, country }
+            PlaceInfo { name: p.name.clone(), kind: p.kind, zone: p.zone.clone(), location, country }
         };
         let key = name.trim().to_lowercase();
-        if let Some(p) = self.config.custom_places.iter().find(|p| p.name.to_lowercase() == key) {
+        if let Some(p) = self.config.custom_places.iter().find(|p| p.is_named(&key)) {
             return Some(custom(p));
         }
         zones::place(name).or_else(|| self.find_place(name.trim()).as_ref().map(custom))
@@ -524,6 +527,15 @@ impl Calculator {
         if scope.scaled.get() && matches!(display, Display::Auto) {
             display = Display::Scaled;
         }
+        let (value, mut display) = self.convert_display(env, expr, value, display)?;
+        if self.config.formatting.fractions
+            && matches!(display, Display::Auto)
+            && let Value::Quantity(q) = &value
+            && !q.unit.is_money()
+            && crate::format::is_simple_fraction(q.number)
+        {
+            display = Display::Fraction;
+        }
         let kept = Kept {
             radix: match display {
                 Display::Radix(radix) => Some(radix),
@@ -544,6 +556,23 @@ impl Calculator {
         }
         let assigned = name.map(|name| (name, answer.reference(), kept));
         Ok(Some((answer, is_total, assigned)))
+    }
+
+    /// The answer converted by the config's rules for how it is shown: hex answers in decimal.
+    fn convert_display(&self, env: &Env, expr: &Expr, value: Value, display: Display) -> Result<(Value, Display)> {
+        let ResultConversions::Rules(rules) = &self.config.formatting.conversions else { return Ok((value, display)) };
+        if matches!(expr, Expr::Convert(..)) {
+            return Ok((value, display));
+        }
+        let kind = crate::answer::kind_of(&display);
+        let format = rules.iter().find_map(|rule| match rule {
+            ConversionRule::Display { from, to } if *from == kind => parser::target::converter_format(*to),
+            _ => None,
+        });
+        match format {
+            Some(format) => env.convert(value, &crate::ast::Target::Format(format), Display::Auto),
+            None => Ok((value, display)),
+        }
     }
 
     /// The parser's view of the calculator, with closures that answer its questions.

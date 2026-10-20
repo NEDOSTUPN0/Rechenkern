@@ -666,11 +666,40 @@ impl Parser<'_> {
     }
 }
 
+/// The format a converter writes in, for `ConversionRule::Display`; `None` for converters that need a target.
+pub(crate) fn converter_format(converter: Converter) -> Option<Format> {
+    Some(match converter {
+        Converter::Hexadecimal => Format::Hex,
+        Converter::Binary => Format::Binary,
+        Converter::Octal => Format::Octal,
+        Converter::Decimal => Format::Decimal,
+        Converter::Scientific => Format::Scientific,
+        Converter::Fraction => Format::Fraction,
+        Converter::Number => Format::Number,
+        Converter::Percentage => Format::Percent,
+        Converter::Multiplier => Format::Multiplier,
+        Converter::Timespan => Format::Timespan,
+        Converter::Laptime => Format::Laptime,
+        Converter::Hms => Format::Hms,
+        Converter::Timestamp => Format::Timestamp,
+        Converter::Date => Format::Date,
+        Converter::Iso8601 => Format::Iso,
+        Converter::Relative => Format::Relative,
+        Converter::Pitch => Format::Pitch,
+        Converter::Midi => Format::Midi,
+        Converter::Dms => Format::Dms,
+        Converter::Frames => Format::Frames,
+        Converter::Megapixels => Format::Megapixels,
+        _ => return None,
+    })
+}
+
 /// The kind of conversion to a target, for `Features::disabled_converters`.
 fn converter(target: &Target) -> Converter {
     match target {
-        Target::Unit(_) | Target::Cast(_) => Converter::Unit,
-        Target::Pattern(_) => Converter::DatePart,
+        Target::Unit(_) => Converter::Unit,
+        Target::Cast(_) => Converter::Cast,
+        Target::Pattern(_) => Converter::Pattern,
         Target::Units(units) if units.iter().any(Unit::is_money) => Converter::Unit,
         Target::Units(_) => Converter::Parts,
         Target::Per(_) => Converter::Rate,
@@ -687,17 +716,21 @@ fn converter(target: &Target) -> Converter {
             Format::Percent => Converter::Percentage,
             Format::Multiplier => Converter::Multiplier,
             Format::Timespan => Converter::Timespan,
-            Format::Laptime | Format::Hms => Converter::Laptime,
+            Format::Laptime => Converter::Laptime,
+            Format::Hms => Converter::Hms,
             Format::Timestamp => Converter::Timestamp,
             Format::Date => Converter::Date,
             Format::Iso => Converter::Iso8601,
+            Format::Relative => Converter::Relative,
             Format::Weekday | Format::WeekNumber | Format::DayOfYear | Format::DayOfMonth | Format::WeekOfMonth => {
                 Converter::DatePart
             }
-            Format::Pitch | Format::Midi => Converter::Pitch,
+            Format::Pitch => Converter::Pitch,
+            Format::Midi => Converter::Midi,
             Format::Dms => Converter::Dms,
-            Format::Megapixels | Format::Frames => Converter::Number,
-            Format::Clock(_) => Converter::Date,
+            Format::Megapixels => Converter::Megapixels,
+            Format::Frames => Converter::Frames,
+            Format::Clock(_) => Converter::Clock,
         },
     }
 }

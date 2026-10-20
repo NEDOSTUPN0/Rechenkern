@@ -613,6 +613,37 @@ impl Env<'_> {
     }
 }
 
+impl Env<'_> {
+    /// How far a moment is from now, as people say it: "tomorrow", "in 3 days", "2 hours ago".
+    pub(super) fn relative(&self, m: &Moment) -> Result<String> {
+        let now = self.now.get().with_time_zone(m.time.time_zone().clone());
+        let plural = |n: i64, unit: &str| format!("{n} {unit}{}", if n == 1 { "" } else { "s" });
+        let say = |n: i64, unit: &str| match n {
+            0 => "now".to_string(),
+            n if n > 0 => format!("in {}", plural(n, unit)),
+            n => format!("{} ago", plural(-n, unit)),
+        };
+        let days = i64::from(m.time.date().since(now.date())?.get_days());
+        let seconds = m.time.timestamp().as_second() - now.timestamp().as_second();
+        Ok(match (m.kind, days) {
+            (MomentKind::Date, 0) => "today".to_string(),
+            (_, 1) if m.kind == MomentKind::Date || seconds.abs() >= 86_400 => "tomorrow".to_string(),
+            (_, -1) if m.kind == MomentKind::Date || seconds.abs() >= 86_400 => "yesterday".to_string(),
+            _ if days.abs() >= 2 => match days.abs() {
+                d if d < 14 => say(days, "day"),
+                d if d < 60 => say((days as f64 / 7.0).round() as i64, "week"),
+                d if d < 730 => say((days as f64 / 30.436875).round() as i64, "month"),
+                _ => say((days as f64 / 365.2425).round() as i64, "year"),
+            },
+            _ => match seconds.abs() {
+                s if s < 60 => "now".to_string(),
+                s if s < 3_600 => say(seconds / 60, "minute"),
+                _ => say((seconds as f64 / 3_600.0).round() as i64, "hour"),
+            },
+        })
+    }
+}
+
 /// Its time units are all shorter than a day: hours of work fit in workdays, days don't.
 pub(super) fn shorter_than_days(unit: &Unit) -> bool {
     let day = Number::from_i64(86_400);

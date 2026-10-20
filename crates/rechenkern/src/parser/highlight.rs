@@ -288,6 +288,7 @@ impl Parser<'_> {
         let phrase = [
             self.phrase_at(i, &words::HOLIDAYS).map(|(_, n)| (TokenKind::Date, n)),
             self.event_at(i).map(|(_, n)| (TokenKind::Date, n)),
+            self.named_day_at(i).map(|(_, n)| (TokenKind::Date, n)),
             self.period_bound_at(i).map(|(_, n)| (TokenKind::Date, n)),
             self.phrase_at(i, &words::DATE_PARTS).map(|(_, n)| (TokenKind::Function, n)),
             self.phrase_at(i, &words::PHYSICAL_CONSTANTS).map(|(_, n)| (TokenKind::Constant, n)),

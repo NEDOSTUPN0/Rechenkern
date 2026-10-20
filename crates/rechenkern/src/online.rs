@@ -255,7 +255,7 @@ impl crate::PlaceProvider for OnlinePlaces {
         let zone = jiff::tz::TimeZone::get(found.get("timezone")?.as_str()?).ok()?;
         let coordinates = found.get("latitude")?.as_f64().zip(found.get("longitude")?.as_f64());
         let name = found.get("name")?.as_str()?.to_string();
-        Some(crate::CustomPlace { name, zone, coordinates })
+        Some(crate::CustomPlace { coordinates, ..crate::CustomPlace::new(&name, zone) })
     }
 }
 

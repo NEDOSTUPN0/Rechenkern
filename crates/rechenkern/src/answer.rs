@@ -115,6 +115,8 @@ pub enum DisplayKind {
     Clock { h24: bool },
     /// ISO 8601: "2026-12-25".
     Iso8601,
+    /// From now: "in 3 days".
+    Relative,
 }
 
 /// One side of a line with two: what is converted, or what it becomes.
@@ -195,27 +197,7 @@ impl Answer {
 
     /// How the answer is written beyond its value.
     pub fn display_kind(&self) -> DisplayKind {
-        match &self.display {
-            Display::Auto => DisplayKind::Plain,
-            Display::Radix(r) => DisplayKind::Base(*r),
-            Display::Scientific => DisplayKind::Scientific,
-            Display::Fraction => DisplayKind::Fraction,
-            Display::Multiplier => DisplayKind::Multiplier,
-            Display::Parts(_) => DisplayKind::Compound,
-            Display::Plain => DisplayKind::Timestamp,
-            Display::Note(_) => DisplayKind::Noted,
-            Display::Period => DisplayKind::Period,
-            Display::Places(dp) => DisplayKind::DecimalPlaces(*dp),
-            Display::Significant(n) => DisplayKind::SignificantDigits(*n),
-            Display::Digits(_) => DisplayKind::Digits,
-            Display::Dms => DisplayKind::Dms,
-            Display::Scaled => DisplayKind::Scaled,
-            Display::Minor => DisplayKind::MinorUnits,
-            Display::Hms => DisplayKind::Hms,
-            Display::Frames => DisplayKind::Frames,
-            Display::Clock(h24) => DisplayKind::Clock { h24: *h24 },
-            Display::Iso => DisplayKind::Iso8601,
-        }
+        kind_of(&self.display)
     }
 
     /// What later lines get for this answer: the value, or the value as shown if the
@@ -471,6 +453,16 @@ impl Env<'_> {
                 (ConversionRule::TimeZone(zone), Value::Moment(m)) if m.kind != MomentKind::Date => {
                     Some(Target::Zone(Place::of_zone(zone)))
                 }
+                (ConversionRule::Durations { to }, Value::Duration(_)) => Some(Target::Unit(custom::parse_unit(to)?)),
+                (ConversionRule::Durations { to }, Value::Quantity(q)) if q.unit.dim() == Dim::TIME => {
+                    Some(Target::Unit(custom::parse_unit(to)?))
+                }
+                (ConversionRule::Parts { like, units }, Value::Quantity(q)) => {
+                    let like = custom::parse_unit(like)?;
+                    let units = units.iter().map(|u| custom::parse_unit(u)).collect::<Option<Vec<_>>>()?;
+                    (!q.unit.is_none() && q.unit.dim() == like.dim()).then_some(Target::Units(units))
+                }
+                (ConversionRule::RelativeDates, Value::Moment(_)) => Some(Target::Format(Format::Relative)),
                 _ => None,
             }),
         };
@@ -754,6 +746,33 @@ fn format_caption(format: Format) -> Option<String> {
         Format::Dms => "Degrees, Minutes and Seconds",
         Format::Megapixels => "Megapixels",
         Format::Frames => "Frames",
+        Format::Relative => "Relative Date",
     };
     Some(name.to_string())
+}
+
+/// What kind of display a line's answer has.
+pub(crate) fn kind_of(display: &Display) -> DisplayKind {
+    match display {
+        Display::Auto => DisplayKind::Plain,
+        Display::Radix(r) => DisplayKind::Base(*r),
+        Display::Scientific => DisplayKind::Scientific,
+        Display::Fraction => DisplayKind::Fraction,
+        Display::Multiplier => DisplayKind::Multiplier,
+        Display::Parts(_) => DisplayKind::Compound,
+        Display::Plain => DisplayKind::Timestamp,
+        Display::Note(_) => DisplayKind::Noted,
+        Display::Period => DisplayKind::Period,
+        Display::Places(dp) => DisplayKind::DecimalPlaces(*dp),
+        Display::Significant(n) => DisplayKind::SignificantDigits(*n),
+        Display::Digits(_) => DisplayKind::Digits,
+        Display::Dms => DisplayKind::Dms,
+        Display::Scaled => DisplayKind::Scaled,
+        Display::Minor => DisplayKind::MinorUnits,
+        Display::Hms => DisplayKind::Hms,
+        Display::Frames => DisplayKind::Frames,
+        Display::Clock(h24) => DisplayKind::Clock { h24: *h24 },
+        Display::Iso => DisplayKind::Iso8601,
+        Display::Relative => DisplayKind::Relative,
+    }
 }

@@ -9,7 +9,7 @@ use crate::lexer::{Tok, Token};
 use crate::number::Number;
 use crate::units::foods::Food;
 use crate::units::{Dim, Unit, registry};
-use crate::zones::{self, Location, Place, PlaceKind};
+use crate::zones::{self, Location, Place};
 
 /// Words glued by a hyphen are somewhere in the tokens: "x-ray".
 pub(super) fn has_hyphenated_words(toks: &[Token]) -> bool {
@@ -227,6 +227,7 @@ impl<'a> Parser<'a> {
             || (self.scope.is_function)(w)
             || self.phrase_at(i, &words::HOLIDAYS).is_some()
             || self.event_at(i).is_some()
+            || self.named_day_at(i).is_some()
             || self.phrase_at(i, &words::DATE_PARTS).is_some()
             || self.phrase_at(i, &words::PHYSICAL_CONSTANTS).is_some()
             || self.unit_at(i, false).is_some()
@@ -514,7 +515,7 @@ impl<'a> Parser<'a> {
 
     /// The host's place of this name (lowercase).
     fn custom_place(&self, name: &str) -> Option<&CustomPlace> {
-        self.config().custom_places.iter().find(|p| p.name.to_lowercase() == name)
+        self.config().custom_places.iter().find(|p| p.is_named(name))
     }
 
     /// Up to `MAX_WORDS` lowercase words from token `i`, and the token index after each.
@@ -539,7 +540,7 @@ impl<'a> Parser<'a> {
         let (zone, n) = self.place_at(i)?;
         let written = &self.src[self.toks[i].start..self.toks[i + n - 1].end];
         if let Some(custom) = self.custom_place(&written.replace('-', " ").to_lowercase()) {
-            return Some((Place { name: custom.name.clone(), zone, kind: PlaceKind::City }, n));
+            return Some((Place { name: custom.name.clone(), zone, kind: custom.kind }, n));
         }
         Some((Place::written(written, zone), n))
     }

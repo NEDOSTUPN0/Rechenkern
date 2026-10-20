@@ -4,6 +4,7 @@ use super::Parser;
 use crate::ast::{
     Direction, Expr, Format, Func, GrowthResult, IncomeTaxPart, MonthDay, Op, Target, TaxPart, TimeExpr, Which,
 };
+use crate::config::Phrase;
 use crate::error::Result;
 use crate::lexer::Tok;
 use crate::number::Number;
@@ -12,78 +13,122 @@ use crate::units::{Dim, Unit, registry};
 impl Parser<'_> {
     /// Tries phrases such as "20 is what % of 200" on the whole line.
     pub(super) fn phrase(&mut self) -> Result<Option<Expr>> {
-        if let Some(expr) = self.cadence()? {
+        let disabled = &self.config().features.disabled_phrases;
+        let on = |phrase: Phrase| disabled.is_empty() || !disabled.contains(&phrase);
+        if on(Phrase::Cadence)
+            && let Some(expr) = self.cadence()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.sales_tax()? {
+        if on(Phrase::SalesTax)
+            && let Some(expr) = self.sales_tax()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.inflation()? {
+        if on(Phrase::Inflation)
+            && let Some(expr) = self.inflation()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.investment_required()? {
+        if on(Phrase::InvestmentRequired)
+            && let Some(expr) = self.investment_required()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.time_saved()? {
+        if on(Phrase::TimeSaved)
+            && let Some(expr) = self.time_saved()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.discount()? {
+        if on(Phrase::Discount)
+            && let Some(expr) = self.discount()?
+        {
             return Ok(Some(expr));
         }
         // "frames between 00:00:10:00 and 00:00:20:00", "frames in 00:01:00:00 to 00:02:00:00"
-        if ["between", "in", "from"].iter().any(|w| self.matches_at(0, &["frames", w])) {
+        if on(Phrase::Frames) && ["between", "in", "from"].iter().any(|w| self.matches_at(0, &["frames", w])) {
             let mut p = self.sub(2, self.toks.len());
             let [a, b] = p.pair()?;
             return Ok(Some(Self::formatted(Expr::Range(a.boxed(), b.boxed()), Format::Frames)));
         }
-        if let Some(expr) = self.income_tax()? {
+        if on(Phrase::IncomeTax)
+            && let Some(expr) = self.income_tax()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.growth()? {
+        if on(Phrase::Growth)
+            && let Some(expr) = self.growth()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.screen_density()? {
+        if on(Phrase::ScreenDensity)
+            && let Some(expr) = self.screen_density()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.wheel_speed()? {
+        if on(Phrase::WheelSpeed)
+            && let Some(expr) = self.wheel_speed()?
+        {
             return Ok(Some(expr));
         }
 
-        if let Some(expr) = self.annual_return()? {
+        if on(Phrase::AnnualReturn)
+            && let Some(expr) = self.annual_return()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.progress() {
+        if on(Phrase::Progress)
+            && let Some(expr) = self.progress()
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.exchange_rate()? {
+        if on(Phrase::ExchangeRate)
+            && let Some(expr) = self.exchange_rate()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.leading_cast() {
+        if on(Phrase::Cast)
+            && let Some(expr) = self.leading_cast()
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.time_to_reach()? {
+        if on(Phrase::TimeToReach)
+            && let Some(expr) = self.time_to_reach()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.growth_rate()? {
+        if on(Phrase::GrowthRate)
+            && let Some(expr) = self.growth_rate()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.investment_return()? {
+        if on(Phrase::InvestmentReturn)
+            && let Some(expr) = self.investment_return()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.when_it_is()? {
+        if on(Phrase::WhenItIs)
+            && let Some(expr) = self.when_it_is()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.percent_change()? {
+        if on(Phrase::PercentChange)
+            && let Some(expr) = self.percent_change()?
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.prime_check() {
+        if on(Phrase::PrimeCheck)
+            && let Some(expr) = self.prime_check()
+        {
             return Ok(Some(expr));
         }
-        if let Some(expr) = self.digits_of_pi() {
+        if on(Phrase::DigitsOfPi)
+            && let Some(expr) = self.digits_of_pi()
+        {
             return Ok(Some(expr));
         }
         // Every phrase below has one of these words.
-        if !self.toks.iter().any(|t| ["is", "as", "what"].iter().any(|w| t.is_word(w))) {
+        if !on(Phrase::Percentages) || !self.toks.iter().any(|t| ["is", "as", "what"].iter().any(|w| t.is_word(w))) {
             return Ok(None);
         }
         let end = self.toks.len();

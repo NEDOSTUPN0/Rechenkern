@@ -588,6 +588,11 @@ impl Parser<'_> {
             let year = self.year().map(|y| y as i16);
             return Ok(Some(self.in_year(TimeExpr::Holiday { holiday, year })));
         }
+        if let Some((date, n)) = self.named_day_at(self.pos) {
+            self.pos += n;
+            let (year, month, day) = (date.year(), date.month(), date.day());
+            return Ok(Some(Expr::Time(TimeExpr::Date { year: Some(year), month, day })));
+        }
         if let Some((event, n)) = self.event_at(self.pos) {
             self.pos += n;
             if !self.eat_word("release") {
@@ -620,24 +625,25 @@ impl Parser<'_> {
 
     /// An event name at token `i`, such as `GTA 6`.
     pub(super) fn event_at(&self, i: usize) -> Option<(&'static words::Event, usize)> {
-        // Names are lowercase; numbers in them are whole.
+        words::EVENTS.iter().find_map(|event| event.names.iter().find_map(|name| Some((event, self.name_at(i, name)?))))
+    }
+
+    /// A day the host named, from token `i`: "Company Day".
+    pub(super) fn named_day_at(&self, i: usize) -> Option<(jiff::civil::Date, usize)> {
+        let days = &self.config().named_days;
+        days.iter().find_map(|day| Some((day.date, self.name_at(i, &day.name.to_lowercase())?)))
+    }
+
+    /// The tokens from `i` spell a lowercase name; how many they are.
+    fn name_at(&self, i: usize, name: &str) -> Option<usize> {
+        // Numbers in names are whole.
         let spells = |k: usize, part: &str| match self.toks.get(k).map(|t| &t.tok) {
             Some(Tok::Word(w)) => w.chars().flat_map(char::to_lowercase).eq(part.chars()),
             Some(Tok::Num(n)) => n.is_integer() && n.to_string() == part,
             _ => false,
         };
-        words::EVENTS.iter().find_map(|event| {
-            event.names.iter().find_map(|name| {
-                let mut n = 0;
-                for part in name.split(' ') {
-                    if !spells(i + n, part) {
-                        return None;
-                    }
-                    n += 1;
-                }
-                Some((event, n))
-            })
-        })
+        let parts = name.split(' ').collect::<Vec<_>>();
+        parts.iter().enumerate().all(|(n, part)| spells(i + n, part)).then_some(parts.len())
     }
 
     /// "time" after an unknown word is not now, as in SoulverCore: "Qwertyville time",

@@ -220,9 +220,21 @@ impl Calculator {
     /// The two dates of an interval a text names: "the conference from March 3 to March 10".
     pub fn date_interval_for(&self, text: &str) -> Option<(Moment, Moment)> {
         self.find(text, &[DataKind::DateInterval]).into_iter().rev().find_map(|f| match (f.value, f.end) {
-            (Some(Value::Moment(a)), Some(Value::Moment(b))) => Some((a, b)),
+            (Some(Value::Moment(a)), Some(Value::Moment(b))) => Some((self.at_range_time(a), self.at_range_time(b))),
             _ => None,
         })
+    }
+
+    /// A date of an interval at the config's time for them.
+    fn at_range_time(&self, m: Moment) -> Moment {
+        let Some(time) = self.config().features.dates.range_time else { return m };
+        if m.kind != crate::value::MomentKind::Date {
+            return m;
+        }
+        match m.time.date().to_datetime(time).to_zoned(m.time.time_zone().clone()) {
+            Ok(zoned) => Moment { time: zoned, kind: crate::value::MomentKind::DateTime, ..m },
+            Err(_) => m,
+        }
     }
 
     /// Reads data out of a text one piece after another, as SoulverCore's `ObjectParser`.

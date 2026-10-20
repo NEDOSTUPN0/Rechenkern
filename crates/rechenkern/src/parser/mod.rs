@@ -10,7 +10,7 @@ mod inflation;
 mod phrases;
 mod primary;
 mod sky;
-mod target;
+pub(crate) mod target;
 mod time;
 mod tokens;
 mod weather;
@@ -162,7 +162,7 @@ impl<'a> Parser<'a> {
         Parser::new(self.src, &self.toks[from..to], self.scope)
     }
 
-    fn config(&self) -> &Config {
+    fn config(&self) -> &'a Config {
         self.scope.config
     }
 

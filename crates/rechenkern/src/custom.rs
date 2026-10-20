@@ -3,13 +3,14 @@
 
 use jiff::tz::TimeZone;
 
-use crate::config::CurrencySymbol;
+use crate::config::{CurrencySymbol, UnitSymbol};
 use crate::currency::Currency;
 use crate::error::{Error, Result};
 use crate::hash::TableMap;
 use crate::number::Number;
 use crate::units::{self, Dim, Unit, UnitDef, registry};
 use crate::value::Value;
+use crate::zones::PlaceKind;
 
 /// A unit of the host's own, worth an amount of a known one: a smoot is 1.7018 m.
 #[derive(Clone, Debug, PartialEq)]
@@ -41,11 +42,20 @@ pub struct CustomPlace {
     pub zone: TimeZone,
     /// Latitude (north) and longitude (east) in degrees, for sunrise and distances.
     pub coordinates: Option<(f64, f64)>,
+    /// Other names lines may use: "HQ" for "Head Office".
+    pub aliases: Vec<String>,
+    /// What the place is, for highlighting and captions; a city unless the host says.
+    pub kind: PlaceKind,
 }
 
 impl CustomPlace {
     pub fn new(name: &str, zone: TimeZone) -> CustomPlace {
-        CustomPlace { name: name.into(), zone, coordinates: None }
+        CustomPlace { name: name.into(), zone, coordinates: None, aliases: Vec::new(), kind: PlaceKind::City }
+    }
+
+    /// The place goes by this lowercase name or alias.
+    pub(crate) fn is_named(&self, lowercase: &str) -> bool {
+        self.name.to_lowercase() == lowercase || self.aliases.iter().any(|a| a.to_lowercase() == lowercase)
     }
 }
 
@@ -113,13 +123,18 @@ pub(crate) struct CustomUnits {
 }
 
 impl CustomUnits {
-    pub fn build(units: &[CustomUnit], symbols: &[CurrencySymbol]) -> Result<CustomUnits> {
+    pub fn build(units: &[CustomUnit], symbols: &[CurrencySymbol], unit_symbols: &[UnitSymbol]) -> Result<CustomUnits> {
         let mut table = CustomUnits::default();
         // The host's currency symbols read as their currencies: "100 kr".
         for symbol in symbols {
             let unit = registry()
                 .currency(&symbol.code)
                 .ok_or_else(|| Error::new(format!("unknown currency {}", symbol.code)))?;
+            table.exact.insert(symbol.symbol.clone(), unit);
+        }
+        for symbol in unit_symbols {
+            let unit = parse_unit(&symbol.unit).ok_or_else(|| Error::new(format!("unknown unit {}", symbol.unit)))?;
+            table.max_words = table.max_words.max(symbol.symbol.split(' ').count());
             table.exact.insert(symbol.symbol.clone(), unit);
         }
         for custom in units {

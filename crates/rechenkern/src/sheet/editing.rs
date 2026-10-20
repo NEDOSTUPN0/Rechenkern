@@ -120,6 +120,18 @@ impl SheetLine {
 }
 
 impl Sheet {
+    /// The sheet in another locale, as SoulverCore's `convertToLocale`: numbers are rewritten
+    /// in its decimal style (`1,5` to `1.5`) and the calculator takes its settings.
+    pub fn convert_to_locale(&mut self, locale: &str) -> Vec<usize> {
+        let to = self.calc.config().with_locale(locale);
+        let texts: Vec<String> = self.lines.iter().map(|l| self.calc.localize(&l.text, &to)).collect();
+        for (line, text) in self.lines.iter_mut().zip(texts) {
+            line.text = text;
+        }
+        *self.calc.config_mut() = to;
+        self.recalculate()
+    }
+
     /// A copy to change without touching this one, as SoulverCore's `deepCopy`.
     pub fn deep_copy(&self) -> Sheet {
         self.clone()

@@ -3,6 +3,7 @@
 use std::ops::Range;
 
 use crate::calculator::Calculator;
+use crate::config::Config;
 use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::words;
 use crate::units::registry;
@@ -254,6 +255,36 @@ impl Calculator {
             }
             out.push(c);
         }
+        out
+    }
+
+    /// The line with its numbers written as `to` writes them, as SoulverCore's
+    /// `convertToLocale`: `1.234,5` becomes `1,234.5` from a decimal comma to a decimal point.
+    pub fn localize(&self, line: &str, to: &Config) -> String {
+        let from = self.config().decimal_comma;
+        if from == to.decimal_comma {
+            return line.to_string();
+        }
+        let (decimal, grouping) = if from { (',', '.') } else { ('.', ',') };
+        let mut out = String::with_capacity(line.len());
+        let mut at = 0;
+        for h in self.highlight(line) {
+            if !matches!(h.kind, TokenKind::Number | TokenKind::Negative) {
+                continue;
+            }
+            let swapped: String = line[h.range.clone()]
+                .chars()
+                .map(|c| match c {
+                    c if c == decimal => grouping,
+                    c if c == grouping => decimal,
+                    c => c,
+                })
+                .collect();
+            out.push_str(&line[at..h.range.start]);
+            out.push_str(&swapped);
+            at = h.range.end;
+        }
+        out.push_str(&line[at..]);
         out
     }
 

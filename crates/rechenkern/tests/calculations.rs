@@ -1860,6 +1860,13 @@ fn third_sweep() {
 #[test]
 fn fourth_sweep() {
     check(&[
+        ("next friday as relative", "in 2 days"),
+        ("christmas as relative", "in 3 months"),
+        ("now - 3 hours as relative", "3 hours ago"),
+        ("tomorrow as relative date", "tomorrow"),
+        ("1/3 * 3 as fraction", "1"),
+        ("5 lakh", "500k"),
+        ("2 crore + 1", "20,000,001"),
         ("today to christmas", "3 months 2 days"),
         ("christmas to easter", "3 months 3 days"),
         ("today to easter 2027", "6 months 5 days"),

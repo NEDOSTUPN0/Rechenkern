@@ -476,6 +476,15 @@ today as iso8601                             → 2026-09-23
 255 in iso                                   → <error: can't write a number as ISO 8601>
 0.75 as iso                                  → <error: can't write a number as ISO 8601>
 today as iso                                 → 2026-09-23
+255 in relative date                         → <error: can't write a number from now>
+0.75 as relative date                        → <error: can't write a number from now>
+today as relative date                       → today
+255 in relative time                         → <error: can't write a number from now>
+0.75 as relative time                        → <error: can't write a number from now>
+today as relative time                       → today
+255 in relative                              → <error: can't write a number from now>
+0.75 as relative                             → <error: can't write a number from now>
+today as relative                            → today
 255 in day of the week                       → <error: a number has no weekday>
 0.75 as day of the week                      → <error: a number has no weekday>
 today as day of the week                     → Wednesday

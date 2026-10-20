@@ -61,6 +61,8 @@ pub enum Display {
     Clock(bool),
     /// Written as ISO 8601: "2026-12-25".
     Iso,
+    /// From now: "in 3 days".
+    Relative,
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -997,6 +999,10 @@ impl Env<'_> {
                 }
                 Value::Moment(m) => (Value::Text(m.time.strftime("%Y-%m-%dT%H:%M:%S%:z").to_string()), Display::Iso),
                 v => bail!("can't write {} as ISO 8601", v.kind()),
+            },
+            Format::Relative => match value {
+                Value::Moment(m) => (Value::Text(self.relative(&m)?), Display::Relative),
+                v => bail!("can't write {} from now", v.kind()),
             },
             Format::Weekday => match value {
                 Value::Moment(m) => (Value::Text(m.time.strftime("%A").to_string()), Display::Auto),
