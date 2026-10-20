@@ -71,6 +71,31 @@ const MULTI_SYMBOLS: &[(&str, &str)] = &[
     ("||", "||"),
 ];
 
+/// "h30m" after "1": the length of the leading time unit ("h") when the word is time
+/// units and numbers taking turns and ends in a unit, as in "h30m" or "d12h".
+fn time_units_run(word: &str) -> Option<usize> {
+    const UNITS: &[&str] = &["w", "d", "h", "hr", "m", "min", "s", "sec"];
+    let mut rest = word;
+    let mut first = None;
+    while !rest.is_empty() {
+        let letters = rest.find(|c: char| !c.is_ascii_lowercase()).unwrap_or(rest.len());
+        if !UNITS.contains(&&rest[..letters]) {
+            return None;
+        }
+        first.get_or_insert(letters);
+        rest = &rest[letters..];
+        let digits = rest.find(|c: char| !c.is_ascii_digit()).unwrap_or(rest.len());
+        if digits == 0 {
+            break;
+        }
+        rest = &rest[digits..];
+        if rest.is_empty() {
+            return None;
+        }
+    }
+    first.filter(|&n| n < word.len())
+}
+
 fn single_symbol(c: char) -> Option<&'static str> {
     Some(match c {
         '+' => "+",
@@ -374,6 +399,13 @@ impl Lexer<'_> {
         }
         let mut word: String =
             self.chars[start..self.i].iter().map(|&(_, c)| if c == '’' { '\'' } else { c }).collect();
+        // "1h30m", "2h15m30s": a time unit glued between numbers ends the word.
+        if self.after_number()
+            && let Some(len) = time_units_run(&word)
+        {
+            self.i = start + len;
+            word.truncate(len);
+        }
         // "a.m." and "p.m."
         if matches!(word.as_str(), "a" | "p" | "A" | "P")
             && self.peek(0) == Some('.')
