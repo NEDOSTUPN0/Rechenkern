@@ -315,6 +315,11 @@ impl Registry {
         self.exact.get(&code).filter(|u| u.is_money()).cloned()
     }
 
+    /// Every built-in unit with its id, in the order of the table.
+    pub fn units(&self) -> impl Iterator<Item = (UnitId, &UnitDef)> {
+        self.defs.iter().enumerate().filter_map(|(i, def)| Some((UnitId::try_from(i).ok()?, def)))
+    }
+
     /// Every spelling of every unit, sorted.
     pub(crate) fn spellings(&self) -> Vec<&str> {
         let mut all: Vec<&str> = self.exact.keys().chain(self.folded.keys()).map(String::as_str).collect();

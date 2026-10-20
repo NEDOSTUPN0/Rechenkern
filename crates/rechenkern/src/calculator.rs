@@ -16,9 +16,11 @@ use crate::parser::Kept;
 use crate::parser::highlight::{Highlight, TokenKind};
 use crate::parser::{self, Scope};
 use crate::rates::{RateProvider, RateTable, Rates};
-use crate::units::Unit;
+use crate::units::{Unit, registry};
+use crate::value::Quantity;
 use crate::value::Value;
 use crate::weather::WeatherProvider;
+use crate::zones::{self, Location, PlaceInfo, PlaceKind};
 
 /// Evaluates natural language math.
 ///
@@ -145,6 +147,33 @@ impl Calculator {
         let found = provider.place(name);
         self.found_places.borrow_mut().insert(key, found.clone());
         found
+    }
+
+    /// What a place name is: the config's places first, then the built-in ones, then the provider's.
+    pub fn place(&self, name: &str) -> Option<PlaceInfo> {
+        let custom = |p: &CustomPlace| {
+            let location =
+                p.coordinates.map(|(latitude, longitude)| Location { zone: p.zone.clone(), latitude, longitude });
+            let country = p.zone.iana_name().and_then(zones::country_of_zone);
+            PlaceInfo { name: p.name.clone(), kind: PlaceKind::City, zone: p.zone.clone(), location, country }
+        };
+        let key = name.trim().to_lowercase();
+        if let Some(p) = self.config.custom_places.iter().find(|p| p.name.to_lowercase() == key) {
+            return Some(custom(p));
+        }
+        zones::place(name).or_else(|| self.find_place(name.trim()).as_ref().map(custom))
+    }
+
+    /// A unit by any of its spellings, custom units of the config first: "km", "miles per hour".
+    pub fn unit(&self, name: &str) -> Option<Unit> {
+        let custom = self.units().ok().and_then(|units| units.lookup(name));
+        custom.or_else(|| registry().lookup(name))
+    }
+
+    /// An amount in another unit of the same kind, at the calculator's rates: `5 km` in miles.
+    pub fn convert(&self, quantity: &Quantity, to: &Unit) -> Result<Quantity> {
+        let (names, lines) = (Names::default(), Vec::new());
+        self.env(&names, &lines).convert_quantity(quantity, to)
     }
 
     pub fn set_rates(&mut self, table: RateTable) {

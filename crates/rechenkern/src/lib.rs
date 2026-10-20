@@ -63,4 +63,7 @@ pub use sheet::{
 };
 pub use value::{Cadence, Coordinates, Duration, Moment, MomentKind, Pitch, Quantity, Resolution, Timecode, Value};
 pub use weather::{Weather, WeatherProvider, WeatherQuery, WeatherRequest, condition as weather_condition};
-pub use zones::{Place, PlaceKind};
+pub use zones::{
+    Airport, CityEntry as City, Country, Location, Place, PlaceInfo, PlaceKind, airports, airports_near,
+    all_cities as cities, countries, country, country_of_zone,
+};
