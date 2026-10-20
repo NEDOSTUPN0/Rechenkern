@@ -1572,3 +1572,45 @@ fn home_conversions() {
     assert_eq!(calc.calculate("5 km").unwrap().unwrap().text(), "3.106855961 mi");
     assert_eq!(calc.calculate("20 °C").unwrap().unwrap().text(), "68 °F");
 }
+
+#[test]
+fn second_sweep() {
+    check(&[
+        ("first day of the month", "Thu, 1 Oct 2026"),
+        ("last day of the month", "Wed, 30 Sep 2026"),
+        ("first day of next month", "Thu, 1 Oct 2026"),
+        ("last day of February 2028", "Tue, 29 Feb 2028"),
+        ("the first of next month", "Thu, 1 Oct 2026"),
+        ("third friday in March", "Fri, 20 Mar 2026"),
+        ("every third monday", "Mon, 19 Oct 2026"),
+        ("every monday", "every week from Mon, 28 Sep 2026"),
+        ("every second tuesday", "every 2 weeks from Tue, 29 Sep 2026"),
+        ("half a dozen", "6"),
+        ("half an hour in minutes", "30 minutes"),
+        ("1h30m", "1 hour 30 minutes"),
+        ("2h15m in minutes", "135 minutes"),
+        ("3 nights in Paris", "3 nights"),
+        ("4 nights in Tokyo at $200/night", "$800.00"),
+        ("3 milliampere hour in Ah", "0.003 Ah"),
+        ("3 watt minutes in kJ", "0.18 kJ"),
+        ("3 business hours in minutes", "180 minutes"),
+        ("3 week days", "3 workdays"),
+        ("3 ° celsius in °F", "37.4 °F"),
+        ("3 imperial gal in mL", "13,638.27 mL"),
+        ("3 gBps in Mbps", "24,000 Mbps"),
+        ("3 kilos in g", "3,000 g"),
+        ("5 S", "5 seconds"),
+        ("3 mS", "3 mS"),
+        ("$50,000 a year in monthly", "$4,166.67/month"),
+        ("$100 daily", "$100.00/day"),
+        ("$10 twice a week", "$20.00/week"),
+        ("3 times per day", "3/day"),
+        ("once a week", "1/week"),
+        ("56.4567 rounded to 1 digit", "56.5"),
+        ("56.4567 to 3 digit", "56.457"),
+        ("purchasing power of $500 in 2030 assuming 3% inflation", "$444.24"),
+        ("yearly return on $500 that grew to $1,000 over 5 years", "14.8698355%"),
+        ("annual return on $500 invested $1,000 returned over 5 years", "14.8698355%"),
+    ]);
+    assert_eq!(sheet("monthly = $500\nmonthly * 2"), "$1,000.00");
+}
