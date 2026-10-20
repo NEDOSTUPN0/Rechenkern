@@ -241,3 +241,68 @@ fn weather() {
     let answer = calc.calculate("weather in Tokyo").unwrap().unwrap();
     assert_eq!(answer.copy_text(), "18.5 °C");
 }
+
+/// Rates that arrive later: pending until `arrived` is set.
+struct Later(std::sync::Arc<std::sync::atomic::AtomicBool>);
+
+impl RateProvider for Later {
+    fn rates(&self) -> Result<RateTable, String> {
+        Euros.rates()
+    }
+
+    fn pending(&self) -> bool {
+        !self.0.load(std::sync::atomic::Ordering::SeqCst)
+    }
+}
+
+#[test]
+fn pending_answers() {
+    let arrived = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let mut calc = Calculator::with_config(config());
+    calc.set_rate_provider(Later(arrived.clone()));
+    let mut sheet = rechenkern::Sheet::new(calc);
+    sheet.set_text("$100 in EUR\n5 + 5\nprev * 2");
+    let error = sheet.lines()[0].answer().unwrap_err();
+    assert_eq!(error.kind(), rechenkern::ErrorKind::Pending);
+    assert_eq!(sheet.pending_lines(), [0]);
+    arrived.store(true, std::sync::atomic::Ordering::SeqCst);
+    assert_eq!(sheet.recalculate_pending(), [0]);
+    assert_eq!(sheet.lines()[0].answer().unwrap().unwrap().text(), "€90.00");
+    assert!(sheet.pending_lines().is_empty());
+}
+
+#[test]
+fn error_kinds() {
+    use rechenkern::ErrorKind::*;
+    let mut calc = Calculator::with_config(config());
+    for (line, kind) in [
+        ("1/0", DivisionByZero),
+        ("sqrt(-4)", NotReal),
+        ("1e400", TooLarge),
+        ("5 km in kg", UnitMismatch),
+        ("time in Qwertyville", Unknown),
+        ("sqrt(1, 2)", Arity),
+        ("factorial(200)", OutOfRange),
+    ] {
+        let error = calc.calculate(line).unwrap_err();
+        assert_eq!(error.kind(), kind, "{line}: {error}");
+    }
+}
+
+#[test]
+fn stateless_lines_and_threads() {
+    let mut calc = Calculator::with_config(config());
+    calc.calculate("rent = 1500").unwrap();
+    let vars =
+        std::collections::HashMap::from([("Food".to_string(), rechenkern::Value::number(Number::from_i64(400)))]);
+    let answer = calc.calculate_with("rent + food", &vars).unwrap().unwrap();
+    assert_eq!(answer.text(), "1,900");
+    assert!(calc.variable("food").is_none());
+    // A clone per thread.
+    let copy = calc.clone();
+    let handle = std::thread::spawn(move || {
+        let mut copy = copy;
+        copy.calculate("rent * 2").unwrap().unwrap().text().to_string()
+    });
+    assert_eq!(handle.join().unwrap(), "3,000");
+}

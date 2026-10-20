@@ -25,6 +25,9 @@ use crate::weather::WeatherProvider;
 /// Lines are remembered, so later lines can use variables (`rent = $1500`),
 /// earlier answers (`prev`, `line 2`) and totals (`sum`).
 ///
+/// A calculator is `Send` but not `Sync`: for several threads, give each a clone. Clones
+/// share the providers and what they fetched (rates, places), and nothing else.
+///
 /// ```
 /// let mut calc = rechenkern::Calculator::new();
 /// assert_eq!(calc.calculate("20% of 50 km").unwrap().unwrap().text(), "10 km");
@@ -36,11 +39,31 @@ pub struct Calculator {
     pub(crate) names: Names,
     pub(crate) lines: Vec<Line>,
     rates: Rates,
-    inflation: Option<Box<dyn InflationProvider>>,
-    places: Option<Box<dyn PlaceProvider>>,
-    weather: Option<Box<dyn WeatherProvider>>,
+    inflation: Option<Arc<dyn InflationProvider>>,
+    places: Option<Arc<dyn PlaceProvider>>,
+    weather: Option<Arc<dyn WeatherProvider>>,
     /// What the place provider said for each name asked.
     found_places: RefCell<HashMap<String, Option<CustomPlace>>>,
+    /// The line asked the place provider about a place it is still looking up.
+    pending_place: Cell<bool>,
+}
+
+/// A copy shares the providers and what they gave; variables and lines are its own.
+impl Clone for Calculator {
+    fn clone(&self) -> Calculator {
+        Calculator {
+            config: self.config.clone(),
+            units: OnceCell::new(),
+            names: self.names.clone(),
+            lines: self.lines.clone(),
+            rates: self.rates.clone(),
+            inflation: self.inflation.clone(),
+            places: self.places.clone(),
+            weather: self.weather.clone(),
+            found_places: self.found_places.clone(),
+            pending_place: Cell::new(false),
+        }
+    }
 }
 
 impl Default for Calculator {
@@ -65,6 +88,7 @@ impl Calculator {
             places: None,
             weather: None,
             found_places: RefCell::default(),
+            pending_place: Cell::new(false),
         }
     }
 
@@ -87,23 +111,23 @@ impl Calculator {
 
     /// Where exchange rates come from; asked once, on the first conversion.
     pub fn set_rate_provider(&mut self, provider: impl RateProvider + 'static) {
-        self.rates = Rates::with_provider(Box::new(provider));
+        self.rates = Rates::with_provider(Arc::new(provider));
     }
 
     /// Where consumer price indexes come from, for currencies besides the US dollar or
     /// newer ones; the bundled US index is used otherwise.
     pub fn set_inflation_provider(&mut self, provider: impl InflationProvider + 'static) {
-        self.inflation = Some(Box::new(provider));
+        self.inflation = Some(Arc::new(provider));
     }
 
     /// Where the weather comes from: `weather in Tokyo`.
     pub fn set_weather_provider(&mut self, provider: impl WeatherProvider + 'static) {
-        self.weather = Some(Box::new(provider));
+        self.weather = Some(Arc::new(provider));
     }
 
     /// Where places the engine doesn't know are looked up: `time in Smallville`.
     pub fn set_place_provider(&mut self, provider: impl PlaceProvider + 'static) {
-        self.places = Some(Box::new(provider));
+        self.places = Some(Arc::new(provider));
         self.found_places.borrow_mut().clear();
     }
 
@@ -113,6 +137,10 @@ impl Calculator {
         let key = name.to_lowercase();
         if let Some(found) = self.found_places.borrow().get(&key) {
             return found.clone();
+        }
+        if provider.pending(name) {
+            self.pending_place.set(true);
+            return None;
         }
         let found = provider.place(name);
         self.found_places.borrow_mut().insert(key, found.clone());
@@ -140,6 +168,14 @@ impl Calculator {
     pub fn clear(&mut self) {
         self.names = Names::default();
         self.lines.clear();
+    }
+
+    /// Works out one line with these variables over the ones set already, remembering
+    /// nothing, as SoulverCore's `calculate(_:with:)`.
+    pub fn calculate_with(&self, line: &str, variables: &HashMap<String, Value>) -> Result<Option<Answer>> {
+        let mut names = self.names.clone();
+        names.vars.extend(variables.iter().map(|(name, value)| (name.to_lowercase(), value.clone())));
+        self.run(line, &names, &self.lines, false).0
     }
 
     /// Calculates one line. `Ok(None)` means there is nothing to calculate,
@@ -183,7 +219,15 @@ impl Calculator {
         let asked = track.then_some(&asked);
         let body = &trimmed[self.label_end(trimmed, names, asked)..];
         let label = &trimmed[..trimmed.len() - body.len()];
+        self.pending_place.set(false);
         let result = self.evaluate(body, label, names, lines, asked, &mut effects);
+        // "time in Smallville" while the provider looks it up: not unknown, only not yet known.
+        let result = match result {
+            Err(e) if self.pending_place.get() && e.kind() == crate::error::ErrorKind::Unknown => {
+                Err(Error::pending("the place is being looked up"))
+            }
+            result => result,
+        };
         if self.config.features.labels_as_variables
             && effects.assigned.is_none()
             && let Ok(Some((answer, false))) = &result
@@ -229,6 +273,7 @@ impl Calculator {
             inflation: self.inflation.as_deref(),
             weather: self.weather.as_deref(),
             reads: Default::default(),
+            custom_call: Default::default(),
         }
     }
 
@@ -287,6 +332,7 @@ impl Calculator {
                     Some(Value::Quantity(crate::value::Quantity::new(crate::Number::ONE, unit.clone())))
                 }
                 crate::ast::CustomArg::Text(text) => Some(Value::Text(text.clone())),
+                crate::ast::CustomArg::Value(value) => Some(value.clone()),
             })
             .collect()
     }
@@ -441,7 +487,17 @@ impl Calculator {
             },
             food: food_of(expr),
         };
-        let answer = env.describe(expr, value, display, parts, &self.config);
+        let mut answer = env.describe(expr, value, display, parts, &self.config);
+        if matches!(expr, Expr::Custom { .. })
+            && let Some((function, values)) = env.custom_call.take()
+        {
+            let custom = &self.config.custom_functions[function];
+            answer.set_custom_call(crate::answer::CustomCall {
+                id: custom.id.clone(),
+                prototype: custom.prototype.clone(),
+                values,
+            });
+        }
         let assigned = name.map(|name| (name, answer.reference(), kept));
         Ok(Some((answer, is_total, assigned)))
     }

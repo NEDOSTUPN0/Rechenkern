@@ -408,6 +408,7 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         | Display::Dms
         | Display::Places(_)
         | Display::Significant(_)
+        | Display::Iso
         | Display::Digits(_) => {
             if let Some((currency, 1)) = q.unit.currency() {
                 return money(q, currency, config, false);

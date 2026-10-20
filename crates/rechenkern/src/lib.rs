@@ -43,7 +43,7 @@ mod weather;
 mod zones;
 
 pub use alternatives::{Alternative, AlternativeKind};
-pub use answer::{Answer, Form, Side};
+pub use answer::{Answer, CustomCall, DisplayKind, Form, Side};
 pub use calculator::Calculator;
 pub use config::{
     AngleUnit, CommentOptions, Config, ConversionRule, Converter, CurrencySymbol, DateOptions, DateOrder, Features,
@@ -51,15 +51,15 @@ pub use config::{
     TimespanStyle, ZoneCodeCorrection,
 };
 pub use custom::{CustomFunction, CustomPlace, CustomType, CustomUnit, FunctionHandler, PlaceProvider, UnitSystem};
-pub use error::{Error, Result};
+pub use error::{Error, ErrorKind, Result};
 pub use find::{DataKind, Found, Scanner};
 pub use inflation::InflationProvider;
 pub use number::Number;
 pub use parser::highlight::{Highlight, TokenKind};
 pub use rates::{RateProvider, RateTable, bundled_rates};
 pub use sheet::{
-    Alignment, Behaviour, Checkpoint, Color, Delta, HtmlColors, HtmlOptions, ObserverId, Portion, Sheet, SheetLine,
-    Statistic, TextOptions, TextStyle,
+    Alignment, Behaviour, Checkpoint, Color, Definitions, Delta, HtmlColors, HtmlOptions, LineType, ObserverId,
+    Portion, Sheet, SheetLine, Statistic, StatisticOptions, TextOptions, TextStyle,
 };
 pub use value::{Cadence, Coordinates, Duration, Moment, MomentKind, Pitch, Quantity, Resolution, Timecode, Value};
 pub use weather::{Weather, WeatherProvider, WeatherQuery, WeatherRequest, condition as weather_condition};

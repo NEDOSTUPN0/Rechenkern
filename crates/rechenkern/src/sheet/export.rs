@@ -299,7 +299,7 @@ impl Sheet {
     }
 
     /// The text of line `i` for an export.
-    fn expression(&self, i: usize, hide_comments: bool, substitute: bool, hide_heading: bool) -> String {
+    pub(super) fn expression(&self, i: usize, hide_comments: bool, substitute: bool, hide_heading: bool) -> String {
         let text = self.lines[i].text();
         if self.lines[i].is_heading() {
             return if hide_heading { text.trim_start_matches('#').trim_start().to_string() } else { text.to_string() };
@@ -533,6 +533,7 @@ fn statistic_name(statistic: Statistic) -> &'static str {
         Statistic::Lcm => "LCM",
         Statistic::Gcd => "GCD",
         Statistic::StandardDeviation => "Standard deviation",
+        Statistic::Reduction => "Reduction",
     }
 }
 
@@ -542,6 +543,7 @@ const BEHAVIOURS: &[(Behaviour, &str)] = &[
     (Behaviour::GrandTotal, "grand_total"),
     (Behaviour::RunningTotal, "running_total"),
     (Behaviour::RunningBudget, "running_budget"),
+    (Behaviour::TripWaypoint, "trip_waypoint"),
 ];
 
 fn behaviour_name(behaviour: Behaviour) -> &'static str {

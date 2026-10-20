@@ -55,6 +55,13 @@ impl CustomPlace {
 pub trait PlaceProvider: Send + Sync {
     /// The place `name` (as written in the line) stands for, if there is one.
     fn place(&self, name: &str) -> Option<CustomPlace>;
+
+    /// The place is being looked up in the background: the line answers `ErrorKind::Pending`
+    /// and is asked again later (`Sheet::recalculate_pending`).
+    fn pending(&self, name: &str) -> bool {
+        let _ = name;
+        false
+    }
 }
 
 /// What generic names like "gallon", "cup" and "ton" mean, as in SoulverCore.
@@ -207,6 +214,8 @@ pub struct CustomFunction {
     /// Other phrases for the same function.
     pub aliases: Vec<String>,
     pub handler: FunctionHandler,
+    /// The host's name for the function, given back in `Answer::custom_call`.
+    pub id: Option<String>,
 }
 
 impl CustomFunction {
@@ -214,7 +223,17 @@ impl CustomFunction {
         prototype: &str,
         handler: impl Fn(&[Value]) -> std::result::Result<Value, String> + Send + Sync + 'static,
     ) -> CustomFunction {
-        CustomFunction { prototype: prototype.into(), aliases: Vec::new(), handler: std::sync::Arc::new(handler) }
+        CustomFunction {
+            prototype: prototype.into(),
+            aliases: Vec::new(),
+            handler: std::sync::Arc::new(handler),
+            id: None,
+        }
+    }
+
+    /// The same function with the host's name for it.
+    pub fn with_id(self, id: &str) -> CustomFunction {
+        CustomFunction { id: Some(id.into()), ..self }
     }
 }
 
@@ -226,11 +245,23 @@ impl std::fmt::Debug for CustomFunction {
 
 /// Words a custom placeholder matches, as SoulverCore's `CustomType`: `__airline` for
 /// "QF", "BA" and "Qantas".
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Default)]
 pub struct CustomType {
     /// "__airline".
     pub placeholder: String,
     pub words: Vec<String>,
+    /// What each word stands for, by position, as SoulverCore's `associatedObject`; a word
+    /// without one is handed over as text.
+    pub values: Vec<Value>,
+}
+
+impl PartialEq for CustomType {
+    fn eq(&self, other: &CustomType) -> bool {
+        self.placeholder == other.placeholder
+            && self.words == other.words
+            && self.values.len() == other.values.len()
+            && self.values.iter().zip(&other.values).all(|(a, b)| a.same_as(b))
+    }
 }
 
 /// One part of a prototype phrase.

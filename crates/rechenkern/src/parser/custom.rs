@@ -40,9 +40,13 @@ impl Parser<'_> {
                 with(CustomArg::Text(place.name), at + n)
             }
             Slot::Placeholder(SlotKind::Type(t)) => {
-                let words = &self.config().custom_types[*t].words;
-                let (word, n) = words.iter().find_map(|w| Some((w.clone(), self.custom_words_at(at, w)?)))?;
-                with(CustomArg::Text(word), at + n)
+                let custom = &self.config().custom_types[*t];
+                let (k, n) =
+                    custom.words.iter().enumerate().find_map(|(k, w)| Some((k, self.custom_words_at(at, w)?)))?;
+                match custom.values.get(k) {
+                    Some(value) => with(CustomArg::Value(value.clone()), at + n),
+                    None => with(CustomArg::Text(custom.words[k].clone()), at + n),
+                }
             }
             Slot::Placeholder(kind) => {
                 // The value runs to where the rest can match: the next literal, or the end.

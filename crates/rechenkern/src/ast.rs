@@ -208,6 +208,8 @@ pub enum CustomArg {
     Expr(Expr, crate::custom::SlotKind),
     Unit(Unit),
     Text(String),
+    /// What the host gave a word of a custom type.
+    Value(crate::value::Value),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

@@ -59,6 +59,8 @@ pub enum Display {
     Frames,
     /// A time of day on a 24-hour (true) or 12-hour clock.
     Clock(bool),
+    /// Written as ISO 8601: "2026-12-25".
+    Iso,
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -104,6 +106,8 @@ pub(crate) struct Env<'a> {
     pub weather: Option<&'a dyn WeatherProvider>,
     /// What the line read, for sheets that recalculate only what changed.
     pub reads: std::cell::RefCell<crate::calculator::Reads>,
+    /// The host phrase the line called last, with the values it got.
+    pub custom_call: std::cell::RefCell<Option<(usize, Vec<Value>)>>,
 }
 
 impl Env<'_> {
@@ -392,6 +396,7 @@ impl Env<'_> {
             inflation: self.inflation,
             weather: self.weather,
             reads: Default::default(),
+            custom_call: Default::default(),
         };
         let result = inner.eval(&function.body);
         self.reads.borrow_mut().merge(inner.reads.take());
@@ -408,6 +413,7 @@ impl Env<'_> {
             .map(|arg| match arg {
                 CustomArg::Unit(unit) => Ok(Value::Quantity(Quantity::new(Number::ONE, unit.clone()))),
                 CustomArg::Text(text) => Ok(Value::Text(text.clone())),
+                CustomArg::Value(value) => Ok(value.clone()),
                 CustomArg::Expr(expr, kind) => {
                     let value = self.eval(expr)?;
                     let fits = match (kind, &value) {
@@ -428,6 +434,7 @@ impl Env<'_> {
                 }
             })
             .collect::<Result<Vec<_>>>()?;
+        self.custom_call.replace(Some((function, values.clone())));
         (custom.handler)(&values).map_err(Error::new)
     }
 
@@ -986,9 +993,9 @@ impl Env<'_> {
             Format::Iso => match value {
                 // A date alone has no time of day: "christmas in iso" = 2026-12-25.
                 Value::Moment(m) if m.kind == MomentKind::Date => {
-                    (Value::Text(m.time.strftime("%Y-%m-%d").to_string()), Display::Auto)
+                    (Value::Text(m.time.strftime("%Y-%m-%d").to_string()), Display::Iso)
                 }
-                Value::Moment(m) => (Value::Text(m.time.strftime("%Y-%m-%dT%H:%M:%S%:z").to_string()), Display::Auto),
+                Value::Moment(m) => (Value::Text(m.time.strftime("%Y-%m-%dT%H:%M:%S%:z").to_string()), Display::Iso),
                 v => bail!("can't write {} as ISO 8601", v.kind()),
             },
             Format::Weekday => match value {

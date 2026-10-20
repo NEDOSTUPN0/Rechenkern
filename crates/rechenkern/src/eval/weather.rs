@@ -41,6 +41,9 @@ impl Env<'_> {
             zone: place.zone.clone(),
             date: (date != today).then_some(date),
         };
+        if provider.pending(&request) {
+            return Err(Error::pending("the weather is on its way"));
+        }
         let weather = provider.weather(&request).map_err(Error::new)?;
         let missing = || Error::new("the weather provider doesn't know that");
         let celsius = |t: Option<f64>| -> Result<Value> {

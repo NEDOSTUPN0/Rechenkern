@@ -87,6 +87,12 @@ pub struct Weather {
 /// A source of weather, as SoulverCore's `WeatherDataProvider`.
 pub trait WeatherProvider: Send + Sync {
     fn weather(&self, request: &WeatherRequest) -> Result<Weather, String>;
+
+    /// The weather is being fetched in the background: the line answers `ErrorKind::Pending`.
+    fn pending(&self, request: &WeatherRequest) -> bool {
+        let _ = request;
+        false
+    }
 }
 
 /// The sky for a WMO weather code, as weather services report it.

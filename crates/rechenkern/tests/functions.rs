@@ -44,8 +44,11 @@ fn split(values: &[Value]) -> Result<Value, String> {
 fn host_phrases() {
     let mut tip = CustomFunction::new("tip on __money", tip);
     tip.aliases.push("__money tip".into());
-    let airline =
-        CustomType { placeholder: "__airline".into(), words: vec!["QF".into(), "BA".into(), "Qantas".into()] };
+    let airline = CustomType {
+        placeholder: "__airline".into(),
+        words: vec!["QF".into(), "BA".into(), "Qantas".into()],
+        ..Default::default()
+    };
     let flight = CustomFunction::new("flight __airline __number", |values| match values {
         [Value::Text(airline), Value::Quantity(n)] => Ok(Value::Text(format!("{airline}{}", n.number))),
         _ => Err("bad flight".into()),
