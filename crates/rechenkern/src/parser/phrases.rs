@@ -677,25 +677,34 @@ impl Parser<'_> {
         }
     }
 
-    /// "annual return on $500 that grew to $1,000 over 5 years": the yearly growth rate.
+    /// "annual return on $500 that grew to $1,000 over 5 years", "monthly return on $500
+    /// invested $1,000 returned after 2 years": the growth rate per period.
     fn annual_return(&self) -> Result<Option<Expr>> {
-        if !self.matches_at(0, &["annual", "return", "on"]) {
+        let Some(period) = self.lower(0).and_then(|w| super::words::period_word(&w)) else { return Ok(None) };
+        if !self.matches_at(1, &["return", "on"]) {
             return Ok(None);
         }
         let Some(during) = ["over", "after", "in", "for"].iter().filter_map(|w| self.find(4, &[w])).min() else {
             return Ok(None);
         };
+        // "... as a %": the answer is a percentage anyway.
+        let mut end = self.toks.len();
+        for tail in [&["as", "a", "%"][..], &["as", "%"], &["in", "%"]] {
+            if self.ends_with(tail) {
+                end -= tail.len();
+                break;
+            }
+        }
         // The amount at the start, then at the end, with words around them.
         let mut amounts = self.sub(3, during);
-        let start = amounts.additive()?;
+        let start = amounts.unary()?;
         amounts.eat_word("to");
-        let end = amounts.additive()?;
+        let finish = amounts.unary()?;
         amounts.finish()?;
-        let reg = registry();
-        let years = Expr::Convert(self.part(during + 1, self.toks.len())?.boxed(), Target::Unit(reg.get("yr")));
-        let years = Self::formatted(years, Format::Number);
+        let periods = Expr::Convert(self.part(during + 1, end)?.boxed(), Target::Unit(registry().get(period)));
+        let periods = Self::formatted(periods, Format::Number);
         let one = || Expr::Number(Number::ONE);
-        let growth = Expr::binary(Op::Pow, Expr::binary(Op::Div, end, start), Expr::binary(Op::Div, one(), years));
+        let growth = Expr::binary(Op::Pow, Expr::binary(Op::Div, finish, start), Expr::binary(Op::Div, one(), periods));
         Ok(Some(Self::formatted(Expr::binary(Op::Sub, growth, one()), Format::Percent)))
     }
 
