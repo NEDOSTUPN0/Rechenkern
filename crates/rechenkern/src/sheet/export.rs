@@ -166,8 +166,10 @@ fn token_colors(dark: bool) -> Vec<(TokenKind, String)> {
     let pick = |light: &str, night: &str| if dark { night.to_string() } else { light.to_string() };
     vec![
         (TokenKind::Number, pick("#0b66e4", "#6cb4ff")),
+        (TokenKind::Negative, pick("#0b66e4", "#6cb4ff")),
         (TokenKind::Unit, pick("#008080", "#4fd1c5")),
         (TokenKind::Function, pick("#8e44ad", "#c39bd3")),
+        (TokenKind::PhraseFunction, pick("#8e44ad", "#c39bd3")),
         (TokenKind::Variable, pick("#d35400", "#f5a65b")),
         (TokenKind::Reference, pick("#d35400", "#f5a65b")),
         (TokenKind::Date, pick("#1e8449", "#7dcea0")),
@@ -176,6 +178,8 @@ fn token_colors(dark: bool) -> Vec<(TokenKind, String)> {
         (TokenKind::Comment, pick("#8e8e93", "#8e8e93")),
         (TokenKind::Label, pick("#8e8e93", "#a1a1a6")),
         (TokenKind::Tag, pick("#e67e22", "#f0b27a")),
+        (TokenKind::TagIndicator, pick("#e67e22", "#f0b27a")),
+        (TokenKind::Url, pick("#0b66e4", "#6cb4ff")),
     ]
 }
 

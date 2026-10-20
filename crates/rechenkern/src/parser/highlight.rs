@@ -39,10 +39,20 @@ pub enum TokenKind {
     /// `Rent:` before a line.
     Label,
     Heading,
-    /// `#food`.
+    /// The `#` of a heading.
+    HeadingIndicator,
+    /// `food` in `#food`.
     Tag,
+    /// The `#` of a tag.
+    TagIndicator,
     /// `1.` or `a)` starting a line.
     ListMarker,
+    /// A link in a comment: `https://example.com`.
+    Url,
+    /// A number with its minus sign: `-5`.
+    Negative,
+    /// The words of a whole-line phrase: `is what` in `20 is what % of 200`.
+    PhraseFunction,
 }
 
 impl TokenKind {
@@ -72,8 +82,13 @@ impl TokenKind {
             TokenKind::Comment => "comment",
             TokenKind::Label => "label",
             TokenKind::Heading => "heading",
+            TokenKind::HeadingIndicator => "heading_indicator",
             TokenKind::Tag => "tag",
+            TokenKind::TagIndicator => "tag_indicator",
             TokenKind::ListMarker => "list_marker",
+            TokenKind::Url => "url",
+            TokenKind::Negative => "negative",
+            TokenKind::PhraseFunction => "phrase_function",
         }
     }
 }
@@ -83,6 +98,20 @@ impl TokenKind {
 pub struct Highlight {
     pub range: Range<usize>,
     pub kind: TokenKind,
+}
+
+impl Highlight {
+    /// The range in characters of `line`, the line it was found in.
+    pub fn char_range(&self, line: &str) -> Range<usize> {
+        let start = line[..self.range.start].chars().count();
+        start..start + line[self.range.clone()].chars().count()
+    }
+
+    /// The range in UTF-16 code units of `line`, as web and Apple hosts count.
+    pub fn utf16_range(&self, line: &str) -> Range<usize> {
+        let start = line[..self.range.start].encode_utf16().count();
+        start..start + line[self.range.clone()].encode_utf16().count()
+    }
 }
 
 /// The parts of an expression `src`, with ranges moved by `offset` (the label before it).
@@ -122,6 +151,15 @@ pub fn highlight(src: &str, offset: usize, scope: &Scope) -> Vec<Highlight> {
     }
     out.sort_by_key(|h| h.range.start);
     gaps(src, &mut out);
+    negatives(src, &mut out);
+    // "20 is what % of 200": the words a whole-line phrase reads are its own.
+    if Parser::new(src, &kept, scope).phrase().ok().flatten().is_some() {
+        for h in out.iter_mut().filter(|h| matches!(h.kind, TokenKind::Comment | TokenKind::Keyword)) {
+            if kept.iter().any(|t| t.start == h.range.start && t.word().is_some()) {
+                h.kind = TokenKind::PhraseFunction;
+            }
+        }
+    }
     for h in &mut out {
         h.range = h.range.start + offset..h.range.end + offset;
     }
@@ -143,9 +181,16 @@ fn gaps(src: &str, out: &mut Vec<Highlight>) {
                 let rest = &src[k..stop];
                 let len = rest.find(char::is_whitespace).unwrap_or(rest.len());
                 let tag = rest.starts_with('#') && rest[1..].starts_with(char::is_alphabetic);
-                let kind = if tag { TokenKind::Tag } else { TokenKind::Comment };
-                let len = if tag { len } else { rest.len() };
-                found.push(Highlight { range: k..k + len, kind });
+                let url = ["http://", "https://", "www."].iter().any(|p| rest.starts_with(p));
+                let len =
+                    if tag || url { len } else { rest.find(" http").or(rest.find(" www.")).unwrap_or(rest.len()) };
+                if tag {
+                    found.push(Highlight { range: k..k + 1, kind: TokenKind::TagIndicator });
+                    found.push(Highlight { range: k + 1..k + len, kind: TokenKind::Tag });
+                } else {
+                    let kind = if url { TokenKind::Url } else { TokenKind::Comment };
+                    found.push(Highlight { range: k..k + len, kind });
+                }
                 k += len;
                 k += src[k..stop].len() - src[k..stop].trim_start().len();
             }
@@ -154,6 +199,26 @@ fn gaps(src: &str, out: &mut Vec<Highlight>) {
     }
     out.extend(found);
     out.sort_by_key(|h| h.range.start);
+}
+
+/// A minus sign glued to the number after it, where no value comes before: `-5`, `2 * -3`.
+fn negatives(src: &str, out: &mut Vec<Highlight>) {
+    let mut i = 0;
+    while i + 1 < out.len() {
+        let (h, next) = (&out[i], &out[i + 1]);
+        let minus = h.kind == TokenKind::Operator && matches!(&src[h.range.clone()], "-" | "−");
+        let operand = i.checked_sub(1).map(|k| &out[k]).is_some_and(|before| {
+            !matches!(
+                before.kind,
+                TokenKind::Operator | TokenKind::Converter | TokenKind::Connector | TokenKind::Keyword
+            ) && &src[before.range.clone()] != "("
+        });
+        if minus && !operand && next.kind == TokenKind::Number && next.range.start == h.range.end {
+            out[i] = Highlight { range: h.range.start..next.range.end, kind: TokenKind::Negative };
+            out.remove(i + 1);
+        }
+        i += 1;
+    }
 }
 
 impl Parser<'_> {

@@ -374,7 +374,7 @@ impl Env<'_> {
         if args.len() != function.params.len() {
             bail!("{name} takes {} values, not {}", function.params.len(), args.len());
         }
-        if self.depth.get() >= 64 {
+        if self.depth.get() >= 32 {
             bail!("{name} calls itself too deep");
         }
         let mut vars = self.vars.clone();

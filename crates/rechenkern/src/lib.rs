@@ -19,6 +19,7 @@ mod calculator;
 mod config;
 pub mod currency;
 mod custom;
+mod editor;
 mod error;
 mod eval;
 mod find;
@@ -51,6 +52,7 @@ pub use config::{
     TimespanStyle, ZoneCodeCorrection,
 };
 pub use custom::{CustomFunction, CustomPlace, CustomType, CustomUnit, FunctionHandler, PlaceProvider, UnitSystem};
+pub use editor::{Beautify, Components, Token};
 pub use error::{Error, ErrorKind, Result};
 pub use find::{DataKind, Found, Scanner};
 pub use inflation::InflationProvider;

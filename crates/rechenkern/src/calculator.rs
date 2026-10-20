@@ -185,6 +185,11 @@ impl Calculator {
         self.rates.table()
     }
 
+    /// A function the lines defined: `area(w, h) = w * h`.
+    pub(crate) fn function_defined(&self, name: &str) -> bool {
+        self.names.functions.contains_key(name)
+    }
+
     pub fn variable(&self, name: &str) -> Option<&Value> {
         self.names.vars.get(&name.to_lowercase())
     }
@@ -317,7 +322,11 @@ impl Calculator {
         let start = line.len() - line.trim_start().len();
         let trimmed = line.trim();
         if line_kind(trimmed) == LineKind::Heading {
-            return vec![Highlight { range: start..start + trimmed.len(), kind: TokenKind::Heading }];
+            let marks = trimmed.len() - trimmed.trim_start_matches('#').len();
+            let text = start + trimmed.len() - trimmed[marks..].trim_start().len();
+            let indicator = Highlight { range: start..start + marks, kind: TokenKind::HeadingIndicator };
+            let heading = Highlight { range: text..start + trimmed.len(), kind: TokenKind::Heading };
+            return [indicator, heading].into_iter().filter(|h| !h.range.is_empty()).collect();
         }
         if line_kind(trimmed) != LineKind::Value {
             return Vec::new();
@@ -326,7 +335,13 @@ impl Calculator {
         let mut out = Vec::new();
         let label = trimmed[..trimmed.len() - body.len()].trim_end();
         if !label.is_empty() {
-            out.push(Highlight { range: start..start + label.len(), kind: TokenKind::Label });
+            // "1. Rent:": the list marker before the label is its own.
+            let marker = list_marker_len(label);
+            if marker > 0 {
+                out.push(Highlight { range: start..start + marker, kind: TokenKind::ListMarker });
+            }
+            let label_start = start + marker + label[marker..].len() - label[marker..].trim_start().len();
+            out.push(Highlight { range: label_start..start + label.len(), kind: TokenKind::Label });
         }
         let is_var = |name: &str| names.vars.contains_key(name);
         let is_function = |name: &str| names.functions.contains_key(name);
@@ -647,6 +662,19 @@ pub(crate) fn line_kind(trimmed: &str) -> LineKind {
     } else {
         LineKind::Value
     }
+}
+
+/// The length of a list marker starting a text and the space after it: "1." in "1. Rent:", "a)".
+fn list_marker_len(text: &str) -> usize {
+    let digits = text.len() - text.trim_start_matches(|c: char| c.is_ascii_digit()).len();
+    let lead = match digits {
+        0 if text.chars().next().is_some_and(|c| c.is_ascii_alphabetic()) && text[1..].starts_with(')') => 1,
+        0 => return 0,
+        n => n,
+    };
+    let rest = &text[lead..];
+    let ends = (rest.starts_with(')') || (rest.starts_with('.') && digits > 0)) && rest[1..].starts_with(' ');
+    if ends { lead + 1 } else { 0 }
 }
 
 /// "#food total", "#food average in EUR": a statistic of tagged lines, not a heading.

@@ -62,17 +62,21 @@ fn notes() {
     check(&[
         ("$20 for lunch + $15", "$:unit 20:number for:comment lunch:comment +:operator $:unit 15:number"),
         ("Rent: $1,500", "Rent::label $:unit 1,500:number"),
-        ("# Budget", "# Budget:heading"),
+        ("# Budget", "#:heading_indicator Budget:heading"),
         ("$999 (for iPhone 16)", "$:unit 999:number (:comment for:comment iPhone:comment 16:comment ):comment"),
         (
             "Boeing \"747\" costs $5 // note",
             "Boeing:comment \"747\":comment costs:comment $:unit 5:number // note:comment",
         ),
         ("1. 5 + 5", "1.:list_marker 5:number +:operator 5:number"),
-        ("coffee #food $5", "coffee:comment #food:tag $:unit 5:number"),
-        ("see https://example.com for $5", "see:comment https://example.com:comment for:comment $:unit 5:number"),
+        ("coffee #food $5", "coffee:comment #:tag_indicator food:tag $:unit 5:number"),
+        ("see https://example.com for $5", "see:comment https://example.com:url for:comment $:unit 5:number"),
         ("monthly rent = $1500", "monthly rent:variable =:operator $:unit 1500:number"),
         ("line 2 + prev", "line 2:reference +:operator prev:reference"),
+        ("-5 + -3", "-5:negative +:operator -3:negative"),
+        ("10 - 3", "10:number -:operator 3:number"),
+        ("2 * (-3)", "2:number *:operator (:parenthesis -3:negative ):parenthesis"),
+        ("20 is what % of 200", "20:number is:phrase_function what:phrase_function %:operator of:connector 200:number"),
     ]);
 }
 
