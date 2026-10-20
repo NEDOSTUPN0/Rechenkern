@@ -1,5 +1,6 @@
 ---
 source: crates/rechenkern/src/tests/snapshots.rs
+assertion_line: 38
 ---
 2.5 "                                        → 2.5
 2.5 " in m                                   → 2.5
@@ -654,7 +655,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 VUV                                      → 3 VUV
 2.5 VUV in EUR                               → €1.13
 2.5 W                                        → 2.5 W
-2.5 W m                                      → 2.5 W·m
+2.5 W m                                      → 2.5 W·min
+2.5 W m in J                                 → 150 J
 2.5 W s                                      → 2.5 W·s
 2.5 W s in J                                 → 2.5 J
 2.5 WST                                      → 2.50 WST
@@ -1062,6 +1064,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 bushels in L                             → 88.09767542 L
 2.5 business day                             → 2.5 workdays
 2.5 business days                            → 2.5 workdays
+2.5 business hour                            → 2.5 hours
+2.5 business hour in s                       → 9,000 seconds
+2.5 business hours                           → 2.5 hours
+2.5 business hours in s                      → 9,000 seconds
 2.5 bwp                                      → 2.50 BWP
 2.5 bwp in EUR                               → €1.13
 2.5 byn                                      → 2.50 BYN
@@ -1642,6 +1648,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 furlongs in m                            → 502.92 m
 2.5 g                                        → 2.5 g
 2.5 g in kg                                  → 0.0025 kg
+2.5 gBps                                     → 2.5 GB/s
+2.5 gBps in bps                              → 20,000,000,000 bps
 2.5 gal                                      → 2.5 gal
 2.5 gal in L                                 → 9.46352946 L
 2.5 gallon                                   → 2.5 gal
@@ -1960,14 +1968,22 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 imp tbsp in L                            → 0.04439541016 L
 2.5 imp tsp                                  → 2.5 imp tsp
 2.5 imp tsp in L                             → 0.01479847005 L
+2.5 imperial fl oz                           → 2.5 imp fl oz
+2.5 imperial fl oz in L                      → 0.07103265625 L
+2.5 imperial floz                            → 2.5 imp fl oz
+2.5 imperial floz in L                       → 0.07103265625 L
 2.5 imperial fluid ounce                     → 2.5 imp fl oz
 2.5 imperial fluid ounce in L                → 0.07103265625 L
 2.5 imperial fluid ounces                    → 2.5 imp fl oz
 2.5 imperial fluid ounces in L               → 0.07103265625 L
+2.5 imperial gal                             → 2.5 imp gal
+2.5 imperial gal in L                        → 11.365225 L
 2.5 imperial gallon                          → 2.5 imp gal
 2.5 imperial gallon in L                     → 11.365225 L
 2.5 imperial gallons                         → 2.5 imp gal
 2.5 imperial gallons in L                    → 11.365225 L
+2.5 imperial gals                            → 2.5 imp gal
+2.5 imperial gals in L                       → 11.365225 L
 2.5 imperial gill                            → 2.5 imp gi
 2.5 imperial gill in L                       → 0.3551632813 L
 2.5 imperial gills                           → 2.5 imp gi
@@ -1990,6 +2006,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 imperial tablespoon in L                 → 0.04439541016 L
 2.5 imperial tablespoons                     → 2.5 imp tbsp
 2.5 imperial tablespoons in L                → 0.04439541016 L
+2.5 imperial tbsp                            → 2.5 imp tbsp
+2.5 imperial tbsp in L                       → 0.04439541016 L
 2.5 imperial teaspoon                        → 2.5 imp tsp
 2.5 imperial teaspoon in L                   → 0.01479847005 L
 2.5 imperial teaspoons                       → 2.5 imp tsp
@@ -1998,6 +2016,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 imperial ton in kg                       → 2,540.117272 kg
 2.5 imperial tons                            → 2.5 long ton
 2.5 imperial tons in kg                      → 2,540.117272 kg
+2.5 imperial tsp                             → 2.5 imp tsp
+2.5 imperial tsp in L                        → 0.01479847005 L
 2.5 in                                       → 2.5 in
 2.5 in in m                                  → 0.0635 m
 2.5 in-lb                                    → 2.5 lbf·inch
@@ -2074,6 +2094,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 jpy in EUR                               → €0.02
 2.5 kA                                       → 2.5 kA
 2.5 kA in A                                  → 2,500 A
+2.5 kAh                                      → 2.5 kAh
 2.5 kB                                       → 2.5 kB
 2.5 kB in B                                  → 2,500 B
 2.5 kBps                                     → 2.5 kB/s
@@ -2153,10 +2174,15 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 kibioctet in B                           → 2,560 B
 2.5 kibioctets                               → 2.5 KiB
 2.5 kibioctets in B                          → 2,560 B
+2.5 kilo                                     → 2.5 kg
 2.5 kiloamp                                  → 2.5 kA
 2.5 kiloamp in A                             → 2,500 A
+2.5 kiloamp hour                             → 2.5 kAh
+2.5 kiloamp hours                            → 2.5 kAh
 2.5 kiloampere                               → 2.5 kA
 2.5 kiloampere in A                          → 2,500 A
+2.5 kiloampere hour                          → 2.5 kAh
+2.5 kiloampere hours                         → 2.5 kAh
 2.5 kiloamperes                              → 2.5 kA
 2.5 kiloamperes in A                         → 2,500 A
 2.5 kiloamps                                 → 2.5 kA
@@ -2249,6 +2275,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 kilopound per square inch in Pa          → 17,236,893.23 Pa
 2.5 kilopounds per square inch               → 2.5 ksi
 2.5 kilopounds per square inch in Pa         → 17,236,893.23 Pa
+2.5 kilos                                    → 2.5 kg
 2.5 kilosiemens                              → 2.5 kS
 2.5 kilotonne                                → 2.5 kilotonnes
 2.5 kilotonne in kg                          → 2,500,000 kg
@@ -2533,6 +2560,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 mA                                       → 2.5 mA
 2.5 mA in A                                  → 0.0025 A
 2.5 mAh                                      → 2.5 mAh
+2.5 mBps                                     → 2.5 MB/s
+2.5 mBps in bps                              → 20,000,000 bps
 2.5 mC                                       → 2.5 mC
 2.5 mF                                       → 2.5 mF
 2.5 mH                                       → 2.5 mH
@@ -2763,8 +2792,12 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 mib in B                                 → 2,621,440 B
 2.5 microamp                                 → 2.5 µA
 2.5 microamp in A                            → 0.0000025 A
+2.5 microamp hour                            → 2.5 µAh
+2.5 microamp hours                           → 2.5 µAh
 2.5 microampere                              → 2.5 µA
 2.5 microampere in A                         → 0.0000025 A
+2.5 microampere hour                         → 2.5 µAh
+2.5 microampere hours                        → 2.5 µAh
 2.5 microamperes                             → 2.5 µA
 2.5 microamperes in A                        → 0.0000025 A
 2.5 microamps                                → 2.5 µA
@@ -2859,6 +2892,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 milliamp hours                           → 2.5 mAh
 2.5 milliampere                              → 2.5 mA
 2.5 milliampere in A                         → 0.0025 A
+2.5 milliampere hour                         → 2.5 mAh
+2.5 milliampere hours                        → 2.5 mAh
 2.5 milliamperes                             → 2.5 mA
 2.5 milliamperes in A                        → 0.0025 A
 2.5 milliamps                                → 2.5 mA
@@ -3885,6 +3920,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 são tomé and príncipe dobras in EUR      → €1.13
 2.5 t                                        → 2.5 t
 2.5 t in kg                                  → 2,500 kg
+2.5 tBps                                     → 2.5 TB/s
+2.5 tBps in bps                              → 20,000,000,000,000 bps
 2.5 tablespoon                               → 2.5 tbsp
 2.5 tablespoon in L                          → 0.03696691195 L
 2.5 tablespoons                              → 2.5 tbsp
@@ -4071,6 +4108,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 tögrögs in EUR                           → €1.13
 2.5 uA                                       → 2.5 µA
 2.5 uA in A                                  → 0.0000025 A
+2.5 uAh                                      → 2.5 µAh
 2.5 uC                                       → 2.5 µC
 2.5 uF                                       → 2.5 µF
 2.5 uH                                       → 2.5 µH
@@ -4253,6 +4291,10 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 watt hour in J                           → 9,000 J
 2.5 watt hours                               → 2.5 Wh
 2.5 watt hours in J                          → 9,000 J
+2.5 watt minute                              → 2.5 W·min
+2.5 watt minute in J                         → 150 J
+2.5 watt minutes                             → 2.5 W·min
+2.5 watt minutes in J                        → 150 J
 2.5 watt second                              → 2.5 W·s
 2.5 watt second in J                         → 2.5 J
 2.5 watt seconds                             → 2.5 W·s
@@ -4266,6 +4308,8 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 webers                                   → 2.5 Wb
 2.5 week                                     → 2.5 weeks
 2.5 week in s                                → 1,512,000 seconds
+2.5 week day                                 → 2.5 workdays
+2.5 week days                                → 2.5 workdays
 2.5 weekdays                                 → 2.5 workdays
 2.5 weeks                                    → 2.5 weeks
 2.5 weeks in s                               → 1,512,000 seconds
@@ -4414,6 +4458,7 @@ source: crates/rechenkern/src/tests/snapshots.rs
 2.5 °f in K                                  → 256.7611111 K
 2.5 µA                                       → 2.5 µA
 2.5 µA in A                                  → 0.0000025 A
+2.5 µAh                                      → 2.5 µAh
 2.5 µC                                       → 2.5 µC
 2.5 µF                                       → 2.5 µF
 2.5 µH                                       → 2.5 µH

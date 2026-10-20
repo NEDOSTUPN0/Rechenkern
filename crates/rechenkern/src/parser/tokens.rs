@@ -291,6 +291,12 @@ impl<'a> Parser<'a> {
             {
                 return Some((u, 2));
             }
+            // "° celsius"
+            if let Some(next) = self.toks.get(i + 1).and_then(Token::word).filter(|w| w.len() > 1)
+                && let Some(u) = self.lookup_unit(next).filter(|u| u.dim() == Dim::TEMPERATURE)
+            {
+                return Some((u, 2));
+            }
             return Some((registry().get("°"), 1));
         }
         let word = tok.word()?;
@@ -312,6 +318,10 @@ impl<'a> Parser<'a> {
         let after_slash = i > 0 && (self.toks[i - 1].is_sym("/") || self.toks[i - 1].is_sym("*"));
         if word.eq_ignore_ascii_case("in") || (!after_number && (article || (word_unit && !after_slash))) {
             return None;
+        }
+        // "5 H", "5 S", "5 T": hours, seconds and tonnes after a number, as in SoulverCore.
+        if after_number && let Some(name) = [("H", "h"), ("S", "s"), ("T", "t")].iter().find(|(w, _)| *w == word) {
+            return Some((registry().get(name.1), 1));
         }
         // "min(" is a function.
         if self.toks.get(i + 1).is_some_and(|t| t.is_sym("(") && !t.space_before)

@@ -417,7 +417,7 @@ fn units() {
         ("5 µM in nM", "5,000 nM"),
         ("5 um in mm", "0.005 mm"),
         ("5 us dollars", "$5.00"),
-        ("3 W m", "3 W·m"),
+        ("3 W m", "3 W·min"),
         ("440 hz to 1/s", "440/second"),
         ("5 km cast to miles", "5 mi"),
         ("speed of 26 inch tire at 200 rpm", "15.46996382 mph"),

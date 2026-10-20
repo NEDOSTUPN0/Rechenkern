@@ -162,6 +162,8 @@ fn definitions() -> Vec<Def> {
                 "work hours",
                 "working hour",
                 "working hours",
+                "business hour",
+                "business hours",
             ])
             .spelled()
             .calendar(Cal::Hour, 1),
@@ -201,7 +203,10 @@ fn definitions() -> Vec<Def> {
                 "working days",
                 "business day",
                 "business days",
+                // Not "weekday": "today as weekday" is the day's name.
                 "weekdays",
+                "week day",
+                "week days",
             ])
             .spelled(),
         // Length
@@ -266,7 +271,12 @@ fn definitions() -> Vec<Def> {
         // Volume
         unit("L", "liter", Dim::VOLUME, "0.001").aliases(&["l", "ℓ", "litre", "litres"]).prefixes(VOLUME),
         unit("gal", "gallon", Dim::VOLUME, "0.003785411784").aliases(&["us gallon", "us gallons"]),
-        unit("imp gal", "imperial gallon", Dim::VOLUME, "0.00454609").aliases(&["uk gallon", "uk gallons"]),
+        unit("imp gal", "imperial gallon", Dim::VOLUME, "0.00454609").aliases(&[
+            "uk gallon",
+            "uk gallons",
+            "imperial gal",
+            "imperial gals",
+        ]),
         unit("qt", "quart", Dim::VOLUME, "0.000946352946").aliases(&["us quart", "us quarts"]),
         unit("imp qt", "imperial quart", Dim::VOLUME, "0.0011365225").aliases(&["uk quart", "uk quarts"]),
         // "pt" is the typographic point.
@@ -288,6 +298,8 @@ fn definitions() -> Vec<Def> {
             "uk fl oz",
             "uk fluid ounce",
             "uk fluid ounces",
+            "imperial fl oz",
+            "imperial floz",
         ]),
         unit("tbsp", "tablespoon", Dim::VOLUME, "0.00001478676478125").aliases(&["Tbsp", "tbs"]),
         unit("tsp", "teaspoon", Dim::VOLUME, "0.00000492892159375"),
@@ -296,11 +308,14 @@ fn definitions() -> Vec<Def> {
         unit("pinch", "pinch", Dim::VOLUME, "1").scale(tsp / Number::from_i64(16)).plural("pinches").spelled(),
         unit("smidgen", "smidgen", Dim::VOLUME, "1").scale(tsp / Number::from_i64(32)).spelled(),
         // The old British spoons: 5/8 and 5/24 of an imperial fluid ounce.
-        unit("imp tbsp", "imperial tablespoon", Dim::VOLUME, "0.0000177581640625")
-            .aliases(&["uk tablespoon", "uk tablespoons"]),
+        unit("imp tbsp", "imperial tablespoon", Dim::VOLUME, "0.0000177581640625").aliases(&[
+            "uk tablespoon",
+            "uk tablespoons",
+            "imperial tbsp",
+        ]),
         unit("imp tsp", "imperial teaspoon", Dim::VOLUME, "1")
             .scale(Number::parse("0.0000177581640625").unwrap() / Number::from_i64(3))
-            .aliases(&["uk teaspoon", "uk teaspoons"]),
+            .aliases(&["uk teaspoon", "uk teaspoons", "imperial tsp"]),
         unit("bbl", "barrel", Dim::VOLUME, "0.158987294928"),
         unit("pk", "peck", Dim::VOLUME, "0.00880976754172").aliases(&["us peck", "us pecks"]).spelled(),
         unit("imp pk", "imperial peck", Dim::VOLUME, "0.00909218").aliases(&["uk peck", "uk pecks"]),
@@ -454,7 +469,8 @@ fn definitions() -> Vec<Def> {
         ]),
         unit("V", "volt", Dim::VOLTAGE, "1").prefixes(&[KILO, MEGA, MILLI, MICRO]),
         unit("Ω", "ohm", Dim::RESISTANCE, "1").aliases(&["Ω"]).prefixes(&[KILO, MEGA, MILLI, MICRO]),
-        // "C", "F", "H", "S" and "T" alone are Celsius, Fahrenheit, hours, seconds and tonnes, as in SoulverCore.
+        // "C", "F", "H", "S" and "T" alone are Celsius, Fahrenheit, hours, seconds and tonnes, as in
+        // SoulverCore (`Parser::unit_at` reads the last three, after a number only).
         unit("C", "coulomb", Dim::CHARGE, "1").prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO, PICO]).prefixed_only(),
         unit("F", "farad", Dim::CAPACITANCE, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO, PICO]).prefixed_only(),
         unit("H", "henry", Dim::INDUCTANCE, "1")
@@ -514,8 +530,8 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("TWh", &["TWh", "twh", "terawatt hour", "terawatt hours"], "TW*h"),
     ("N·m", &["Nm", "N·m", "N⋅m", "N m", "newton meter", "newton meters", "newton metre", "newton metres"], "N*m"),
     ("", &["Ws", "W s", "watt second", "watt seconds"], "W*s"),
-    // A product written with a space, as SoulverCore keeps it: "3 W m".
-    ("", &["W m"], "W*m"),
+    // "W m" is a watt minute, as in SoulverCore.
+    ("", &["W m", "watt minute", "watt minutes"], "W*min"),
     (
         "",
         &[
@@ -539,7 +555,9 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("rpm", &["rpm", "revolution per minute", "revolutions per minute"], "rev/min"),
     ("rps", &["rps", "revolution per second", "revolutions per second"], "rev/s"),
     ("Ah", &["Ah", "amp hour", "amp hours", "ampere hour", "ampere hours"], "A*h"),
-    ("mAh", &["mAh", "mah", "milliamp hour", "milliamp hours"], "mA*h"),
+    ("kAh", &["kAh", "kiloamp hour", "kiloamp hours", "kiloampere hour", "kiloampere hours"], "kA*h"),
+    ("mAh", &["mAh", "mah", "milliamp hour", "milliamp hours", "milliampere hour", "milliampere hours"], "mA*h"),
+    ("µAh", &["µAh", "uAh", "microamp hour", "microamp hours", "microampere hour", "microampere hours"], "µA*h"),
     ("bps", &["bps", "bits per second"], "bit/s"),
     ("kbps", &["kbps", "Kbps"], "kbit/s"),
     ("Mbps", &["Mbps", "mbps"], "Mbit/s"),
@@ -548,9 +566,10 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     // A capital B is bytes.
     ("", &["Bps", "bytes per second"], "B/s"),
     ("", &["kBps", "KBps"], "kB/s"),
-    ("", &["MBps"], "MB/s"),
-    ("", &["GBps"], "GB/s"),
-    ("", &["TBps"], "TB/s"),
+    ("", &["MBps", "mBps"], "MB/s"),
+    ("", &["GBps", "gBps"], "GB/s"),
+    ("", &["TBps", "tBps"], "TB/s"),
+    ("", &["kilo", "kilos"], "kg"),
     ("", &["sqm"], "m^2"),
     ("", &["sqkm"], "km^2"),
     ("", &["sqdm"], "dm^2"),
