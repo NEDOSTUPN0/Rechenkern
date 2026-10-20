@@ -752,23 +752,71 @@ impl Parser<'_> {
         ends.then_some((func, n))
     }
 
-    /// "twenty five", "seven".
+    /// "seven", "twenty five", "one hundred and twenty", "two thousand and five".
+    /// A scale word that ends the number is left to `multipliers` ("two thousand" = 2k).
     fn number_words(&mut self) -> Option<Number> {
-        let first = words::number_word(&self.lower(self.pos)?)?;
-        self.pos += 1;
-        let mut total = first;
-        // "twenty five", "twenty-five"
-        let hyphen = self.cur().is_some_and(|t| t.is_sym("-") && !t.space_before)
-            && self.toks.get(self.pos + 1).is_some_and(|t| !t.space_before);
-        let at = self.pos + usize::from(hyphen);
+        let (mut group, mut at) = self.hundreds_at(self.pos)?;
+        let mut total = 0;
+        loop {
+            let scale = match self.lower(at).as_deref() {
+                Some("thousand") => 1_000,
+                Some("million") => 1_000_000,
+                Some("billion") => 1_000_000_000,
+                Some("trillion") => 1_000_000_000_000,
+                _ => break,
+            };
+            let Some((next, end)) = self.number_word_after_and(at + 1) else {
+                // "three million two hundred thousand"; a scale ending the number alone stays.
+                if total > 0 {
+                    total += group * scale;
+                    group = 0;
+                    at += 1;
+                }
+                break;
+            };
+            total += group * scale;
+            group = next;
+            at = end;
+        }
+        self.pos = at;
+        Some(Number::from_i64(total + group))
+    }
+
+    /// A number below a thousand in words at token `i`: "seven", "twenty-five",
+    /// "one hundred and twenty". Returns it and the token after it.
+    fn hundreds_at(&self, i: usize) -> Option<(i64, usize)> {
+        let (mut n, mut at) = self.tens_at(i)?;
+        if n < 10 && self.words_at(at, &["hundred"]) {
+            n *= 100;
+            at += 1;
+            if let Some((rest, end)) = self.number_word_after_and(at).filter(|(rest, _)| *rest < 100) {
+                n += rest;
+                at = end;
+            }
+        }
+        Some((n, at))
+    }
+
+    /// "and five" or "five" at token `i`, as a number below a thousand.
+    fn number_word_after_and(&self, i: usize) -> Option<(i64, usize)> {
+        let i = if self.words_at(i, &["and"]) { i + 1 } else { i };
+        self.hundreds_at(i)
+    }
+
+    /// "seven", "twenty five", "twenty-five" at token `i`.
+    fn tens_at(&self, i: usize) -> Option<(i64, usize)> {
+        let first = words::number_word(&self.lower(i)?)?;
+        let next = i + 1;
+        let hyphen = self.toks.get(next).is_some_and(|t| t.is_sym("-") && !t.space_before)
+            && self.toks.get(next + 1).is_some_and(|t| !t.space_before);
+        let at = next + usize::from(hyphen);
         if first >= 20
             && first % 10 == 0
             && let Some(ones) = self.lower(at).and_then(|w| words::number_word(&w)).filter(|n| (1..10).contains(n))
         {
-            total += ones;
-            self.pos = at + 1;
+            return Some((first + ones, at + 1));
         }
-        Some(Number::from_i64(total))
+        Some((first, next))
     }
 
     fn bare_unit(&mut self, unit: Unit, n: usize) -> Result<Expr> {
