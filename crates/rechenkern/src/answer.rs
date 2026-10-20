@@ -632,6 +632,8 @@ fn format_caption(format: Format) -> Option<String> {
         Format::Timespan => "Timespan",
         Format::Laptime => "Laptime",
         Format::Hms => "Hours, Minutes and Seconds",
+        Format::Clock(true) => "24-Hour Clock",
+        Format::Clock(false) => "12-Hour Clock",
         Format::WeekOfMonth => "Week of Month",
         Format::Timestamp => "Unix Timestamp",
         Format::Date => "Date",

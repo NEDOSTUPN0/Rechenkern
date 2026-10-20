@@ -13,13 +13,14 @@ impl Parser<'_> {
     /// One conversion step after `expr`, or `None` if there is none.
     pub(super) fn conversion(&mut self, expr: &Expr) -> Result<Option<Expr>> {
         let start = self.pos;
-        // "2 hours to 1.5x": played at that speed.
+        // "2 hours to 1.5x", "2 hours to 1.5x speed": played at that speed.
         if self.cur().is_some_and(|t| t.is_word("to"))
             && let Some(Tok::Num(speed)) = self.toks.get(self.pos + 1).map(|t| &t.tok)
             && self.toks.get(self.pos + 2).is_some_and(|t| t.word() == Some("x") && !t.space_before)
-            && self.toks.len() == self.pos + 3
+            && let speed_word = usize::from(self.toks.get(self.pos + 3).is_some_and(|t| t.is_word("speed")))
+            && self.toks.len() == self.pos + 3 + speed_word
         {
-            self.pos += 3;
+            self.pos += 3 + speed_word;
             return Ok(Some(Expr::binary(Op::At, expr.clone(), Expr::Number(*speed))));
         }
         if self.converter_allowed(Converter::Rounding) && self.eat_rounding_word() {
@@ -74,6 +75,13 @@ impl Parser<'_> {
             return Ok(None);
         }
         self.pos += 1;
+        // "3pm in 24 hour", "15:45 to 12-hour time": the clock it is shown on; "in 24 hours" moves it.
+        if is_moment(expr)
+            && let Some((h24, n)) = self.clock_style_at(self.pos)
+        {
+            self.pos += n;
+            return Ok(Some(Parser::formatted(expr.clone(), Format::Clock(h24))));
+        }
         // "today as yyyy-MM-dd", "now as HH:mm": the rest of the line is the template.
         if is_moment(expr)
             && let Some(first) = self.toks.get(self.pos)
@@ -650,6 +658,7 @@ fn converter(target: &Target) -> Converter {
             Format::Pitch | Format::Midi => Converter::Pitch,
             Format::Dms => Converter::Dms,
             Format::Megapixels | Format::Frames => Converter::Number,
+            Format::Clock(_) => Converter::Date,
         },
     }
 }
@@ -664,6 +673,33 @@ fn is_date_pattern(text: &str) -> bool {
     let separated = text.chars().any(|c| " -/:.,".contains(c));
     let repeated = text.chars().all(|c| text.starts_with(c));
     marked && text.chars().all(allowed) && (separated || repeated)
+}
+
+impl Parser<'_> {
+    /// "24 hour", "24-hour time", "12h clock", "military time" at token `i`: whether the clock
+    /// has 24 hours, and the length in tokens.
+    fn clock_style_at(&self, i: usize) -> Option<(bool, usize)> {
+        if self.words_at(i, &["military", "time"]) {
+            return Some((true, 2));
+        }
+        let Tok::Num(hours) = self.toks.get(i)?.tok else { return None };
+        let h24 = match hours.to_i64()? {
+            24 => true,
+            12 => false,
+            _ => return None,
+        };
+        let hyphen = usize::from(self.toks.get(i + 1).is_some_and(|t| t.is_sym("-")));
+        let word = self.lower(i + 1 + hyphen)?;
+        if !matches!(word.as_str(), "hour" | "h" | "hr") {
+            return None;
+        }
+        let mut n = 2 + hyphen;
+        if self.lower(i + n).is_some_and(|w| matches!(w.as_str(), "time" | "clock" | "format")) {
+            n += 1;
+        }
+        // Nothing else follows: "in 24 hour increments" is something else.
+        (i + n == self.toks.len()).then_some((h24, n))
+    }
 }
 
 fn is_moment(expr: &Expr) -> bool {

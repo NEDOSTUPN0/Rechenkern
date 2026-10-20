@@ -562,6 +562,8 @@ pub enum Format {
     Megapixels,
     /// Frames of a timecode.
     Frames,
+    /// A time of day on a 24-hour (true) or 12-hour clock: `3pm in 24 hour`.
+    Clock(bool),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

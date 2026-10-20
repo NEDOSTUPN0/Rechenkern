@@ -233,6 +233,7 @@ impl<'a> Parser<'a> {
             || self.weather_at(i).is_some()
             || self.distance_at(i).is_some()
             || self.coordinates_at(i).is_some()
+            || self.geo_of_number_at(i).is_some()
             || self.note_at(i).is_some()
             || self.place_sky_at(i).is_some()
             || self.density_at(i).is_some()

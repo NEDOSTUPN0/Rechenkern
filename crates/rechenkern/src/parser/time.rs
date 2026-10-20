@@ -774,13 +774,33 @@ impl Parser<'_> {
                 // what is left is always of this one: "days left in month".
                 let the = usize::from(self.words_at(at, &["the"]));
                 let named = the == 1 || left || self.lower(at).is_some_and(|w| words::which(&w).is_some());
-                let period = if named { self.named_period_at(at + the) } else { self.period_at(at) };
-                let Some((first, span, n)) = period.filter(|_| !left || self.words_at(at - 1, &["in"])) else {
+                let mut period = if named { self.named_period_at(at + the) } else { self.period_at(at) };
+                // "days in March 5, 2025": a day, not its month.
+                if let Some((_, _, n)) = &period
+                    && self.date_starts(at + the)
+                {
+                    let mut p = self.clone();
+                    p.pos = at + the + n;
+                    if !p.value_ends() {
+                        p.pos = at + the;
+                        let day = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("d"));
+                        period = p.additive().ok().map(|date| (date, day, p.pos - at - the));
+                    }
+                }
+                let Some((mut first, span, n)) = period.filter(|_| !left || self.words_at(at - 1, &["in"])) else {
                     return Ok(None);
                 };
                 let n = n + the;
                 self.pos = at + n;
-                let end = Expr::binary(Op::Add, first.clone(), span);
+                let mut end = Expr::binary(Op::Add, first.clone(), span.clone());
+                // "days left in Q3" after Q3: what is left of the next one, as "days until Q3" counts to it.
+                if left && matches!(first, Expr::Time(TimeExpr::Date { year: None, .. })) {
+                    let year = Expr::WithUnit(Expr::Number(Number::ONE).boxed(), registry().get("yr"));
+                    let over = Expr::binary(Op::Le, end.clone(), start()).boxed();
+                    let next = Expr::binary(Op::Add, first.clone(), year);
+                    first = Expr::If { cond: over, then: Some(next.boxed()), otherwise: Some(first.boxed()) };
+                    end = Expr::binary(Op::Add, first.clone(), span);
+                }
                 if left {
                     // What is left starts now, or when the period does; a past period has none.
                     let from = Expr::Call(Func::Max, vec![start(), first]);

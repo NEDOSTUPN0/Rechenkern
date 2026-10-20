@@ -196,6 +196,9 @@ impl<'a> Parser<'a> {
     /// "true if income > expenses", "false unless expenses > income".
     fn value(&mut self) -> Result<Expr> {
         let end = self.toks.len();
+        if let Some(ternary) = self.ternary()? {
+            return Ok(ternary);
+        }
         for (word, negate) in [("if", false), ("unless", true)] {
             let Some(at) = self.find(1, &[word]) else { continue };
             let otherwise = self.find(at + 1, &["else"]);
@@ -223,6 +226,21 @@ impl<'a> Parser<'a> {
                 false => Err(e),
             }),
         }
+    }
+
+    /// "5 > 3 ? 1 : 0": a condition, then the value if it holds and the one if it doesn't.
+    fn ternary(&self) -> Result<Option<Expr>> {
+        let gap_has = |k: usize, c: char| k > 0 && self.src[self.toks[k - 1].end..self.toks[k].start].contains(c);
+        let end = self.toks.len();
+        let Some(question) = (1..end).find(|&k| gap_has(k, '?')) else { return Ok(None) };
+        let Some(colon) = (question + 1..end).find(|&k| gap_has(k, ':')) else { return Ok(None) };
+        let Ok(cond) = self.part(0, question) else { return Ok(None) };
+        if !is_boolean(&cond) {
+            return Ok(None);
+        }
+        let then = Some(self.part(question, colon)?.boxed());
+        let otherwise = Some(self.part(colon, end)?.boxed());
+        Ok(Some(Expr::If { cond: cond.boxed(), then, otherwise }))
     }
 
     /// Numbers in text: the last of the values that matter most, as in

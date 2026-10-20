@@ -3,6 +3,7 @@
 use super::Parser;
 use crate::ast::Expr;
 use crate::error::Result;
+use crate::lexer::Tok;
 use crate::number::Number;
 use crate::units::registry;
 use crate::zones;
@@ -94,8 +95,54 @@ impl Parser<'_> {
         Some((what, (i, i + n), n + 1))
     }
 
+    /// "latitude of 35.6762° N": a coordinates word before written coordinates at token `i`.
+    pub(super) fn geo_of_number_at(&self, i: usize) -> Option<Geo> {
+        let w = self.lower(i)?;
+        let &(_, what) = GEO_WORDS.iter().find(|(g, _)| *g == w)?;
+        let number = matches!(self.toks.get(i + 2).map(|t| &t.tok), Some(Tok::Num(_)));
+        (self.words_at(i + 1, &["of"]) && number).then_some(what)
+    }
+
+    /// "35.6762° N, 139.6503° E" after the latitude's angle: coordinates written out.
+    pub(super) fn coordinates_literal(&mut self, latitude: &Expr) -> Option<Expr> {
+        let hemisphere = |p: &Self, signs: [&str; 2]| {
+            let w = p.cur()?.word()?;
+            [(signs[0], 1.0), (signs[1], -1.0)].into_iter().find(|(s, _)| w.eq_ignore_ascii_case(s)).map(|(_, v)| v)
+        };
+        let latitude = angle_degrees(latitude)? * hemisphere(self, ["N", "S"])?;
+        let mut p = self.clone();
+        p.pos += 1;
+        p.eat_sym(",");
+        let Some(Tok::Num(n)) = p.cur().map(|t| &t.tok) else { return None };
+        p.pos += 1;
+        let longitude = p.quantity(Expr::Number(*n)).ok()?;
+        let longitude = angle_degrees(&longitude)? * hemisphere(&p, ["E", "W"])?;
+        if latitude.abs() > 90.0 || longitude.abs() > 180.0 {
+            return None;
+        }
+        *self = p;
+        self.pos += 1;
+        Some(Expr::Coordinates(latitude, longitude))
+    }
+
     /// The coordinates, latitude or longitude of a place at the cursor.
     pub(super) fn coordinates(&mut self) -> Result<Option<Expr>> {
+        // "latitude of 35.6762° N, 139.6503° E"
+        if let Some(what) = self.geo_of_number_at(self.pos)
+            && let Some(Tok::Num(n)) = self.toks.get(self.pos + 2).map(|t| &t.tok)
+        {
+            let mut p = self.clone();
+            p.pos += 3;
+            if let Ok(Expr::Coordinates(latitude, longitude)) = p.quantity(Expr::Number(*n)) {
+                *self = p;
+                let degrees = |d: f64| Expr::WithUnit(Expr::Number(Number::from_f64(d)).boxed(), registry().get("°"));
+                return Ok(Some(match what {
+                    Geo::Coordinates => Expr::Coordinates(latitude, longitude),
+                    Geo::Latitude => degrees(latitude),
+                    Geo::Longitude => degrees(longitude),
+                }));
+            }
+        }
         let Some((what, (from, to), n)) = self.coordinates_at(self.pos) else { return Ok(None) };
         let (location, _) = self.location_at(from).expect("coordinates_at found a place");
         let place = self.located(location, from, to)?;
@@ -106,5 +153,18 @@ impl Parser<'_> {
             Geo::Latitude => degrees(place.latitude),
             Geo::Longitude => degrees(place.longitude),
         }))
+    }
+}
+
+/// An angle written as an amount, in degrees: "35.6762°", "35° 40′ 34″".
+fn angle_degrees(expr: &Expr) -> Option<f64> {
+    match expr {
+        Expr::WithUnit(n, unit) if unit.dim() == crate::units::Dim::ANGLE => {
+            let Expr::Number(n) = **n else { return None };
+            let def = unit.single()?;
+            Some(n.to_f64() * def.scale.to_f64() / registry().get("°").single()?.scale.to_f64())
+        }
+        Expr::Composite(parts) => parts.iter().map(angle_degrees).sum(),
+        _ => None,
     }
 }

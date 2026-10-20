@@ -35,7 +35,10 @@ pub(crate) fn render(value: &Value, display: &Display, config: &Config, now: &No
     match value {
         Value::Quantity(q) => quantity(q, display, config),
         Value::Percent(p) => format!("{}%", number(*p, config)),
-        Value::Moment(m) => moment(m, config, now.get()),
+        Value::Moment(m) => match display {
+            Display::Clock(h24) => moment(m, &Config { clock_24h: *h24, ..config.clone() }, now.get()),
+            _ => moment(m, config, now.get()),
+        },
         Value::Duration(d) if matches!(display, Display::Hms) => hms(d),
         Value::Duration(d) => duration(d, config),
         Value::Bool(b) => b.to_string(),
@@ -399,6 +402,7 @@ fn quantity(q: &Quantity, display: &Display, config: &Config) -> String {
         }
         Display::Auto
         | Display::Hms
+        | Display::Clock(_)
         | Display::Note(_)
         | Display::Period
         | Display::Dms

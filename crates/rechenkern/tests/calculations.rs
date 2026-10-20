@@ -1060,7 +1060,6 @@ fn dates() {
         ("days left in the week", "5 days"),
         ("hours left in the day", "9.5 hours"),
         ("days in a month", "30.436875 days"),
-        ("days left in March", "0 days"),
         ("weeks remaining in 2027", "52.14285714 weeks"),
         ("hours in a week", "168 hours"),
         ("workdays until christmas", "67 workdays"),
@@ -1613,4 +1612,40 @@ fn second_sweep() {
         ("annual return on $500 invested $1,000 returned over 5 years", "14.8698355%"),
     ]);
     assert_eq!(sheet("monthly = $500\nmonthly * 2"), "$1,000.00");
+}
+
+#[test]
+fn second_sweep_wrong_answers() {
+    check(&[
+        ("latitude of 35.6762° N, 139.6503° E", "35.6762°"),
+        ("longitude of 35.6762° N, 139.6503° W", "-139.6503°"),
+        ("35.6762° N, 139.6503° E", "35.6762° N, 139.6503° E"),
+        ("35° 41′ 24″ N, 139° 41′ 24″ E", "35.69° N, 139.69° E"),
+        ("days in March 5, 2025", "1 day"),
+        ("hours in March 5", "24 hours"),
+        ("days left in March 5, 2025", "0 days"),
+        ("time saved 3 weeks to 1.5x", "1 week"),
+        ("time saved at 3 weeks at 1.5x", "1 week"),
+        ("3 weeks to 1.5x speed", "2 weeks"),
+        ("clamp 20 5 25", "20"),
+        ("clamp 2 5 25", "5"),
+        ("5 > 3 ? 1 : 0", "1"),
+        ("5 < 3 ? $1 : $2", "$2.00"),
+        ("1st", "1"),
+        ("21st", "21"),
+        ("1 st in kg", "6.35029318 kg"),
+        ("Russian Good Friday", "Fri, 30 Apr 2027"),
+        ("3:45 in 24 hour", "03:45"),
+        ("15:45 in 12 hour", "3:45 pm"),
+        ("3pm in 24h", "15:00"),
+        ("3pm to 24-hour time", "15:00"),
+        ("3pm in military time", "15:00"),
+        ("3pm in 24 hours", "Thu, 24 Sep 2026 15:00"),
+        ("days left in Q2", "91 days"),
+        ("days left in March", "31 days"),
+        ("days left in Q3", "8 days"),
+    ]);
+    assert_eq!(sheet("10\n20\nsum of above"), "30");
+    assert_eq!(sheet("10\n20\ntotal of the above\n30\nsubtotal"), "30");
+    assert_eq!(sheet("10\n20\naverage above"), "15");
 }

@@ -598,13 +598,14 @@ impl Parser<'_> {
         Ok(Some(Expr::IncomeTax { income: income.boxed(), country, part }))
     }
 
-    /// "time saved for 1 hour 30 minutes at 1.5x": the time minus the time at that speed.
+    /// "time saved for 1 hour 30 minutes at 1.5x" (or "to 1.5x"): the time minus the time at that speed.
     fn time_saved(&self) -> Result<Option<Expr>> {
         if !self.matches_at(0, &["time", "saved"]) {
             return Ok(None);
         }
-        let start = 2 + usize::from(self.matches_at(2, &["for"]) || self.matches_at(2, &["on"]));
-        let Some(at) = self.find(start + 1, &["at"]) else { return Ok(None) };
+        let start = 2 + usize::from(["for", "on", "at"].iter().any(|w| self.matches_at(2, &[w])));
+        // "time saved 3 weeks to 1.5x" plays it at that speed too.
+        let Some(at) = self.find(start + 1, &["at"]).or_else(|| self.find(start + 1, &["to"])) else { return Ok(None) };
         let time = self.part(start, at)?;
         let speed = self.part(at + 1, self.toks.len())?;
         let faster = Expr::binary(Op::At, time.clone(), speed);

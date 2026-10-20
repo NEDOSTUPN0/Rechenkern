@@ -57,6 +57,8 @@ pub enum Display {
     Hms,
     /// A count of video frames: "240 frames".
     Frames,
+    /// A time of day on a 24-hour (true) or 12-hour clock.
+    Clock(bool),
 }
 
 /// What kind of line an earlier line was, for totals.
@@ -890,6 +892,10 @@ impl Env<'_> {
                     (Value::Percent(q.number * Number::from_i64(100)), Display::Auto)
                 }
                 v => bail!("can't show {} as a percentage", v.kind()),
+            },
+            Format::Clock(h24) => match value {
+                Value::Moment(_) => (value, Display::Clock(h24)),
+                v => bail!("{} is not a time of day", v.kind()),
             },
             Format::Hms => {
                 let seconds = match &value {

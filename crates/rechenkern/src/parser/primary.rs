@@ -110,6 +110,13 @@ impl Parser<'_> {
         if let Some(root) = self.root_of_degree(value)? {
             return Ok(root);
         }
+        // "1st", "21st": an ordinal, not stones.
+        if self.cur().is_some_and(|t| t.word() == Some("st") && !t.space_before)
+            && value.to_i64().is_some_and(|v| value.is_integer() && v % 10 == 1 && v % 100 != 11)
+        {
+            self.pos += 1;
+            return Ok(Expr::Number(value));
+        }
         // "1.5x" is a plain multiplier.
         if self.cur().is_some_and(|t| t.word() == Some("x") && !t.space_before) && !self.operand_follows(1) {
             self.pos += 1;
@@ -174,7 +181,7 @@ impl Parser<'_> {
     }
 
     /// Attaches a unit after a value, then further parts: `5 ft 3 in`.
-    fn quantity(&mut self, value: Expr) -> Result<Expr> {
+    pub(super) fn quantity(&mut self, value: Expr) -> Result<Expr> {
         let start = self.pos;
         let Some(unit) = self.number_unit() else { return Ok(value) };
         let mut last = unit.clone();
@@ -195,7 +202,13 @@ impl Parser<'_> {
         {
             self.pos += 1 + n;
         }
-        Ok(if parts.len() == 1 { parts.pop().unwrap() } else { Expr::Composite(parts) })
+        let amount = if parts.len() == 1 { parts.pop().unwrap() } else { Expr::Composite(parts) };
+        if last.dim() == Dim::ANGLE
+            && let Some(coordinates) = self.coordinates_literal(&amount)
+        {
+            return Ok(coordinates);
+        }
+        Ok(amount)
     }
 
     /// "at 30 fps" after a timecode: its frame rate.
@@ -713,6 +726,16 @@ impl Parser<'_> {
     /// `prev`, `line 3`, `sum`, `average`.
     fn line_ref(&mut self) -> Result<Option<Expr>> {
         let w = self.lower(self.pos).unwrap_or_default();
+        // "sum of above", "total of the above", "average above": the lines above, as "sum" alone.
+        if matches!(w.as_str(), "sum" | "total" | "subtotal" | "average" | "avg" | "mean") {
+            let mut at = self.pos + 1 + usize::from(self.words_at(self.pos + 1, &["of"]));
+            at += usize::from(self.words_at(at, &["the"]));
+            if self.words_at(at, &["above"]) && self.toks.get(at + 1).is_none_or(|t| !t.is_word("line")) {
+                self.pos = at + 1;
+                let average = matches!(w.as_str(), "average" | "avg" | "mean");
+                return Ok(Some(Expr::Line(if average { LineRef::Average } else { LineRef::Sum })));
+            }
+        }
         // "sum of 1, 2", "average(1, 2)", "average 36, 42", "average between 10 and 20" are functions.
         let followed_by_args =
             self.toks.get(self.pos + 1).is_some_and(|t| t.is_word("of") || t.is_word("between") || t.is_sym("("))
@@ -947,7 +970,7 @@ impl Parser<'_> {
         if func == Func::Log && self.eat_word("base") {
             args.push(self.unary()?);
         }
-        // "clamp 26 between 5 and 25", "clamp 4 from 5 to 25"
+        // "clamp 26 between 5 and 25", "clamp 4 from 5 to 25", "clamp 20 5 25"
         if func == Func::Clamp && args.len() == 1 {
             if self.eat_word("between") {
                 args.extend(self.list()?);
@@ -955,6 +978,9 @@ impl Parser<'_> {
                 args.push(self.bit_or()?);
                 self.eat_word("to");
                 args.push(self.bit_or()?);
+            } else if self.operand_follows(0) {
+                args.push(self.unary()?);
+                args.push(self.unary()?);
             }
         }
         Ok(Some(Expr::Call(func, args)))
