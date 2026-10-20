@@ -1839,6 +1839,9 @@ fn third_sweep() {
         ("this quarters", "1 Jul – 30 Sep 2026"),
         ("10% from 200", "20"),
         ("5% apples from 100", "5"),
+        ("days from March 5, 2025 to March 5, 2025", "0 days"),
+        ("days from 2020 to 2025", "1,827 days"),
+        ("3 FORCEPOUND IN N", "13.34466485 N"),
     ]);
     // A tag takes the tagged lines of the whole sheet, across blocks and other totals.
     let blocks = "lunch $10 #food\ntaxi $5 #travel\nsum\n\ndinner $20 #food\n---\nsnack $3 #food\n";

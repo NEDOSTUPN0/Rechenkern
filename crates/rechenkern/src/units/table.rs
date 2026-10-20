@@ -935,7 +935,8 @@ pub(super) fn build() -> Registry {
 
     for &(text, target) in EXTRA {
         let unit = b.exact[target].clone();
-        b.exact.entry(text.into()).or_insert(unit);
+        // Lowercase spellings match in any case: "FORCEPOUND".
+        b.spelling(text, &unit);
     }
 
     let mut compound_symbols = Vec::new();

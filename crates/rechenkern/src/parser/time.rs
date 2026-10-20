@@ -798,8 +798,17 @@ impl Parser<'_> {
                 let [a, b] = self.pair()?;
                 Expr::SignedRange(a.boxed(), b.boxed())
             }
-            "from" if self.date_starts(self.pos + 1) => {
+            // "days from 2020 to 2025": years count from their first day.
+            "from" if self.date_starts(self.pos + 1) || self.year_range_at(self.pos + 1) => {
                 self.pos += 1;
+                if self.year_range_at(self.pos) {
+                    let a = self.date_or_period(false)?;
+                    self.range_word(&["to", "until", "till"]);
+                    return Ok(Some(Expr::Convert(
+                        Expr::SignedRange(a.boxed(), self.date_or_period(true)?.boxed()).boxed(),
+                        Target::Unit(unit.clone()),
+                    )));
+                }
                 let a = self.additive()?;
                 match self.range_word(&["to", "until", "till"]) {
                     Some(through) => Expr::SignedRange(a.boxed(), self.range_end(through)?.boxed()),
@@ -875,6 +884,13 @@ impl Parser<'_> {
             }
         }
         self.additive()
+    }
+
+    /// Two years at token `i`: "2020 to 2025".
+    fn year_range_at(&self, i: usize) -> bool {
+        let year = |k: usize| matches!(self.toks.get(k).map(|t| &t.tok), Some(Tok::Num(n)) if n.is_integer() && (1000..3000).contains(&n.to_i64().unwrap_or(0)));
+        let to = ["to", "until", "till"].iter().any(|w| self.words_at(i + 1, &[w]));
+        year(i) && to && year(i + 2) && i + 3 == self.toks.len()
     }
 
     /// A date, then a word that ends a range, from token `i`: "March 3 to May 30".

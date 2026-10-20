@@ -10,6 +10,16 @@ use crate::parser::words;
 impl Parser<'_> {
     /// A whole-line inflation phrase, or `None`.
     pub(super) fn inflation(&mut self) -> Result<Option<Expr>> {
+        let found = self.inflation_phrase()?;
+        // "days from March 5, 2025 to today" counts days: only an amount inflates.
+        let amount = |e: &Expr| match e {
+            Expr::Inflation { amount, .. } => !matches!(**amount, Expr::BareUnit(_)),
+            _ => true,
+        };
+        Ok(found.filter(amount))
+    }
+
+    fn inflation_phrase(&mut self) -> Result<Option<Expr>> {
         // Every phrase names a year after "in" or "from".
         let Some(at) = (1..self.toks.len()).find(|&i| self.year_at(i).is_some() && self.words_before_year(i)) else {
             return Ok(None);
@@ -80,6 +90,9 @@ impl Parser<'_> {
             }
             if self.matches_at(to, &["in"]) || self.matches_at(to, &["to"]) {
                 to += 1;
+            }
+            if from == lead {
+                return Ok(None);
             }
             let amount = || self.part(lead, from).map(Box::new);
             // "what was $100 from 2000 worth": worth today.
