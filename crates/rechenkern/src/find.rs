@@ -135,7 +135,7 @@ impl Calculator {
         let env = self.env(&self.names, &self.lines);
         for (range, expr) in self.values_in(text) {
             let Ok((value, end)) = (match &expr {
-                Expr::Range(a, b) => env.range_ends(a, b).map(|(a, b)| (a, Some(b))),
+                Expr::Range(a, b) | Expr::SignedRange(a, b) => env.range_ends(a, b).map(|(a, b)| (a, Some(b))),
                 Expr::Period(..) => env.eval(&expr).and_then(|span| period_ends(&env, span)).map(|(a, b)| (a, Some(b))),
                 _ => env.eval(&expr).map(|v| (v, None)),
             }) else {

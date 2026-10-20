@@ -425,7 +425,7 @@ impl Env<'_> {
         }
         let mut parts = Parts::default();
         let (value, display) = match expr {
-            Expr::Convert(inner, target) if !matches!(**inner, Expr::Range(..)) => {
+            Expr::Convert(inner, target) if !matches!(**inner, Expr::Range(..) | Expr::SignedRange(..)) => {
                 let saved = self.food_as.replace(weight_or_volume(target));
                 let source = self.answer(inner);
                 self.food_as.set(saved);
@@ -437,11 +437,11 @@ impl Env<'_> {
                 }
                 self.convert(from, target, display)?
             }
-            _ if let Some((a, b)) = interval(expr) => {
+            _ if let Some((a, b, signed)) = interval(expr) => {
                 let (a, b) = self.range_ends(a, b)?;
                 parts.source = Some((a.clone(), Display::Auto));
                 parts.end = Some(b.clone());
-                let span = self.range(a, b)?;
+                let span = if signed { self.signed_range(a, b)? } else { self.range(a, b)? };
                 match expr {
                     Expr::Convert(_, target) => self.convert(span, target, Display::Auto)?,
                     _ => (span, Display::Auto),
@@ -507,11 +507,12 @@ fn form(expr: &Expr, value: &Value) -> Form {
 
 /// The ends of a range of dates or times, also inside a conversion: `days until christmas`,
 /// `Jan 1 - Mar 1`.
-fn interval(expr: &Expr) -> Option<(&Expr, &Expr)> {
+fn interval(expr: &Expr) -> Option<(&Expr, &Expr, bool)> {
     match expr {
         Expr::Convert(inner, _) => interval(inner),
-        Expr::Range(a, b) if is_moment(a) && is_moment(b) => Some((a, b)),
-        Expr::Binary(Op::Sub, a, b) if time::yearless(a) && time::yearless(b) => Some((a, b)),
+        Expr::Range(a, b) if is_moment(a) && is_moment(b) => Some((a, b, false)),
+        Expr::SignedRange(a, b) if is_moment(a) && is_moment(b) => Some((a, b, true)),
+        Expr::Binary(Op::Sub, a, b) if time::yearless(a) && time::yearless(b) => Some((a, b, false)),
         _ => None,
     }
 }

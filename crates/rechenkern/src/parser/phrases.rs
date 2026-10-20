@@ -317,10 +317,12 @@ impl Parser<'_> {
             compounds,
             result,
         };
-        // "monthly repayment": the whole loan spread over its time.
+        // "monthly repayment": the whole loan spread over its time, all of it in a loan shorter
+        // than a month.
         Ok(Some(match every {
             Some((n, unit)) => {
                 let every = Expr::WithUnit(Expr::Number(Number::from_i64(n)).boxed(), registry().get(unit));
+                let time = Expr::Call(Func::Max, vec![time, every.clone()]);
                 Expr::binary(Op::Mul, Expr::binary(Op::Div, growth, time), every)
             }
             None => growth,
@@ -384,6 +386,7 @@ impl Parser<'_> {
             let every = period(rate.period.unwrap_or((Number::ONE, registry().get("yr"))));
             let factor = Expr::binary(Op::Add, Expr::Number(Number::ONE), rate.rate);
             let steps = Expr::Call(Func::Log, vec![Expr::binary(Op::Div, b, a), factor]);
+            let steps = Expr::Call(Func::Reach, vec![steps]);
             let time = Expr::binary(Op::Mul, steps, every);
             return Ok(Some(match unit {
                 Some(unit) => Expr::Convert(time.boxed(), Target::Unit(unit)),
@@ -405,11 +408,13 @@ impl Parser<'_> {
             (None, Some((_, unit))) => Some(Target::Units(parts(unit))),
             (None, None) => None,
         };
+        // Plain numbers are money at a money rate: "time from 20 to 30 at $50/hour".
+        let op = if rate.rate.edge_unit(true).is_some_and(Unit::is_money) { Op::At } else { Op::Div };
         let rate = match rate.period {
             Some(p) => Expr::binary(Op::Per, rate.rate, period(p)),
             None => rate.rate,
         };
-        let time = Expr::binary(Op::Div, Expr::binary(Op::Sub, b, a), rate);
+        let time = Expr::Call(Func::Reach, vec![Expr::binary(op, Expr::binary(Op::Sub, b, a), rate)]);
         Ok(Some(match target {
             Some(target) => Expr::Convert(time.boxed(), target),
             None => time,
@@ -529,18 +534,29 @@ impl Parser<'_> {
     /// "ppi of 5.5 inch at 1920x1080", "density of 27 inch at 2560x1440": the pixels per inch of a screen.
     fn screen_density(&self) -> Result<Option<Expr>> {
         let words = [&["ppi"][..], &["dpi"], &["density"], &["pixel", "density"], &["pixels", "per", "inch"]];
-        let Some(n) = words.iter().find(|w| self.matches_at(0, w)).map(|w| w.len()) else { return Ok(None) };
-        let start = n + usize::from(self.matches_at(n, &["of"]));
+        // "5.5 inch screen at 1920x1080 ppi": the word may come last.
+        let last = usize::from(self.ends_with(&["ppi"]) || self.ends_with(&["dpi"]));
+        let lead = match words.iter().find(|w| self.matches_at(0, w)) {
+            Some(w) => w.len(),
+            None if last == 1 => 0,
+            None => return Ok(None),
+        };
+        let start = lead + usize::from(self.matches_at(lead, &["of"]));
         let resolution = (start + 1..self.toks.len()).find_map(|i| Some((i, self.resolution_at(i)?)));
         let Some((at, (width, height, n))) = resolution else {
             return Ok(None);
         };
-        if at + n != self.toks.len() {
+        if at + n + last != self.toks.len() {
             return Ok(None);
         }
         let end = at - usize::from(self.matches_at(at - 1, &["at"]));
         let reg = registry();
-        let inches = Expr::Convert(self.part(start, end)?.boxed(), Target::Unit(reg.get("in")));
+        let screen = match self.part(start, end) {
+            Ok(screen) => screen,
+            Err(_) if lead == 0 => return Ok(None),
+            Err(e) => return Err(e),
+        };
+        let inches = Expr::Convert(screen.boxed(), Target::Unit(reg.get("in")));
         let pixels = Expr::Call(Func::Sqrt, vec![Expr::Number(width * width + height * height)]);
         let density = Expr::binary(Op::Div, pixels, Self::formatted(inches, Format::Number));
         Ok(Some(Expr::WithUnit(density.boxed(), reg.get("ppi"))))

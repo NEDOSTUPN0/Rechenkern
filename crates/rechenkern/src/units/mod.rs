@@ -203,6 +203,7 @@ const DERIVED: &[(Dim, &str)] = &[
     (Dim::MAGNETIC_FLUX, "Wb"),
     (Dim::FLUX_DENSITY, "tesla"),
     (Dim::INDUCTANCE, "henry"),
+    (Dim::ILLUMINANCE, "lx"),
 ];
 
 /// All known units and their spellings.

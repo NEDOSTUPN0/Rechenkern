@@ -177,6 +177,11 @@ impl Env<'_> {
                 )
             }
             Fact => factorial(x.clone()),
+            Reach => match x {
+                Value::Quantity(q) if q.number.is_negative() => bail!("it never gets there at that rate"),
+                Value::Duration(d) if d.span.is_negative() => bail!("it never gets there at that rate"),
+                v => Ok(v.clone()),
+            },
             Sin | Cos | Tan | SinD | CosD | TanD | Cot | Csc | CotD | CscD => {
                 let degrees = matches!(func, SinD | CosD | TanD | CotD | CscD);
                 let rad = self.radians(x, degrees)?;

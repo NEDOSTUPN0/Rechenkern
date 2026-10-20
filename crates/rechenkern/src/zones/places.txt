@@ -386,6 +386,7 @@ british columbia = America/Vancouver
 manitoba = America/Winnipeg
 new brunswick = America/Moncton
 newfoundland = America/St_Johns
+newfoundland and labrador = America/St_Johns
 northwest territories = America/Edmonton
 nova scotia = America/Halifax
 nunavut = America/Iqaluit
@@ -612,6 +613,8 @@ zanzibar = Africa/Dar_es_Salaam
 zermatt = Europe/Zurich 46.02 7.75
 
 # Airports
+# Doncaster Sheffield, closed in 2022 (not in OurAirports' list): only in capitals.
+DSA = Europe/London 53.52 -1.13
 akl = Pacific/Auckland -36.85 174.76
 ala = Asia/Almaty 43.25 76.91
 ams = Europe/Amsterdam 52.37 4.89

@@ -348,7 +348,9 @@ impl Lexer<'_> {
                 }
             } else if matches!(c, '\'' | '′' | '’') {
                 self.i += 1;
-                if self.after_number() || (c == '′' && self.after_number_spaced()) {
+                // "3 '" is feet too, when no word is glued after it.
+                let alone = c == '\'' && self.peek(0).is_none_or(char::is_whitespace);
+                if self.after_number() || ((c == '′' || alone) && self.after_number_spaced()) {
                     self.push(Tok::Sym(if c == '′' { "′" } else { "'" }), start);
                 }
             } else if let Some(&(text, sym)) =
@@ -421,6 +423,21 @@ impl Lexer<'_> {
                 self.i += 1;
             }
             word = format!("{}m", word.to_lowercase());
+        }
+        // "S/.3", "S/ 3": the Peruvian sol, but not "m/S".
+        let before = start.checked_sub(1).and_then(|k| self.chars.get(k)).map(|&(_, c)| c);
+        if word == "S"
+            && self.peek(0) == Some('/')
+            && before != Some('/')
+            && (self.peek(1) == Some('.') || self.peek(1).is_some_and(|c| c.is_ascii_digit() || c == ' '))
+            && (self.peek(1) != Some(' ') || self.peek(2).is_some_and(|c| c.is_ascii_digit()))
+        {
+            self.i += 1;
+            word.push('/');
+            if self.peek(0) == Some('.') {
+                self.i += 1;
+                word.push('.');
+            }
         }
         // "US$", "C$", "R$", "CN¥"
         if let Some(sign @ ('$' | '¥')) = self.peek(0)

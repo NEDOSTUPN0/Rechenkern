@@ -420,6 +420,25 @@ impl Env<'_> {
                 false => self.div(a, b),
             };
         }
+        let reg = registry();
+        if let (Value::Quantity(x), Value::Quantity(rate)) = (&a, &b) {
+            // "300 px at 326 ppi": that many pixels are inches long.
+            if x.unit.same_as(&reg.get("px")) && rate.unit.same_as(&reg.get("ppi")) && !rate.number.is_zero() {
+                return Ok(Value::Quantity(Quantity::new(x.number / rate.number, reg.get("in"))));
+            }
+            // "20 at $50/hour": a plain number is money at a money rate, as in SoulverCore (24 minutes).
+            if x.unit.is_none() && is_money_per_time(&rate.unit) {
+                let money = Value::Quantity(Quantity::new(x.number, money_of(&rate.unit)));
+                return self.div(money, b);
+            }
+        }
+        // "01:30:00 at $50/hour": the duration's hours at the rate.
+        if let Value::Duration(_) = &a
+            && matches!(&b, Value::Quantity(q) if is_money_per_time(&q.unit))
+        {
+            let seconds = Value::Quantity(Quantity::new(self.seconds(&a)?, reg.get("s")));
+            return self.at(seconds, b);
+        }
         let product = self.mul(a.clone(), b.clone());
         let quotient = self.div(a, b);
         let factors = |v: &Result<Value>| match v {
@@ -517,4 +536,15 @@ fn time_per_time(unit: &Unit) -> Option<Unit> {
         (-1, 1) if time(a) && time(b) => Some(Unit::of(a)),
         _ => None,
     }
+}
+
+/// Money per a time: `$50/hour`.
+fn is_money_per_time(unit: &Unit) -> bool {
+    unit.dim() == Dim::MONEY.div(Dim::TIME) && unit.factors().len() == 2
+}
+
+/// The currency of a money rate.
+fn money_of(unit: &Unit) -> Unit {
+    let &(id, _) = unit.factors().iter().find(|&&(id, e)| e > 0 && Unit::of(id).is_money()).expect("a money rate");
+    Unit::of(id)
 }

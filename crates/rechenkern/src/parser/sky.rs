@@ -72,6 +72,13 @@ impl Parser<'_> {
                 self.pos += n;
                 continue;
             }
+            // "moon phase in Tokyo": the same everywhere, the place changes nothing.
+            if !what.is_local()
+                && let Some((_, _, n)) = self.sky_place_at(self.pos)
+            {
+                self.pos += n;
+                continue;
+            }
             if on.is_none()
                 && self.date_follows()
                 && let Some(date) = self.date_word()?

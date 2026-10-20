@@ -250,6 +250,11 @@ impl Parser<'_> {
             Tok::Word(w) if matches!(w.as_str(), "um" | "us") && self.micro_here() => {
                 Some(if w == "um" { "µm" } else { "µs" })
             }
+            // "3 um3": cubic micrometers.
+            Tok::Word(w) if matches!(w.as_str(), "um2" | "um3") && self.micro_here() => {
+                self.pos += 1;
+                return Some(registry().get("µm").pow(if w == "um2" { 2 } else { 3 }));
+            }
             Tok::Word(w) if w.eq_ignore_ascii_case("in") && self.inch_here() => Some("in"),
             _ => None,
         };
@@ -317,9 +322,15 @@ impl Parser<'_> {
         if power > 1 {
             self.pos += 1;
         }
-        // "sq in" is square inches.
-        let inch = power > 1 && self.toks.get(self.pos).is_some_and(|t| t.is_word("in"));
-        let found = if inch { Some((registry().get("in"), 1)) } else { self.unit_at(self.pos, after_number) };
+        // "sq in" is square inches, "cu um" cubic micrometers.
+        let after_power = |w: &str| power > 1 && self.toks.get(self.pos).is_some_and(|t| t.is_word(w));
+        let found = if after_power("in") {
+            Some((registry().get("in"), 1))
+        } else if after_power("um") {
+            Some((registry().get("µm"), 1))
+        } else {
+            self.unit_at(self.pos, after_number)
+        };
         let Some((unit, n)) = found else {
             self.pos = start;
             return None;
@@ -336,8 +347,26 @@ impl Parser<'_> {
             Some(per) if power > 1 => base.pow(power).product(&per.pow(-1)),
             _ => unit.pow(power),
         };
-        let unit = self.per_unit_power(unit, per.as_ref());
+        let mut unit = self.per_unit_power(unit, per.as_ref());
+        // "m s^-2", "kg m^2": units side by side multiply when the next has a power.
+        while after_number && let Some(next) = self.powered_unit() {
+            unit = unit.product(&next);
+        }
         Some(self.per_amount(&unit).unwrap_or(unit))
+    }
+
+    /// A unit with a power written after it, at the cursor: the `s^-2` of `m s^-2`.
+    fn powered_unit(&mut self) -> Option<Unit> {
+        let (unit, n) = self.unit_at(self.pos, true)?;
+        let mut p = self.clone();
+        p.pos += n;
+        // "kg m s^-2": a unit without one counts before another that has one.
+        let unit = match p.cur().is_some_and(|t| t.is_sym("^")) {
+            true => unit.pow(p.signed_exponent()?),
+            false => unit.product(&p.powered_unit()?),
+        };
+        *self = p;
+        Some(unit)
     }
 
     /// A power after a unit; "meters per second squared" gives it to the second.
@@ -364,13 +393,27 @@ impl Parser<'_> {
         }
     }
 
-    /// A power at the cursor, read past: `²`, `^3`, `squared`.
+    /// A positive power at the cursor, read past: `²`, `^3`, `squared`. A negative one after
+    /// the number's own unit is the amount's: `3 s^-1` = 1/(3 s), as in SoulverCore.
     fn exponent(&mut self) -> Option<i8> {
+        let mut p = self.clone();
+        let e = p.signed_exponent().filter(|&e| e > 0)?;
+        *self = p;
+        Some(e)
+    }
+
+    /// A power at the cursor, read past, also a negative one: `^-2`.
+    fn signed_exponent(&mut self) -> Option<i8> {
         let exp = match self.cur().map(|t| &t.tok) {
             Some(Tok::Sym("²")) => Some((2, 1)),
             Some(Tok::Sym("³")) => Some((3, 1)),
             Some(Tok::Sym("^")) => match self.toks.get(self.pos + 1).map(|t| &t.tok) {
                 Some(Tok::Num(e)) => e.to_i64().filter(|e| (1..=9).contains(e)).map(|e| (e as i8, 2)),
+                // "s^-2"
+                Some(Tok::Sym("-" | "−")) => match self.toks.get(self.pos + 2).map(|t| &t.tok) {
+                    Some(Tok::Num(e)) => e.to_i64().filter(|e| (1..=9).contains(e)).map(|e| (-e as i8, 3)),
+                    _ => None,
+                },
                 _ => None,
             },
             Some(Tok::Word(w)) if w.eq_ignore_ascii_case("squared") => Some((2, 1)),
@@ -960,7 +1003,11 @@ impl Parser<'_> {
         if func == Func::Root && !self.at_sym("(") {
             // "root of 16" is the square root.
             if self.eat_word("of") {
-                return Ok(Some(Expr::Call(Func::Sqrt, vec![self.unary()?])));
+                let x = self.unary()?;
+                if self.at_sym(",") {
+                    bail!("root takes one value");
+                }
+                return Ok(Some(Expr::Call(Func::Sqrt, vec![x])));
             }
             let degree = self.unary()?;
             self.eat_word("of");
@@ -973,6 +1020,7 @@ impl Parser<'_> {
             self.eat_word("of");
             return Ok(Some(Expr::Call(func, vec![self.unary()?, base])));
         }
+        let called = self.at_sym("(");
         let mut args = if self.eat_sym("(") {
             let saved = std::mem::replace(&mut self.in_list, true);
             let mut args = Vec::new();
@@ -986,7 +1034,12 @@ impl Parser<'_> {
             self.eat_sym(")");
             args
         } else if self.eat_word("of") || self.eat_word("between") {
-            self.list()?
+            let list = self.list()?;
+            // "log of 2, 8 and 4" is no logarithm.
+            if func == Func::Log && list.len() > 1 {
+                bail!("log takes one value");
+            }
+            list
         } else if func.takes_list() && self.list_follows() {
             // "average 36, 42, 19, 81"
             self.list()?
@@ -1005,7 +1058,11 @@ impl Parser<'_> {
         // "pow(2, 10)", "nthroot(27, 3)"
         match (func, args.as_slice()) {
             (Func::Pow, [base, exp]) => return Ok(Some(Expr::binary(Op::Pow, base.clone(), exp.clone()))),
+            // "root(27, 3)": the degree last, as in "nthroot"; "root 3 of 27" puts it first.
             (Func::NthRoot, [x, degree]) => return Ok(Some(Expr::Call(Func::Root, vec![degree.clone(), x.clone()]))),
+            (Func::Root, [x, degree]) if called => {
+                return Ok(Some(Expr::Call(Func::Root, vec![degree.clone(), x.clone()])));
+            }
             (Func::Pow | Func::NthRoot, _) => {
                 bail!("{} takes 2 arguments", if func == Func::Pow { "pow" } else { "nthroot" })
             }

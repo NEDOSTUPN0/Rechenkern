@@ -242,6 +242,10 @@ impl Env<'_> {
                 let (a, b) = self.range_ends(a, b)?;
                 self.range(a, b)?
             }
+            Expr::SignedRange(a, b) => {
+                let (a, b) = self.range_ends(a, b)?;
+                self.signed_range(a, b)?
+            }
             Expr::Period(first, length) => self.period(first, length)?,
             Expr::ZoneDiff(a, b) => self.zone_difference(&a.zone, &b.zone)?,
             Expr::Sky { what, place, on } => self.sky(*what, place.as_ref(), on.as_deref())?,
@@ -629,15 +633,22 @@ impl Env<'_> {
                         .take_while(|l| l.kind == LineKind::Value)
                         .count()
                     - self.lines.iter().rev().take_while(|l| l.kind == LineKind::Total).count();
+                // A tag takes its lines from the whole sheet above, as in SoulverCore: "sum #food".
+                let whole = !self.tags.is_empty();
                 // The line that ends the block counts too: it may stop being a heading.
-                self.reads.borrow_mut().lines.extend(first.saturating_sub(1)..self.lines.len());
+                let first = if whole { 0 } else { first.saturating_sub(1) };
+                self.reads.borrow_mut().lines.extend(first..self.lines.len());
                 let tagged = |l: &&Line| self.tags.is_empty() || l.tags.iter().any(|t| self.tags.contains(t));
+                let in_block = std::cell::Cell::new(true);
                 let mut block: Vec<Value> = self
                     .lines
                     .iter()
                     .rev()
                     .skip_while(|l| l.kind == LineKind::Total)
-                    .take_while(|l| l.kind == LineKind::Value)
+                    .filter(|l| {
+                        in_block.set(in_block.get() && l.kind == LineKind::Value);
+                        (whole || in_block.get()) && l.kind == LineKind::Value
+                    })
                     .filter(tagged)
                     .filter_map(|l| l.value.clone())
                     .filter(|v| matches!(v, Value::Quantity(_) | Value::Percent(_) | Value::Duration(_)))
@@ -671,6 +682,14 @@ impl Env<'_> {
             }
             Target::Units(units) => self.to_parts(value, units)?,
             Target::Per(period) => {
+                // "salary $120k in monthly": an amount of money alone is a year's.
+                let value = match value {
+                    Value::Quantity(q) if q.unit.dim() == Dim::MONEY => {
+                        let year = Value::Quantity(Quantity::new(Number::ONE, registry().get("yr")));
+                        self.binary(Op::Per, Value::Quantity(q), year)?
+                    }
+                    v => v,
+                };
                 let unit = match &value {
                     Value::Quantity(q) => q.unit.numerator().product(&period.pow(-1)),
                     v => bail!("{} is not a rate", v.kind()),
@@ -944,6 +963,8 @@ impl Env<'_> {
                 v => bail!("can't make a timestamp from {}", v.kind()),
             },
             Format::Date => match value {
+                // A date stays one; a clock time shows its date too.
+                Value::Moment(m) if m.kind == MomentKind::Date => (Value::Moment(m), Display::Auto),
                 Value::Moment(m) => (Value::Moment(Moment { kind: MomentKind::DateTime, ..m }), Display::Auto),
                 Value::Quantity(q) if q.unit.is_none() => {
                     (Value::Moment(self.timestamp_moment(q.number)?), Display::Auto)

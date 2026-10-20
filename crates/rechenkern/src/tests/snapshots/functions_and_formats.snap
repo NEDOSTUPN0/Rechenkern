@@ -22,8 +22,8 @@ cubed root(16)                               → 2.5198421
 cubed root(2, 8)                             → <error: cbrt takes 1 argument>
 cubed root of 2, 8 and 4                     → <error: cbrt takes 1 argument>
 root(16)                                     → <error: root takes 2 arguments>
-root(2, 8)                                   → 2.828427125
-root of 2, 8 and 4                           → 12
+root(2, 8)                                   → 1.090507733
+root of 2, 8 and 4                           → <error: root takes one value>
 nthroot(16)                                  → <error: nthroot takes 2 arguments>
 nthroot(2, 8)                                → 1.090507733
 nthroot of 2, 8 and 4                        → <error: nthroot takes 2 arguments>
@@ -44,10 +44,10 @@ natural logarithm(2, 8)                      → <error: ln takes 1 argument>
 natural logarithm of 2, 8 and 4              → <error: ln takes 1 argument>
 log(16)                                      → 1.204119983
 log(2, 8)                                    → 0.3333333333
-log of 2, 8 and 4                            → 0.3333333333
+log of 2, 8 and 4                            → <error: log takes one value>
 logarithm(16)                                → 1.204119983
 logarithm(2, 8)                              → 0.3333333333
-logarithm of 2, 8 and 4                      → 0.3333333333
+logarithm of 2, 8 and 4                      → <error: log takes one value>
 log2(16)                                     → 4
 log2(2, 8)                                   → <error: log2 takes 1 argument>
 log2 of 2, 8 and 4                           → <error: log2 takes 1 argument>
@@ -318,6 +318,12 @@ rand of 2, 8 and 4                           → <error: random takes no argumen
 clamp(16)                                    → <error: clamp takes 3 arguments>
 clamp(2, 8)                                  → <error: clamp takes 3 arguments>
 clamp of 2, 8 and 4                          → 8
+scrub(16)                                    → <error: clamp takes 3 arguments>
+scrub(2, 8)                                  → <error: clamp takes 3 arguments>
+scrub of 2, 8 and 4                          → 8
+scrubber(16)                                 → <error: clamp takes 3 arguments>
+scrubber(2, 8)                               → <error: clamp takes 3 arguments>
+scrubber of 2, 8 and 4                       → 8
 ncr(16)                                      → <error: ncr takes 2 arguments>
 ncr(2, 8)                                    → <error: combinations need 0 ≤ k ≤ n>
 ncr of 2, 8 and 4                            → <error: ncr takes 2 arguments>
@@ -460,7 +466,7 @@ today as unix                                → 1790136000
 today as epoch                               → 1790136000
 255 in date                                  → Wed, 31 Dec 1969 19:04:15
 0.75 as date                                 → Wed, 31 Dec 1969 19:00
-today as date                                → Wed, 23 Sep 2026 00:00
+today as date                                → Wed, 23 Sep 2026
 255 in iso 8601                              → <error: can't write a number as ISO 8601>
 0.75 as iso 8601                             → <error: can't write a number as ISO 8601>
 today as iso 8601                            → 2026-09-23T00:00:00-04:00

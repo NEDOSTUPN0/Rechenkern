@@ -496,6 +496,12 @@ impl<'a> Parser<'a> {
             if !self.operand_follows(len) {
                 return Ok(lhs);
             }
+            // "10% from 200" is a share of it, as in SoulverCore.
+            if swap && matches!(lhs, Expr::Percent(_)) && tok.is_word("from") {
+                self.pos += len;
+                lhs = Expr::binary(Op::Of, lhs, self.multiplicative()?);
+                continue;
+            }
             // "$100 from 1990" is not date arithmetic.
             if swap && !time::maybe_duration(&lhs) {
                 bail!("expected a length of time before \"{}\"", self.src[tok.start..tok.end].trim());
@@ -621,11 +627,6 @@ impl<'a> Parser<'a> {
                 Some(unit) if op == Op::Div => (Op::Per, Expr::BareUnit(unit)),
                 _ => (op, rhs),
             };
-            // "4 out of 10" as a fraction, if the config asks for one.
-            if op == Op::OutOf && !share && self.config().features.proper_fraction_parsing {
-                lhs = Self::formatted(Expr::binary(Op::Div, lhs, rhs), crate::ast::Format::Fraction);
-                continue;
-            }
             // "4 out of 10" as a fraction, if the config asks for one.
             if op == Op::OutOf && !share && self.config().features.proper_fraction_parsing {
                 lhs = Self::formatted(Expr::binary(Op::Div, lhs, rhs), crate::ast::Format::Fraction);
@@ -788,8 +789,19 @@ impl<'a> Parser<'a> {
         {
             return Ok(Expr::binary(Op::Pow, base, exp));
         }
+        let start = self.pos;
         if self.at_sym("^") {
+            // "3 pi r^2": the power of a comment word is part of the comment, as in SoulverCore.
+            let glued =
+                self.pos > start && !self.toks[self.pos].space_before && self.toks[self.pos - 1].word().is_some();
             self.pos += 1;
+            if glued {
+                self.eat_sym("-");
+                if matches!(self.cur().map(|t| &t.tok), Some(Tok::Num(_))) {
+                    self.pos += 1;
+                }
+                return Ok(base);
+            }
             return Ok(Expr::binary(Op::Pow, base, self.unary()?));
         }
         Ok(base)

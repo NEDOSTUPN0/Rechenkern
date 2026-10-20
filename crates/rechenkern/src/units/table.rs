@@ -40,7 +40,7 @@ const NANO: Prefix = si("n", "nano", -9);
 const PICO: Prefix = si("p", "pico", -12);
 
 const SMALL: &[Prefix] = &[MILLI, MICRO, MICRO_GREEK, NANO, PICO];
-const LENGTH: &[Prefix] = &[KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO, PICO];
+const LENGTH: &[Prefix] = &[GIGA, MEGA, KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO, PICO];
 const MASS: &[Prefix] = &[KILO, CENTI, MILLI, MICRO, MICRO_GREEK, NANO];
 const VOLUME: &[Prefix] = &[MEGA, KILO, HECTO, DECI, CENTI, MILLI, MICRO, MICRO_GREEK, NANO];
 const DATA: &[Prefix] = &[
@@ -436,6 +436,19 @@ fn definitions() -> Vec<Def> {
             "ounce of force",
             "ounces of force",
         ]),
+        // "kip" alone is the Lao currency.
+        unit("klbf", "kilopound-force", Dim::FORCE, "4448.2216152605").plural("kilopounds-force").aliases(&[
+            "kilopound-force",
+            "kilopounds-force",
+            "kilopound force",
+            "kilopound of force",
+            "kilopounds of force",
+        ]),
+        unit("Mlbf", "megapound-force", Dim::FORCE, "4448221.6152605").plural("megapounds-force").aliases(&[
+            "megapound force",
+            "megapound of force",
+            "megapounds of force",
+        ]),
         unit("pdl", "poundal", Dim::FORCE, "0.138254954376"),
         unit("kgf", "kilogram-force", Dim::FORCE, "9.80665").plural("kilograms-force").aliases(&["kilogram force"]),
         unit("J", "joule", Dim::ENERGY, "1").prefixes(&[KILO, MEGA, GIGA, TERA, MILLI]),
@@ -462,7 +475,15 @@ fn definitions() -> Vec<Def> {
                 "pounds of force per square inch",
             ]),
         unit("ksi", "kilopound per square inch", Dim::PRESSURE, "6894757.293168361")
-            .plural("kilopounds per square inch"),
+            .plural("kilopounds per square inch")
+            .aliases(&[
+                "kilopound of force per square inch",
+                "kilopounds of force per square inch",
+                "kilopound-force per square inch",
+                "kilopounds-force per square inch",
+                "kip per square inch",
+                "kips per square inch",
+            ]),
         unit("Mpsi", "megapound per square inch", Dim::PRESSURE, "6894757293.168361")
             .plural("megapounds per square inch"),
         unit("mmHg", "millimeter of mercury", Dim::PRESSURE, "133.322387415").plural("millimeters of mercury"),
@@ -495,9 +516,29 @@ fn definitions() -> Vec<Def> {
             .prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK])
             .prefixed_only(),
         // "MS" stays milliseconds, as in SoulverCore: megasiemens are written out.
-        unit("MS", "megasiemens", Dim::CONDUCTANCE, "1000000").plural("megasiemens").spelled().prefixed_only(),
-        unit("Wb", "weber", Dim::MAGNETIC_FLUX, "1").prefixes(&[KILO, MEGA, MILLI, MICRO, MICRO_GREEK, NANO]),
+        unit("MS", "megasiemens", Dim::CONDUCTANCE, "1000000")
+            .plural("megasiemens")
+            .aliases(&["megasiemen"])
+            .spelled()
+            .prefixed_only(),
+        unit("Wb", "weber", Dim::MAGNETIC_FLUX, "1").aliases(&["WB"]).prefixes(&[
+            KILO,
+            MEGA,
+            MILLI,
+            MICRO,
+            MICRO_GREEK,
+            NANO,
+        ]),
         unit("Mx", "maxwell", Dim::MAGNETIC_FLUX, "0.00000001"),
+        unit("lm", "lumen", Dim::LUMINOUS_FLUX, "1").prefixes(&[KILO, MILLI]),
+        unit("lx", "lux", Dim::ILLUMINANCE, "1").plural("lux").aliases(&["luxes"]).prefixes(&[KILO, MILLI]),
+        unit("fc", "foot-candle", Dim::ILLUMINANCE, "10.763910416709722").plural("foot-candles").aliases(&[
+            "footcandle",
+            "footcandles",
+            "foot candle",
+            "foot candles",
+        ]),
+        unit("ph", "phot", Dim::ILLUMINANCE, "10000"),
         unit("T", "tesla", Dim::FLUX_DENSITY, "1").prefixes(&[MILLI, MICRO, MICRO_GREEK, NANO]).prefixed_only(),
         // "kT" is knots and "MT" tonnes, as in SoulverCore: kiloteslas and megateslas are written out.
         unit("kT", "kilotesla", Dim::FLUX_DENSITY, "1000").spelled().prefixed_only(),
@@ -505,7 +546,7 @@ fn definitions() -> Vec<Def> {
         unit("gauss", "gauss", Dim::FLUX_DENSITY, "0.0001").plural("gauss").spelled(),
         unit("mol", "mole", Dim::AMOUNT, "1").aliases(&["mols"]).prefixes(&[KILO, MILLI, MICRO, MICRO_GREEK, NANO]),
         // Molar concentration, a mole per liter; glued to a number "M" is a million ("5M").
-        unit("M", "molar", Dim::AMOUNT.div(Dim::VOLUME), "1000").plural("molar").aliases(&["molars"]).prefixes(&[
+        unit("M", "molar", Dim::AMOUNT.div(Dim::VOLUME), "1000").plural("molar").aliases(&["molars", "ᴍ"]).prefixes(&[
             MILLI,
             MICRO,
             MICRO_GREEK,
@@ -556,29 +597,57 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
             "ft-lb",
             "ft-lbs",
             "ft-lbf",
+            "ft lb",
+            "ft lbs",
+            "ft lbf",
             "lb-ft",
+            "lb ft",
             "foot-pound",
             "foot-pounds",
             "foot pound",
             "foot pounds",
             "pound-foot",
             "pound-feet",
+            "pound foot",
+            "pound feet",
         ],
         "lbf*ft",
     ),
-    ("", &["lbf-in", "in-lb", "in-lbs", "in-lbf", "lb-in", "inch-pound", "inch-pounds"], "lbf*in"),
+    (
+        "",
+        &["lbf-in", "in-lb", "in-lbs", "in-lbf", "lb-in", "inch-pound", "inch-pounds", "inch pound", "inch pounds"],
+        "lbf*in",
+    ),
     ("", &["ozf-in", "oz-in", "in-oz", "inch-ounce", "inch-ounces"], "ozf*in"),
     ("rpm", &["rpm", "revolution per minute", "revolutions per minute"], "rev/min"),
     ("rps", &["rps", "revolution per second", "revolutions per second"], "rev/s"),
     ("Ah", &["Ah", "amp hour", "amp hours", "ampere hour", "ampere hours"], "A*h"),
     ("kAh", &["kAh", "kiloamp hour", "kiloamp hours", "kiloampere hour", "kiloampere hours"], "kA*h"),
     ("mAh", &["mAh", "mah", "milliamp hour", "milliamp hours", "milliampere hour", "milliampere hours"], "mA*h"),
-    ("µAh", &["µAh", "uAh", "microamp hour", "microamp hours", "microampere hour", "microampere hours"], "µA*h"),
+    ("MAh", &["MAh", "megaamp hour", "megaamp hours", "megaampere hour", "megaampere hours"], "MA*h"),
+    (
+        "µAh",
+        &[
+            "µAh",
+            "uAh",
+            "microamp hour",
+            "microamp hours",
+            "microampere hour",
+            "microampere hours",
+            "uamp hour",
+            "uamp hours",
+        ],
+        "µA*h",
+    ),
     ("bps", &["bps", "bits per second"], "bit/s"),
     ("kbps", &["kbps", "Kbps"], "kbit/s"),
     ("Mbps", &["Mbps", "mbps"], "Mbit/s"),
     ("Gbps", &["Gbps", "gbps"], "Gbit/s"),
     ("Tbps", &["Tbps", "tbps"], "Tbit/s"),
+    ("Pbps", &["Pbps", "pbps"], "Pbit/s"),
+    ("Ebps", &["Ebps", "ebps"], "Ebit/s"),
+    ("Zbps", &["Zbps", "zbps"], "Zbit/s"),
+    ("Ybps", &["Ybps", "ybps"], "Ybit/s"),
     // A capital B is bytes.
     ("", &["Bps", "bytes per second"], "B/s"),
     ("", &["kBps", "KBps"], "kB/s"),
@@ -587,14 +656,24 @@ const COMPOUNDS: &[(&str, &[&str], &str)] = &[
     ("", &["TBps", "tBps"], "TB/s"),
     ("", &["PBps", "pBps"], "PB/s"),
     ("", &["EBps", "eBps"], "EB/s"),
+    ("", &["ZBps", "zBps"], "ZB/s"),
+    ("", &["YBps", "yBps"], "YB/s"),
     ("", &["KiBps"], "KiB/s"),
     ("", &["MiBps"], "MiB/s"),
     ("", &["GiBps"], "GiB/s"),
     ("", &["TiBps"], "TiB/s"),
+    ("", &["PiBps"], "PiB/s"),
+    ("", &["EiBps"], "EiB/s"),
+    ("", &["ZiBps"], "ZiB/s"),
+    ("", &["YiBps"], "YiB/s"),
     ("", &["Kibps"], "Kibit/s"),
     ("", &["Mibps"], "Mibit/s"),
     ("", &["Gibps"], "Gibit/s"),
     ("", &["Tibps"], "Tibit/s"),
+    ("", &["Pibps"], "Pibit/s"),
+    ("", &["Eibps"], "Eibit/s"),
+    ("", &["Zibps"], "Zibit/s"),
+    ("", &["Yibps"], "Yibit/s"),
     ("", &["sqnm"], "nm^2"),
     ("", &["squm", "sqµm"], "µm^2"),
     ("", &["kilo", "kilos"], "kg"),
@@ -664,10 +743,15 @@ const EXTRA: &[(&str, &str)] = &[
     ("af", "acre-foot"),
     ("pts", "pt"),
     ("PostScript point", "pt"),
+    ("PostScript points", "pt"),
     ("postscript point", "pt"),
     ("postscript points", "pt"),
     ("force pound", "lbf"),
     ("force pounds", "lbf"),
+    ("forcepound", "lbf"),
+    ("forcepounds", "lbf"),
+    ("force-pound", "lbf"),
+    ("force-pounds", "lbf"),
     ("micromol", "µmol"),
     ("nanomol", "nmol"),
     ("micron", "µm"),

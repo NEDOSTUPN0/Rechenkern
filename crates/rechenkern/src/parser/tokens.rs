@@ -180,7 +180,8 @@ impl<'a> Parser<'a> {
         let w = word.to_lowercase();
         let w = w.as_str();
         words::KEYWORDS.contains(&w)
-            || w == "x"
+            // "3 x^2" is no product: the x is a comment there.
+            || (w == "x" && !self.toks.get(i + 1).is_some_and(|t| t.is_sym("^") && !t.space_before))
             || self.article_unit_at(i)
             // "for 2 hours" and "split 4 ways" only matter before an amount.
             || (w == "for" && self.duration_at(i + 1))
@@ -197,7 +198,8 @@ impl<'a> Parser<'a> {
             // "zł10", "apr3": letters with digits glued after them.
             || (word.ends_with(|c: char| c.is_ascii_digit()) && (self.glued_money(i).is_some() || self.glued_date(i).is_some()))
             // "first monday of the month", "first day in March"
-            || (self.nth_at(i).is_some_and(|(_, n)| n == 1) && self.day_in_month_at(i + 1).is_some())
+            || (self.nth_at(i).is_some_and(|(_, n)| n == 1)
+                && (self.day_in_month_at(i + 1).is_some() || (w == "first" && self.weekday_ends_at(i + 1))))
             // "flour 1 cup": a food before its amount.
             || (matches!(self.toks.get(i + 1).map(|t| &t.tok), Some(Tok::Num(_)))
                 && self.unit_at(i + 2, false).is_some_and(|(u, _)| matches!(u.dim(), Dim::MASS | Dim::VOLUME))
@@ -635,7 +637,9 @@ impl<'a> Parser<'a> {
         let Some(next) = self.toks.get(self.pos + 1) else { return false };
         let sign = next.is_sym("+") || next.is_sym("-");
         let comment = next.word().is_some() && !self.significant(self.pos + 1);
-        next.space_before && !sign && !comment && self.operand_follows(1)
+        // "10% from 200", "5% of 20": a percentage before its operator.
+        let operator = ["from", "of", "on", "off", "after", "before"].iter().any(|w| next.is_word(w));
+        next.space_before && !sign && !comment && !operator && self.operand_follows(1)
     }
 
     /// Something that multiplies without an operator follows: "(", a function,
@@ -653,6 +657,8 @@ impl<'a> Parser<'a> {
         let Some(w) = self.lower(self.pos) else { return false };
         words::constant(&w).is_some()
             || self.var_at(self.pos).is_some()
+            // "3 gold price": three ounces.
+            || self.metal_price_at(self.pos).is_some()
             || (self.function_at(self.pos).is_some_and(|(f, _)| !matches!(f, Func::Sum | Func::Average | Func::Count))
                 && self.toks.get(self.pos + 1).is_some_and(|t| t.is_sym("(")))
     }

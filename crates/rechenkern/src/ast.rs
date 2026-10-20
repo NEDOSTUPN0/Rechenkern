@@ -92,6 +92,8 @@ pub enum Expr {
     InZone(Box<Expr>, Place),
     /// Time between two moments: `9am to 5pm`.
     Range(Box<Expr>, Box<Expr>),
+    /// A range counted from its first end, negative when the second is behind it: `days until March 5, 2025`.
+    SignedRange(Box<Expr>, Box<Expr>),
     /// A calendar period, its first day and length: `Q3 2026`.
     Period(Box<Expr>, Box<Expr>),
     /// Difference between the UTC offsets of two zones.
@@ -237,7 +239,9 @@ impl Expr {
     pub fn contains(&self, f: &impl Fn(&Expr) -> bool) -> bool {
         f(self)
             || match self {
-                Expr::Binary(_, a, b) | Expr::Range(a, b) | Expr::Period(a, b) => a.contains(f) || b.contains(f),
+                Expr::Binary(_, a, b) | Expr::Range(a, b) | Expr::SignedRange(a, b) | Expr::Period(a, b) => {
+                    a.contains(f) || b.contains(f)
+                }
                 Expr::Composite(parts) => parts.iter().any(|p| p.contains(f)),
                 Expr::WithUnit(e, _)
                 | Expr::Percent(e)
@@ -377,6 +381,8 @@ pub enum Func {
     Int,
     /// `is 17 prime`: true or false.
     IsPrime,
+    /// The time a value takes to reach another, an error when it never does (no name).
+    Reach,
 }
 
 impl Func {

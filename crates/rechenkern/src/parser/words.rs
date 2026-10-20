@@ -333,6 +333,9 @@ pub static FUNCTIONS: Phrases<Func> = Phrases::new(&[
     ("random", Func::Random),
     ("rand", Func::Random),
     ("clamp", Func::Clamp),
+    // SoulverCore's name for it.
+    ("scrub", Func::Clamp),
+    ("scrubber", Func::Clamp),
     ("ncr", Func::Comb),
     ("npr", Func::Perm),
     ("hex", Func::Hex),

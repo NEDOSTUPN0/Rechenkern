@@ -216,7 +216,10 @@ impl Env<'_> {
             TimeExpr::InMonth(pick, month) => {
                 let pick_in = |d: Date| -> Result<Date> {
                     Ok(match *pick {
-                        MonthDay::Nth(n, weekday) => d.first_of_month().nth_weekday_of_month(n, weekday)?,
+                        MonthDay::Nth(n, weekday) => d
+                            .first_of_month()
+                            .nth_weekday_of_month(n, weekday)
+                            .map_err(|_| Error::new(format!("{} has no {n}th {weekday:?}", d.strftime("%B %Y"))))?,
                         MonthDay::Day(-1) => d.last_of_month(),
                         MonthDay::Day(day) => Date::new(d.year(), d.month(), day)
                             .map_err(|_| Error::new(format!("that month has no day {day}")))?,
@@ -325,6 +328,14 @@ impl Env<'_> {
     /// The two ends of a range. A date without a year is read next to the other end:
     /// "Dec 1 to Jan 31" ends next year, "days since Dec 25" starts last year.
     pub(crate) fn range_ends(&self, a: &Expr, b: &Expr) -> Result<(Value, Value)> {
+        // "monday to friday", "friday to friday": the end is the next such day after the start.
+        if let Expr::Time(TimeExpr::Weekday(weekday, None)) = b {
+            let start = self.endpoint(a)?;
+            if let Value::Moment(m) = &start {
+                let end = m.time.date().nth_weekday(1, *weekday)?;
+                return Ok((start, Value::Moment(self.date_moment(end)?)));
+            }
+        }
         if yearless(b) {
             let start = self.endpoint(a)?;
             let end = match &start {
@@ -379,6 +390,30 @@ impl Env<'_> {
         let first = self.eval(first)?;
         let end = self.add(first.clone(), self.eval(length)?)?;
         self.range(first, end)
+    }
+
+    /// A range, negative when its end is behind its start: `days until March 5, 2025`.
+    pub(crate) fn signed_range(&self, a: Value, b: Value) -> Result<Value> {
+        // Clock times alone wrap past midnight instead.
+        let clocks = |a: &Moment, b: &Moment| a.kind == MomentKind::Clock && b.kind == MomentKind::Clock;
+        let behind = matches!((&a, &b), (Value::Moment(a), Value::Moment(b)) if b.time < a.time && !clocks(a, b));
+        Ok(match self.range(a, b)? {
+            // Counted back from the later end.
+            Value::Duration(d) if behind => {
+                let Some(start) = d.anchor else {
+                    return Ok(Value::Duration(Duration { span: d.span.negate(), ..d }));
+                };
+                let end = start.checked_add(d.span)?;
+                let days = [Cal::Year, Cal::Month, Cal::Week, Cal::Day].iter().any(|&c| get(&d.span, c) != 0);
+                let mut span = end.until((if days { Cal::Year } else { Cal::Hour }, start))?;
+                if d.span.get_weeks() != 0 {
+                    let n = span.get_days() as i64;
+                    span = span.try_days(n % 7)?.try_weeks(n / 7)?;
+                }
+                Value::Duration(Duration { span, anchor: Some(end), ..d })
+            }
+            v => v,
+        })
     }
 
     pub(crate) fn range(&self, a: Value, b: Value) -> Result<Value> {
