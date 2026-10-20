@@ -15,6 +15,8 @@ pub enum WeatherQuery {
     Low,
     Humidity,
     WindSpeed,
+    /// Where the wind comes from.
+    WindDirection,
     UvIndex,
     ChanceOfRain,
 }
@@ -43,6 +45,8 @@ pub struct Weather {
     pub humidity: Option<f64>,
     /// Kilometers an hour.
     pub wind_speed: Option<f64>,
+    /// Degrees from north, where the wind comes from.
+    pub wind_direction: Option<f64>,
     pub uv_index: Option<f64>,
     /// Percent.
     pub chance_of_rain: Option<f64>,

@@ -59,12 +59,25 @@ impl Env<'_> {
                 let speed = Number::from_f64(weather.wind_speed.ok_or_else(missing)?);
                 Value::Quantity(Quantity::new(speed, registry().lookup("kph").expect("kilometers per hour")))
             }
+            WeatherQuery::WindDirection => {
+                let degrees = Number::from_f64(weather.wind_direction.ok_or_else(missing)?.round());
+                Value::Quantity(Quantity::new(degrees, registry().get("°")))
+            }
             WeatherQuery::UvIndex => Value::number(Number::from_f64(weather.uv_index.ok_or_else(missing)?)),
         };
         let display = match (what, weather.condition) {
             (WeatherQuery::Summary, Some(sky)) => Display::Note(Cow::Owned(sky)),
+            (WeatherQuery::WindDirection, _) => {
+                Display::Note(Cow::Borrowed(compass_point(weather.wind_direction.unwrap_or_default())))
+            }
             _ => Display::Auto,
         };
         Ok((value, display))
     }
+}
+
+/// The compass point of a direction in degrees from north: "NW".
+fn compass_point(degrees: f64) -> &'static str {
+    const POINTS: [&str; 8] = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    POINTS[((degrees.rem_euclid(360.0) + 22.5) / 45.0) as usize % 8]
 }

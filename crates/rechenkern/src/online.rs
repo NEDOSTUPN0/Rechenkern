@@ -273,7 +273,7 @@ impl Default for OnlineWeather {
 }
 
 /// What a day of Open-Meteo's daily weather holds.
-const DAILY: &str = "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max,uv_index_max,precipitation_probability_max";
+const DAILY: &str = "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max,wind_direction_10m_dominant,uv_index_max,precipitation_probability_max";
 
 impl crate::WeatherProvider for OnlineWeather {
     fn weather(&self, request: &crate::WeatherRequest) -> Result<crate::Weather, String> {
@@ -298,11 +298,14 @@ impl crate::WeatherProvider for OnlineWeather {
             if recent {
                 DAILY
             } else {
-                "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max"
+                "temperature_2m_max,temperature_2m_min,weather_code,relative_humidity_2m_mean,wind_speed_10m_max,wind_direction_10m_dominant"
             },
         );
         if request.date.is_none() {
-            call = call.query("current", "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,uv_index");
+            call = call.query(
+                "current",
+                "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,uv_index",
+            );
         }
         let response = call.config().timeout_global(Some(self.timeout)).build().call();
         let text = response
@@ -320,6 +323,7 @@ impl crate::WeatherProvider for OnlineWeather {
             low,
             humidity: current("relative_humidity_2m").or_else(|| daily("relative_humidity_2m_mean")),
             wind_speed: current("wind_speed_10m").or_else(|| daily("wind_speed_10m_max")),
+            wind_direction: current("wind_direction_10m").or_else(|| daily("wind_direction_10m_dominant")),
             uv_index: current("uv_index").or_else(|| daily("uv_index_max")),
             chance_of_rain: daily("precipitation_probability_max"),
             condition: code.and_then(|c| crate::weather_condition(c as u32)).map(String::from),
